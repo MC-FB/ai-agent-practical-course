@@ -1,0 +1,94 @@
+from __future__ import annotations
+
+import time
+from datetime import UTC, datetime
+from typing import Any
+
+from dagqa.config import ExecutionConfig, LLMConfig
+from dagqa.graph.substitution import (
+    MissingDependencyValue,
+    resolve_input_map,
+    resolve_question,
+)
+from dagqa.llm.base import LanguageModel
+from dagqa.nodes.output_validation import parse_node_output, validate_node_output
+from dagqa.nodes.prompts import render_node_prompt, render_repair_prompt
+from dagqa.schemas import DagNode, LLMRequest, NodeStatus, NodeTrace, ValidationResult
+
+
+class NodeRunner:
+    def __init__(
+        self,
+        llm: LanguageModel,
+        execution: ExecutionConfig,
+        llm_config: LLMConfig,
+    ) -> None:
+        self.llm = llm
+        self.execution = execution
+        self.llm_config = llm_config
+
+    async def run(self, node: DagNode, outputs: dict[str, dict[str, Any]]) -> NodeTrace:
+        started_perf = time.perf_counter()
+        started_at = datetime.now(UTC).isoformat()
+        trace = NodeTrace(
+            node_id=node.id,
+            label=node.label,
+            task_type=node.task_type,
+            operation=node.operation,
+            status=NodeStatus.running,
+            started_at=started_at,
+        )
+        try:
+            dependency_values = resolve_input_map(node.input_map, outputs)
+            resolved_question = resolve_question(node.question, outputs)
+            prompt = render_node_prompt(node, resolved_question, dependency_values, outputs)
+            trace.dependency_values = dependency_values
+            trace.resolved_question = resolved_question
+            trace.rendered_prompt = prompt
+            raw_response = await self._call_llm(node.prompt.system, prompt)
+            trace.raw_response = raw_response
+            parsed, validation = await self._parse_validate_repair(node, raw_response)
+            trace.parsed_output = parsed
+            trace.returned_value = parsed
+            trace.validation = validation
+            trace.repair_attempts = 0 if validation.valid else self.execution.node_repair_rounds
+            trace.status = NodeStatus.succeeded if validation.valid else NodeStatus.failed
+        except (MissingDependencyValue, ValueError) as exc:
+            trace.status = NodeStatus.failed
+            trace.validation = ValidationResult(valid=False, errors=[str(exc)])
+            trace.error = str(exc)
+        finally:
+            trace.finished_at = datetime.now(UTC).isoformat()
+            trace.duration_ms = (time.perf_counter() - started_perf) * 1000
+        return trace
+
+    async def _parse_validate_repair(
+        self, node: DagNode, raw_response: str
+    ) -> tuple[dict[str, Any] | None, ValidationResult]:
+        current_raw = raw_response
+        last_output: dict[str, Any] | None = None
+        last_validation = ValidationResult(valid=False, errors=["No validation attempted."])
+
+        for attempt in range(self.execution.node_repair_rounds + 1):
+            try:
+                last_output = parse_node_output(current_raw)
+            except Exception as exc:
+                last_validation = ValidationResult(valid=False, errors=[str(exc)])
+            else:
+                last_validation = validate_node_output(last_output, node.output_schema)
+                if last_validation.valid:
+                    return last_output, last_validation
+
+            if attempt < self.execution.node_repair_rounds:
+                current_raw = await self._call_llm(
+                    "Repair malformed node output.",
+                    render_repair_prompt(current_raw, node.output_schema, last_validation.errors),
+                )
+
+        return last_output, last_validation
+
+    async def _call_llm(self, system: str, prompt: str) -> str:
+        response = await self.llm.complete(
+            LLMRequest(system=system, prompt=prompt, temperature=self.llm_config.temperature)
+        )
+        return response.text

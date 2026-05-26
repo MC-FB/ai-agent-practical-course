@@ -1,0 +1,24 @@
+llm:
+  provider: azure_openai
+  model: azure/gpt-4o-mini
+  model_env: AZURE_OPENAI_MODEL
+  temperature: 0.0
+  api_key_env: AZURE_OPENAI_API_KEY
+  api_base_env: AZURE_OPENAI_ENDPOINT
+  api_version_env: AZURE_OPENAI_API_VERSION
+planner:
+  max_nodes: 10
+  max_depth: 3
+  repair_rounds: 1
+execution:
+  max_parallel_nodes: 4
+  node_timeout_seconds: 45
+  node_repair_rounds: 1
+  fail_fast: false
+validation:
+  structural_only: true
+benchmark:
+  dataset: hotpotqa
+  split: validation
+  default_limit: 100
+  output_dir: runs/benchmarks
