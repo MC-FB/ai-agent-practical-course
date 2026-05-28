@@ -1,0 +1,1135 @@
+import {
+  Activity,
+  ArrowLeft,
+  BarChart3,
+  CheckCircle2,
+  Database,
+  GitBranch,
+  History,
+  Loader2,
+  MessageSquare,
+  Play,
+  Send,
+  Timer,
+} from "lucide-react";
+import mermaid from "mermaid";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
+import {
+  getBenchmarkResult,
+  getHotpotBenchmarkMeta,
+  getLiveBenchmark,
+  getLiveAsk,
+  listBenchmarkResults,
+  startLiveBenchmark,
+  startLiveAsk,
+  type DagNode,
+  type HotpotBenchmarkMeta,
+  type HotpotBenchmarkRecord,
+  type HotpotBenchmarkResult,
+  type LiveBenchmark,
+  type LiveRun,
+  type NodeTrace,
+  type RunTrace,
+  type SavedBenchmarkSummary,
+} from "./api";
+import "./index.css";
+
+mermaid.initialize({ startOnLoad: false, theme: "default", securityLevel: "loose" });
+
+const SAMPLE_QUESTIONS = [
+  "Which person was born earlier: Ada Lovelace or Alan Turing?",
+  "Which city is farther north: the birthplace of Albert Einstein or the birthplace of Marie Curie?",
+  "Who lived longer: the author of Pride and Prejudice or the author of Frankenstein?",
+  "Which film was released earlier: the film that won Best Picture in 1994 or the film that won Best Picture in 2001?",
+  "Which country has the larger population: the birthplace country of Nikola Tesla or the birthplace country of Isaac Newton?",
+  "Which river is longer: the river that flows through Paris or the river that flows through London?",
+  "Which university is older: the university attended by Barack Obama or the university attended by Bill Clinton?",
+  "Which composer was born first: the composer of The Four Seasons or the composer of The Magic Flute?",
+  "Which mountain is taller: the highest mountain in Japan or the highest mountain in Germany?",
+  "Which company was founded earlier: the company that created the iPhone or the company that created Windows?",
+];
+
+type Tab = "chat" | "dataset" | "results";
+type RunPhase = "idle" | "planning" | "executing" | "complete" | "error";
+
+function formatRawResponse(raw?: string) {
+  if (!raw) return "";
+  const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const body = (fenceMatch ? fenceMatch[1] : raw).trim();
+  try {
+    return JSON.stringify(JSON.parse(body), null, 2);
+  } catch {
+    return body;
+  }
+}
+
+function formatJson(value: unknown) {
+  if (value === undefined || value === null) return "";
+  return JSON.stringify(value, null, 2);
+}
+
+function schemaType(schema: unknown): string {
+  if (!schema || typeof schema !== "object") return "unknown";
+  const typed = schema as { type?: unknown; format?: unknown; items?: unknown };
+  const type = Array.isArray(typed.type) ? typed.type.join(" | ") : typed.type;
+  const suffix = typeof typed.format === "string" ? `:${typed.format}` : "";
+  if (type === "array") return `array<${schemaType(typed.items)}>`;
+  return typeof type === "string" ? `${type}${suffix}` : "unknown";
+}
+
+function expectedInputsForNode(planNode?: DagNode, planNodes: DagNode[] = []) {
+  if (!planNode) return [];
+  const byId = new Map(planNodes.map((node) => [node.id, node]));
+  return Object.entries(planNode.input_map).map(([name, reference]) => {
+    const [childId, field] = reference.split(".", 2);
+    const child = byId.get(childId);
+    const properties = child?.output_schema?.properties;
+    const schema =
+      properties && typeof properties === "object"
+        ? (properties as Record<string, unknown>)[field]
+        : undefined;
+    return {
+      name,
+      reference,
+      childLabel: child?.label ?? childId,
+      type: schemaType(schema),
+    };
+  });
+}
+
+function formatPercent(value?: number) {
+  if (value === undefined) return "-";
+  return `${(value * 100).toFixed(1)}%`;
+}
+
+function formatNumber(value?: number, digits = 0) {
+  if (value === undefined || Number.isNaN(value)) return "-";
+  return value.toLocaleString(undefined, {
+    maximumFractionDigits: digits,
+    minimumFractionDigits: digits,
+  });
+}
+
+function formatDuration(ms?: number) {
+  if (ms === undefined) return "-";
+  if (ms < 1000) return `${Math.round(ms)} ms`;
+  return `${(ms / 1000).toFixed(1)} s`;
+}
+
+function formatSavedDateTime(value?: string | null) {
+  if (!value) return "Unknown date";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ${pad(
+    date.getHours(),
+  )}:${pad(date.getMinutes())}`;
+}
+
+function GraphView({
+  mermaidText,
+  phase,
+  onSelectNode,
+}: {
+  mermaidText?: string;
+  phase: RunPhase;
+  onSelectNode?: (nodeId: string) => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const onSelectNodeRef = useRef(onSelectNode);
+
+  useEffect(() => {
+    onSelectNodeRef.current = onSelectNode;
+  }, [onSelectNode]);
+
+  useEffect(() => {
+    const globalWindow = window as Window &
+      typeof globalThis & {
+        dagqaSelectGraphNode?: (nodeId: string) => void;
+      };
+    const handler = (nodeId: string) => {
+      onSelectNodeRef.current?.(nodeId);
+    };
+
+    globalWindow.dagqaSelectGraphNode = handler;
+
+    return () => {
+      if (globalWindow.dagqaSelectGraphNode === handler) {
+        delete globalWindow.dagqaSelectGraphNode;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function renderGraph() {
+      if (!containerRef.current) {
+        return;
+      }
+      if (!mermaidText) {
+        containerRef.current.innerHTML = "";
+        return;
+      }
+
+      try {
+        const result = await mermaid.render("dag-graph", mermaidText);
+        if (cancelled || !containerRef.current) {
+          return;
+        }
+        containerRef.current.innerHTML = result.svg;
+        result.bindFunctions?.(containerRef.current);
+      } catch {
+        if (!cancelled && containerRef.current) {
+          containerRef.current.innerHTML = "";
+        }
+      }
+    }
+
+    void renderGraph();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mermaidText]);
+
+  return (
+    <section className="panel-section">
+      <div className="section-header">
+        <div>
+          <h2>Reasoning Graph</h2>
+          <span>
+            {phase === "planning"
+              ? "Creating DAG"
+              : phase === "executing"
+                ? "Executing planned node waves"
+              : mermaidText
+                ? "Generated DAG"
+                : "No graph yet"}
+          </span>
+        </div>
+        {phase === "planning" ? <Loader2 className="spin" size={18} /> : <GitBranch size={18} />}
+      </div>
+      <div className="graph-surface">
+        {phase === "planning" ? (
+          <div className="graph-loader">
+            <Loader2 className="spin" size={26} />
+            <strong>Building the reasoning graph</strong>
+            <span>Azure is creating a structured DAG plan. The graph will appear as soon as planning finishes.</span>
+            <div className="progress-rail">
+              <span />
+            </div>
+          </div>
+        ) : mermaidText ? (
+          <div ref={containerRef} />
+        ) : (
+          <div className="empty">Run a question to inspect the plan.</div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function TracePanel({
+  nodes,
+  selected,
+  onSelect,
+}: {
+  nodes: NodeTrace[];
+  selected?: string;
+  onSelect: (node: NodeTrace) => void;
+}) {
+  return (
+    <section className="panel-section">
+      <div className="section-header">
+        <div>
+          <h2>Trace</h2>
+          <span>{nodes.length ? `${nodes.length} nodes` : "No run loaded"}</span>
+        </div>
+        <Activity size={18} />
+      </div>
+      <div className="trace-list">
+        {nodes.length === 0 ? (
+          <div className="empty">Node outputs will appear here.</div>
+        ) : (
+          nodes.map((node) => (
+            <button
+              className={`trace-row ${selected === node.node_id ? "active" : ""}`}
+              key={node.node_id}
+              onClick={() => onSelect(node)}
+            >
+              <span className={`status-dot ${node.status}`} />
+              <span>
+                <strong>{node.label}</strong>
+                <small>
+                  {node.task_type} · {Math.round(node.duration_ms ?? 0)} ms
+                </small>
+              </span>
+            </button>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
+function NodeInspector({
+  node,
+  planNode,
+  planNodes,
+}: {
+  node?: NodeTrace;
+  planNode?: DagNode;
+  planNodes: DagNode[];
+}) {
+  const hasInputMap = planNode?.input_map && Object.keys(planNode.input_map).length > 0;
+  const expectedInputs = expectedInputsForNode(planNode, planNodes);
+
+  return (
+    <section className="panel-section inspector-section">
+      <div className="section-header">
+        <div>
+          <h2>Inspector</h2>
+          <span>{node ? node.node_id : "Select a node"}</span>
+        </div>
+        {node?.validation.valid ? <CheckCircle2 size={18} /> : <GitBranch size={18} />}
+      </div>
+      {!node ? (
+        <div className="empty">Select a trace row to inspect prompts and outputs.</div>
+      ) : (
+        <div className="inspector-grid">
+          {planNode && (
+            <div className="inspector-summary">
+              <div>
+                <label>Depends On</label>
+                <div className="node-chip-row">
+                  {planNode.depends_on.length ? (
+                    planNode.depends_on.map((dependency) => (
+                      <span className="node-chip" key={dependency}>
+                        {dependency}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="muted-value">None</span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label>Operation</label>
+                <span className="muted-value">{planNode.operation}</span>
+              </div>
+            </div>
+          )}
+          {planNode && (
+            <div className="contract-panel">
+              <div className="contract-heading">
+                <label>Expected From Children</label>
+                <span>{hasInputMap ? `${expectedInputs.length} values` : "No child values required"}</span>
+              </div>
+              {hasInputMap ? (
+                <div className="mapping-list contract-list">
+                  {expectedInputs.map(({ name, reference, childLabel, type }) => (
+                    <div className="mapping-row" key={name}>
+                      <div>
+                        <code>{name}</code>
+                        <small>{type}</small>
+                      </div>
+                      <span>-&gt;</span>
+                      <div>
+                        <code>{reference}</code>
+                        <small>{childLabel}</small>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="empty compact-empty">No child inputs.</div>
+              )}
+            </div>
+          )}
+          {planNode?.child_output_policy && (
+            <div>
+              <label>Child Output Policy</label>
+              <pre>{planNode.child_output_policy}</pre>
+            </div>
+          )}
+          <div className="contract-panel">
+            <div className="contract-heading">
+              <label>Received Saturated Values</label>
+              <span>{Object.keys(node.dependency_values).length} values</span>
+            </div>
+            <pre>{formatJson(node.dependency_values)}</pre>
+          </div>
+          <div>
+            <label>Question</label>
+            <pre>{node.resolved_question ?? ""}</pre>
+          </div>
+          {planNode && (
+            <div>
+              <label>User Template</label>
+              <pre>{planNode.prompt.user_template}</pre>
+            </div>
+          )}
+          <div>
+            <label>Rendered Prompt Sent To Model</label>
+            <pre>{node.rendered_prompt ?? ""}</pre>
+          </div>
+          {planNode && (
+            <div className="contract-panel">
+              <div className="contract-heading">
+                <label>Return Format Expected By Parent</label>
+                <span>JSON Schema</span>
+              </div>
+              <pre>{formatJson(planNode.output_schema)}</pre>
+            </div>
+          )}
+          <div className="contract-panel">
+            <div className="contract-heading">
+              <label>Returned To Parent</label>
+              <span>{node.validation.valid ? "Valid" : "Invalid"}</span>
+            </div>
+            <pre>{formatJson(node.returned_value)}</pre>
+          </div>
+          {!node.validation.valid && (
+            <div>
+              <label>Validation Errors</label>
+              <pre>{formatJson(node.validation.errors)}</pre>
+            </div>
+          )}
+          <div>
+            <label>Raw Response</label>
+            <pre>{formatRawResponse(node.raw_response)}</pre>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function ChatView() {
+  const [question, setQuestion] = useState(SAMPLE_QUESTIONS[0]);
+  const [run, setRun] = useState<LiveRun | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>();
+  const [phase, setPhase] = useState<RunPhase>("idle");
+  const [error, setError] = useState("");
+  const busy = phase === "planning" || phase === "executing";
+  const selectedNode = run?.nodes.find((node) => node.node_id === selectedNodeId) ?? run?.nodes[0];
+  const selectedPlanNode = run?.plan?.nodes.find((node) => node.id === selectedNode?.node_id);
+
+  const metrics = useMemo(
+    () => ({
+      status: busy ? "In Progress" : run?.status ?? "idle",
+      nodes: run?.nodes.length ?? 0,
+      waves: run?.waves.length ?? 0,
+      runtime: busy ? "running" : `${Math.round(run?.total_duration_ms ?? 0)} ms`,
+    }),
+    [busy, run],
+  );
+
+  async function runAsk() {
+    if (!question.trim()) return;
+    setPhase("planning");
+    setError("");
+    setRun(null);
+    setSelectedNodeId(undefined);
+    try {
+      const started = await startLiveAsk(question.trim());
+      setRun(started);
+      setPhase(started.phase);
+
+      let current = started;
+      while (current.phase === "planning" || current.phase === "executing") {
+        await new Promise((resolve) => window.setTimeout(resolve, 700));
+        current = await getLiveAsk(started.run_id);
+        setRun(current);
+        setPhase(current.phase);
+        if (!selectedNodeId && current.nodes.length > 0) {
+          setSelectedNodeId(current.nodes[0].node_id);
+        }
+      }
+
+      if (current.phase === "error") {
+        setError(current.error ?? "Request failed");
+      } else {
+        setSelectedNodeId(current.nodes[0]?.node_id);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Request failed");
+      setPhase("error");
+    }
+  }
+
+  return (
+    <main className="workspace">
+      <section className="chat-column">
+        <div className="chat-header">
+          <div>
+            <h1>Chat</h1>
+            <p>Ask a multi-hop question and inspect how the DAG agent decomposes it.</p>
+          </div>
+          <span className="model-pill">Azure GPT-4o</span>
+        </div>
+
+        <div className="sample-select">
+          <label htmlFor="sample-question">Example question</label>
+          <select
+            id="sample-question"
+            value={SAMPLE_QUESTIONS.includes(question) ? question : ""}
+            onChange={(event) => setQuestion(event.target.value)}
+          >
+            <option value="" disabled>
+              Select an example
+            </option>
+            {SAMPLE_QUESTIONS.map((sample) => (
+              <option key={sample} value={sample}>
+                {sample}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="composer">
+          <textarea
+            value={question}
+            onChange={(event) => setQuestion(event.target.value)}
+            placeholder="Paste a question..."
+          />
+          <button className="primary-button" disabled={busy || !question.trim()} onClick={runAsk}>
+            {busy ? <Loader2 className="spin" size={18} /> : <Send size={18} />}
+            {busy ? "Running" : "Ask"}
+          </button>
+        </div>
+
+        {error && <div className="error-box">{error}</div>}
+
+        {busy && (
+          <div className="run-progress">
+            <Loader2 className="spin" size={18} />
+            <div>
+              <strong>In Progress</strong>
+              <span>
+                {phase === "planning"
+                  ? "Creating the DAG plan."
+                  : "Executing nodes and updating the graph as each call runs."}
+              </span>
+            </div>
+          </div>
+        )}
+
+        <section className="answer-panel">
+          <div className="section-header">
+            <div>
+              <h2>Answer</h2>
+              <span>{run ? run.status : "Waiting for a question"}</span>
+            </div>
+            <MessageSquare size={18} />
+          </div>
+          <div className="answer-body">
+            {busy ? (
+              <div className="empty">Waiting for the final answer.</div>
+            ) : run?.final_answer ? (
+              <pre>{JSON.stringify(run.final_answer, null, 2)}</pre>
+            ) : (
+              <div className="empty">The final answer will appear here.</div>
+            )}
+          </div>
+        </section>
+      </section>
+
+      <aside className="run-sidebar">
+        <div className="metric-grid">
+          <div className="metric">
+            <label>Status</label>
+            <strong>{metrics.status}</strong>
+          </div>
+          <div className="metric">
+            <label>Nodes</label>
+            <strong>{busy ? "-" : metrics.nodes}</strong>
+          </div>
+          <div className="metric">
+            <label>Waves</label>
+            <strong>{busy ? "-" : metrics.waves}</strong>
+          </div>
+          <div className="metric">
+            <label>Runtime</label>
+            <strong>{metrics.runtime}</strong>
+          </div>
+        </div>
+        <GraphView
+          mermaidText={run?.mermaid ?? undefined}
+          phase={phase}
+          onSelectNode={(nodeId) => setSelectedNodeId(nodeId)}
+        />
+        <TracePanel
+          nodes={run?.nodes ?? []}
+          selected={selectedNode?.node_id}
+          onSelect={(node) => setSelectedNodeId(node.node_id)}
+        />
+        <NodeInspector
+          node={selectedNode}
+          planNode={selectedPlanNode}
+          planNodes={run?.plan?.nodes ?? []}
+        />
+      </aside>
+    </main>
+  );
+}
+
+function BenchmarkResultView({
+  result,
+  totalExamples,
+  onSelectRecord,
+}: {
+  result?: HotpotBenchmarkResult;
+  totalExamples?: number;
+  onSelectRecord?: (record: HotpotBenchmarkRecord) => void;
+}) {
+  const metrics = result?.metrics;
+  const errorRecords = result?.records.filter((record) => record.error) ?? [];
+
+  if (!result || !metrics) {
+    return <div className="empty">Metrics will appear here.</div>;
+  }
+
+  return (
+    <div className="benchmark-result-grid">
+      <div className="benchmark-metrics">
+        <div className="metric">
+          <label>Runtime</label>
+          <strong>{formatDuration(result.total_runtime_ms)}</strong>
+        </div>
+        <div className="metric">
+          <label>LLM Calls</label>
+          <strong>{formatNumber(metrics.total_llm_call_count)}</strong>
+        </div>
+        <div className="metric">
+          <label>Success</label>
+          <strong>{formatNumber(metrics.success_count)}</strong>
+        </div>
+        <div className="metric">
+          <label>Failures</label>
+          <strong>{formatNumber(metrics.failure_count)}</strong>
+        </div>
+        <div className="metric">
+          <label>Errors</label>
+          <strong>{formatNumber(metrics.error_count)}</strong>
+        </div>
+        <div className="metric">
+          <label>Exact Match</label>
+          <strong>{formatPercent(metrics.exact_match)}</strong>
+        </div>
+        <div className="metric">
+          <label>F1</label>
+          <strong>{formatPercent(metrics.f1)}</strong>
+        </div>
+        <div className="metric">
+          <label>Avg Latency</label>
+          <strong>{formatDuration(metrics.avg_latency_ms)}</strong>
+        </div>
+        <div className="metric">
+          <label>Avg Nodes</label>
+          <strong>{formatNumber(metrics.avg_node_count, 1)}</strong>
+        </div>
+        <div className="metric">
+          <label>Avg Depth</label>
+          <strong>{formatNumber(metrics.avg_graph_depth, 1)}</strong>
+        </div>
+      </div>
+      <div className="benchmark-context">
+        <div>
+          <label>Model</label>
+          <strong>{result.model}</strong>
+        </div>
+        <div>
+          <label>Sample</label>
+          <strong>
+            {formatNumber(result.records.length)} of {formatNumber(totalExamples)}
+          </strong>
+        </div>
+        <div>
+          <label>Seed</label>
+          <strong>{result.seed}</strong>
+        </div>
+        <div>
+          <label>Saved File</label>
+          <span>{result.output_path ?? "Not saved"}</span>
+        </div>
+        <div>
+          <label>Baseline Note</label>
+          <span>
+            Public HotpotQA leaderboards usually evaluate context-grounded systems, while this run
+            uses the configured answer pipeline directly. Compare EM/F1 only when the setup is the
+            same.
+          </span>
+        </div>
+      </div>
+      <div className="record-table-wrap">
+        <table className="record-table">
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th>Gold</th>
+              <th>Prediction</th>
+              <th>EM</th>
+              <th>F1</th>
+              <th>Status</th>
+              <th>Graph</th>
+            </tr>
+          </thead>
+          <tbody>
+            {result.records.map((record) => (
+              <tr
+                className={onSelectRecord && record.run_trace ? "clickable-row" : ""}
+                key={record.id}
+                onClick={() => {
+                  if (record.run_trace) onSelectRecord?.(record);
+                }}
+              >
+                <td>{record.question}</td>
+                <td>{record.gold_answer}</td>
+                <td>{record.prediction}</td>
+                <td>{formatPercent(record.exact_match)}</td>
+                <td>{formatPercent(record.f1)}</td>
+                <td>{record.error ? "error" : record.structural_failure ? "failed" : "ok"}</td>
+                <td>{record.run_trace ? "Inspect" : "-"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {errorRecords.length > 0 && (
+        <div>
+          <label>Errors</label>
+          <pre>{formatJson(errorRecords.map((record) => ({ id: record.id, error: record.error })))}</pre>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DatasetView() {
+  const [limit, setLimit] = useState(5);
+  const [system, setSystem] = useState("dag_agent");
+  const [seedInput, setSeedInput] = useState("");
+  const [meta, setMeta] = useState<HotpotBenchmarkMeta>();
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<HotpotBenchmarkResult>();
+  const [liveRun, setLiveRun] = useState<LiveBenchmark>();
+  const [error, setError] = useState("");
+  const maxExamples = meta?.total_examples && meta.total_examples > 1 ? meta.total_examples : 7405;
+  const resolvedLimit = Math.min(limit, maxExamples);
+  const progressPercent = liveRun?.total ? (liveRun.completed / liveRun.total) * 100 : 0;
+
+  function updateLimit(value: number) {
+    if (!Number.isFinite(value)) return;
+    setLimit(Math.min(Math.max(Math.trunc(value), 1), maxExamples));
+  }
+
+  useEffect(() => {
+    getHotpotBenchmarkMeta()
+      .then((nextMeta) => {
+        setMeta(nextMeta);
+        setLimit(Math.min(nextMeta.default_limit, nextMeta.total_examples));
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : "Could not load benchmark metadata"));
+  }, []);
+
+  async function runDatasetBenchmark() {
+    setBusy(true);
+    setError("");
+    setLiveRun(undefined);
+    setResult(undefined);
+    try {
+      const parsedSeed = seedInput.trim() ? Number(seedInput) : undefined;
+      if (parsedSeed !== undefined && !Number.isInteger(parsedSeed)) {
+        throw new Error("Seed must be an integer.");
+      }
+      const started = await startLiveBenchmark(resolvedLimit, system, parsedSeed);
+      setLiveRun(started);
+      setResult(started);
+      setSeedInput(String(started.seed));
+
+      let current = started;
+      while (current.phase === "running") {
+        await new Promise((resolve) => window.setTimeout(resolve, 1000));
+        current = await getLiveBenchmark(started.run_id);
+        setLiveRun(current);
+        setResult(current);
+      }
+
+      if (current.phase === "error") {
+        setError(current.error ?? "Benchmark failed");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Benchmark failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="dataset-workspace">
+      <section className="dataset-panel">
+        <div className="chat-header">
+          <div>
+            <h1>Dataset</h1>
+            <p>Run a seeded HotpotQA validation sample against the active DAG agent.</p>
+          </div>
+          <Database size={22} />
+        </div>
+
+        <div className="benchmark-form">
+          <label>
+            System
+            <select value={system} onChange={(event) => setSystem(event.target.value)}>
+              <option value="dag_agent">DAG agent</option>
+              <option value="direct_llm">Direct LLM</option>
+            </select>
+          </label>
+          <div className="benchmark-slider">
+            <div className="slider-header">
+              <label htmlFor="benchmark-limit">Examples</label>
+              <div className="limit-input-wrap">
+                <input
+                  aria-label="Benchmark example count"
+                  min={1}
+                  max={maxExamples}
+                  type="number"
+                  value={resolvedLimit}
+                  onChange={(event) => updateLimit(Number(event.target.value))}
+                />
+                <span>/ {formatNumber(maxExamples)}</span>
+              </div>
+            </div>
+            <div className="range-row">
+              <span>1</span>
+              <input
+                id="benchmark-limit"
+                min={1}
+                max={maxExamples}
+                type="range"
+                value={resolvedLimit}
+                onChange={(event) => updateLimit(Number(event.target.value))}
+              />
+              <span>{formatNumber(maxExamples)}</span>
+            </div>
+          </div>
+          <label>
+            Seed
+            <input
+              inputMode="numeric"
+              placeholder="Random"
+              type="number"
+              value={seedInput}
+              onChange={(event) => setSeedInput(event.target.value)}
+            />
+          </label>
+          <button className="primary-button benchmark-run-button" disabled={busy} onClick={runDatasetBenchmark}>
+            {busy ? <Loader2 className="spin" size={18} /> : <Play size={18} />}
+            {busy ? "Running" : "Start benchmark"}
+          </button>
+        </div>
+
+        {error && <div className="error-box">{error}</div>}
+
+        {busy && liveRun && (
+          <div className="benchmark-progress">
+            <div className="progress-summary">
+              <div>
+                <strong>
+                  {formatNumber(liveRun.completed)} / {formatNumber(liveRun.total)} examples
+                </strong>
+                <span>{liveRun.current_question ?? "Finalizing benchmark run."}</span>
+              </div>
+              <span>{progressPercent.toFixed(0)}%</span>
+            </div>
+            <div className="progress-rail static-progress">
+              <span style={{ width: `${progressPercent}%` }} />
+            </div>
+          </div>
+        )}
+
+        <section className="answer-panel">
+          <div className="section-header">
+            <div>
+              <h2>Benchmark Result</h2>
+              <span>
+                {result
+                  ? `${result.dataset} ${result.split}, seed ${result.seed}`
+                  : meta
+                    ? `${formatNumber(meta.total_examples)} HotpotQA examples available`
+                    : "Loading metadata"}
+              </span>
+            </div>
+            <BarChart3 size={18} />
+          </div>
+          <div className="answer-body benchmark-output">
+            <BenchmarkResultView result={result} totalExamples={meta?.total_examples} />
+          </div>
+        </section>
+      </section>
+    </main>
+  );
+}
+
+function BenchmarkRecordDetail({
+  record,
+  onBack,
+}: {
+  record: HotpotBenchmarkRecord;
+  onBack: () => void;
+}) {
+  const run = record.run_trace;
+  const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>(run?.nodes[0]?.node_id);
+  const selectedNode = run?.nodes.find((node) => node.node_id === selectedNodeId) ?? run?.nodes[0];
+  const selectedPlanNode = run?.plan?.nodes.find((node) => node.id === selectedNode?.node_id);
+
+  if (!run) {
+    return (
+      <main className="dataset-workspace">
+        <section className="dataset-panel">
+          <button className="secondary-button" onClick={onBack}>
+            <ArrowLeft size={18} />
+            Back
+          </button>
+          <div className="empty">This saved row does not contain a graph trace.</div>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main className="workspace detail-workspace">
+      <section className="chat-column">
+        <div className="chat-header">
+          <div>
+            <h1>Benchmark Detail</h1>
+            <p>{record.question}</p>
+          </div>
+          <button className="secondary-button" onClick={onBack}>
+            <ArrowLeft size={18} />
+            Back
+          </button>
+        </div>
+
+        <div className="metric-grid">
+          <div className="metric">
+            <label>Status</label>
+            <strong>{run.status}</strong>
+          </div>
+          <div className="metric">
+            <label>Gold</label>
+            <strong>{record.gold_answer}</strong>
+          </div>
+          <div className="metric">
+            <label>Prediction</label>
+            <strong>{record.prediction || "-"}</strong>
+          </div>
+          <div className="metric">
+            <label>F1</label>
+            <strong>{formatPercent(record.f1)}</strong>
+          </div>
+        </div>
+
+        {record.structural_issues && record.structural_issues.length > 0 && (
+          <section className="answer-panel">
+            <div className="section-header">
+              <div>
+                <h2>Structural Issues</h2>
+                <span>{record.structural_issues.length} issues</span>
+              </div>
+              <GitBranch size={18} />
+            </div>
+            <div className="answer-body">
+              <pre>{formatJson(record.structural_issues)}</pre>
+            </div>
+          </section>
+        )}
+
+        <section className="answer-panel">
+          <div className="section-header">
+            <div>
+              <h2>Final Answer</h2>
+              <span>{run.final_answer ? "Returned by final node" : "No final answer"}</span>
+            </div>
+            <MessageSquare size={18} />
+          </div>
+          <div className="answer-body">
+            {run.final_answer ? (
+              <pre>{formatJson(run.final_answer)}</pre>
+            ) : (
+              <div className="empty">No final answer was returned.</div>
+            )}
+          </div>
+        </section>
+      </section>
+
+      <aside className="run-sidebar">
+        <GraphView
+          mermaidText={run.mermaid ?? undefined}
+          phase="complete"
+          onSelectNode={(nodeId) => setSelectedNodeId(nodeId)}
+        />
+        <TracePanel
+          nodes={run.nodes}
+          selected={selectedNode?.node_id}
+          onSelect={(node) => setSelectedNodeId(node.node_id)}
+        />
+        <NodeInspector
+          node={selectedNode}
+          planNode={selectedPlanNode}
+          planNodes={run.plan?.nodes ?? []}
+        />
+      </aside>
+    </main>
+  );
+}
+
+function ResultsView() {
+  const [items, setItems] = useState<SavedBenchmarkSummary[]>([]);
+  const [selectedRunId, setSelectedRunId] = useState("");
+  const [selectedResult, setSelectedResult] = useState<HotpotBenchmarkResult>();
+  const [detailRecord, setDetailRecord] = useState<HotpotBenchmarkRecord>();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  async function refreshResults() {
+    setBusy(true);
+    setError("");
+    try {
+      const response = await listBenchmarkResults();
+      setItems(response.results);
+      const nextRunId = selectedRunId || response.results[0]?.run_id || "";
+      setSelectedRunId(nextRunId);
+      if (nextRunId) {
+        setSelectedResult(await getBenchmarkResult(nextRunId));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load benchmark results");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    void refreshResults();
+  }, []);
+
+  async function selectResult(runId: string) {
+    setSelectedRunId(runId);
+    setDetailRecord(undefined);
+    setBusy(true);
+    setError("");
+    try {
+      setSelectedResult(await getBenchmarkResult(runId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load benchmark result");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (detailRecord) {
+    return <BenchmarkRecordDetail record={detailRecord} onBack={() => setDetailRecord(undefined)} />;
+  }
+
+  return (
+    <main className="dataset-workspace">
+      <section className="dataset-panel">
+        <div className="chat-header">
+          <div>
+            <h1>Results</h1>
+            <p>Open previously saved HotpotQA benchmark runs.</p>
+          </div>
+          <History size={22} />
+        </div>
+
+        <div className="results-browser">
+          <label>
+            Saved Run
+            <select
+              value={selectedRunId}
+              onChange={(event) => void selectResult(event.target.value)}
+            >
+              <option value="" disabled>
+                Select a run
+              </option>
+              {items.map((item) => (
+                <option key={item.run_id} value={item.run_id}>
+                  {formatSavedDateTime(item.created_at)} · {item.system} · {item.limit} · seed {item.seed}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="primary-button" disabled={busy} onClick={() => void refreshResults()}>
+            {busy ? <Loader2 className="spin" size={18} /> : <History size={18} />}
+            Refresh
+          </button>
+        </div>
+
+        {error && <div className="error-box">{error}</div>}
+
+        <section className="answer-panel">
+          <div className="section-header">
+            <div>
+              <h2>Saved Benchmark</h2>
+              <span>
+            {selectedResult
+              ? `${selectedResult.dataset} ${selectedResult.split}, seed ${selectedResult.seed}`
+              : busy
+                ? "Loading saved runs"
+                : `${formatNumber(items.length)} saved runs`}
+              </span>
+            </div>
+            <BarChart3 size={18} />
+          </div>
+          <div className="answer-body benchmark-output">
+            <BenchmarkResultView result={selectedResult} onSelectRecord={setDetailRecord} />
+          </div>
+        </section>
+      </section>
+    </main>
+  );
+}
+
+function App() {
+  const [tab, setTab] = useState<Tab>("chat");
+
+  return (
+    <div className="app-shell">
+      <aside className="sidebar">
+        <div className="sidebar-brand">
+          <div className="brand-mark">DQ</div>
+          <div>
+            <strong>DAG QA</strong>
+            <span>Multi-hop evaluation</span>
+          </div>
+        </div>
+        <nav className="tab-list">
+          <button className={tab === "chat" ? "active" : ""} onClick={() => setTab("chat")}>
+            <MessageSquare size={18} />
+            Chat
+          </button>
+          <button className={tab === "dataset" ? "active" : ""} onClick={() => setTab("dataset")}>
+            <Database size={18} />
+            Dataset
+          </button>
+          <button className={tab === "results" ? "active" : ""} onClick={() => setTab("results")}>
+            <History size={18} />
+            Results
+          </button>
+        </nav>
+        <div className="sidebar-footer">
+          <Timer size={16} />
+          <span>Runs use the active backend config.</span>
+        </div>
+      </aside>
+      {tab === "chat" ? <ChatView /> : tab === "dataset" ? <DatasetView /> : <ResultsView />}
+    </div>
+  );
+}
+
+export default App;
+
+createRoot(document.getElementById("root") as HTMLElement).render(<App />);
