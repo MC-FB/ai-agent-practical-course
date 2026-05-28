@@ -60,6 +60,7 @@ def benchmark(
     dataset: str = "hotpotqa",
     limit: int = 100,
     system: str = "dag_agent",
+    seed: int | None = None,
     data_path: Annotated[Path | None, typer.Option("--data-path")] = None,
     output: Annotated[Path | None, typer.Option("--output")] = None,
     config: Annotated[Path, typer.Option("--config")] = Path("configs/local.yaml"),
@@ -67,7 +68,7 @@ def benchmark(
     if dataset != "hotpotqa":
         raise typer.BadParameter("Only hotpotqa is supported.")
     result = asyncio.run(
-        benchmark_hotpotqa(_client(config), system=system, limit=limit, path=data_path)
+        benchmark_hotpotqa(_client(config), system=system, limit=limit, seed=seed, path=data_path)
     )
     if output:
         write_jsonl(result, output)

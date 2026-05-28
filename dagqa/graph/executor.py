@@ -9,6 +9,7 @@ from dagqa.config import AppConfig
 from dagqa.graph.scheduler import Scheduler
 from dagqa.llm.base import LanguageModel
 from dagqa.nodes.runner import NodeRunner
+from dagqa.planning.normalizer import normalize_plan_dependencies
 from dagqa.planning.validator import validate_plan
 from dagqa.schemas import DagPlan, NodeStatus, NodeTrace, RunTrace, SchedulerWave
 
@@ -25,6 +26,7 @@ class DagExecutor:
         self.runner = NodeRunner(llm, config.execution, config.llm)
 
     async def execute(self, plan: DagPlan) -> RunTrace:
+        plan = normalize_plan_dependencies(plan)
         validation = validate_plan(plan, self.config.planner)
         if not validation.valid:
             raise ExecutionError("Invalid DAG: " + "; ".join(validation.errors))

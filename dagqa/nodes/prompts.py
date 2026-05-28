@@ -33,9 +33,23 @@ def render_node_prompt(
         lambda match: str(context.get(match.group(1), match.group(0))),
         node.prompt.user_template,
     )
+    if node.depends_on and dependency_values and "dependencies" not in node.prompt.user_template:
+        rendered = (
+            "Dependency values available to this node:\n"
+            f"{json.dumps(dependency_values, indent=2, ensure_ascii=False)}\n\n"
+            f"{rendered}"
+        )
     rendered += "\n\nReturn format JSON Schema:\n"
     rendered += json.dumps(node.output_schema, indent=2)
-    rendered += "\n\nReturn JSON only."
+    rendered += """
+
+Return JSON only. Do not wrap the JSON in markdown fences.
+Normalize final answer values:
+- yes/no questions: answer with "yes" or "no", not true/false.
+- dates: use the natural date form requested by the question when possible.
+- numbers: return only the concise number or quantity unless units are part of the answer.
+- if the schema contains an answer field, put the concise final answer there.
+"""
     return rendered
 
 

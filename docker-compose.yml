@@ -1,10 +1,15 @@
 services:
   dagqa:
+    container_name: dagqa-app
+    image: dagqa-app:latest
     build: .
+    restart: unless-stopped
     ports:
       - "8000:8000"
     env_file:
       - .env
     volumes:
-      - ./configs:/app/configs:ro
-      - ./runs:/app/runs
+      - dagqa-runs:/app/runs
+
+volumes:
+  dagqa-runs:

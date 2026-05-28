@@ -15,6 +15,9 @@ class HotpotExample(BaseModel):
     answer: str
 
 
+HOTPOTQA_DISTRACTOR_VALIDATION_SIZE = 7405
+
+
 def load_hotpot_examples(
     path: str | Path | None = None,
     limit: int | None = None,
@@ -23,6 +26,12 @@ def load_hotpot_examples(
         return _load_from_huggingface(limit)
     examples = list(_load_from_json(path))
     return examples[:limit] if limit is not None else examples
+
+
+def count_hotpot_examples(path: str | Path | None = None) -> int:
+    if path is None:
+        return HOTPOTQA_DISTRACTOR_VALIDATION_SIZE
+    return sum(1 for _example in _load_from_json(path))
 
 
 def _load_from_json(path: str | Path) -> Iterator[HotpotExample]:

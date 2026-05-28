@@ -10,6 +10,7 @@ def render_mermaid(plan: DagPlan, traces: list[NodeTrace] | None = None) -> str:
         status = status_by_id.get(node.id, "pending")
         label = f"{node.id}: {node.label}\\n{node.task_type.value}\\n{status}"
         lines.append(f'  {node.id}["{label}"]')
+        lines.append(f"  click {node.id} dagqaSelectGraphNode")
         for dep in node.depends_on:
             lines.append(f"  {dep} --> {node.id}")
     return "\n".join(lines)

@@ -11,7 +11,15 @@ from dagqa.config import PlannerConfig
 from dagqa.schemas import DagPlan, ValidationResult
 
 _PLACEHOLDER_RE = re.compile(r"\{([A-Za-z][A-Za-z0-9_-]*)\.([A-Za-z_][A-Za-z0-9_]*)\}")
+_ANY_PLACEHOLDER_RE = re.compile(r"\{([A-Za-z_][A-Za-z0-9_.-]*)\}")
 _REFERENCE_RE = re.compile(r"^([A-Za-z][A-Za-z0-9_-]*)\.([A-Za-z_][A-Za-z0-9_]*)$")
+_BUILTIN_PROMPT_PLACEHOLDERS = {
+    "dependencies",
+    "resolved_question",
+    "node.id",
+    "node.label",
+    "node.question",
+}
 
 
 def validate_plan(  # noqa: PLR0912
@@ -28,6 +36,8 @@ def validate_plan(  # noqa: PLR0912
 
     if plan.final_node not in node_set:
         errors.append(f"final_node '{plan.final_node}' does not exist.")
+    elif "answer" not in by_id[plan.final_node].output_schema.get("properties", {}):
+        errors.append(f"final_node '{plan.final_node}' output_schema must include 'answer'.")
 
     for node in plan.nodes:
         for dep in node.depends_on:
@@ -64,6 +74,19 @@ def validate_plan(  # noqa: PLR0912
                 f"input_map '{name}'",
             )
 
+        for ref_node, ref_field in _child_placeholders(node.prompt.user_template):
+            _validate_reference(
+                errors,
+                node.id,
+                ref_node,
+                ref_field,
+                declared_deps,
+                by_id.get(ref_node),
+                "prompt placeholder",
+            )
+
+        _validate_dependent_prompt_uses_children(errors, node.id, declared_deps, node)
+
         try:
             Draft202012Validator.check_schema(node.output_schema)
         except SchemaError as exc:
@@ -83,6 +106,55 @@ def validate_plan(  # noqa: PLR0912
                 errors.append(f"Plan depth is {depth}; max_depth is {config.max_depth}.")
 
     return ValidationResult(valid=not errors, errors=errors)
+
+
+def _child_placeholders(template: str) -> list[tuple[str, str]]:
+    placeholders = []
+    for placeholder in _ANY_PLACEHOLDER_RE.findall(template):
+        if placeholder in _BUILTIN_PROMPT_PLACEHOLDERS:
+            continue
+        match = _REFERENCE_RE.match(placeholder)
+        if match:
+            placeholders.append(match.groups())
+    return placeholders
+
+
+def _validate_dependent_prompt_uses_children(
+    errors: list[str],
+    node_id: str,
+    declared_deps: set[str],
+    node: Any,
+) -> None:
+    if not declared_deps:
+        return
+
+    if not node.input_map:
+        errors.append(f"Node '{node_id}' depends on children but has an empty input_map.")
+        return
+
+    referenced_deps = {
+        reference.split(".", 1)[0]
+        for reference in node.input_map.values()
+        if _REFERENCE_RE.match(reference)
+    }
+    missing_deps = sorted(declared_deps - referenced_deps)
+    if missing_deps:
+        errors.append(
+            f"Node '{node_id}' depends on {missing_deps} but input_map does not consume them."
+        )
+
+    template = node.prompt.user_template
+    placeholders = set(_ANY_PLACEHOLDER_RE.findall(template))
+    uses_dependency_context = "dependencies" in placeholders
+    uses_input_value = bool(placeholders.intersection(node.input_map.keys()))
+    uses_direct_child_value = any(
+        ref_node in declared_deps for ref_node, _ref_field in _child_placeholders(template)
+    )
+    if not (uses_dependency_context or uses_input_value or uses_direct_child_value):
+        errors.append(
+            f"Node '{node_id}' depends on children but prompt.user_template does not include "
+            "child values via {dependencies}, input_map placeholders, or direct child placeholders."
+        )
 
 
 def graph_depth(plan: DagPlan) -> int:
