@@ -1,0 +1,44 @@
+{
+  "run_id": "6d8c0910-a507-464d-8776-d5fa072a0eb0",
+  "system": "direct_llm",
+  "limit": 1,
+  "model": "stub",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "seed": 42,
+  "created_at": "2026-05-27T07:31:37Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260527T073137Z-6d8c0910-a507-464d-8776-d5fa072a0eb0.json",
+  "total_runtime_ms": 0.15912496019154787,
+  "records": [
+    {
+      "id": "a",
+      "question": "Capital of France?",
+      "gold_answer": "Paris",
+      "prediction": "Paris",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 0.06729201413691044,
+      "llm_call_count": 1,
+      "node_count": null,
+      "graph_depth": null,
+      "structural_failure": false,
+      "error": null
+    }
+  ],
+  "metrics": {
+    "example_count": 1.0,
+    "success_count": 1.0,
+    "failure_count": 0.0,
+    "error_count": 0.0,
+    "exact_match": 1.0,
+    "f1": 1.0,
+    "avg_latency_ms": 0.06729201413691044,
+    "p50_latency_ms": 0.06729201413691044,
+    "total_llm_call_count": 1.0,
+    "avg_llm_call_count": 1.0,
+    "avg_node_count": 0.0,
+    "avg_graph_depth": 0.0,
+    "structural_failure_rate": 0.0,
+    "total_runtime_ms": 0.15912496019154787
+  }
+}

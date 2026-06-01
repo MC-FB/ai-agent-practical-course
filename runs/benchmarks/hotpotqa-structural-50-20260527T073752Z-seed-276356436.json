@@ -1,0 +1,3931 @@
+{
+  "run_id": "20260527T073752Z-seed-276356436",
+  "created_at": "2026-05-27T07:37:56.059927+00:00",
+  "seed": 276356436,
+  "limit": 50,
+  "dataset_size": 7405,
+  "config": "configs/azure-openai.yaml",
+  "model": "azure/gpt-4o-mini",
+  "records": [
+    {
+      "index": 1,
+      "id": "5a8361f35542996488c2e431",
+      "question": "Underwater! is a 1955 adventure film starring an American film actress who was a leading sex symbol in what decades?",
+      "gold_answer": "1940s and 1950s",
+      "status": "succeeded",
+      "prediction": "1940s, 1950s",
+      "exact_match": 0.0,
+      "f1": 0.8,
+      "latency_ms": 8281.750291993376,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "1940s, 1950s"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "decades": "1940s, 1950s"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify actress",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "actress_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine decades of prominence",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "actress_name": "q1.actress_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "decades"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "decades": "q2.decades"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 2,
+      "id": "5abd0b9a5542996e802b46b7",
+      "question": "Glenn Quagmire is voiced by the creator of what 2012 film?",
+      "gold_answer": "Ted",
+      "status": "succeeded",
+      "prediction": "True",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 11078.39141599834,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "True"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "film_title": "Ted"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify Glenn Quagmire's voice actor",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "voice_actor"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Identify the 2012 film created by the voice actor",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "voice_actor": "q1.voice_actor"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "film_title"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Final Answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "film_title": "q2.film_title"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 3,
+      "id": "5a87191155429960ec39b73d",
+      "question": "What private university in Virginia did Jamal Benjamin Brooks play college football at?",
+      "gold_answer": "Hampton University",
+      "status": "succeeded",
+      "prediction": "The University of Alabama is not a private institution and is not located in Virginia. It is a public university located in Tuscaloosa, Alabama.",
+      "exact_match": 0.0,
+      "f1": 0.08695652173913042,
+      "latency_ms": 7829.203583998606,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "The University of Alabama is not a private institution and is not located in Virginia. It is a public university located in Tuscaloosa, Alabama."
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "university": "University of Alabama"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify Jamal Benjamin Brooks' college football team",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "team"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine the university associated with the team",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "team": "q1.team"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "university"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Verify if the university is private and in Virginia",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "university": "q2.university"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 4,
+      "id": "5a7f84225542994857a76756",
+      "question": "The Pappas house is the largest of the Usonian Automatics built after a house located in what village?",
+      "gold_answer": "Amberley Village",
+      "status": "succeeded",
+      "prediction": "Unknown",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 14267.02720799949,
+      "llm_call_count": 6,
+      "node_count": 5,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Unknown"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 3,
+        "mapped_edge_count": 4,
+        "final_node": "s1",
+        "final_depends_on": [
+          "q3",
+          "q4"
+        ],
+        "final_dependency_values": {
+          "largest_house": "Information about the largest Usonian Automatic is not provided in the available data.",
+          "village": "Unknown"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify the Pappas house",
+            "task_type": "entity_resolution",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "house_name",
+              "house_type"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Identify Usonian Automatics",
+            "task_type": "entity_resolution",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "houses"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Find the largest Usonian Automatic",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "houses": "q2.houses"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "largest_house"
+            ]
+          },
+          {
+            "id": "q4",
+            "label": "Find the village of the house built before the Pappas house",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "house_name": "q1.house_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "village"
+            ]
+          },
+          {
+            "id": "s1",
+            "label": "Synthesize final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q3",
+              "q4"
+            ],
+            "input_map": {
+              "largest_house": "q3.largest_house",
+              "village": "q4.village"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 5,
+      "id": "5a730a6b5542992359bc3210",
+      "question": "Who is older Craig Nicholls or Norman Blake ?",
+      "gold_answer": "Norman Blake",
+      "status": "succeeded",
+      "prediction": "Norman Blake",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 7370.955499995034,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "older_person": "Norman Blake"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 4,
+        "final_node": "compare_ages",
+        "final_depends_on": [
+          "lookup_craig",
+          "lookup_norman"
+        ],
+        "final_dependency_values": {
+          "person1": "Craig Nicholls",
+          "birth_year1": 1977,
+          "person2": "Norman Blake",
+          "birth_year2": 1938
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_craig",
+            "label": "Lookup Craig Nicholls' birth year",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "person",
+              "birth_year"
+            ]
+          },
+          {
+            "id": "lookup_norman",
+            "label": "Lookup Norman Blake's birth year",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "person",
+              "birth_year"
+            ]
+          },
+          {
+            "id": "compare_ages",
+            "label": "Compare ages of Craig Nicholls and Norman Blake",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_craig",
+              "lookup_norman"
+            ],
+            "input_map": {
+              "person1": "lookup_craig.person",
+              "birth_year1": "lookup_craig.birth_year",
+              "person2": "lookup_norman.person",
+              "birth_year2": "lookup_norman.birth_year"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "older_person"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 6,
+      "id": "5ae3992d5542994393b9e722",
+      "question": "Chandamama and Kajal Aggarwal are both associated with which Indian film industries?",
+      "gold_answer": "Telugu and Tamil",
+      "status": "succeeded",
+      "prediction": "Telugu, Tamil",
+      "exact_match": 0.0,
+      "f1": 0.8,
+      "latency_ms": 18640.839208033867,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "common_industries": "Telugu, Tamil"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 2,
+        "final_node": "s1",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {
+          "chandamama_industries": "Telugu, Tamil",
+          "kajal_industries": "Bollywood, Tollywood, Kollywood, Sandalwood"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Chandamama's film industry",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "industries"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Kajal Aggarwal's film industry",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "industries"
+            ]
+          },
+          {
+            "id": "s1",
+            "label": "Common film industries",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "chandamama_industries": "q1.industries",
+              "kajal_industries": "q2.industries"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "common_industries"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 7,
+      "id": "5a74a62b55429916b01641a0",
+      "question": "Which astronaut, Jean-François Clervoy or Ulrich Walter, was born first?",
+      "gold_answer": "Prof. Dr. Ulrich Hans Walter",
+      "status": "succeeded",
+      "prediction": "Ulrich Walter",
+      "exact_match": 0.0,
+      "f1": 0.5714285714285715,
+      "latency_ms": 22215.90524999192,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "earlier_astronaut": "Ulrich Walter"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 4,
+        "final_node": "compare_birth_dates",
+        "final_depends_on": [
+          "lookup_clervoy_birth",
+          "lookup_walter_birth"
+        ],
+        "final_dependency_values": {
+          "astronaut1": "Jean-François Clervoy",
+          "birth_date1": "1958-11-19",
+          "astronaut2": "Ulrich Walter",
+          "birth_date2": "1954-02-09"
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_clervoy_birth",
+            "label": "Lookup Jean-François Clervoy's birth date",
+            "task_type": "date_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "astronaut",
+              "birth_date"
+            ]
+          },
+          {
+            "id": "lookup_walter_birth",
+            "label": "Lookup Ulrich Walter's birth date",
+            "task_type": "date_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "astronaut",
+              "birth_date"
+            ]
+          },
+          {
+            "id": "compare_birth_dates",
+            "label": "Compare birth dates",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_clervoy_birth",
+              "lookup_walter_birth"
+            ],
+            "input_map": {
+              "astronaut1": "lookup_clervoy_birth.astronaut",
+              "birth_date1": "lookup_clervoy_birth.birth_date",
+              "astronaut2": "lookup_walter_birth.astronaut",
+              "birth_date2": "lookup_walter_birth.birth_date"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "earlier_astronaut"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 8,
+      "id": "5ab2659e554299340b5254b2",
+      "question": "From March 631 to April 631, Farrukhzad Khosrau V was the king of an empire that succeeded which empire?",
+      "gold_answer": "the Parthian Empire",
+      "status": "succeeded",
+      "prediction": "Parthian Empire",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 22066.42779201502,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Parthian Empire"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "predecessor_empire": "Parthian Empire"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify Farrukhzad Khosrau V's empire",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "empire"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine the predecessor empire",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "current_empire": "q1.empire"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "predecessor_empire"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Final answer synthesis",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "predecessor_empire": "q2.predecessor_empire"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 9,
+      "id": "5a73250a5542991f9a20c643",
+      "question": "Where has Kerwin Swint's work appeared that draws 20.5 million unique visitors a month?",
+      "gold_answer": "Mental Floss",
+      "status": "failed",
+      "prediction": "",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 19036.539625027217,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": null,
+      "structure": {
+        "valid": false,
+        "problems": [
+          "q3: final trace has no resolved dependency_values"
+        ],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 3,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {},
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify Kerwin Swint's work appearances",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "platform"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Identify platform visitor statistics",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "platform": "q1.platform"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "platform",
+              "unique_visitors"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Determine the matching platform",
+            "task_type": "classification",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "platform": "q2.platform",
+              "unique_visitors": "q2.unique_visitors"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "platform"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 10,
+      "id": "5a7759dd5542994aec3b729f",
+      "question": "What Major League Soccer team owned by Anthony Precourt is coached by a retired American soccer player ?",
+      "gold_answer": "Columbus Crew Soccer Club",
+      "status": "succeeded",
+      "prediction": "yes",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 18894.971625006292,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "yes"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 3,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {
+          "team": "Austin FC",
+          "coach": "Josh Wolff"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify MLS team owned by Anthony Precourt",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "team"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Identify coach of the team",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "team": "q1.team"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "coach"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Verify if the coach is a retired American soccer player",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "team": "q1.team",
+              "coach": "q2.coach"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 11,
+      "id": "5a8e1577554299068b959e54",
+      "question": "What professionn does Stanley Kwan and Ken Hughes have in common?",
+      "gold_answer": "director",
+      "status": "succeeded",
+      "prediction": "film director",
+      "exact_match": 0.0,
+      "f1": 0.6666666666666666,
+      "latency_ms": 18912.366916018073,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "common_profession": "film director"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 2,
+        "final_node": "compare_professions",
+        "final_depends_on": [
+          "lookup_stanley_kwan",
+          "lookup_ken_hughes"
+        ],
+        "final_dependency_values": {
+          "profession1": "film director",
+          "profession2": "Film director and screenwriter"
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_stanley_kwan",
+            "label": "Lookup Stanley Kwan's profession",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "profession"
+            ]
+          },
+          {
+            "id": "lookup_ken_hughes",
+            "label": "Lookup Ken Hughes's profession",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "profession"
+            ]
+          },
+          {
+            "id": "compare_professions",
+            "label": "Compare professions",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_stanley_kwan",
+              "lookup_ken_hughes"
+            ],
+            "input_map": {
+              "profession1": "lookup_stanley_kwan.profession",
+              "profession2": "lookup_ken_hughes.profession"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "common_profession"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 12,
+      "id": "5a798f8c5542994bb9457023",
+      "question": "What city and nation was the location of the 2015 Pacific Games where the Kiribati national basketball team finished with a 0-4 record?",
+      "gold_answer": "Port Moresby, Papua New Guinea",
+      "status": "succeeded",
+      "prediction": "Port Moresby, Papua New Guinea",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 21874.80037502246,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "answer": "Port Moresby, Papua New Guinea"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 3,
+        "final_node": "s1",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {
+          "city": "Port Moresby",
+          "nation": "Papua New Guinea",
+          "record": "0-4"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "2015 Pacific Games location",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "city",
+              "nation"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Kiribati basketball team record",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "record"
+            ]
+          },
+          {
+            "id": "s1",
+            "label": "Synthesize final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "city": "q1.city",
+              "nation": "q1.nation",
+              "record": "q2.record"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 13,
+      "id": "5a820c0c554299676cceb1fc",
+      "question": "What is the name of the company that wholly owns the Value Alliance airline whose head office is within Terminal 2 of Narita International Airport?",
+      "gold_answer": "All Nippon",
+      "status": "succeeded",
+      "prediction": "Value Alliance is not wholly owned by a single company; it is a partnership of low-cost airlines in the Asia-Pacific region.",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 24602.501542016398,
+      "llm_call_count": 5,
+      "node_count": 4,
+      "wave_count": 3,
+      "final_answer": {
+        "final_answer": "Value Alliance is not wholly owned by a single company; it is a partnership of low-cost airlines in the Asia-Pacific region."
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 3,
+        "final_node": "q4",
+        "final_depends_on": [
+          "q2",
+          "q3"
+        ],
+        "final_dependency_values": {
+          "is_within_terminal_2": false,
+          "owning_company": "Value Alliance is not wholly owned by a single company; it is a partnership of low-cost airlines in the Asia-Pacific region."
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify Value Alliance airline head office",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "head_office_location"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Verify head office location in Terminal 2 of Narita International Airport",
+            "task_type": "classification",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "head_office_location": "q1.head_office_location"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "is_within_terminal_2"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Identify owning company of Value Alliance",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "owning_company"
+            ]
+          },
+          {
+            "id": "q4",
+            "label": "Determine the owning company based on location verification",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2",
+              "q3"
+            ],
+            "input_map": {
+              "is_within_terminal_2": "q2.is_within_terminal_2",
+              "owning_company": "q3.owning_company"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "final_answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 14,
+      "id": "5adf49935542993a75d26491",
+      "question": "Are Power Grid and Vanished Planet both cooperative board games?",
+      "gold_answer": "no",
+      "status": "succeeded",
+      "prediction": "False",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 20423.667250026483,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "both_cooperative": false
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 4,
+        "final_node": "compare_cooperative_status",
+        "final_depends_on": [
+          "lookup_power_grid",
+          "lookup_vanished_planet"
+        ],
+        "final_dependency_values": {
+          "game1": "Power Grid",
+          "is_cooperative1": false,
+          "game2": "Vanished Planet",
+          "is_cooperative2": true
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_power_grid",
+            "label": "Lookup Power Grid",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "game",
+              "is_cooperative"
+            ]
+          },
+          {
+            "id": "lookup_vanished_planet",
+            "label": "Lookup Vanished Planet",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "game",
+              "is_cooperative"
+            ]
+          },
+          {
+            "id": "compare_cooperative_status",
+            "label": "Compare Cooperative Status",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_power_grid",
+              "lookup_vanished_planet"
+            ],
+            "input_map": {
+              "game1": "lookup_power_grid.game",
+              "is_cooperative1": "lookup_power_grid.is_cooperative",
+              "game2": "lookup_vanished_planet.game",
+              "is_cooperative2": "lookup_vanished_planet.is_cooperative"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "both_cooperative"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 15,
+      "id": "5ae5bcbd55429960a22e0324",
+      "question": "When is the football club which Stan Spinks played for founded",
+      "gold_answer": "in 1902",
+      "status": "succeeded",
+      "prediction": "Arsenal Football Club",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 19556.1255000066,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Arsenal Football Club"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "founding_year": 1886
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify Stan Spinks' football club",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "football_club"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find the founding year of the football club",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "football_club": "q1.football_club"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "founding_year"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Provide the founding year of the football club",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "founding_year": "q2.founding_year"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 16,
+      "id": "5abb326055429966062416e7",
+      "question": "Ruddles Brewery is owned by a pub retailer and brewer based in what city?",
+      "gold_answer": "Bury St Edmunds",
+      "status": "succeeded",
+      "prediction": "Bury St Edmunds",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 19454.997874971014,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Bury St Edmunds"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "city": "Bury St Edmunds"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify Ruddles Brewery owner",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "owner"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine owner's base city",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "owner": "q1.owner"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "city"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Final Answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "city": "q2.city"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 17,
+      "id": "5a7351785542994cef4bc539",
+      "question": "Was Atom Egoyans biggest commercial success on stage or on film?",
+      "gold_answer": "erotic thriller film",
+      "status": "succeeded",
+      "prediction": "film",
+      "exact_match": 0.0,
+      "f1": 0.5,
+      "latency_ms": 22326.14270801423,
+      "llm_call_count": 5,
+      "node_count": 4,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "film"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 3,
+        "final_node": "q4",
+        "final_depends_on": [
+          "q3"
+        ],
+        "final_dependency_values": {
+          "comparison_result": "film"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Atom Egoyan's biggest commercial success in film",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "film_success"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Atom Egoyan's biggest commercial success on stage",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "stage_success"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Comparison of commercial success",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "film_success": "q1.film_success",
+              "stage_success": "q2.stage_success"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "greater_success"
+            ]
+          },
+          {
+            "id": "q4",
+            "label": "Final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q3"
+            ],
+            "input_map": {
+              "comparison_result": "q3.greater_success"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 18,
+      "id": "5ae114f155429901ffe4ad5c",
+      "question": "Do the documentaries Hot Girls Wanted and The Truth According to Wikipedia have the same director?",
+      "gold_answer": "no",
+      "status": "succeeded",
+      "prediction": "False",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 25726.762041973416,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "same_director": false
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 2,
+        "final_node": "compare_directors",
+        "final_depends_on": [
+          "lookup_director_1",
+          "lookup_director_2"
+        ],
+        "final_dependency_values": {
+          "director_1": "Jill Bauer and Ronna Gradus",
+          "director_2": "IJsbrand van Veelen"
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_director_1",
+            "label": "Lookup Director of Hot Girls Wanted",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "director"
+            ]
+          },
+          {
+            "id": "lookup_director_2",
+            "label": "Lookup Director of The Truth According to Wikipedia",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "director"
+            ]
+          },
+          {
+            "id": "compare_directors",
+            "label": "Compare Directors",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_director_1",
+              "lookup_director_2"
+            ],
+            "input_map": {
+              "director_1": "lookup_director_1.director",
+              "director_2": "lookup_director_2.director"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "same_director"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 19,
+      "id": "5ae4a1ef55429970de88d9e7",
+      "question": "When was the  Argentine former footballer which  Dutch manager Ronald Koeman replaced in  2014–15 Southampton F.C. season born",
+      "gold_answer": "2 March 1972",
+      "status": "succeeded",
+      "prediction": "1972-03-02",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 15005.682250019163,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "1972-03-02"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q4",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "birth_date": "1972-03-02"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify the Argentine former footballer replaced by Ronald Koeman",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "footballer_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine the birth date of the identified footballer",
+            "task_type": "date_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "footballer_name": "q1.footballer_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "birth_date"
+            ]
+          },
+          {
+            "id": "q4",
+            "label": "Provide the birth date of the footballer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "birth_date": "q2.birth_date"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 20,
+      "id": "5a73977d554299623ed4ac08",
+      "question": "What is the shared country of ancestry between Art Laboe and Scout Tufankjian?",
+      "gold_answer": "Armenian",
+      "status": "succeeded",
+      "prediction": "Armenia",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 19434.468666964676,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "shared_country": "Armenia"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 2,
+        "final_node": "s1",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {
+          "country1": "Armenia",
+          "country2": "Armenia"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Art Laboe's ancestry",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "country"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Scout Tufankjian's ancestry",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "country"
+            ]
+          },
+          {
+            "id": "s1",
+            "label": "Shared country of ancestry",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "country1": "q1.country",
+              "country2": "q2.country"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "shared_country"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 21,
+      "id": "5ac3295d5542995ef918c14d",
+      "question": "What role in the TV show \"Death in Paradise\" was played by the man who performed with Alexander Armstrong in the podcast \"Timeghost\"?",
+      "gold_answer": "Richard Poole",
+      "status": "succeeded",
+      "prediction": "Detective Inspector Richard Poole",
+      "exact_match": 0.0,
+      "f1": 0.6666666666666666,
+      "latency_ms": 20513.810582982842,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "specific_role": "Detective Inspector Richard Poole"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "roles": "DI Richard Poole"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify performer in podcast",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "performer"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find roles in TV show",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "performer": "q1.performer"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "roles"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Determine specific role",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "roles": "q2.roles"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "specific_role"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 22,
+      "id": "5a84b7db5542991dd0999db0",
+      "question": "Are both Götterdämmerung and Dafne considered operas?",
+      "gold_answer": "no",
+      "status": "succeeded",
+      "prediction": "True",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 19561.091542011127,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "both_are_operas": true
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 2,
+        "final_node": "compare_opera_status",
+        "final_depends_on": [
+          "lookup_gotterdammerung",
+          "lookup_dafne"
+        ],
+        "final_dependency_values": {
+          "classification_gotterdammerung": "Opera",
+          "classification_dafne": "Opera"
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_gotterdammerung",
+            "label": "Lookup Götterdämmerung",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "classification"
+            ]
+          },
+          {
+            "id": "lookup_dafne",
+            "label": "Lookup Dafne",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "classification"
+            ]
+          },
+          {
+            "id": "compare_opera_status",
+            "label": "Compare Opera Status",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_gotterdammerung",
+              "lookup_dafne"
+            ],
+            "input_map": {
+              "classification_gotterdammerung": "lookup_gotterdammerung.classification",
+              "classification_dafne": "lookup_dafne.classification"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "both_are_operas"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 23,
+      "id": "5ab7ef0f5542991d322237ca",
+      "question": "Chandgi Ram won a gold medal in 1970 in a continental multi-sport event held at which city ?",
+      "gold_answer": "Bangkok",
+      "status": "succeeded",
+      "prediction": "Bangkok",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 20999.179125006776,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Bangkok"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "city": "Bangkok"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify the event",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "event_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Locate the event city",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "event_name": "q1.event_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "city"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Final Answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "city": "q2.city"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 24,
+      "id": "5a7380e055429908901be2d6",
+      "question": "Which building is newer, The Spiral, or the New York World Building?",
+      "gold_answer": "The Spiral",
+      "status": "succeeded",
+      "prediction": "The Spiral",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 19771.326249989215,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "newer_building": "The Spiral"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 4,
+        "final_node": "compare_years",
+        "final_depends_on": [
+          "lookup_spiral_year",
+          "lookup_world_year"
+        ],
+        "final_dependency_values": {
+          "building1": "The Spiral",
+          "year1": 2023,
+          "building2": "New York World Building",
+          "year2": 1890
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_spiral_year",
+            "label": "Lookup The Spiral completion year",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "building",
+              "completion_year"
+            ]
+          },
+          {
+            "id": "lookup_world_year",
+            "label": "Lookup New York World Building completion year",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "building",
+              "completion_year"
+            ]
+          },
+          {
+            "id": "compare_years",
+            "label": "Compare building completion years",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_spiral_year",
+              "lookup_world_year"
+            ],
+            "input_map": {
+              "building1": "lookup_spiral_year.building",
+              "year1": "lookup_spiral_year.completion_year",
+              "building2": "lookup_world_year.building",
+              "year2": "lookup_world_year.completion_year"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "newer_building"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 25,
+      "id": "5ab9c292554299131ca423f5",
+      "question": "To which place was this Irish convict portrayed by Oscar Redding in \"Van Diemen's Land\" transported for theft?",
+      "gold_answer": "Van Diemen's Land",
+      "status": "succeeded",
+      "prediction": "The Irish convict portrayed by Oscar Redding in 'Van Diemen's Land' was transported to Van Diemen's Land (now Tasmania, Australia) for theft.",
+      "exact_match": 0.0,
+      "f1": 0.25,
+      "latency_ms": 23536.877708975226,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "final_answer": "The Irish convict portrayed by Oscar Redding in 'Van Diemen's Land' was transported to Van Diemen's Land (now Tasmania, Australia) for theft."
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "s1",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "transported_place": "Van Diemen's Land (now Tasmania, Australia)"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify the Irish convict portrayed by Oscar Redding in 'Van Diemen's Land'.",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "convict_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine the place to which the convict was transported.",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "convict_name": "q1.convict_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "transported_place"
+            ]
+          },
+          {
+            "id": "s1",
+            "label": "Synthesize the final answer.",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "transported_place": "q2.transported_place"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "final_answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 26,
+      "id": "5ac3e68b5542997ea680c98b",
+      "question": "What do Susan Stafford and Vanna White have in common?",
+      "gold_answer": "\"Wheel of Fortune\"",
+      "status": "succeeded",
+      "prediction": "Both Susan Stafford and Vanna White are best known for their roles as co-hosts and letter-turners on the popular American television game show 'Wheel of Fortune,' with Stafford being the original hostess and White succeeding her. They both became cultural icons through their contributions to the show, showcasing charm and professionalism. Additionally, both have been involved in philanthropy and charitable causes, with Stafford focusing on mental health awareness and humanitarian work, and White supporting organizations like St. Jude Children's Research Hospital. Their legacies extend beyond television, highlighting their dedication to making a positive impact on society.",
+      "exact_match": 0.0,
+      "f1": 0.06315789473684211,
+      "latency_ms": 21388.251708005555,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "commonalities": "Both Susan Stafford and Vanna White are best known for their roles as co-hosts and letter-turners on the popular American television game show 'Wheel of Fortune,' with Stafford being the original hostess and White succeeding her. They both became cultural icons through their contributions to the show, showcasing charm and professionalism. Additionally, both have been involved in philanthropy and charitable causes, with Stafford focusing on mental health awareness and humanitarian work, and White supporting organizations like St. Jude Children's Research Hospital. Their legacies extend beyond television, highlighting their dedication to making a positive impact on society."
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 2,
+        "final_node": "synthesize_commonalities",
+        "final_depends_on": [
+          "lookup_susan_stafford",
+          "lookup_vanna_white"
+        ],
+        "final_dependency_values": {
+          "susan_attributes": "Susan Stafford is best known as the original hostess of the popular American television game show 'Wheel of Fortune,' which she co-hosted from its inception in 1975 until 1982. She was the first woman to turn the letters on the puzzle board, becoming a trailblazer in the television industry. Stafford left the show to pursue a career in humanitarian work, including earning a Ph.D. in clinical psychology and working with cancer patients and terminally ill individuals. She has also been recognized for her contributions to charitable causes and her advocacy for mental health awareness.",
+          "vanna_attributes": "Vanna White is a renowned American television personality and actress, best known for her role as the co-host and letter-turner on the long-running game show 'Wheel of Fortune,' a position she has held since 1982. Her charm, poise, and iconic presence have made her a cultural icon in American television. Over the years, she has appeared in over 7,000 episodes of the show, earning her a Guinness World Record for 'Most Frequent Clapper' due to her consistent applause during the program. Beyond her television career, Vanna is also an accomplished author, having published her autobiography 'Vanna Speaks!' in 1987. Additionally, she is known for her philanthropy, particularly her support for St. Jude Children's Research Hospital. Vanna is also a skilled crocheter and has her own line of yarn called 'Vanna's Choice,' produced in collaboration with Lion Brand Yarn. Her enduring popularity, professionalism, and contributions to entertainment and charity have solidified her legacy as a beloved figure in American pop culture."
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_susan_stafford",
+            "label": "Lookup Susan Stafford",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "attributes"
+            ]
+          },
+          {
+            "id": "lookup_vanna_white",
+            "label": "Lookup Vanna White",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "attributes"
+            ]
+          },
+          {
+            "id": "synthesize_commonalities",
+            "label": "Synthesize Commonalities",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "lookup_susan_stafford",
+              "lookup_vanna_white"
+            ],
+            "input_map": {
+              "susan_attributes": "lookup_susan_stafford.attributes",
+              "vanna_attributes": "lookup_vanna_white.attributes"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "commonalities"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 27,
+      "id": "5a8affca55429971feec45e3",
+      "question": " Cliburn railway station was a station situated on This railway that  ran between Clifton Junction near Penrith and Kirkby Stephen via what?",
+      "gold_answer": "Appleby-in-Westmorland",
+      "status": "succeeded",
+      "prediction": "Clifton Junction near Penrith to Kirkby Stephen",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 33230.71041703224,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "segment": "Clifton Junction near Penrith to Kirkby Stephen"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "route": "The Eden Valley Railway runs between the towns of Kirkby Stephen and Appleby-in-Westmorland in Cumbria, England."
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify the railway line",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "railway_line"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine the route of the railway",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "railway_line": "q1.railway_line"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "route"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Extract the specific segment",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "route": "q2.route"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "segment"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 28,
+      "id": "5a87d8215542994775f60800",
+      "question": "This American crime film set in South Los Angeles was written and directed by the same director and writer of screenwriter of \"Street Kings\", \"End of Watch\", \"Sabotage\", \"Fury\" and what other film? ",
+      "gold_answer": "Suicide Squad",
+      "status": "succeeded",
+      "prediction": "End of Watch",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 17538.028291019145,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "specific_film": "End of Watch"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "other_films": "Harsh Times, End of Watch, Sabotage, Fury, Bright"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify director and writer",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "director_writer"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find other films by director",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "director_writer": "q1.director_writer"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "other_films"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Determine the specific film",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "other_films": "q2.other_films"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "specific_film"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 29,
+      "id": "5abfdfcb5542997d642958fe",
+      "question": "Double Dragon starred the actor and martial artist who played which character in \"Brotherhood of the Wolf\"?",
+      "gold_answer": "Mani",
+      "status": "succeeded",
+      "prediction": "Mani",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 20911.71245800797,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Mani"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "character_name": "Mani"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify actor in Double Dragon",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "actor_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Identify character in Brotherhood of the Wolf",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "actor_name": "q1.actor_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "character_name"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Final Answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "character_name": "q2.character_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 30,
+      "id": "5a75404a55429916b01642be",
+      "question": "At what university can the building that served as the fictional household that includes Gomez and Morticia be found?",
+      "gold_answer": "Syracuse University",
+      "status": "failed",
+      "prediction": "",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 21253.56533296872,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": null,
+      "structure": {
+        "valid": false,
+        "problems": [
+          "q3: final trace has no resolved dependency_values"
+        ],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 4,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {},
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify fictional household building",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "building_name",
+              "building_location"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find university at location",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "building_location": "q1.building_location"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "university_name"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Provide final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "building_name": "q1.building_name",
+              "building_location": "q1.building_location",
+              "university_name": "q2.university_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 31,
+      "id": "5adf4b335542993a75d264a5",
+      "question": "Paul DeBoy is known for an appearance in the Western action-adventure game developed by which company?",
+      "gold_answer": "Rockstar San Diego",
+      "status": "succeeded",
+      "prediction": "Rockstar Games",
+      "exact_match": 0.0,
+      "f1": 0.4,
+      "latency_ms": 22669.87899999367,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Rockstar Games"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "developer": "Rockstar Games"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify game",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "game_title"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Identify developer",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "game_title": "q1.game_title"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "developer"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "developer": "q2.developer"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 32,
+      "id": "5a865d11554299211dda2b0d",
+      "question": "What is the original name of the place where The 1st Minnesota Light Artillery Battery mustered?",
+      "gold_answer": "Fort Saint Anthony",
+      "status": "succeeded",
+      "prediction": "Bdote",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 17172.640207980294,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Bdote"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "original_name": "Bdote"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify muster location",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "muster_location"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine original name",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "location": "q1.muster_location"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "original_name"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Provide final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "original_name": "q2.original_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 33,
+      "id": "5ae14cf05542990adbacf742",
+      "question": "What is the nationality of the illustrator of Chaos Marauders?",
+      "gold_answer": "British",
+      "status": "succeeded",
+      "prediction": "British",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 18562.28208297398,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "British"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "nationality": "British"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Find Illustrator",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "illustrator"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find Illustrator's Nationality",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "illustrator": "q1.illustrator"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "nationality"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Provide Final Answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "nationality": "q2.nationality"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 34,
+      "id": "5aded1595542995ec70e8f29",
+      "question": "Juhi Parmar who appears in colors TV's high rated mythological show shani which premiered on November 7 2013 was born when?",
+      "gold_answer": "born 14 December 1980",
+      "status": "succeeded",
+      "prediction": "1980-12-14",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 19561.82366597932,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "answer": "1980-12-14"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {
+          "birthdate": "1980-12-14",
+          "premiere_date": "2016-11-07"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify Juhi Parmar's birthdate",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "birthdate"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Verify show details",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "premiere_date"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Synthesize final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "birthdate": "q1.birthdate",
+              "premiere_date": "q2.premiere_date"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 35,
+      "id": "5a74bc1555429929fddd84dd",
+      "question": "Which movie was released first, Fantastic Mr. Fox or Khan Kluay?",
+      "gold_answer": "Khan Kluay",
+      "status": "succeeded",
+      "prediction": "Khan Kluay",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 21487.86245897645,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "earlier_movie": "Khan Kluay"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 4,
+        "final_node": "compare_release_years",
+        "final_depends_on": [
+          "lookup_fantastic_mr_fox",
+          "lookup_khan_kluay"
+        ],
+        "final_dependency_values": {
+          "movie1": "Fantastic Mr. Fox",
+          "release_year1": 2009,
+          "movie2": "Khan Kluay",
+          "release_year2": 2006
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_fantastic_mr_fox",
+            "label": "Lookup Fantastic Mr. Fox Release Year",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "movie",
+              "release_year"
+            ]
+          },
+          {
+            "id": "lookup_khan_kluay",
+            "label": "Lookup Khan Kluay Release Year",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "movie",
+              "release_year"
+            ]
+          },
+          {
+            "id": "compare_release_years",
+            "label": "Compare Release Years",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_fantastic_mr_fox",
+              "lookup_khan_kluay"
+            ],
+            "input_map": {
+              "movie1": "lookup_fantastic_mr_fox.movie",
+              "release_year1": "lookup_fantastic_mr_fox.release_year",
+              "movie2": "lookup_khan_kluay.movie",
+              "release_year2": "lookup_khan_kluay.release_year"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "earlier_movie"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 36,
+      "id": "5a82ffe755429940e5e1a949",
+      "question": "Lou Pai is a former executive of an energy company that went bankrupt in what year?",
+      "gold_answer": "2001",
+      "status": "succeeded",
+      "prediction": "Lou Pai was an executive at Enron, which went bankrupt in the year 2001.",
+      "exact_match": 0.0,
+      "f1": 0.15384615384615385,
+      "latency_ms": 20811.989167006686,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Lou Pai was an executive at Enron, which went bankrupt in the year 2001."
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 3,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {
+          "company_name": "Enron",
+          "bankruptcy_year": 2001
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify Lou Pai's associated energy company",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "company_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine the bankruptcy year of the company",
+            "task_type": "date_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "company_name": "q1.company_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "bankruptcy_year"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Provide the final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "company_name": "q1.company_name",
+              "bankruptcy_year": "q2.bankruptcy_year"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 37,
+      "id": "5ae0036a55429942ec259bdf",
+      "question": "What other two divisions of Argentine forces were involved in the war with Britain that incurred losses in aircraft?",
+      "gold_answer": "Army, Navy",
+      "status": "succeeded",
+      "prediction": "Argentine Navy, Argentine Army Aviation",
+      "exact_match": 0.0,
+      "f1": 0.5714285714285715,
+      "latency_ms": 19830.340042011812,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "additional_divisions": "Argentine Navy, Argentine Army Aviation"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 2,
+        "final_node": "s1",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {
+          "all_divisions": "Argentine Army, Argentine Navy, Argentine Air Force, Argentine Coast Guard, and paramilitary forces such as the Gendarmerie and Prefecture.",
+          "divisions_with_losses": "Argentine Air Force, Argentine Navy, Argentine Army Aviation"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify Argentine forces divisions",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "divisions"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine divisions with aircraft losses",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "divisions_with_losses"
+            ]
+          },
+          {
+            "id": "s1",
+            "label": "Synthesize divisions with aircraft losses",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "all_divisions": "q1.divisions",
+              "divisions_with_losses": "q2.divisions_with_losses"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "additional_divisions"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 38,
+      "id": "5a8f608d5542992414482a94",
+      "question": "The Pollution Prevention Act of 1990 expanded a publicly available or private database?",
+      "gold_answer": "publicly available",
+      "status": "succeeded",
+      "prediction": "publicly available",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 19515.590417024214,
+      "llm_call_count": 3,
+      "node_count": 2,
+      "wave_count": 2,
+      "final_answer": {
+        "availability": "publicly available"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 1,
+        "final_node": "q2",
+        "final_depends_on": [
+          "q1"
+        ],
+        "final_dependency_values": {
+          "database_type": "Toxics Release Inventory (TRI)"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Pollution Prevention Act database type",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "database_type"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine database availability",
+            "task_type": "classification",
+            "operation": "transform",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "database_type": "q1.database_type"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "availability"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 39,
+      "id": "5abb14d85542996cc5e49f92",
+      "question": "Are Alexander Kluge and Sidney Salkow of the same nationality?",
+      "gold_answer": "no",
+      "status": "succeeded",
+      "prediction": "False",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 20442.647374991793,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "same_nationality": false
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 4,
+        "final_node": "compare_nationalities",
+        "final_depends_on": [
+          "lookup_kluge_nationality",
+          "lookup_salkow_nationality"
+        ],
+        "final_dependency_values": {
+          "person1": "Alexander Kluge",
+          "nationality1": "German",
+          "person2": "Sidney Salkow",
+          "nationality2": "American"
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_kluge_nationality",
+            "label": "Lookup Alexander Kluge's nationality",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "person",
+              "nationality"
+            ]
+          },
+          {
+            "id": "lookup_salkow_nationality",
+            "label": "Lookup Sidney Salkow's nationality",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "person",
+              "nationality"
+            ]
+          },
+          {
+            "id": "compare_nationalities",
+            "label": "Compare nationalities",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_kluge_nationality",
+              "lookup_salkow_nationality"
+            ],
+            "input_map": {
+              "person1": "lookup_kluge_nationality.person",
+              "nationality1": "lookup_kluge_nationality.nationality",
+              "person2": "lookup_salkow_nationality.person",
+              "nationality2": "lookup_salkow_nationality.nationality"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "same_nationality"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 40,
+      "id": "5a7269fa5542992359bc308d",
+      "question": "Which tennis player was born first, Kimberly Po or Leoš Friedl?",
+      "gold_answer": "Leoš Friedl",
+      "status": "succeeded",
+      "prediction": "Kimberly Po",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 24357.26654197788,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "earlier_player": "Kimberly Po"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 4,
+        "final_node": "compare_birth_years",
+        "final_depends_on": [
+          "lookup_kimberly_po",
+          "lookup_leos_friedl"
+        ],
+        "final_dependency_values": {
+          "player1": "Kimberly Po",
+          "birth_year1": 1971,
+          "player2": "Leoš Friedl",
+          "birth_year2": 1977
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_kimberly_po",
+            "label": "Lookup Kimberly Po's birth year",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "player",
+              "birth_year"
+            ]
+          },
+          {
+            "id": "lookup_leos_friedl",
+            "label": "Lookup Leoš Friedl's birth year",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "player",
+              "birth_year"
+            ]
+          },
+          {
+            "id": "compare_birth_years",
+            "label": "Compare birth years",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_kimberly_po",
+              "lookup_leos_friedl"
+            ],
+            "input_map": {
+              "player1": "lookup_kimberly_po.player",
+              "birth_year1": "lookup_kimberly_po.birth_year",
+              "player2": "lookup_leos_friedl.player",
+              "birth_year2": "lookup_leos_friedl.birth_year"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "earlier_player"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 41,
+      "id": "5a8b7e9c5542995d1e6f13c1",
+      "question": "Psychopsis and Aubrieta are both genuses of which type of plants?",
+      "gold_answer": "flowering plants",
+      "status": "succeeded",
+      "prediction": "flowering plants",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 16903.203124995343,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "common_plant_type": "flowering plants"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 2,
+        "final_node": "s1",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {
+          "psychopsis_type": "orchids",
+          "aubrieta_type": "herbaceous perennial"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Psychopsis plant type",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "plant_type"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Aubrieta plant type",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "plant_type"
+            ]
+          },
+          {
+            "id": "s1",
+            "label": "Synthesize plant types",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "psychopsis_type": "q1.plant_type",
+              "aubrieta_type": "q2.plant_type"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "common_plant_type"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 42,
+      "id": "5ae362105542991a06ce99ae",
+      "question": "What was the size of the 1700 Cascadia earthquake predicted by Kenji Satake?",
+      "gold_answer": "8.7",
+      "status": "succeeded",
+      "prediction": "Kenji Satake predicted the size of the 1700 Cascadia earthquake to be Mw 9.0.",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 18105.74575001374,
+      "llm_call_count": 3,
+      "node_count": 2,
+      "wave_count": 2,
+      "final_answer": {
+        "answer": "Kenji Satake predicted the size of the 1700 Cascadia earthquake to be Mw 9.0."
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 1,
+        "final_node": "s1",
+        "final_depends_on": [
+          "q1"
+        ],
+        "final_dependency_values": {
+          "dependencies": "Mw 9.0"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Retrieve earthquake prediction",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "earthquake_size"
+            ]
+          },
+          {
+            "id": "s1",
+            "label": "Final synthesis",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "dependencies": "q1.earthquake_size"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 43,
+      "id": "5a88a1475542997e5c09a646",
+      "question": "Which genus has more species, Salvia or Arachis?",
+      "gold_answer": "Salvia",
+      "status": "succeeded",
+      "prediction": "Salvia",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 20505.266749998555,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "genus_with_more_species": "Salvia"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 4,
+        "final_node": "compare_species_count",
+        "final_depends_on": [
+          "lookup_salvia_species",
+          "lookup_arachis_species"
+        ],
+        "final_dependency_values": {
+          "genus1": "Salvia",
+          "species_count1": 1000,
+          "genus2": "Arachis",
+          "species_count2": 80
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_salvia_species",
+            "label": "Lookup Salvia species count",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "genus",
+              "species_count"
+            ]
+          },
+          {
+            "id": "lookup_arachis_species",
+            "label": "Lookup Arachis species count",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "genus",
+              "species_count"
+            ]
+          },
+          {
+            "id": "compare_species_count",
+            "label": "Compare species counts",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_salvia_species",
+              "lookup_arachis_species"
+            ],
+            "input_map": {
+              "genus1": "lookup_salvia_species.genus",
+              "species_count1": "lookup_salvia_species.species_count",
+              "genus2": "lookup_arachis_species.genus",
+              "species_count2": "lookup_arachis_species.species_count"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "genus_with_more_species"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 44,
+      "id": "5a7c465a5542990527d5547f",
+      "question": "The Churchills is a TV exploration of Winston Churchill and his ancestor the Duke of Marlborough, presented by which English historian and broadcaster?",
+      "gold_answer": "David Starkey",
+      "status": "succeeded",
+      "prediction": "David Starkey",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 17034.02229200583,
+      "llm_call_count": 2,
+      "node_count": 1,
+      "wave_count": 1,
+      "final_answer": {
+        "presenter": "David Starkey"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 0,
+        "mapped_edge_count": 0,
+        "final_node": "q1",
+        "final_depends_on": [],
+        "final_dependency_values": {},
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify the presenter of 'The Churchills'",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "presenter"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 45,
+      "id": "5ab5499e5542992aa134a295",
+      "question": "In what year was the team that Luke Clark plays either right back or central midfielder for founded?",
+      "gold_answer": "1963",
+      "status": "succeeded",
+      "prediction": "2006",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 19724.501040996984,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "2006"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q4",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "founding_year": 2006
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify Luke Clark's team",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "team_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find the founding year of the team",
+            "task_type": "date_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "team_name": "q1.team_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "founding_year"
+            ]
+          },
+          {
+            "id": "q4",
+            "label": "Provide the founding year of the team",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "founding_year": "q2.founding_year"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 46,
+      "id": "5abe7c515542993f32c2a128",
+      "question": "How many marchers were in the protest that Pelham D. Glassford ended? ",
+      "gold_answer": "43,000 marchers",
+      "status": "succeeded",
+      "prediction": "43000",
+      "exact_match": 0.0,
+      "f1": 0.6666666666666666,
+      "latency_ms": 19948.244707949925,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": 43000
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "marcher_count": 43000
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify the protest ended by Pelham D. Glassford",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "protest_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine the number of marchers in the protest",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "protest_name": "q1.protest_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "marcher_count"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Provide the final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "marcher_count": "q2.marcher_count"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 47,
+      "id": "5a8249b85542990a1d231f8f",
+      "question": "What title did the actor who worked with Sivaji Ganesan in a 1970 drama film other than actor?",
+      "gold_answer": "politician",
+      "status": "succeeded",
+      "prediction": "Kadhal Mannan",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 34114.405957981944,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Kadhal Mannan"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "title": "Kadhal Mannan"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify the actor who worked with Sivaji Ganesan in a 1970 drama film",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "actor_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine the title of the identified actor",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "actor_name": "q1.actor_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "title"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Provide the final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "title": "q2.title"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 48,
+      "id": "5ae625935542995703ce8b2a",
+      "question": "Who founded gaming company which owns and operates the Red Rock Resort?",
+      "gold_answer": "Frank Fertitta, Jr.",
+      "status": "succeeded",
+      "prediction": "The gaming company owning the Red Rock Resort is Station Casinos, and it was founded by Frank Fertitta Jr.",
+      "exact_match": 0.0,
+      "f1": 0.3,
+      "latency_ms": 20129.70283301547,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "The gaming company owning the Red Rock Resort is Station Casinos, and it was founded by Frank Fertitta Jr."
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 3,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {
+          "company_name": "Station Casinos",
+          "founder_name": "Frank Fertitta Jr."
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify the gaming company owning Red Rock Resort",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "company_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find the founder of the identified company",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "company_name": "q1.company_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "founder_name"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Provide the final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "company_name": "q1.company_name",
+              "founder_name": "q2.founder_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 49,
+      "id": "5a7736bc554299373536021b",
+      "question": "What composer with an Italian libretto was born 4 March 1678?",
+      "gold_answer": "Antonio Lucio Vivaldi",
+      "status": "succeeded",
+      "prediction": "Antonio Vivaldi",
+      "exact_match": 0.0,
+      "f1": 0.8,
+      "latency_ms": 19707.95154199004,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "composer": "Antonio Vivaldi"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {
+          "born_composers": "Antonio Vivaldi",
+          "italian_libretto_composers": "Giuseppe Verdi"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Find composers born on 4 March 1678",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "composer"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find composers with Italian librettos",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "composer"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Determine the composer matching both criteria",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "born_composers": "q1.composer",
+              "italian_libretto_composers": "q2.composer"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "composer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 50,
+      "id": "5a77a44d5542997042120aba",
+      "question": "What census-designated place located in Nassau County, New York has as portions of it's territory, districts of Brian Curran, New York State assemblyman?",
+      "gold_answer": "Baldwin",
+      "status": "failed",
+      "prediction": "",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 30964.319708989933,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": null,
+      "structure": {
+        "valid": false,
+        "problems": [
+          "q3: final trace has no resolved dependency_values"
+        ],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {},
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify districts of Brian Curran",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "districts"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find census-designated places in Nassau County",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "places"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Determine matching census-designated place",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "districts": "q1.districts",
+              "places": "q2.places"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "place"
+            ]
+          }
+        ]
+      },
+      "error": null
+    }
+  ],
+  "summary": {
+    "completed": 50,
+    "success_count": 47,
+    "error_count": 0,
+    "structurally_valid_count": 47,
+    "exact_match": 0.26,
+    "f1": 0.4059363542635854,
+    "avg_latency_ms": 19945.075294158887,
+    "total_llm_call_count": 200,
+    "avg_node_count": 3.0,
+    "total_runtime_ms": 997359.5645420137
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "run_id": "6c5f8fa9-e896-4aeb-82a2-9b4050eb419b",
+  "system": "direct_llm",
+  "limit": 1,
+  "model": "azure/gpt-4o-mini",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "seed": 1,
+  "created_at": "2026-05-27T16:14:08Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260527T161408Z-6c5f8fa9-e896-4aeb-82a2-9b4050eb419b.json",
+  "total_runtime_ms": 3128.3073750091717,
+  "records": [
+    {
+      "id": "5abe953b5542993f32c2a170",
+      "question": "what is one of the stars of  The Newcomers known for",
+      "gold_answer": "superhero roles as the Marvel Comics",
+      "prediction": "Kate Bosworth is known for her role in \"Blue Crush.\"",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 0.8974579977802932,
+      "llm_call_count": 1,
+      "node_count": null,
+      "graph_depth": null,
+      "structural_valid": null,
+      "structural_issues": [],
+      "structural_failure": false,
+      "run_trace": null,
+      "error": null
+    }
+  ],
+  "metrics": {
+    "example_count": 1.0,
+    "success_count": 1.0,
+    "failure_count": 0.0,
+    "error_count": 0.0,
+    "exact_match": 0.0,
+    "f1": 0.0,
+    "avg_latency_ms": 0.8974579977802932,
+    "p50_latency_ms": 0.8974579977802932,
+    "total_llm_call_count": 1.0,
+    "avg_llm_call_count": 1.0,
+    "avg_node_count": 0.0,
+    "avg_graph_depth": 0.0,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.0,
+    "total_runtime_ms": 3128.3073750091717
+  }
+}
