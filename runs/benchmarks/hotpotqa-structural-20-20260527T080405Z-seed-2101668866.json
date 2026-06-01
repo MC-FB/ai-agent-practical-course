@@ -1,0 +1,1499 @@
+{
+  "run_id": "20260527T080405Z-seed-2101668866",
+  "created_at": "2026-05-27T08:04:09.177852+00:00",
+  "seed": 2101668866,
+  "limit": 20,
+  "dataset_size": 7405,
+  "config": "configs/azure-openai.yaml",
+  "model": "azure/gpt-4o-mini",
+  "records": [
+    {
+      "index": 1,
+      "id": "5abba4b4554299642a094af3",
+      "question": "What is the middle name of the Silicon Valley entrepreneur disussed in the non-fiction book The Unwinding?",
+      "gold_answer": "Andreas",
+      "status": "succeeded",
+      "prediction": "Andreas",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 20935.152292018756,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Andreas"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "middle_name": "Andreas"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify the entrepreneur",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "entrepreneur_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find the middle name",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "entrepreneur_name": "q1.entrepreneur_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "middle_name"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Provide the final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "middle_name": "q2.middle_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 2,
+      "id": "5a7140585542994082a3e6fa",
+      "question": "Seal Harris was born in what county?",
+      "gold_answer": "Polk County",
+      "status": "succeeded",
+      "prediction": "Cherokee County",
+      "exact_match": 0.0,
+      "f1": 0.5,
+      "latency_ms": 4298.236292030197,
+      "llm_call_count": 2,
+      "node_count": 1,
+      "wave_count": 1,
+      "final_answer": {
+        "answer": "Cherokee County"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 0,
+        "mapped_edge_count": 0,
+        "final_node": "q1",
+        "final_depends_on": [],
+        "final_dependency_values": {},
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Determine Seal Harris's birth county",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 3,
+      "id": "5ae336495542990afbd1e0e1",
+      "question": "Which German aeronautical engineer concieved the Dornier Aerodyne?",
+      "gold_answer": "Alexander Lippisch",
+      "status": "succeeded",
+      "prediction": "Alexander Lippisch",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 3076.565249997657,
+      "llm_call_count": 2,
+      "node_count": 1,
+      "wave_count": 1,
+      "final_answer": {
+        "answer": "Alexander Lippisch"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 0,
+        "mapped_edge_count": 0,
+        "final_node": "q1",
+        "final_depends_on": [],
+        "final_dependency_values": {},
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify the engineer",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 4,
+      "id": "5a90991d5542990a9849366b",
+      "question": "In which state is Stewart Nozette imprisoned?",
+      "gold_answer": "Indiana",
+      "status": "succeeded",
+      "prediction": "Indiana",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 4979.670000029728,
+      "llm_call_count": 3,
+      "node_count": 2,
+      "wave_count": 2,
+      "final_answer": {
+        "answer": "Indiana"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 1,
+        "final_node": "q2",
+        "final_depends_on": [
+          "q1"
+        ],
+        "final_dependency_values": {
+          "state": "Indiana"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Locate Stewart Nozette's imprisonment",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "state"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Provide final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "state": "q1.state"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 5,
+      "id": "5a8b3d795542997f31a41cc1",
+      "question": "Which band included more previously-known figures when it was formed, !!! or Puddle of Mudd?",
+      "gold_answer": "!!!",
+      "status": "succeeded",
+      "prediction": "!!!",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 36076.55704097124,
+      "llm_call_count": 6,
+      "node_count": 5,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "!!!"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 3,
+        "mapped_edge_count": 4,
+        "final_node": "compare_known_figures",
+        "final_depends_on": [
+          "lookup_band1_known_figures",
+          "lookup_band2_known_figures"
+        ],
+        "final_dependency_values": {
+          "band1_known_figures": [
+            "Nic Offer",
+            "Mario Andreoni",
+            "Justin Vandervolgen",
+            "John Pugh",
+            "Allan Wilson"
+          ],
+          "band2_known_figures": [
+            "Wes Scantlin"
+          ]
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_band1_members",
+            "label": "Lookup !!! band members",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "members"
+            ]
+          },
+          {
+            "id": "lookup_band2_members",
+            "label": "Lookup Puddle of Mudd band members",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "members"
+            ]
+          },
+          {
+            "id": "lookup_band1_known_figures",
+            "label": "Identify known figures in !!!",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "lookup_band1_members"
+            ],
+            "input_map": {
+              "members": "lookup_band1_members.members"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "known_figures"
+            ]
+          },
+          {
+            "id": "lookup_band2_known_figures",
+            "label": "Identify known figures in Puddle of Mudd",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "lookup_band2_members"
+            ],
+            "input_map": {
+              "members": "lookup_band2_members.members"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "known_figures"
+            ]
+          },
+          {
+            "id": "compare_known_figures",
+            "label": "Compare known figures between bands",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_band1_known_figures",
+              "lookup_band2_known_figures"
+            ],
+            "input_map": {
+              "band1_known_figures": "lookup_band1_known_figures.known_figures",
+              "band2_known_figures": "lookup_band2_known_figures.known_figures"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 6,
+      "id": "5adbfaa655429947ff173888",
+      "question": "Adena Friedman was formerly the managing director and CFO of a company that specializes in what four key business areas?",
+      "gold_answer": "corporate private equity, real assets, global market strategies, and investment solutions.",
+      "status": "succeeded",
+      "prediction": "Corporate Private Equity, Real Assets, Global Credit, Investment Solutions",
+      "exact_match": 0.0,
+      "f1": 0.7999999999999999,
+      "latency_ms": 27750.256291998085,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Corporate Private Equity, Real Assets, Global Credit, Investment Solutions"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "business_areas": [
+            "Corporate Private Equity",
+            "Real Assets",
+            "Global Credit",
+            "Investment Solutions"
+          ]
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify Adena Friedman's former company",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "company_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine the business areas of the company",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "company_name": "q1.company_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "business_areas"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Synthesize final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "business_areas": "q2.business_areas"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 7,
+      "id": "5a7130365542994082a3e645",
+      "question": "What town did Moe Sedway have success in after Benjamin \"Bugsy\" Siegel's murder?",
+      "gold_answer": "Las Vegas",
+      "status": "succeeded",
+      "prediction": "Las Vegas",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 27659.383125021122,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "answer": "Las Vegas"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {
+          "activities": [
+            "Key associate of organized crime figure Meyer Lansky.",
+            "Played a significant role in the development of Las Vegas as a gambling hub.",
+            "Partnered with Bugsy Siegel in the Flamingo Hotel project.",
+            "Helped manage and oversee operations of the Flamingo Hotel after Siegel's death.",
+            "Instrumental in ensuring the financial success of early Las Vegas casinos."
+          ],
+          "aftermath": "After Bugsy Siegel's murder on June 20, 1947, the Flamingo Hotel, which he had heavily invested in, was taken over by his associates in the mob. His death marked a turning point in organized crime's involvement in Las Vegas, as the mob continued to expand its influence in the city's burgeoning casino industry. Siegel's murder remains officially unsolved, but it is widely believed to have been ordered by mob bosses due to his mismanagement of funds and the Flamingo's initial financial struggles. His death also solidified the perception of the mob's ruthless enforcement of discipline within its ranks."
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify Moe Sedway's activities",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "activities"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine the context of Bugsy Siegel's murder",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "aftermath"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Synthesize Moe Sedway's success post-Siegel",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "activities": "q1.activities",
+              "aftermath": "q2.aftermath"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 8,
+      "id": "5ab4832e5542991751b4d79d",
+      "question": "Who wrote the 1996 American historical drama film in which William Preston appeared?",
+      "gold_answer": "Arthur Miller",
+      "status": "succeeded",
+      "prediction": "David Franzoni",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 32704.498458013404,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "David Franzoni"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "writer": "David Franzoni"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify the film",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "film_title"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find the screenwriter",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "film_title": "q1.film_title"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "writer"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Provide the final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "writer": "q2.writer"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 9,
+      "id": "5abaf0ec5542996cc5e49f22",
+      "question": "Where is the American honky tonk country band, whose first studio album was Honky Tonks and Cheap Motels, based?",
+      "gold_answer": "Flint, Michigan, United States",
+      "status": "succeeded",
+      "prediction": "Flint, Michigan",
+      "exact_match": 0.0,
+      "f1": 0.6666666666666666,
+      "latency_ms": 26772.785625013057,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Flint, Michigan"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "base_location": "Flint, Michigan"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify the band",
+            "task_type": "entity_resolution",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "band_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find the band's base location",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "band_name": "q1.band_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "base_location"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Provide the final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "base_location": "q2.base_location"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 10,
+      "id": "5ac05fb55542997d64295a0b",
+      "question": "which  American conglomerate company is  a subsidiary of Trump Entertainment Resorts ",
+      "gold_answer": "Icahn Enterprises L.P.",
+      "status": "succeeded",
+      "prediction": "None",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 21351.335250015836,
+      "llm_call_count": 3,
+      "node_count": 2,
+      "wave_count": 2,
+      "final_answer": {
+        "answer": "None"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 1,
+        "final_node": "q2",
+        "final_depends_on": [
+          "q1"
+        ],
+        "final_dependency_values": {
+          "subsidiaries": [
+            "Trump Plaza Hotel and Casino",
+            "Trump Marina Hotel Casino",
+            "Trump Taj Mahal Casino Resort"
+          ]
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify subsidiaries of Trump Entertainment Resorts",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "subsidiaries"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine American conglomerate company",
+            "task_type": "classification",
+            "operation": "transform",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "subsidiaries": "q1.subsidiaries"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 11,
+      "id": "5ac19b2c55429963665198b6",
+      "question": "Which park is further south within Spain, Picos de Europa National Park or Timanfaya National Park?",
+      "gold_answer": "Timanfaya National Park",
+      "status": "succeeded",
+      "prediction": "Timanfaya National Park",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 43671.076332975645,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "answer": "Timanfaya National Park"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 4,
+        "final_node": "compare_latitudes",
+        "final_depends_on": [
+          "lookup_picos_latitude",
+          "lookup_timanfaya_latitude"
+        ],
+        "final_dependency_values": {
+          "park1_name": "Picos de Europa National Park",
+          "park1_latitude": 43.2,
+          "park2_name": "Timanfaya National Park",
+          "park2_latitude": 29.0116
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_picos_latitude",
+            "label": "Retrieve Picos de Europa latitude",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "park_name",
+              "latitude"
+            ]
+          },
+          {
+            "id": "lookup_timanfaya_latitude",
+            "label": "Retrieve Timanfaya latitude",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "park_name",
+              "latitude"
+            ]
+          },
+          {
+            "id": "compare_latitudes",
+            "label": "Compare park latitudes",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_picos_latitude",
+              "lookup_timanfaya_latitude"
+            ],
+            "input_map": {
+              "park1_name": "lookup_picos_latitude.park_name",
+              "park1_latitude": "lookup_picos_latitude.latitude",
+              "park2_name": "lookup_timanfaya_latitude.park_name",
+              "park2_latitude": "lookup_timanfaya_latitude.latitude"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 12,
+      "id": "5a8e4b7c5542990e94052ab7",
+      "question": "What is the familial relationship of the founder of the Gulf Cartel to Juan García Ábrego?",
+      "gold_answer": "uncle",
+      "status": "error",
+      "prediction": "",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 22730.116458027624,
+      "llm_call_count": null,
+      "node_count": null,
+      "wave_count": null,
+      "final_answer": null,
+      "structure": {
+        "valid": false,
+        "problems": [
+          "Planner produced invalid DAG: final_node 's1' does not exist."
+        ]
+      },
+      "error": "Planner produced invalid DAG: final_node 's1' does not exist."
+    },
+    {
+      "index": 13,
+      "id": "5ab294a6554299545a2cf9a6",
+      "question": "Who is the son of John Button under contract with as a driver?",
+      "gold_answer": "McLaren-Honda",
+      "status": "succeeded",
+      "prediction": "Jenson Button is under contract with Unknown as a driver.",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 33184.32820803719,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Jenson Button is under contract with Unknown as a driver."
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 3,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {
+          "son_name": "Jenson Button",
+          "contract": "Unknown"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify John Button's son",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "son_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find the contract details of the driver",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "driver_name": "q1.son_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "contract"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Provide the final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "son_name": "q1.son_name",
+              "contract": "q2.contract"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 14,
+      "id": "5a903b7255429933b8a204ae",
+      "question": "What Canadian filmmaker created a film about Bettie Page in 2005?",
+      "gold_answer": "Mary Harron (born January 12, 1953)",
+      "status": "succeeded",
+      "prediction": "no",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 24896.99149999069,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "answer": "no"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {
+          "canadian_filmmakers": [
+            "David Cronenberg",
+            "Denis Villeneuve",
+            "Atom Egoyan",
+            "Sarah Polley",
+            "Xavier Dolan",
+            "Norman Jewison",
+            "Patricia Rozema",
+            "Guy Maddin",
+            "Deepa Mehta",
+            "Jean-Marc Vallée",
+            "Bruce McDonald",
+            "Don McKellar",
+            "Michael Snow",
+            "Alanis Obomsawin",
+            "Ingrid Veninger"
+          ],
+          "bettie_page_director": "Mary Harron"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify Canadian filmmakers",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "filmmakers"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find filmmaker of Bettie Page film",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "director"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Determine if the director is Canadian",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "canadian_filmmakers": "q1.filmmakers",
+              "bettie_page_director": "q2.director"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 15,
+      "id": "5a7555215542996c70cfaee1",
+      "question": "Which came to market first, \"Hey Pa! There's a Goat on the Roof\" or \"Poleconomy\"",
+      "gold_answer": "Hey Pa! There's a Goat on the Roof",
+      "status": "succeeded",
+      "prediction": "Poleconomy",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 31313.339540967718,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "answer": "Poleconomy"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 4,
+        "final_node": "compare_release_dates",
+        "final_depends_on": [
+          "lookup_hey_pa",
+          "lookup_poleconomy"
+        ],
+        "final_dependency_values": {
+          "title1": "Hey Pa! There's a Goat on the Roof",
+          "release_date1": "October 1, 1996",
+          "title2": "Poleconomy",
+          "release_date2": "1980"
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_hey_pa",
+            "label": "Lookup release date for 'Hey Pa! There's a Goat on the Roof'",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "title",
+              "release_date"
+            ]
+          },
+          {
+            "id": "lookup_poleconomy",
+            "label": "Lookup release date for 'Poleconomy'",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "title",
+              "release_date"
+            ]
+          },
+          {
+            "id": "compare_release_dates",
+            "label": "Compare release dates",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_hey_pa",
+              "lookup_poleconomy"
+            ],
+            "input_map": {
+              "title1": "lookup_hey_pa.title",
+              "release_date1": "lookup_hey_pa.release_date",
+              "title2": "lookup_poleconomy.title",
+              "release_date2": "lookup_poleconomy.release_date"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 16,
+      "id": "5abd68b45542993062266c77",
+      "question": "What did the main character in Unbroken do in the Olympics?",
+      "gold_answer": "Olympic distance runner",
+      "status": "succeeded",
+      "prediction": "Louis Zamperini competed in the 1936 Berlin Olympics in the 5000-meter event, finishing 8th and running the fastest final lap.",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 26494.927791005466,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Louis Zamperini competed in the 1936 Berlin Olympics in the 5000-meter event, finishing 8th and running the fastest final lap."
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "olympic_activities": "Louis Zamperini competed in the 1936 Berlin Olympics as a long-distance runner, participating in the 5000-meter event and finishing 8th overall. He also ran the fastest final lap in the event, gaining attention for his performance."
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify main character",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "main_character"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Olympic participation",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "main_character": "q1.main_character"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "olympic_activities"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Final synthesis",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "olympic_activities": "q2.olympic_activities"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 17,
+      "id": "5a753ff455429916b01642bc",
+      "question": "Who died more recently, Lincoln Steffens, or Monique Wittig?",
+      "gold_answer": "Monique Wittig",
+      "status": "succeeded",
+      "prediction": "Monique Wittig",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 27408.332459046505,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "answer": "Monique Wittig"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 4,
+        "final_node": "compare_death_dates",
+        "final_depends_on": [
+          "lookup_steffens_death",
+          "lookup_wittig_death"
+        ],
+        "final_dependency_values": {
+          "person1": "Lincoln Steffens",
+          "death_date1": "August 9, 1936",
+          "person2": "Monique Wittig",
+          "death_date2": "January 3, 2003"
+        },
+        "node_summaries": [
+          {
+            "id": "lookup_steffens_death",
+            "label": "Lookup Lincoln Steffens' death date",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "person",
+              "death_date"
+            ]
+          },
+          {
+            "id": "lookup_wittig_death",
+            "label": "Lookup Monique Wittig's death date",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "person",
+              "death_date"
+            ]
+          },
+          {
+            "id": "compare_death_dates",
+            "label": "Compare death dates",
+            "task_type": "comparison",
+            "operation": "compare",
+            "depends_on": [
+              "lookup_steffens_death",
+              "lookup_wittig_death"
+            ],
+            "input_map": {
+              "person1": "lookup_steffens_death.person",
+              "death_date1": "lookup_steffens_death.death_date",
+              "person2": "lookup_wittig_death.person",
+              "death_date2": "lookup_wittig_death.death_date"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 18,
+      "id": "5abba4855542993f40c73b68",
+      "question": "Who were the directors of the 2009 American science fiction film starring the actor who played Dexter Morgan in the Showtime TV Network series \"Dexter\"?",
+      "gold_answer": "Mark Neveldine and Brian Taylor",
+      "status": "succeeded",
+      "prediction": "Mark Neveldine and Brian Taylor",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 42149.39620799851,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Mark Neveldine and Brian Taylor"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "film_title": "Gamer"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify actor of Dexter Morgan",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "actor_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Find 2009 sci-fi film starring actor",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "actor_name": "q1.actor_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "film_title"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Determine directors of the film",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "film_title": "q2.film_title"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 19,
+      "id": "5ab3b50055429969a97a818c",
+      "question": "On which river is the shipyard established by Andrew Sprowle ?",
+      "gold_answer": "the Elizabeth River",
+      "status": "succeeded",
+      "prediction": "Portsmouth Harbour",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 25396.673750015907,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 3,
+      "final_answer": {
+        "answer": "Portsmouth Harbour"
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 2,
+        "mapped_edge_count": 2,
+        "final_node": "q3",
+        "final_depends_on": [
+          "q2"
+        ],
+        "final_dependency_values": {
+          "river_name": "Portsmouth Harbour"
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Identify the shipyard established by Andrew Sprowle",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "shipyard_name"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Determine the river associated with the shipyard",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [
+              "q1"
+            ],
+            "input_map": {
+              "shipyard_name": "q1.shipyard_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "river_name"
+            ]
+          },
+          {
+            "id": "q3",
+            "label": "Provide the final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q2"
+            ],
+            "input_map": {
+              "river_name": "q2.river_name"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "index": 20,
+      "id": "5adbf43655429947ff173864",
+      "question": "What type of coat coloration do Colorpoint Shorthairs and Siamese share?",
+      "gold_answer": "Point coloration",
+      "status": "succeeded",
+      "prediction": "Point coloration with darker extremities.",
+      "exact_match": 0.0,
+      "f1": 0.5714285714285715,
+      "latency_ms": 26970.465582970064,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "wave_count": 2,
+      "final_answer": {
+        "answer": "Point coloration with darker extremities."
+      },
+      "structure": {
+        "valid": true,
+        "problems": [],
+        "dependent_node_count": 1,
+        "mapped_edge_count": 2,
+        "final_node": "s1",
+        "final_depends_on": [
+          "q1",
+          "q2"
+        ],
+        "final_dependency_values": {
+          "colorpoint_shorthair_coloration": "Pointed pattern with various colors, including seal, blue, chocolate, lilac, red, cream, and tortoiseshell points.",
+          "siamese_coloration": "Point coloration with a pale body and darker extremities (ears, face, paws, and tail)."
+        },
+        "node_summaries": [
+          {
+            "id": "q1",
+            "label": "Colorpoint Shorthair coat coloration",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "breed",
+              "coat_coloration"
+            ]
+          },
+          {
+            "id": "q2",
+            "label": "Siamese coat coloration",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "depends_on": [],
+            "input_map": {},
+            "uses_child_values_in_template": null,
+            "output_fields": [
+              "breed",
+              "coat_coloration"
+            ]
+          },
+          {
+            "id": "s1",
+            "label": "Shared coat coloration",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "depends_on": [
+              "q1",
+              "q2"
+            ],
+            "input_map": {
+              "colorpoint_shorthair_coloration": "q1.coat_coloration",
+              "siamese_coloration": "q2.coat_coloration"
+            },
+            "uses_child_values_in_template": true,
+            "output_fields": [
+              "answer"
+            ]
+          }
+        ]
+      },
+      "error": null
+    }
+  ],
+  "summary": {
+    "completed": 20,
+    "success_count": 19,
+    "error_count": 1,
+    "structurally_valid_count": 19,
+    "exact_match": 0.4,
+    "f1": 0.5269047619047619,
+    "avg_latency_ms": 25491.00437280722,
+    "total_llm_call_count": 72,
+    "avg_node_count": 2.65,
+    "total_runtime_ms": 509850.5785000161
+  }
+}

@@ -1,0 +1,1598 @@
+{
+  "run_id": "f27630c9-94ae-4589-92d2-f81a92c88ffb",
+  "system": "dag_agent",
+  "limit": 5,
+  "model": "azure/gpt-4o-mini",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "seed": 1449280931,
+  "created_at": "2026-05-27T16:15:01Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260527T161501Z-f27630c9-94ae-4589-92d2-f81a92c88ffb.json",
+  "total_runtime_ms": 101409.17716600234,
+  "records": [
+    {
+      "id": "5a776bd155429966f1a36d3b",
+      "question": "Who was born first, Maurice Ravel or William Walton?",
+      "gold_answer": "Maurice Ravel",
+      "prediction": "Maurice Ravel",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 9572.995416005142,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 2,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "run_trace": {
+        "run_id": "7c8db58c-4a88-46ad-b508-aff87931e266",
+        "question": "Who was born first, Maurice Ravel or William Walton?",
+        "plan": {
+          "question": "Who was born first, Maurice Ravel or William Walton?",
+          "nodes": [
+            {
+              "id": "lookup_ravel",
+              "label": "Lookup Maurice Ravel's birth year",
+              "task_type": "fact_lookup",
+              "question": "What year was Maurice Ravel born?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "What year was Maurice Ravel born?"
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "composer",
+                  "birth_year"
+                ],
+                "properties": {
+                  "composer": {
+                    "type": "string",
+                    "description": "The name of the composer."
+                  },
+                  "birth_year": {
+                    "type": "integer",
+                    "description": "The year the composer was born."
+                  }
+                }
+              }
+            },
+            {
+              "id": "lookup_walton",
+              "label": "Lookup William Walton's birth year",
+              "task_type": "fact_lookup",
+              "question": "What year was William Walton born?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "What year was William Walton born?"
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "composer",
+                  "birth_year"
+                ],
+                "properties": {
+                  "composer": {
+                    "type": "string",
+                    "description": "The name of the composer."
+                  },
+                  "birth_year": {
+                    "type": "integer",
+                    "description": "The year the composer was born."
+                  }
+                }
+              }
+            },
+            {
+              "id": "compare_birth_years",
+              "label": "Compare birth years of Maurice Ravel and William Walton",
+              "task_type": "comparison",
+              "question": "Who was born first, Maurice Ravel or William Walton?",
+              "operation": "compare",
+              "depends_on": [
+                "lookup_ravel",
+                "lookup_walton"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Using the following data: {dependencies}, determine who was born first, Maurice Ravel or William Walton."
+              },
+              "input_map": {
+                "composer1": "lookup_ravel.composer",
+                "birth_year1": "lookup_ravel.birth_year",
+                "composer2": "lookup_walton.composer",
+                "birth_year2": "lookup_walton.birth_year"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The name of the composer who was born first."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "compare_birth_years"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "lookup_ravel",
+              "lookup_walton"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "compare_birth_years"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "lookup_ravel",
+            "label": "Lookup Maurice Ravel's birth year",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "What year was Maurice Ravel born?",
+            "rendered_prompt": "What year was Maurice Ravel born?\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"composer\",\n    \"birth_year\"\n  ],\n  \"properties\": {\n    \"composer\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the composer.\"\n    },\n    \"birth_year\": {\n      \"type\": \"integer\",\n      \"description\": \"The year the composer was born.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"composer\": \"Maurice Ravel\",\n  \"birth_year\": 1875\n}",
+            "parsed_output": {
+              "composer": "Maurice Ravel",
+              "birth_year": 1875
+            },
+            "returned_value": {
+              "composer": "Maurice Ravel",
+              "birth_year": 1875
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:15:09.612389+00:00",
+            "finished_at": "2026-05-27T16:15:10.983387+00:00",
+            "duration_ms": 1371.0169169935398,
+            "error": null
+          },
+          {
+            "node_id": "lookup_walton",
+            "label": "Lookup William Walton's birth year",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "What year was William Walton born?",
+            "rendered_prompt": "What year was William Walton born?\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"composer\",\n    \"birth_year\"\n  ],\n  \"properties\": {\n    \"composer\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the composer.\"\n    },\n    \"birth_year\": {\n      \"type\": \"integer\",\n      \"description\": \"The year the composer was born.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"composer\": \"William Walton\",\n  \"birth_year\": 1902\n}",
+            "parsed_output": {
+              "composer": "William Walton",
+              "birth_year": 1902
+            },
+            "returned_value": {
+              "composer": "William Walton",
+              "birth_year": 1902
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:15:09.612770+00:00",
+            "finished_at": "2026-05-27T16:15:10.522495+00:00",
+            "duration_ms": 909.7432919661514,
+            "error": null
+          },
+          {
+            "node_id": "compare_birth_years",
+            "label": "Compare birth years of Maurice Ravel and William Walton",
+            "task_type": "comparison",
+            "operation": "compare",
+            "status": "succeeded",
+            "dependency_values": {
+              "composer1": "Maurice Ravel",
+              "birth_year1": 1875,
+              "composer2": "William Walton",
+              "birth_year2": 1902
+            },
+            "resolved_question": "Who was born first, Maurice Ravel or William Walton?",
+            "rendered_prompt": "Using the following data: {\n  \"composer1\": \"Maurice Ravel\",\n  \"birth_year1\": 1875,\n  \"composer2\": \"William Walton\",\n  \"birth_year2\": 1902\n}, determine who was born first, Maurice Ravel or William Walton.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the composer who was born first.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"Maurice Ravel\"\n}",
+            "parsed_output": {
+              "answer": "Maurice Ravel"
+            },
+            "returned_value": {
+              "answer": "Maurice Ravel"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:15:10.983662+00:00",
+            "finished_at": "2026-05-27T16:15:12.199746+00:00",
+            "duration_ms": 1216.0904170013964,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Maurice Ravel"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 2587.8185409819707,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o-mini",
+            "model_env": "AZURE_OPENAI_MODEL",
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 45.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  lookup_ravel[\"lookup_ravel: Lookup Maurice Ravel's birth year\\nfact_lookup\\nsucceeded\"]\n  lookup_walton[\"lookup_walton: Lookup William Walton's birth year\\nfact_lookup\\nsucceeded\"]\n  compare_birth_years[\"compare_birth_years: Compare birth years of Maurice Ravel and William Walton\\ncomparison\\nsucceeded\"]\n  lookup_ravel --> compare_birth_years\n  lookup_walton --> compare_birth_years"
+      },
+      "error": null
+    },
+    {
+      "id": "5a8e3ea95542995a26add48d",
+      "question": "The director of the romantic comedy \"Big Stone Gap\" is based in what New York city?",
+      "gold_answer": "Greenwich Village, New York City",
+      "prediction": "New York City",
+      "exact_match": 0.0,
+      "f1": 0.7499999999999999,
+      "latency_ms": 7637.33354199212,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 3,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "run_trace": {
+        "run_id": "0b498906-975c-4db8-a8ae-bd08e9b31e6c",
+        "question": "The director of the romantic comedy 'Big Stone Gap' is based in what New York city?",
+        "plan": {
+          "question": "The director of the romantic comedy 'Big Stone Gap' is based in what New York city?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Identify the director of 'Big Stone Gap'",
+              "task_type": "fact_lookup",
+              "question": "Who is the director of the romantic comedy 'Big Stone Gap'?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the director of the romantic comedy 'Big Stone Gap'."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "director"
+                ],
+                "properties": {
+                  "director": {
+                    "type": "string",
+                    "description": "The name of the director of the movie."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Determine the city in New York where the director is based",
+              "task_type": "fact_lookup",
+              "question": "In which city in New York is {q1.director} based?",
+              "operation": "answer",
+              "depends_on": [
+                "q1"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Determine the city in New York where the director {q1.director} is based."
+              },
+              "input_map": {
+                "director": "q1.director"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "city"
+                ],
+                "properties": {
+                  "city": {
+                    "type": "string",
+                    "description": "The city in New York where the director is based."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q3",
+              "label": "Provide the final answer",
+              "task_type": "synthesis",
+              "question": "What is the New York city where the director of 'Big Stone Gap' is based?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Based on the information, the director of 'Big Stone Gap' is based in {q2.city}."
+              },
+              "input_map": {
+                "city": "q2.city"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The New York city where the director is based."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q3"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "q2"
+            ]
+          },
+          {
+            "index": 3,
+            "node_ids": [
+              "q3"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "Identify the director of 'Big Stone Gap'",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Who is the director of the romantic comedy 'Big Stone Gap'?",
+            "rendered_prompt": "Identify the director of the romantic comedy 'Big Stone Gap'.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"director\"\n  ],\n  \"properties\": {\n    \"director\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the director of the movie.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"director\": \"Adriana Trigiani\"\n}",
+            "parsed_output": {
+              "director": "Adriana Trigiani"
+            },
+            "returned_value": {
+              "director": "Adriana Trigiani"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:15:17.688176+00:00",
+            "finished_at": "2026-05-27T16:15:18.504082+00:00",
+            "duration_ms": 815.9135839669034,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Determine the city in New York where the director is based",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {
+              "director": "Adriana Trigiani"
+            },
+            "resolved_question": "In which city in New York is Adriana Trigiani based?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"director\": \"Adriana Trigiani\"\n}\n\nDetermine the city in New York where the director Adriana Trigiani is based.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"city\"\n  ],\n  \"properties\": {\n    \"city\": {\n      \"type\": \"string\",\n      \"description\": \"The city in New York where the director is based.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"city\": \"New York City\"\n}",
+            "parsed_output": {
+              "city": "New York City"
+            },
+            "returned_value": {
+              "city": "New York City"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:15:18.504242+00:00",
+            "finished_at": "2026-05-27T16:15:19.081430+00:00",
+            "duration_ms": 577.2072089603171,
+            "error": null
+          },
+          {
+            "node_id": "q3",
+            "label": "Provide the final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "city": "New York City"
+            },
+            "resolved_question": "What is the New York city where the director of 'Big Stone Gap' is based?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"city\": \"New York City\"\n}\n\nBased on the information, the director of 'Big Stone Gap' is based in New York City.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The New York city where the director is based.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"New York City\"\n}",
+            "parsed_output": {
+              "answer": "New York City"
+            },
+            "returned_value": {
+              "answer": "New York City"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:15:19.081747+00:00",
+            "finished_at": "2026-05-27T16:15:19.837370+00:00",
+            "duration_ms": 755.6340419687331,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "New York City"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 2149.4761249632575,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o-mini",
+            "model_env": "AZURE_OPENAI_MODEL",
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 45.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Identify the director of 'Big Stone Gap'\\nfact_lookup\\nsucceeded\"]\n  q2[\"q2: Determine the city in New York where the director is based\\nfact_lookup\\nsucceeded\"]\n  q1 --> q2\n  q3[\"q3: Provide the final answer\\nsynthesis\\nsucceeded\"]\n  q2 --> q3"
+      },
+      "error": null
+    },
+    {
+      "id": "5adf0e7c5542992d7e9f9297",
+      "question": "What former LA King and current free agent went to school at Lorne Atkins Junior High in St Albert, Alberta?",
+      "gold_answer": "Jarome Iginla",
+      "prediction": "No player meets all criteria.",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 16899.196166021284,
+      "llm_call_count": 5,
+      "node_count": 4,
+      "graph_depth": 2,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "run_trace": {
+        "run_id": "f7d6d457-8160-453f-986d-bb1f934e2f40",
+        "question": "What former LA King and current free agent went to school at Lorne Atkins Junior High in St Albert, Alberta?",
+        "plan": {
+          "question": "What former LA King and current free agent went to school at Lorne Atkins Junior High in St Albert, Alberta?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Identify former LA Kings players",
+              "task_type": "fact_lookup",
+              "question": "List all former LA Kings players.",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable sports historian.",
+                "user_template": "Provide a list of all former LA Kings players."
+              },
+              "input_map": {},
+              "child_output_policy": "all",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "player_name"
+                ],
+                "properties": {
+                  "player_name": {
+                    "type": "array",
+                    "description": "Names of former LA Kings players."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Identify current free agents",
+              "task_type": "fact_lookup",
+              "question": "List all current free agents in hockey.",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable sports historian.",
+                "user_template": "Provide a list of all current free agents in hockey."
+              },
+              "input_map": {},
+              "child_output_policy": "all",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "player_name"
+                ],
+                "properties": {
+                  "player_name": {
+                    "type": "array",
+                    "description": "Names of current free agents in hockey."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q3",
+              "label": "Identify players who attended Lorne Atkins Junior High",
+              "task_type": "fact_lookup",
+              "question": "List all hockey players who attended Lorne Atkins Junior High in St Albert, Alberta.",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable sports historian.",
+                "user_template": "Provide a list of all hockey players who attended Lorne Atkins Junior High in St Albert, Alberta."
+              },
+              "input_map": {},
+              "child_output_policy": "all",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "player_name"
+                ],
+                "properties": {
+                  "player_name": {
+                    "type": "array",
+                    "description": "Names of hockey players who attended Lorne Atkins Junior High."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q4",
+              "label": "Determine the player meeting all criteria",
+              "task_type": "synthesis",
+              "question": "Identify the player who is a former LA King, a current free agent, and attended Lorne Atkins Junior High.",
+              "operation": "synthesize",
+              "depends_on": [
+                "q1",
+                "q2",
+                "q3"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable sports historian.",
+                "user_template": "From the following lists, determine the player who meets all criteria: former LA Kings players: {q1.player_name}, current free agents: {q2.player_name}, and players who attended Lorne Atkins Junior High: {q3.player_name}."
+              },
+              "input_map": {
+                "former_players": "q1.player_name",
+                "free_agents": "q2.player_name",
+                "junior_high_attendees": "q3.player_name"
+              },
+              "child_output_policy": "all",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The name of the player who meets all criteria."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q4"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1",
+              "q2",
+              "q3"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "q4"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "Identify former LA Kings players",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "List all former LA Kings players.",
+            "rendered_prompt": "Provide a list of all former LA Kings players.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"player_name\"\n  ],\n  \"properties\": {\n    \"player_name\": {\n      \"type\": \"array\",\n      \"description\": \"Names of former LA Kings players.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"player_name\": [\n    \"Wayne Gretzky\",\n    \"Luc Robitaille\",\n    \"Marcel Dionne\",\n    \"Rogie Vachon\",\n    \"Dave Taylor\",\n    \"Charlie Simmer\",\n    \"Rob Blake\",\n    \"Jari Kurri\",\n    \"Bernie Nicholls\",\n    \"Dustin Brown\",\n    \"Anze Kopitar\",\n    \"Jonathan Quick\",\n    \"Jeff Carter\",\n    \"Mike Richards\",\n    \"Drew Doughty\",\n    \"Matt Greene\",\n    \"Alec Martinez\",\n    \"Tyler Toffoli\",\n    \"Tanner Pearson\",\n    \"Jake Muzzin\",\n    \"Slava Voynov\",\n    \"Marty McSorley\",\n    \"Kelly Hrudey\",\n    \"Jim Fox\",\n    \"Butch Goring\",\n    \"Terry Harper\",\n    \"Bob Berry\",\n    \"Larry Murphy\",\n    \"Mark Hardy\",\n    \"Steve Duchesne\",\n    \"Tony Granato\",\n    \"Ziggy Palffy\",\n    \"Sean Avery\",\n    \"Ian Laperriere\",\n    \"Alexander Frolov\",\n    \"Michael Cammalleri\",\n    \"Jarret Stoll\",\n    \"Willie Mitchell\",\n    \"Kyle Clifford\",\n    \"Trevor Lewis\",\n    \"Justin Williams\",\n    \"Rob Scuderi\",\n    \"Colin Fraser\",\n    \"Dwight King\",\n    \"Jordan Nolan\",\n    \"Ben Scrivens\",\n    \"Jack Johnson\",\n    \"Ryan Smyth\",\n    \"Dan Cloutier\",\n    \"Felix Potvin\",\n    \"Mathieu Garon\",\n    \"Jamie Storr\",\n    \"Glen Murray\",\n    \"Adam Deadmarsh\",\n    \"Jason Allison\",\n    \"Craig Conroy\",\n    \"Lubomir Visnovsky\",\n    \"Mattias Norstrom\",\n    \"Milan Lucic\",\n    \"Vincent Lecavalier\",\n    \"Marian Gaborik\",\n    \"Ilya Kovalchuk\",\n    \"Paul LaDue\",\n    \"Oscar Fantenberg\",\n    \"Christian Folin\",\n    \"Nate Thompson\",\n    \"Dion Phaneuf\",\n    \"Carl Hagelin\",\n    \"Ben Hutton\",\n    \"Joakim Ryan\",\n    \"Tim Schaller\",\n    \"Trevor Moore\",\n    \"Blake Lizotte\",\n    \"Gabe Vilardi\",\n    \"Adrian Kempe\",\n    \"Cal Petersen\"\n  ]\n}",
+            "parsed_output": {
+              "player_name": [
+                "Wayne Gretzky",
+                "Luc Robitaille",
+                "Marcel Dionne",
+                "Rogie Vachon",
+                "Dave Taylor",
+                "Charlie Simmer",
+                "Rob Blake",
+                "Jari Kurri",
+                "Bernie Nicholls",
+                "Dustin Brown",
+                "Anze Kopitar",
+                "Jonathan Quick",
+                "Jeff Carter",
+                "Mike Richards",
+                "Drew Doughty",
+                "Matt Greene",
+                "Alec Martinez",
+                "Tyler Toffoli",
+                "Tanner Pearson",
+                "Jake Muzzin",
+                "Slava Voynov",
+                "Marty McSorley",
+                "Kelly Hrudey",
+                "Jim Fox",
+                "Butch Goring",
+                "Terry Harper",
+                "Bob Berry",
+                "Larry Murphy",
+                "Mark Hardy",
+                "Steve Duchesne",
+                "Tony Granato",
+                "Ziggy Palffy",
+                "Sean Avery",
+                "Ian Laperriere",
+                "Alexander Frolov",
+                "Michael Cammalleri",
+                "Jarret Stoll",
+                "Willie Mitchell",
+                "Kyle Clifford",
+                "Trevor Lewis",
+                "Justin Williams",
+                "Rob Scuderi",
+                "Colin Fraser",
+                "Dwight King",
+                "Jordan Nolan",
+                "Ben Scrivens",
+                "Jack Johnson",
+                "Ryan Smyth",
+                "Dan Cloutier",
+                "Felix Potvin",
+                "Mathieu Garon",
+                "Jamie Storr",
+                "Glen Murray",
+                "Adam Deadmarsh",
+                "Jason Allison",
+                "Craig Conroy",
+                "Lubomir Visnovsky",
+                "Mattias Norstrom",
+                "Milan Lucic",
+                "Vincent Lecavalier",
+                "Marian Gaborik",
+                "Ilya Kovalchuk",
+                "Paul LaDue",
+                "Oscar Fantenberg",
+                "Christian Folin",
+                "Nate Thompson",
+                "Dion Phaneuf",
+                "Carl Hagelin",
+                "Ben Hutton",
+                "Joakim Ryan",
+                "Tim Schaller",
+                "Trevor Moore",
+                "Blake Lizotte",
+                "Gabe Vilardi",
+                "Adrian Kempe",
+                "Cal Petersen"
+              ]
+            },
+            "returned_value": {
+              "player_name": [
+                "Wayne Gretzky",
+                "Luc Robitaille",
+                "Marcel Dionne",
+                "Rogie Vachon",
+                "Dave Taylor",
+                "Charlie Simmer",
+                "Rob Blake",
+                "Jari Kurri",
+                "Bernie Nicholls",
+                "Dustin Brown",
+                "Anze Kopitar",
+                "Jonathan Quick",
+                "Jeff Carter",
+                "Mike Richards",
+                "Drew Doughty",
+                "Matt Greene",
+                "Alec Martinez",
+                "Tyler Toffoli",
+                "Tanner Pearson",
+                "Jake Muzzin",
+                "Slava Voynov",
+                "Marty McSorley",
+                "Kelly Hrudey",
+                "Jim Fox",
+                "Butch Goring",
+                "Terry Harper",
+                "Bob Berry",
+                "Larry Murphy",
+                "Mark Hardy",
+                "Steve Duchesne",
+                "Tony Granato",
+                "Ziggy Palffy",
+                "Sean Avery",
+                "Ian Laperriere",
+                "Alexander Frolov",
+                "Michael Cammalleri",
+                "Jarret Stoll",
+                "Willie Mitchell",
+                "Kyle Clifford",
+                "Trevor Lewis",
+                "Justin Williams",
+                "Rob Scuderi",
+                "Colin Fraser",
+                "Dwight King",
+                "Jordan Nolan",
+                "Ben Scrivens",
+                "Jack Johnson",
+                "Ryan Smyth",
+                "Dan Cloutier",
+                "Felix Potvin",
+                "Mathieu Garon",
+                "Jamie Storr",
+                "Glen Murray",
+                "Adam Deadmarsh",
+                "Jason Allison",
+                "Craig Conroy",
+                "Lubomir Visnovsky",
+                "Mattias Norstrom",
+                "Milan Lucic",
+                "Vincent Lecavalier",
+                "Marian Gaborik",
+                "Ilya Kovalchuk",
+                "Paul LaDue",
+                "Oscar Fantenberg",
+                "Christian Folin",
+                "Nate Thompson",
+                "Dion Phaneuf",
+                "Carl Hagelin",
+                "Ben Hutton",
+                "Joakim Ryan",
+                "Tim Schaller",
+                "Trevor Moore",
+                "Blake Lizotte",
+                "Gabe Vilardi",
+                "Adrian Kempe",
+                "Cal Petersen"
+              ]
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:15:25.886558+00:00",
+            "finished_at": "2026-05-27T16:15:35.815663+00:00",
+            "duration_ms": 9929.072041995823,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Identify current free agents",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "List all current free agents in hockey.",
+            "rendered_prompt": "Provide a list of all current free agents in hockey.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"player_name\"\n  ],\n  \"properties\": {\n    \"player_name\": {\n      \"type\": \"array\",\n      \"description\": \"Names of current free agents in hockey.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"player_name\": []\n}",
+            "parsed_output": {
+              "player_name": []
+            },
+            "returned_value": {
+              "player_name": []
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:15:25.886830+00:00",
+            "finished_at": "2026-05-27T16:15:27.082922+00:00",
+            "duration_ms": 1196.1065839859657,
+            "error": null
+          },
+          {
+            "node_id": "q3",
+            "label": "Identify players who attended Lorne Atkins Junior High",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "List all hockey players who attended Lorne Atkins Junior High in St Albert, Alberta.",
+            "rendered_prompt": "Provide a list of all hockey players who attended Lorne Atkins Junior High in St Albert, Alberta.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"player_name\"\n  ],\n  \"properties\": {\n    \"player_name\": {\n      \"type\": \"array\",\n      \"description\": \"Names of hockey players who attended Lorne Atkins Junior High.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"player_name\": []\n}",
+            "parsed_output": {
+              "player_name": []
+            },
+            "returned_value": {
+              "player_name": []
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:15:25.886950+00:00",
+            "finished_at": "2026-05-27T16:15:28.147792+00:00",
+            "duration_ms": 2260.84716594778,
+            "error": null
+          },
+          {
+            "node_id": "q4",
+            "label": "Determine the player meeting all criteria",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "former_players": [
+                "Wayne Gretzky",
+                "Luc Robitaille",
+                "Marcel Dionne",
+                "Rogie Vachon",
+                "Dave Taylor",
+                "Charlie Simmer",
+                "Rob Blake",
+                "Jari Kurri",
+                "Bernie Nicholls",
+                "Dustin Brown",
+                "Anze Kopitar",
+                "Jonathan Quick",
+                "Jeff Carter",
+                "Mike Richards",
+                "Drew Doughty",
+                "Matt Greene",
+                "Alec Martinez",
+                "Tyler Toffoli",
+                "Tanner Pearson",
+                "Jake Muzzin",
+                "Slava Voynov",
+                "Marty McSorley",
+                "Kelly Hrudey",
+                "Jim Fox",
+                "Butch Goring",
+                "Terry Harper",
+                "Bob Berry",
+                "Larry Murphy",
+                "Mark Hardy",
+                "Steve Duchesne",
+                "Tony Granato",
+                "Ziggy Palffy",
+                "Sean Avery",
+                "Ian Laperriere",
+                "Alexander Frolov",
+                "Michael Cammalleri",
+                "Jarret Stoll",
+                "Willie Mitchell",
+                "Kyle Clifford",
+                "Trevor Lewis",
+                "Justin Williams",
+                "Rob Scuderi",
+                "Colin Fraser",
+                "Dwight King",
+                "Jordan Nolan",
+                "Ben Scrivens",
+                "Jack Johnson",
+                "Ryan Smyth",
+                "Dan Cloutier",
+                "Felix Potvin",
+                "Mathieu Garon",
+                "Jamie Storr",
+                "Glen Murray",
+                "Adam Deadmarsh",
+                "Jason Allison",
+                "Craig Conroy",
+                "Lubomir Visnovsky",
+                "Mattias Norstrom",
+                "Milan Lucic",
+                "Vincent Lecavalier",
+                "Marian Gaborik",
+                "Ilya Kovalchuk",
+                "Paul LaDue",
+                "Oscar Fantenberg",
+                "Christian Folin",
+                "Nate Thompson",
+                "Dion Phaneuf",
+                "Carl Hagelin",
+                "Ben Hutton",
+                "Joakim Ryan",
+                "Tim Schaller",
+                "Trevor Moore",
+                "Blake Lizotte",
+                "Gabe Vilardi",
+                "Adrian Kempe",
+                "Cal Petersen"
+              ],
+              "free_agents": [],
+              "junior_high_attendees": []
+            },
+            "resolved_question": "Identify the player who is a former LA King, a current free agent, and attended Lorne Atkins Junior High.",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"former_players\": [\n    \"Wayne Gretzky\",\n    \"Luc Robitaille\",\n    \"Marcel Dionne\",\n    \"Rogie Vachon\",\n    \"Dave Taylor\",\n    \"Charlie Simmer\",\n    \"Rob Blake\",\n    \"Jari Kurri\",\n    \"Bernie Nicholls\",\n    \"Dustin Brown\",\n    \"Anze Kopitar\",\n    \"Jonathan Quick\",\n    \"Jeff Carter\",\n    \"Mike Richards\",\n    \"Drew Doughty\",\n    \"Matt Greene\",\n    \"Alec Martinez\",\n    \"Tyler Toffoli\",\n    \"Tanner Pearson\",\n    \"Jake Muzzin\",\n    \"Slava Voynov\",\n    \"Marty McSorley\",\n    \"Kelly Hrudey\",\n    \"Jim Fox\",\n    \"Butch Goring\",\n    \"Terry Harper\",\n    \"Bob Berry\",\n    \"Larry Murphy\",\n    \"Mark Hardy\",\n    \"Steve Duchesne\",\n    \"Tony Granato\",\n    \"Ziggy Palffy\",\n    \"Sean Avery\",\n    \"Ian Laperriere\",\n    \"Alexander Frolov\",\n    \"Michael Cammalleri\",\n    \"Jarret Stoll\",\n    \"Willie Mitchell\",\n    \"Kyle Clifford\",\n    \"Trevor Lewis\",\n    \"Justin Williams\",\n    \"Rob Scuderi\",\n    \"Colin Fraser\",\n    \"Dwight King\",\n    \"Jordan Nolan\",\n    \"Ben Scrivens\",\n    \"Jack Johnson\",\n    \"Ryan Smyth\",\n    \"Dan Cloutier\",\n    \"Felix Potvin\",\n    \"Mathieu Garon\",\n    \"Jamie Storr\",\n    \"Glen Murray\",\n    \"Adam Deadmarsh\",\n    \"Jason Allison\",\n    \"Craig Conroy\",\n    \"Lubomir Visnovsky\",\n    \"Mattias Norstrom\",\n    \"Milan Lucic\",\n    \"Vincent Lecavalier\",\n    \"Marian Gaborik\",\n    \"Ilya Kovalchuk\",\n    \"Paul LaDue\",\n    \"Oscar Fantenberg\",\n    \"Christian Folin\",\n    \"Nate Thompson\",\n    \"Dion Phaneuf\",\n    \"Carl Hagelin\",\n    \"Ben Hutton\",\n    \"Joakim Ryan\",\n    \"Tim Schaller\",\n    \"Trevor Moore\",\n    \"Blake Lizotte\",\n    \"Gabe Vilardi\",\n    \"Adrian Kempe\",\n    \"Cal Petersen\"\n  ],\n  \"free_agents\": [],\n  \"junior_high_attendees\": []\n}\n\nFrom the following lists, determine the player who meets all criteria: former LA Kings players: ['Wayne Gretzky', 'Luc Robitaille', 'Marcel Dionne', 'Rogie Vachon', 'Dave Taylor', 'Charlie Simmer', 'Rob Blake', 'Jari Kurri', 'Bernie Nicholls', 'Dustin Brown', 'Anze Kopitar', 'Jonathan Quick', 'Jeff Carter', 'Mike Richards', 'Drew Doughty', 'Matt Greene', 'Alec Martinez', 'Tyler Toffoli', 'Tanner Pearson', 'Jake Muzzin', 'Slava Voynov', 'Marty McSorley', 'Kelly Hrudey', 'Jim Fox', 'Butch Goring', 'Terry Harper', 'Bob Berry', 'Larry Murphy', 'Mark Hardy', 'Steve Duchesne', 'Tony Granato', 'Ziggy Palffy', 'Sean Avery', 'Ian Laperriere', 'Alexander Frolov', 'Michael Cammalleri', 'Jarret Stoll', 'Willie Mitchell', 'Kyle Clifford', 'Trevor Lewis', 'Justin Williams', 'Rob Scuderi', 'Colin Fraser', 'Dwight King', 'Jordan Nolan', 'Ben Scrivens', 'Jack Johnson', 'Ryan Smyth', 'Dan Cloutier', 'Felix Potvin', 'Mathieu Garon', 'Jamie Storr', 'Glen Murray', 'Adam Deadmarsh', 'Jason Allison', 'Craig Conroy', 'Lubomir Visnovsky', 'Mattias Norstrom', 'Milan Lucic', 'Vincent Lecavalier', 'Marian Gaborik', 'Ilya Kovalchuk', 'Paul LaDue', 'Oscar Fantenberg', 'Christian Folin', 'Nate Thompson', 'Dion Phaneuf', 'Carl Hagelin', 'Ben Hutton', 'Joakim Ryan', 'Tim Schaller', 'Trevor Moore', 'Blake Lizotte', 'Gabe Vilardi', 'Adrian Kempe', 'Cal Petersen'], current free agents: [], and players who attended Lorne Atkins Junior High: [].\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the player who meets all criteria.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"No player meets all criteria.\"\n}",
+            "parsed_output": {
+              "answer": "No player meets all criteria."
+            },
+            "returned_value": {
+              "answer": "No player meets all criteria."
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:15:35.815937+00:00",
+            "finished_at": "2026-05-27T16:15:36.736918+00:00",
+            "duration_ms": 920.9949159994721,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "No player meets all criteria."
+        },
+        "status": "succeeded",
+        "total_duration_ms": 10850.7305419771,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o-mini",
+            "model_env": "AZURE_OPENAI_MODEL",
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 45.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Identify former LA Kings players\\nfact_lookup\\nsucceeded\"]\n  q2[\"q2: Identify current free agents\\nfact_lookup\\nsucceeded\"]\n  q3[\"q3: Identify players who attended Lorne Atkins Junior High\\nfact_lookup\\nsucceeded\"]\n  q4[\"q4: Determine the player meeting all criteria\\nsynthesis\\nsucceeded\"]\n  q1 --> q4\n  q2 --> q4\n  q3 --> q4"
+      },
+      "error": null
+    },
+    {
+      "id": "5a81dacc55429926c1cdada0",
+      "question": "Who is the author of the play that was adapted into a film and featured the orchestral arrangement Suite from Henry V?",
+      "gold_answer": "William Shakespeare",
+      "prediction": "William Shakespeare",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "latency_ms": 39518.81387503818,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 3,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "run_trace": {
+        "run_id": "9427e6ea-5879-43ca-a8e8-93d2306138f5",
+        "question": "Who is the author of the play that was adapted into a film and featured the orchestral arrangement Suite from Henry V?",
+        "plan": {
+          "question": "Who is the author of the play that was adapted into a film and featured the orchestral arrangement Suite from Henry V?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Identify the play associated with the orchestral arrangement",
+              "task_type": "fact_lookup",
+              "question": "Which play is associated with the orchestral arrangement Suite from Henry V?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the play associated with the orchestral arrangement Suite from Henry V."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "play"
+                ],
+                "properties": {
+                  "play": {
+                    "type": "string",
+                    "description": "The title of the play associated with the orchestral arrangement."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Determine the author of the play",
+              "task_type": "fact_lookup",
+              "question": "Who is the author of the play {q1.play}?",
+              "operation": "answer",
+              "depends_on": [
+                "q1"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Determine the author of the play {q1.play}."
+              },
+              "input_map": {
+                "play": "q1.play"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "author"
+                ],
+                "properties": {
+                  "author": {
+                    "type": "string",
+                    "description": "The author of the play."
+                  }
+                }
+              }
+            },
+            {
+              "id": "s1",
+              "label": "Synthesize the final answer",
+              "task_type": "synthesis",
+              "question": "Who is the author of the play that was adapted into a film and featured the orchestral arrangement Suite from Henry V?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q1",
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Based on the play {q1.play} and its author {q2.author}, provide the final answer to the question."
+              },
+              "input_map": {
+                "play": "q1.play",
+                "author": "q2.author"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The author of the play that was adapted into a film and featured the orchestral arrangement Suite from Henry V."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "s1"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "q2"
+            ]
+          },
+          {
+            "index": 3,
+            "node_ids": [
+              "s1"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "Identify the play associated with the orchestral arrangement",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Which play is associated with the orchestral arrangement Suite from Henry V?",
+            "rendered_prompt": "Identify the play associated with the orchestral arrangement Suite from Henry V.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"play\"\n  ],\n  \"properties\": {\n    \"play\": {\n      \"type\": \"string\",\n      \"description\": \"The title of the play associated with the orchestral arrangement.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"play\": \"Henry V\"\n}",
+            "parsed_output": {
+              "play": "Henry V"
+            },
+            "returned_value": {
+              "play": "Henry V"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:15:59.777172+00:00",
+            "finished_at": "2026-05-27T16:16:09.707598+00:00",
+            "duration_ms": 9930.386333027855,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Determine the author of the play",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {
+              "play": "Henry V"
+            },
+            "resolved_question": "Who is the author of the play Henry V?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"play\": \"Henry V\"\n}\n\nDetermine the author of the play Henry V.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"author\"\n  ],\n  \"properties\": {\n    \"author\": {\n      \"type\": \"string\",\n      \"description\": \"The author of the play.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"author\": \"William Shakespeare\"\n}",
+            "parsed_output": {
+              "author": "William Shakespeare"
+            },
+            "returned_value": {
+              "author": "William Shakespeare"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:16:09.707888+00:00",
+            "finished_at": "2026-05-27T16:16:12.880875+00:00",
+            "duration_ms": 3172.985333018005,
+            "error": null
+          },
+          {
+            "node_id": "s1",
+            "label": "Synthesize the final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "play": "Henry V",
+              "author": "William Shakespeare"
+            },
+            "resolved_question": "Who is the author of the play that was adapted into a film and featured the orchestral arrangement Suite from Henry V?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"play\": \"Henry V\",\n  \"author\": \"William Shakespeare\"\n}\n\nBased on the play Henry V and its author William Shakespeare, provide the final answer to the question.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The author of the play that was adapted into a film and featured the orchestral arrangement Suite from Henry V.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"William Shakespeare\"\n}",
+            "parsed_output": {
+              "answer": "William Shakespeare"
+            },
+            "returned_value": {
+              "answer": "William Shakespeare"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:16:12.881090+00:00",
+            "finished_at": "2026-05-27T16:16:16.259587+00:00",
+            "duration_ms": 3378.497417026665,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "William Shakespeare"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 16482.804082974326,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o-mini",
+            "model_env": "AZURE_OPENAI_MODEL",
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 45.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Identify the play associated with the orchestral arrangement\\nfact_lookup\\nsucceeded\"]\n  q2[\"q2: Determine the author of the play\\nfact_lookup\\nsucceeded\"]\n  q1 --> q2\n  s1[\"s1: Synthesize the final answer\\nsynthesis\\nsucceeded\"]\n  q1 --> s1\n  q2 --> s1"
+      },
+      "error": null
+    },
+    {
+      "id": "5a79e7b45542994f819ef0ff",
+      "question": "What is the best known novel from the author of \"Laura Warholic\"?",
+      "gold_answer": "\"Darconville’s Cat\"",
+      "prediction": "Darconville's Cat",
+      "exact_match": 0.0,
+      "f1": 0.5,
+      "latency_ms": 26232.653916988056,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 3,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "run_trace": {
+        "run_id": "34a1fd23-b488-44ed-a8ab-decafbc2adda",
+        "question": "What is the best known novel from the author of 'Laura Warholic'?",
+        "plan": {
+          "question": "What is the best known novel from the author of 'Laura Warholic'?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Identify author of 'Laura Warholic'",
+              "task_type": "fact_lookup",
+              "question": "Who is the author of the novel 'Laura Warholic'?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the author of the novel 'Laura Warholic'."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "author"
+                ],
+                "properties": {
+                  "author": {
+                    "type": "string",
+                    "description": "The author of the novel 'Laura Warholic'."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Find best known novel by author",
+              "task_type": "fact_lookup",
+              "question": "What is the best known novel by {q1.author}?",
+              "operation": "answer",
+              "depends_on": [
+                "q1"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "What is the best known novel by {q1.author}?"
+              },
+              "input_map": {
+                "author": "q1.author"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "best_known_novel"
+                ],
+                "properties": {
+                  "best_known_novel": {
+                    "type": "string",
+                    "description": "The best known novel by the specified author."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q3",
+              "label": "Provide final answer",
+              "task_type": "synthesis",
+              "question": "What is the best known novel from the author of 'Laura Warholic'?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Based on the information, the best known novel from the author of 'Laura Warholic' is {q2.best_known_novel}."
+              },
+              "input_map": {
+                "best_known_novel": "q2.best_known_novel"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The best known novel from the author of 'Laura Warholic'."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q3"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "q2"
+            ]
+          },
+          {
+            "index": 3,
+            "node_ids": [
+              "q3"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "Identify author of 'Laura Warholic'",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Who is the author of the novel 'Laura Warholic'?",
+            "rendered_prompt": "Identify the author of the novel 'Laura Warholic'.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"author\"\n  ],\n  \"properties\": {\n    \"author\": {\n      \"type\": \"string\",\n      \"description\": \"The author of the novel 'Laura Warholic'.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"author\": \"Alexander Theroux\"\n}",
+            "parsed_output": {
+              "author": "Alexander Theroux"
+            },
+            "returned_value": {
+              "author": "Alexander Theroux"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:16:25.249150+00:00",
+            "finished_at": "2026-05-27T16:16:35.268657+00:00",
+            "duration_ms": 10019.46208300069,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Find best known novel by author",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {
+              "author": "Alexander Theroux"
+            },
+            "resolved_question": "What is the best known novel by Alexander Theroux?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"author\": \"Alexander Theroux\"\n}\n\nWhat is the best known novel by Alexander Theroux?\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"best_known_novel\"\n  ],\n  \"properties\": {\n    \"best_known_novel\": {\n      \"type\": \"string\",\n      \"description\": \"The best known novel by the specified author.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"best_known_novel\": \"Darconville's Cat\"\n}",
+            "parsed_output": {
+              "best_known_novel": "Darconville's Cat"
+            },
+            "returned_value": {
+              "best_known_novel": "Darconville's Cat"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:16:35.268849+00:00",
+            "finished_at": "2026-05-27T16:16:38.792659+00:00",
+            "duration_ms": 3523.8205830100924,
+            "error": null
+          },
+          {
+            "node_id": "q3",
+            "label": "Provide final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "best_known_novel": "Darconville's Cat"
+            },
+            "resolved_question": "What is the best known novel from the author of 'Laura Warholic'?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"best_known_novel\": \"Darconville's Cat\"\n}\n\nBased on the information, the best known novel from the author of 'Laura Warholic' is Darconville's Cat.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The best known novel from the author of 'Laura Warholic'.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"Darconville's Cat\"\n}",
+            "parsed_output": {
+              "answer": "Darconville's Cat"
+            },
+            "returned_value": {
+              "answer": "Darconville's Cat"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-05-27T16:16:38.792927+00:00",
+            "finished_at": "2026-05-27T16:16:42.493306+00:00",
+            "duration_ms": 3700.3685829695314,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Darconville's Cat"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 17244.399000017438,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o-mini",
+            "model_env": "AZURE_OPENAI_MODEL",
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 45.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Identify author of 'Laura Warholic'\\nfact_lookup\\nsucceeded\"]\n  q2[\"q2: Find best known novel by author\\nfact_lookup\\nsucceeded\"]\n  q1 --> q2\n  q3[\"q3: Provide final answer\\nsynthesis\\nsucceeded\"]\n  q2 --> q3"
+      },
+      "error": null
+    }
+  ],
+  "metrics": {
+    "example_count": 5.0,
+    "success_count": 5.0,
+    "failure_count": 0.0,
+    "error_count": 0.0,
+    "exact_match": 0.4,
+    "f1": 0.65,
+    "avg_latency_ms": 19972.198583208956,
+    "p50_latency_ms": 16899.196166021284,
+    "total_llm_call_count": 21.0,
+    "avg_llm_call_count": 4.2,
+    "avg_node_count": 3.2,
+    "avg_graph_depth": 2.6,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.0,
+    "total_runtime_ms": 101409.17716600234
+  }
+}

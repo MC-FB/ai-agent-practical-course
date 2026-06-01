@@ -5,7 +5,6 @@
 .cache/
 .pytest_cache/
 .ruff_cache/
-runs/
 .DS_Store
 __pycache__/
 *.py[cod]
