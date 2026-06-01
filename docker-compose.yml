@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     volumes:
-      - dagqa-runs:/app/runs
+      - ./runs:/app/runs
 
 volumes:
   dagqa-runs:

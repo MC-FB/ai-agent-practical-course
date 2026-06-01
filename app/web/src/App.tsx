@@ -21,6 +21,7 @@ import {
   getLiveBenchmark,
   getLiveAsk,
   listBenchmarkResults,
+  repairBenchmarkResult,
   startLiveBenchmark,
   startLiveAsk,
   type DagNode,
@@ -624,6 +625,11 @@ function BenchmarkResultView({
           <strong>{formatPercent(metrics.f1)}</strong>
         </div>
         <div className="metric">
+          <label>Cosine Similarity</label>
+          <strong>{formatNumber(metrics.cosine_sim, 3)}</strong>
+        </div>
+        
+        <div className="metric">
           <label>Avg Latency</label>
           <strong>{formatDuration(metrics.avg_latency_ms)}</strong>
         </div>
@@ -673,6 +679,7 @@ function BenchmarkResultView({
               <th>Prediction</th>
               <th>EM</th>
               <th>F1</th>
+              <th>Cos Sim</th>
               <th>Status</th>
               <th>Graph</th>
             </tr>
@@ -691,6 +698,7 @@ function BenchmarkResultView({
                 <td>{record.prediction}</td>
                 <td>{formatPercent(record.exact_match)}</td>
                 <td>{formatPercent(record.f1)}</td>
+                <td>{formatNumber(record.cosine_sim, 3)}</td>
                 <td>{record.error ? "error" : record.structural_failure ? "failed" : "ok"}</td>
                 <td>{record.run_trace ? "Inspect" : "-"}</td>
               </tr>
@@ -994,6 +1002,15 @@ function ResultsView() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
+  async function loadResultWithRepair(runId: string) {
+    const result = await getBenchmarkResult(runId);
+    if (result.metrics.cosine_sim === undefined) {
+      await repairBenchmarkResult(runId);
+      return getBenchmarkResult(runId);
+    }
+    return result;
+  }
+
   async function refreshResults() {
     setBusy(true);
     setError("");
@@ -1003,7 +1020,7 @@ function ResultsView() {
       const nextRunId = selectedRunId || response.results[0]?.run_id || "";
       setSelectedRunId(nextRunId);
       if (nextRunId) {
-        setSelectedResult(await getBenchmarkResult(nextRunId));
+        setSelectedResult(await loadResultWithRepair(nextRunId));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load benchmark results");
@@ -1022,7 +1039,7 @@ function ResultsView() {
     setBusy(true);
     setError("");
     try {
-      setSelectedResult(await getBenchmarkResult(runId));
+      setSelectedResult(await loadResultWithRepair(runId));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load benchmark result");
     } finally {

@@ -106,6 +106,7 @@ export type HotpotBenchmarkRecord = {
   prediction: string;
   exact_match: number;
   f1: number;
+  cosine_sim: number;
   latency_ms: number;
   llm_call_count?: number | null;
   node_count?: number | null;
@@ -202,6 +203,14 @@ export async function listBenchmarkResults(): Promise<{ results: SavedBenchmarkS
 
 export async function getBenchmarkResult(runId: string): Promise<HotpotBenchmarkResult> {
   const response = await fetch(`/api/benchmarks/results/${runId}`);
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
+export async function repairBenchmarkResult(runId: string): Promise<HotpotBenchmarkResult> {
+  const response = await fetch(`/api/benchmarks/results/${runId}/repair`, {
+    method: "POST",
+  });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
 }

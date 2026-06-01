@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+from functools import lru_cache
 import re
 import string
 from collections import Counter
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
+@lru_cache(maxsize=1)
+def _sentence_transformer() -> SentenceTransformer:
+    return SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
 
 
 def normalize_answer(text: str) -> str:
@@ -35,3 +42,12 @@ def answer_f1(prediction: str, ground_truth: str) -> float:
     precision = num_same / len(pred_tokens)
     recall = num_same / len(gold_tokens)
     return 2 * precision * recall / (precision + recall)
+
+def cosine_sim(prediction: str, ground_truth: str) -> float:
+    model = _sentence_transformer()
+    pred_embedding, gt_embedding  = model.encode([prediction,ground_truth])
+    norms = np.linalg.norm(pred_embedding) * np.linalg.norm(gt_embedding)
+    if norms == 0.0:
+        return 0.0
+    metric = float( np.dot(pred_embedding, gt_embedding) / (norms) )
+    return metric

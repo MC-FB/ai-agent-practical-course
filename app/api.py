@@ -14,6 +14,7 @@ from pydantic import BaseModel
 from dagqa.client import DagQaClient
 from dagqa.config import AppConfig
 from dagqa.eval.benchmark import (
+    BenchmarkRecord,
     BenchmarkResult,
     _aggregate,
     _run_example,
@@ -429,6 +430,19 @@ def get_benchmark_result(run_id: str) -> dict[str, Any]:
     return _normalize_benchmark_payload(json.loads(path.read_text()), path)
 
 
+@router.post("/benchmarks/results/{run_id}/repair")
+def repair_benchmark_result(run_id: str) -> dict[str, Any]:
+    if "/" in run_id or "\\" in run_id or ".." in run_id:
+        raise HTTPException(status_code=400, detail="Invalid run id.")
+    output_dir = _benchmark_output_dir()
+    matches = list(output_dir.glob(f"*{run_id}*.json"))
+    if not matches:
+        raise HTTPException(status_code=404, detail="Benchmark result not found.")
+    path = matches[0]
+    raw = json.loads(path.read_text())
+    repaired = _repair_benchmark_payload(raw, path)   # detects missing, calculates, writes to disk
+    return _normalize_benchmark_payload(repaired, path)  # normalizes the now-repaired data for response
+
 def _benchmark_output_dir() -> Path:
     return Path(load_config().benchmark.output_dir)
 
@@ -461,6 +475,32 @@ def _normalize_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, 
     }
 
 
+def _repair_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, Any]:
+    needs_save = False
+
+    # Patch per-record cosine_sim if missing
+    for record in data.get("records", []):
+        if "cosine_sim" not in record:
+            from dagqa.eval.metrics import cosine_sim as _cosine_sim
+            record["cosine_sim"] = _cosine_sim(
+                record.get("prediction", " "),
+                record.get("gold_answer", " "),
+            )
+            needs_save = True
+
+    # Patch aggregate metrics if missing
+    metrics = dict(data.get("metrics") or {})
+    if "cosine_sim" not in metrics:
+        records = [BenchmarkRecord.model_validate(r) for r in data.get("records", [])]
+        metrics.update(_aggregate(records))
+        data["metrics"] = metrics
+        needs_save = True
+
+    if needs_save:
+        path.write_text(json.dumps(data, indent=2))
+
+    return data
+
 def _normalize_benchmark_record(record: dict[str, Any]) -> dict[str, Any]:
     structure = record.get("structure") or {}
     return {
@@ -470,6 +510,7 @@ def _normalize_benchmark_record(record: dict[str, Any]) -> dict[str, Any]:
         "prediction": record.get("prediction") or "",
         "exact_match": record.get("exact_match") or 0,
         "f1": record.get("f1") or 0,
+        "cosine_sim": record.get("cosine_sim") if record.get("cosine_sim") is not None else 0,
         "latency_ms": record.get("latency_ms") or 0,
         "llm_call_count": record.get("llm_call_count"),
         "node_count": record.get("node_count"),
