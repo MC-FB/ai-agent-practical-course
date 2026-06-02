@@ -2,6 +2,7 @@ import {
   Activity,
   ArrowLeft,
   BarChart3,
+  BookOpen,
   CheckCircle2,
   Database,
   GitBranch,
@@ -587,6 +588,7 @@ function BenchmarkResultView({
 }) {
   const metrics = result?.metrics;
   const errorRecords = result?.records.filter((record) => record.error) ?? [];
+  const sampleTotal = result?.dataset_size ?? totalExamples;
 
   if (!result || !metrics) {
     return <div className="empty">Metrics will appear here.</div>;
@@ -644,7 +646,7 @@ function BenchmarkResultView({
         <div>
           <label>Sample</label>
           <strong>
-            {formatNumber(result.records.length)} of {formatNumber(totalExamples)}
+            {formatNumber(result.records.length)} of {formatNumber(sampleTotal)}
           </strong>
         </div>
         <div>
@@ -672,29 +674,55 @@ function BenchmarkResultView({
               <th>Gold</th>
               <th>Prediction</th>
               <th>EM</th>
-              <th>F1</th>
               <th>Status</th>
               <th>Graph</th>
             </tr>
           </thead>
           <tbody>
-            {result.records.map((record) => (
-              <tr
-                className={onSelectRecord && record.run_trace ? "clickable-row" : ""}
-                key={record.id}
-                onClick={() => {
-                  if (record.run_trace) onSelectRecord?.(record);
-                }}
-              >
-                <td>{record.question}</td>
-                <td>{record.gold_answer}</td>
-                <td>{record.prediction}</td>
-                <td>{formatPercent(record.exact_match)}</td>
-                <td>{formatPercent(record.f1)}</td>
-                <td>{record.error ? "error" : record.structural_failure ? "failed" : "ok"}</td>
-                <td>{record.run_trace ? "Inspect" : "-"}</td>
-              </tr>
-            ))}
+            {result.records.map((record) => {
+              const canInspect = Boolean(onSelectRecord && record.run_trace);
+              return (
+                <tr
+                  className={canInspect ? "clickable-row" : ""}
+                  key={record.id}
+                  onClick={canInspect ? () => onSelectRecord?.(record) : undefined}
+                  onKeyDown={
+                    canInspect
+                      ? (event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            onSelectRecord?.(record);
+                          }
+                        }
+                      : undefined
+                  }
+                  role={canInspect ? "button" : undefined}
+                  tabIndex={canInspect ? 0 : undefined}
+                >
+                  <td>{record.question}</td>
+                  <td>{record.gold_answer}</td>
+                  <td>{record.prediction}</td>
+                  <td>{formatPercent(record.exact_match)}</td>
+                  <td>{record.error ? "error" : record.structural_failure ? "failed" : "ok"}</td>
+                  <td>
+                    {canInspect ? (
+                      <button
+                        className="record-action"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onSelectRecord?.(record);
+                        }}
+                        type="button"
+                      >
+                        Inspect
+                      </button>
+                    ) : (
+                      <span className="muted-value">No trace</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -716,6 +744,7 @@ function DatasetView() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<HotpotBenchmarkResult>();
   const [liveRun, setLiveRun] = useState<LiveBenchmark>();
+  const [detailRecord, setDetailRecord] = useState<HotpotBenchmarkRecord>();
   const [error, setError] = useState("");
   const maxExamples = meta?.total_examples && meta.total_examples > 1 ? meta.total_examples : 7405;
   const resolvedLimit = Math.min(limit, maxExamples);
@@ -740,6 +769,7 @@ function DatasetView() {
     setError("");
     setLiveRun(undefined);
     setResult(undefined);
+    setDetailRecord(undefined);
     try {
       const parsedSeed = seedInput.trim() ? Number(seedInput) : undefined;
       if (parsedSeed !== undefined && !Number.isInteger(parsedSeed)) {
@@ -766,6 +796,10 @@ function DatasetView() {
     } finally {
       setBusy(false);
     }
+  }
+
+  if (detailRecord) {
+    return <BenchmarkRecordDetail record={detailRecord} onBack={() => setDetailRecord(undefined)} />;
   }
 
   return (
@@ -865,7 +899,11 @@ function DatasetView() {
             <BarChart3 size={18} />
           </div>
           <div className="answer-body benchmark-output">
-            <BenchmarkResultView result={result} totalExamples={meta?.total_examples} />
+            <BenchmarkResultView
+              result={result}
+              totalExamples={meta?.total_examples}
+              onSelectRecord={setDetailRecord}
+            />
           </div>
         </section>
       </section>
@@ -1119,6 +1157,10 @@ function App() {
             <History size={18} />
             Results
           </button>
+          <a href="http://localhost:8000/docs" target="_blank" rel="noreferrer">
+            <BookOpen size={18} />
+            API Docs
+          </a>
         </nav>
         <div className="sidebar-footer">
           <Timer size={16} />
