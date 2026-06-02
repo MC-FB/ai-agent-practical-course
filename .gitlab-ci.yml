@@ -2,7 +2,12 @@ stages:
   - test
   - build
   - smoke
-  - secret-detection
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
 
 variables:
   SECRET_DETECTION_ENABLED: 'true'
@@ -62,9 +67,6 @@ docker_build_and_smoke:
       done
       docker logs dagqa-ci
       exit 1
-
-secret_detection:
-  stage: secret-detection
 
 include:
   - template: Security/Secret-Detection.gitlab-ci.yml
