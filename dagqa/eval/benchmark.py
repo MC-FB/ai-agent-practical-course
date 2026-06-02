@@ -11,7 +11,11 @@ from uuid import uuid4
 from pydantic import BaseModel
 
 from dagqa.client import DagQaClient
-from dagqa.eval.hotpot_loader import HotpotExample, load_hotpot_examples
+from dagqa.eval.hotpot_loader import (
+    HOTPOTQA_DISTRACTOR_VALIDATION_SIZE,
+    HotpotExample,
+    load_hotpot_examples,
+)
 from dagqa.eval.metrics import answer_f1, exact_match
 from dagqa.graph.render import render_mermaid
 from dagqa.schemas import LLMRequest
@@ -42,6 +46,7 @@ class BenchmarkResult(BaseModel):
     model: str
     dataset: str = "hotpotqa"
     split: str = "validation"
+    dataset_size: int | None = None
     seed: int
     created_at: str
     output_path: str | None = None
@@ -60,7 +65,14 @@ async def benchmark_hotpotqa(
 ) -> BenchmarkResult:
     started = time.perf_counter()
     seed = seed if seed is not None else random.SystemRandom().randint(1, 2_147_483_647)
-    examples = _sample_examples(load_hotpot_examples(path), limit, seed)
+    if limit <= 0 and path is None:
+        all_examples = []
+        dataset_size = HOTPOTQA_DISTRACTOR_VALIDATION_SIZE
+        examples = []
+    else:
+        all_examples = load_hotpot_examples(path)
+        dataset_size = len(all_examples)
+        examples = _sample_examples(all_examples, limit, seed)
     records = []
     for example in examples:
         records.append(await _run_example(client, example, system))
@@ -72,6 +84,7 @@ async def benchmark_hotpotqa(
         system=system,
         limit=limit,
         model=client.config.llm.model,
+        dataset_size=dataset_size,
         seed=seed,
         created_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         total_runtime_ms=total_runtime_ms,

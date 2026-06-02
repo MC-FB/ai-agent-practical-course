@@ -124,6 +124,7 @@ export type HotpotBenchmarkResult = {
   model: string;
   dataset: string;
   split: string;
+  dataset_size?: number | null;
   seed: number;
   created_at: string;
   output_path?: string | null;
