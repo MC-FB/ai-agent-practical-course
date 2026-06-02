@@ -63,9 +63,7 @@ class DagExecutor:
                 else:
                     status = NodeStatus.failed
                     if self.config.execution.fail_fast:
-                        return self._run_trace(
-                            run_id, plan, waves, traces, None, status, started
-                        )
+                        return self._run_trace(run_id, plan, waves, traces, None, status, started)
 
         final_answer = outputs.get(plan.final_node)
         if final_answer is None:

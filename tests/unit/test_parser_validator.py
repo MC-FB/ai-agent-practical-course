@@ -142,8 +142,7 @@ def test_rejects_dependent_node_that_does_not_prompt_with_child_values(app_confi
 
     assert not result.valid
     assert any(
-        "prompt.user_template does not include child values" in error
-        for error in result.errors
+        "prompt.user_template does not include child values" in error for error in result.errors
     )
 
 

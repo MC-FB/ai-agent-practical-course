@@ -30,11 +30,12 @@ class DspyLanguageModel(LanguageModel):
         os.environ.setdefault("DSPY_CACHEDIR", str(cache_dir.resolve()))
         api_key = os.getenv(config.api_key_env or "") if config.api_key_env else None
         model = (os.getenv(config.model_env) if config.model_env else None) or config.model
-        api_base = (os.getenv(config.api_base_env) if config.api_base_env else None) or config.api_base
+        api_base = (
+            os.getenv(config.api_base_env) if config.api_base_env else None
+        ) or config.api_base
         api_version = (
-            (os.getenv(config.api_version_env) if config.api_version_env else None)
-            or config.api_version
-        )
+            os.getenv(config.api_version_env) if config.api_version_env else None
+        ) or config.api_version
         kwargs = {"api_key": api_key}
         if api_base:
             kwargs["api_base"] = api_base

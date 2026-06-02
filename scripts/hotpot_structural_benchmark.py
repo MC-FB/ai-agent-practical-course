@@ -214,8 +214,7 @@ def _summary(records: list[dict[str, Any]], started_total: float) -> dict[str, A
         ),
         "exact_match": sum(record.get("exact_match", 0.0) for record in records) / len(records),
         "f1": sum(record.get("f1", 0.0) for record in records) / len(records),
-        "avg_latency_ms": sum(record.get("latency_ms", 0.0) for record in records)
-        / len(records),
+        "avg_latency_ms": sum(record.get("latency_ms", 0.0) for record in records) / len(records),
         "total_llm_call_count": sum(record.get("llm_call_count") or 0 for record in records),
         "avg_node_count": sum(record.get("node_count") or 0 for record in records) / len(records),
         "total_runtime_ms": (time.perf_counter() - started_total) * 1000,

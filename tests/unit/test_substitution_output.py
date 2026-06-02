@@ -59,8 +59,6 @@ def test_parses_and_validates_node_output() -> None:
 
 
 def test_parses_fenced_json_with_surrounding_text() -> None:
-    output = parse_node_output(
-        'Here is the object:\n```json\n{"answer": "yes"}\n```\n'
-    )
+    output = parse_node_output('Here is the object:\n```json\n{"answer": "yes"}\n```\n')
 
     assert output == {"answer": "yes"}

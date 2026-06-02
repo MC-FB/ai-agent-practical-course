@@ -105,9 +105,7 @@ def _sample_examples(
     return [examples[index] for index in indices]
 
 
-async def _run_example(
-    client: DagQaClient, example: HotpotExample, system: str
-) -> BenchmarkRecord:
+async def _run_example(client: DagQaClient, example: HotpotExample, system: str) -> BenchmarkRecord:
     started = time.perf_counter()
     try:
         if system == "direct_llm":

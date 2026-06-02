@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from app import api
+from dagqa.eval.hotpot_loader import HOTPOTQA_DISTRACTOR_VALIDATION_SIZE
 from dagqa.schemas import (
     DagNode,
     DagPlan,
@@ -72,11 +73,15 @@ def test_normalize_saved_benchmark_record_rebuilds_missing_mermaid() -> None:
 
 
 def test_normalize_saved_benchmark_payload_backfills_dataset_size(monkeypatch) -> None:
-    monkeypatch.setattr(api, "count_hotpot_examples", lambda data_path=None: 7405)
+    monkeypatch.setattr(
+        api,
+        "count_hotpot_examples",
+        lambda data_path=None: HOTPOTQA_DISTRACTOR_VALIDATION_SIZE,
+    )
 
     normalized = api._normalize_benchmark_payload(
         {"run_id": "run-1", "records": [{"id": "example-1"}]},
         Path("runs/benchmarks/run-1.json"),
     )
 
-    assert normalized["dataset_size"] == 7405
+    assert normalized["dataset_size"] == HOTPOTQA_DISTRACTOR_VALIDATION_SIZE
