@@ -15,6 +15,7 @@ dependencies = [
   "typer>=0.12.5",
   "uvicorn[standard]>=0.30.0",
   "sentence-transformers>=5.5.0",
+  "datasets>=2.20.0",
 ]
 
 [project.optional-dependencies]
@@ -23,9 +24,6 @@ dev = [
   "pytest>=8.3.0",
   "pytest-asyncio>=0.24.0",
   "ruff>=0.6.0",
-]
-datasets = [
-  "datasets>=2.20.0",
 ]
 
 [project.scripts]

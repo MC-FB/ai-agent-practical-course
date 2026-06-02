@@ -6,11 +6,25 @@ import string
 from collections import Counter
 import numpy as np
 from sentence_transformers import SentenceTransformer
+import torch
+
+def get_device() -> str:
+    if torch.cuda.is_available():
+        return "cuda"
+    if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        return "mps"
+    try:
+        import torch_npu  # NPU support usually requires importing its specific toolkit
+        if torch.npu.is_available():
+            return "npu"
+    except (ImportError, AttributeError):
+        pass
+    return "cpu"
+
 
 @lru_cache(maxsize=1)
 def _sentence_transformer() -> SentenceTransformer:
-    return SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
-
+    return SentenceTransformer("sentence-transformers/all-mpnet-base-v2", device = get_device())
 
 def normalize_answer(text: str) -> str:
     def remove_articles(value: str) -> str:
@@ -44,10 +58,21 @@ def answer_f1(prediction: str, ground_truth: str) -> float:
     return 2 * precision * recall / (precision + recall)
 
 def cosine_sim(prediction: str, ground_truth: str) -> float:
+    if prediction == "" or ground_truth == "":
+        return 0.0
+    
     model = _sentence_transformer()
     pred_embedding, gt_embedding  = model.encode([prediction,ground_truth])
-    norms = np.linalg.norm(pred_embedding) * np.linalg.norm(gt_embedding)
-    if norms == 0.0:
+
+    pred_mag = np.linalg.norm(pred_embedding)
+    gt_mag = np.linalg.norm(gt_embedding)
+    
+    if pred_mag == 0.0 or gt_mag == 0.0:
         return 0.0
-    metric = float( np.dot(pred_embedding, gt_embedding) / (norms) )
+    
+    norm_pred_embedding = pred_embedding / pred_mag 
+    norm_gt_embedding = gt_embedding /gt_mag
+    
+    metric = np.dot(norm_pred_embedding, norm_gt_embedding)
     return metric
+

@@ -10,6 +10,8 @@ services:
       - .env
     volumes:
       - ./runs:/app/runs
+      - hf-model-cache:/app/hf_cache
 
 volumes:
   dagqa-runs:
+  hf-model-cache:

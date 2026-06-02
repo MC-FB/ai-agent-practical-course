@@ -82,7 +82,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 1.0000001192092896
     },
     {
       "index": 2,
@@ -123,7 +124,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 0.6992479562759399
     },
     {
       "index": 3,
@@ -164,7 +166,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 1.0
     },
     {
       "index": 4,
@@ -225,7 +228,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 1.0
     },
     {
       "index": 5,
@@ -342,7 +346,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 1.0000001192092896
     },
     {
       "index": 6,
@@ -424,7 +429,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 0.8556040525436401
     },
     {
       "index": 7,
@@ -507,7 +513,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 1.0
     },
     {
       "index": 8,
@@ -584,7 +591,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 0.3405229151248932
     },
     {
       "index": 9,
@@ -661,7 +669,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 0.9594417214393616
     },
     {
       "index": 10,
@@ -726,7 +735,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 0.08399950712919235
     },
     {
       "index": 11,
@@ -809,12 +819,13 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 1.0000001192092896
     },
     {
       "index": 12,
       "id": "5a8e4b7c5542990e94052ab7",
-      "question": "What is the familial relationship of the founder of the Gulf Cartel to Juan García Ábrego?",
+      "question": "What is the familial relationship of the founder of the Gulf Cartel to Juan Garc\u00eda \u00c1brego?",
       "gold_answer": "uncle",
       "status": "error",
       "prediction": "",
@@ -831,7 +842,8 @@
           "Planner produced invalid DAG: final_node 's1' does not exist."
         ]
       },
-      "error": "Planner produced invalid DAG: final_node 's1' does not exist."
+      "error": "Planner produced invalid DAG: final_node 's1' does not exist.",
+      "cosine_sim": 0.2335221767425537
     },
     {
       "index": 13,
@@ -912,7 +924,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 0.49288409948349
     },
     {
       "index": 14,
@@ -951,7 +964,7 @@
             "Patricia Rozema",
             "Guy Maddin",
             "Deepa Mehta",
-            "Jean-Marc Vallée",
+            "Jean-Marc Vall\u00e9e",
             "Bruce McDonald",
             "Don McKellar",
             "Michael Snow",
@@ -1005,7 +1018,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 0.009085647761821747
     },
     {
       "index": 15,
@@ -1088,7 +1102,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 0.08275709301233292
     },
     {
       "index": 16,
@@ -1165,7 +1180,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 0.5669507384300232
     },
     {
       "index": 17,
@@ -1248,7 +1264,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 1.0
     },
     {
       "index": 18,
@@ -1325,7 +1342,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 1.0
     },
     {
       "index": 19,
@@ -1402,7 +1420,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 0.4611593186855316
     },
     {
       "index": 20,
@@ -1481,7 +1500,8 @@
           }
         ]
       },
-      "error": null
+      "error": null,
+      "cosine_sim": 0.6761274933815002
     }
   ],
   "summary": {
@@ -1495,5 +1515,22 @@
     "total_llm_call_count": 72,
     "avg_node_count": 2.65,
     "total_runtime_ms": 509850.5785000161
+  },
+  "metrics": {
+    "example_count": 20.0,
+    "success_count": 19.0,
+    "failure_count": 1.0,
+    "error_count": 1.0,
+    "exact_match": 0.4,
+    "f1": 0.5269047619047619,
+    "cosine_sim": 0.6730651538819075,
+    "avg_latency_ms": 25491.00437280722,
+    "p50_latency_ms": 26970.465582970064,
+    "total_llm_call_count": 72.0,
+    "avg_llm_call_count": 3.789473684210526,
+    "avg_node_count": 2.789473684210526,
+    "avg_graph_depth": 0.0,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.0
   }
 }
