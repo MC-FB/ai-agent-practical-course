@@ -3,7 +3,11 @@ Unit tests for dagqa/eval/metrics.py
 
 Run with:
     pytest tests/metrics_test.py -v
-
+Run with docker:
+    Setup:
+        docker compose --profile test build test
+    Run Tests:
+        docker compose --profile test run --rm test
 For the cosine_sim tests that involve the neural model, _sentence_transformer is
 mocked so no model download or GPU is required.
 """

@@ -9,3 +9,8 @@ RUN pip install --no-cache-dir .
 
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# --- test stage: builds on backend, adds dev dependencies ---
+FROM backend AS test
+RUN pip install --no-cache-dir ".[dev]"
+CMD ["pytest", "tests/", "-v"]
