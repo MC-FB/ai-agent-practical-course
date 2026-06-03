@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dagqa.planning.normalizer import normalize_plan_dependencies
 from dagqa.planning.parser import parse_plan
+from dagqa.planning.prompts import PLANNER_SYSTEM
 from dagqa.planning.validator import graph_depth, scheduler_waves, validate_plan
 from dagqa.schemas import DagNode, DagPlan, Operation, PromptSpec, TaskType
 from tests.fixtures import PARALLEL_PLAN
@@ -15,6 +16,10 @@ def test_parse_and_validate_parallel_plan(app_config) -> None:
     assert result.valid
     assert graph_depth(plan) == expected_depth
     assert scheduler_waves(plan) == [["q1", "q2"], ["q3"]]
+
+
+def test_planner_prompt_discourages_broad_candidate_enumeration() -> None:
+    assert "broad candidate-list or exhaustive enumeration nodes" in PLANNER_SYSTEM
 
 
 def test_parse_accepts_bare_node_list() -> None:

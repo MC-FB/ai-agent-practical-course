@@ -1,0 +1,831 @@
+{
+  "run_id": "1eb85221-0c48-4df5-9199-fa919d5e0110",
+  "system": "dag_agent",
+  "limit": 3,
+  "model": "azure/gpt-4o-mini",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "dataset_size": 7405,
+  "seed": 380317159,
+  "created_at": "2026-06-02T10:34:09Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260602T103409Z-1eb85221-0c48-4df5-9199-fa919d5e0110.json",
+  "total_runtime_ms": 54653.51779200137,
+  "records": [
+    {
+      "id": "5a8430335542996488c2e500",
+      "question": "Orlando Maturana had to compete with what other Colombian retired footballer for the national football team's striker position?",
+      "gold_answer": "Adolfo José Valencia Mosquera",
+      "prediction": "Arnoldo Iguarán",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 10338.842625031248,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 2,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "run_trace": {
+        "run_id": "4178b210-19d2-4f4b-9691-42a2a7d899fb",
+        "question": "Orlando Maturana had to compete with what other Colombian retired footballer for the national football team's striker position?",
+        "plan": {
+          "question": "Orlando Maturana had to compete with what other Colombian retired footballer for the national football team's striker position?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Identify Orlando Maturana's career details",
+              "task_type": "fact_lookup",
+              "question": "What are the career details of Orlando Maturana, including his role and position in the Colombian national football team?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Provide the career details of Orlando Maturana, focusing on his role and position in the Colombian national football team."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "role",
+                  "position"
+                ],
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "description": "The role of Orlando Maturana in the team."
+                  },
+                  "position": {
+                    "type": "string",
+                    "description": "The position played by Orlando Maturana."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Identify other Colombian footballers in similar roles",
+              "task_type": "fact_lookup",
+              "question": "Who are other Colombian retired footballers who played as strikers for the national football team?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "List other Colombian retired footballers who played as strikers for the national football team."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "footballers"
+                ],
+                "properties": {
+                  "footballers": {
+                    "type": "array",
+                    "description": "List of other Colombian retired footballers who played as strikers."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q3",
+              "label": "Determine competition for the striker position",
+              "task_type": "synthesis",
+              "question": "Which Colombian retired footballer competed with Orlando Maturana for the striker position in the national football team?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q1",
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Based on the details of Orlando Maturana's role ({q1.role}) and position ({q1.position}), and the list of other Colombian retired footballers ({q2.footballers}), determine who competed with him for the striker position in the national football team."
+              },
+              "input_map": {
+                "role": "q1.role",
+                "position": "q1.position",
+                "footballers": "q2.footballers"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The name of the Colombian retired footballer who competed with Orlando Maturana for the striker position."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q3"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1",
+              "q2"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "q3"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "Identify Orlando Maturana's career details",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "What are the career details of Orlando Maturana, including his role and position in the Colombian national football team?",
+            "rendered_prompt": "Provide the career details of Orlando Maturana, focusing on his role and position in the Colombian national football team.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"role\",\n    \"position\"\n  ],\n  \"properties\": {\n    \"role\": {\n      \"type\": \"string\",\n      \"description\": \"The role of Orlando Maturana in the team.\"\n    },\n    \"position\": {\n      \"type\": \"string\",\n      \"description\": \"The position played by Orlando Maturana.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"role\": \"Player\",\n  \"position\": \"Forward\"\n}",
+            "parsed_output": {
+              "role": "Player",
+              "position": "Forward"
+            },
+            "returned_value": {
+              "role": "Player",
+              "position": "Forward"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-06-02T10:34:19.053730+00:00",
+            "finished_at": "2026-06-02T10:34:20.175953+00:00",
+            "duration_ms": 1122.2411670023575,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Identify other Colombian footballers in similar roles",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Who are other Colombian retired footballers who played as strikers for the national football team?",
+            "rendered_prompt": "List other Colombian retired footballers who played as strikers for the national football team.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"footballers\"\n  ],\n  \"properties\": {\n    \"footballers\": {\n      \"type\": \"array\",\n      \"description\": \"List of other Colombian retired footballers who played as strikers.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"footballers\": [\n    \"Carlos Valderrama\",\n    \"Faustino Asprilla\",\n    \"Arnoldo Iguarán\",\n    \"Adolfo Valencia\",\n    \"Victor Aristizábal\",\n    \"Freddy Rincón\",\n    \"Hamilton Ricard\",\n    \"Iván Valenciano\",\n    \"Radamel Falcao García\",\n    \"Teófilo Gutiérrez\"\n  ]\n}",
+            "parsed_output": {
+              "footballers": [
+                "Carlos Valderrama",
+                "Faustino Asprilla",
+                "Arnoldo Iguarán",
+                "Adolfo Valencia",
+                "Victor Aristizábal",
+                "Freddy Rincón",
+                "Hamilton Ricard",
+                "Iván Valenciano",
+                "Radamel Falcao García",
+                "Teófilo Gutiérrez"
+              ]
+            },
+            "returned_value": {
+              "footballers": [
+                "Carlos Valderrama",
+                "Faustino Asprilla",
+                "Arnoldo Iguarán",
+                "Adolfo Valencia",
+                "Victor Aristizábal",
+                "Freddy Rincón",
+                "Hamilton Ricard",
+                "Iván Valenciano",
+                "Radamel Falcao García",
+                "Teófilo Gutiérrez"
+              ]
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-06-02T10:34:19.054109+00:00",
+            "finished_at": "2026-06-02T10:34:21.307725+00:00",
+            "duration_ms": 2253.6254579899833,
+            "error": null
+          },
+          {
+            "node_id": "q3",
+            "label": "Determine competition for the striker position",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "role": "Player",
+              "position": "Forward",
+              "footballers": [
+                "Carlos Valderrama",
+                "Faustino Asprilla",
+                "Arnoldo Iguarán",
+                "Adolfo Valencia",
+                "Victor Aristizábal",
+                "Freddy Rincón",
+                "Hamilton Ricard",
+                "Iván Valenciano",
+                "Radamel Falcao García",
+                "Teófilo Gutiérrez"
+              ]
+            },
+            "resolved_question": "Which Colombian retired footballer competed with Orlando Maturana for the striker position in the national football team?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"role\": \"Player\",\n  \"position\": \"Forward\",\n  \"footballers\": [\n    \"Carlos Valderrama\",\n    \"Faustino Asprilla\",\n    \"Arnoldo Iguarán\",\n    \"Adolfo Valencia\",\n    \"Victor Aristizábal\",\n    \"Freddy Rincón\",\n    \"Hamilton Ricard\",\n    \"Iván Valenciano\",\n    \"Radamel Falcao García\",\n    \"Teófilo Gutiérrez\"\n  ]\n}\n\nBased on the details of Orlando Maturana's role (Player) and position (Forward), and the list of other Colombian retired footballers (['Carlos Valderrama', 'Faustino Asprilla', 'Arnoldo Iguarán', 'Adolfo Valencia', 'Victor Aristizábal', 'Freddy Rincón', 'Hamilton Ricard', 'Iván Valenciano', 'Radamel Falcao García', 'Teófilo Gutiérrez']), determine who competed with him for the striker position in the national football team.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the Colombian retired footballer who competed with Orlando Maturana for the striker position.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"Arnoldo Iguarán\"\n}",
+            "parsed_output": {
+              "answer": "Arnoldo Iguarán"
+            },
+            "returned_value": {
+              "answer": "Arnoldo Iguarán"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-06-02T10:34:21.308184+00:00",
+            "finished_at": "2026-06-02T10:34:21.916336+00:00",
+            "duration_ms": 608.1679579801857,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Arnoldo Iguarán"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 2863.2055000634864,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o-mini",
+            "model_env": "AZURE_OPENAI_MODEL",
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 45.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Identify Orlando Maturana's career details\\nfact_lookup\\nsucceeded\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: Identify other Colombian footballers in similar roles\\nfact_lookup\\nsucceeded\"]\n  click q2 dagqaSelectGraphNode\n  q3[\"q3: Determine competition for the striker position\\nsynthesis\\nsucceeded\"]\n  click q3 dagqaSelectGraphNode\n  q1 --> q3\n  q2 --> q3"
+      },
+      "error": null
+    },
+    {
+      "id": "5a7a3dbb5542996a35c17157",
+      "question": "My First Mister co-stars an actor who was best known for his role as what character on the TV series Roseanne?",
+      "gold_answer": "Dan Conner",
+      "prediction": "Albert Brooks did not appear on the TV series 'Roseanne'.",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 8202.719666995108,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 3,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "run_trace": {
+        "run_id": "841feea8-ae1a-47c3-9570-5ee47a927ad8",
+        "question": "My First Mister co-stars an actor who was best known for his role as what character on the TV series Roseanne?",
+        "plan": {
+          "question": "My First Mister co-stars an actor who was best known for his role as what character on the TV series Roseanne?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Identify co-star of My First Mister",
+              "task_type": "fact_lookup",
+              "question": "Who co-starred in the movie 'My First Mister'?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the co-star of the movie 'My First Mister'."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "actor_name"
+                ],
+                "properties": {
+                  "actor_name": {
+                    "type": "string",
+                    "description": "The name of the co-star of the movie 'My First Mister'."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Determine actor's notable role in Roseanne",
+              "task_type": "fact_lookup",
+              "question": "What character did {q1.actor_name} play on the TV series 'Roseanne'?",
+              "operation": "answer",
+              "depends_on": [
+                "q1"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Determine the character played by {q1.actor_name} on the TV series 'Roseanne'."
+              },
+              "input_map": {
+                "actor_name": "q1.actor_name"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "character_name"
+                ],
+                "properties": {
+                  "character_name": {
+                    "type": "string",
+                    "description": "The character name played by the actor on 'Roseanne'."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q3",
+              "label": "Final Answer",
+              "task_type": "synthesis",
+              "question": "What character was the actor best known for on 'Roseanne'?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Based on the information, the actor is best known for playing the character {q2.character_name} on 'Roseanne'."
+              },
+              "input_map": {
+                "character_name": "q2.character_name"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The character the actor is best known for on 'Roseanne'."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q3"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "q2"
+            ]
+          },
+          {
+            "index": 3,
+            "node_ids": [
+              "q3"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "Identify co-star of My First Mister",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Who co-starred in the movie 'My First Mister'?",
+            "rendered_prompt": "Identify the co-star of the movie 'My First Mister'.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"actor_name\"\n  ],\n  \"properties\": {\n    \"actor_name\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the co-star of the movie 'My First Mister'.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"actor_name\": \"Albert Brooks\"\n}",
+            "parsed_output": {
+              "actor_name": "Albert Brooks"
+            },
+            "returned_value": {
+              "actor_name": "Albert Brooks"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-06-02T10:34:27.655557+00:00",
+            "finished_at": "2026-06-02T10:34:28.503499+00:00",
+            "duration_ms": 847.9597079567611,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Determine actor's notable role in Roseanne",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {
+              "actor_name": "Albert Brooks"
+            },
+            "resolved_question": "What character did Albert Brooks play on the TV series 'Roseanne'?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"actor_name\": \"Albert Brooks\"\n}\n\nDetermine the character played by Albert Brooks on the TV series 'Roseanne'.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"character_name\"\n  ],\n  \"properties\": {\n    \"character_name\": {\n      \"type\": \"string\",\n      \"description\": \"The character name played by the actor on 'Roseanne'.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"character_name\": \"Albert Brooks did not appear on the TV series 'Roseanne'.\"\n}",
+            "parsed_output": {
+              "character_name": "Albert Brooks did not appear on the TV series 'Roseanne'."
+            },
+            "returned_value": {
+              "character_name": "Albert Brooks did not appear on the TV series 'Roseanne'."
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-06-02T10:34:28.504729+00:00",
+            "finished_at": "2026-06-02T10:34:29.371624+00:00",
+            "duration_ms": 866.9012080645189,
+            "error": null
+          },
+          {
+            "node_id": "q3",
+            "label": "Final Answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "character_name": "Albert Brooks did not appear on the TV series 'Roseanne'."
+            },
+            "resolved_question": "What character was the actor best known for on 'Roseanne'?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"character_name\": \"Albert Brooks did not appear on the TV series 'Roseanne'.\"\n}\n\nBased on the information, the actor is best known for playing the character Albert Brooks did not appear on the TV series 'Roseanne'. on 'Roseanne'.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The character the actor is best known for on 'Roseanne'.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"Albert Brooks did not appear on the TV series 'Roseanne'.\"\n}",
+            "parsed_output": {
+              "answer": "Albert Brooks did not appear on the TV series 'Roseanne'."
+            },
+            "returned_value": {
+              "answer": "Albert Brooks did not appear on the TV series 'Roseanne'."
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-06-02T10:34:29.377447+00:00",
+            "finished_at": "2026-06-02T10:34:30.119576+00:00",
+            "duration_ms": 742.1319580171257,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Albert Brooks did not appear on the TV series 'Roseanne'."
+        },
+        "status": "succeeded",
+        "total_duration_ms": 2464.480624999851,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o-mini",
+            "model_env": "AZURE_OPENAI_MODEL",
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 45.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Identify co-star of My First Mister\\nfact_lookup\\nsucceeded\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: Determine actor's notable role in Roseanne\\nfact_lookup\\nsucceeded\"]\n  click q2 dagqaSelectGraphNode\n  q1 --> q2\n  q3[\"q3: Final Answer\\nsynthesis\\nsucceeded\"]\n  click q3 dagqaSelectGraphNode\n  q2 --> q3"
+      },
+      "error": null
+    },
+    {
+      "id": "5aba7d8655429901930fa7ec",
+      "question": "Where is the University Joe Odom played football for located?",
+      "gold_answer": "West Lafayette, Indiana",
+      "prediction": "West Lafayette, Indiana, United States",
+      "exact_match": 0.0,
+      "f1": 0.7499999999999999,
+      "latency_ms": 34465.08395904675,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 3,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "run_trace": {
+        "run_id": "ce57d74d-3dd1-45a6-9811-4d566567e7ea",
+        "question": "Where is the University Joe Odom played football for located?",
+        "plan": {
+          "question": "Where is the University Joe Odom played football for located?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Identify University",
+              "task_type": "fact_lookup",
+              "question": "Which university did Joe Odom play football for?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the university where Joe Odom played football."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "university"
+                ],
+                "properties": {
+                  "university": {
+                    "type": "string",
+                    "description": "The name of the university where Joe Odom played football."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Locate University",
+              "task_type": "fact_lookup",
+              "question": "Where is {q1.university} located?",
+              "operation": "answer",
+              "depends_on": [
+                "q1"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Determine the location of the university named {q1.university}."
+              },
+              "input_map": {
+                "university": "q1.university"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "location"
+                ],
+                "properties": {
+                  "location": {
+                    "type": "string",
+                    "description": "The location of the specified university."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q3",
+              "label": "Final Answer",
+              "task_type": "synthesis",
+              "question": "Where is the University Joe Odom played football for located?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Based on the information, the university Joe Odom played football for is located in {q2.location}."
+              },
+              "input_map": {
+                "location": "q2.location"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The location of the university Joe Odom played football for."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q3"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "q2"
+            ]
+          },
+          {
+            "index": 3,
+            "node_ids": [
+              "q3"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "Identify University",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Which university did Joe Odom play football for?",
+            "rendered_prompt": "Identify the university where Joe Odom played football.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"university\"\n  ],\n  \"properties\": {\n    \"university\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the university where Joe Odom played football.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"university\": \"Purdue University\"\n}",
+            "parsed_output": {
+              "university": "Purdue University"
+            },
+            "returned_value": {
+              "university": "Purdue University"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-06-02T10:34:33.884121+00:00",
+            "finished_at": "2026-06-02T10:34:44.553094+00:00",
+            "duration_ms": 10668.963541975245,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Locate University",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {
+              "university": "Purdue University"
+            },
+            "resolved_question": "Where is Purdue University located?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"university\": \"Purdue University\"\n}\n\nDetermine the location of the university named Purdue University.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"location\"\n  ],\n  \"properties\": {\n    \"location\": {\n      \"type\": \"string\",\n      \"description\": \"The location of the specified university.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"location\": \"West Lafayette, Indiana, United States\"\n}",
+            "parsed_output": {
+              "location": "West Lafayette, Indiana, United States"
+            },
+            "returned_value": {
+              "location": "West Lafayette, Indiana, United States"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-06-02T10:34:44.553402+00:00",
+            "finished_at": "2026-06-02T10:35:01.080413+00:00",
+            "duration_ms": 16526.965750032105,
+            "error": null
+          },
+          {
+            "node_id": "q3",
+            "label": "Final Answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "location": "West Lafayette, Indiana, United States"
+            },
+            "resolved_question": "Where is the University Joe Odom played football for located?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"location\": \"West Lafayette, Indiana, United States\"\n}\n\nBased on the information, the university Joe Odom played football for is located in West Lafayette, Indiana, United States.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The location of the university Joe Odom played football for.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"West Lafayette, Indiana, United States\"\n}",
+            "parsed_output": {
+              "answer": "West Lafayette, Indiana, United States"
+            },
+            "returned_value": {
+              "answer": "West Lafayette, Indiana, United States"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-06-02T10:35:01.080620+00:00",
+            "finished_at": "2026-06-02T10:35:04.584299+00:00",
+            "duration_ms": 3503.7115829763934,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "West Lafayette, Indiana, United States"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 30700.692458078265,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o-mini",
+            "model_env": "AZURE_OPENAI_MODEL",
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 45.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Identify University\\nfact_lookup\\nsucceeded\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: Locate University\\nfact_lookup\\nsucceeded\"]\n  click q2 dagqaSelectGraphNode\n  q1 --> q2\n  q3[\"q3: Final Answer\\nsynthesis\\nsucceeded\"]\n  click q3 dagqaSelectGraphNode\n  q2 --> q3"
+      },
+      "error": null
+    }
+  ],
+  "metrics": {
+    "example_count": 3.0,
+    "success_count": 3.0,
+    "failure_count": 0.0,
+    "error_count": 0.0,
+    "exact_match": 0.0,
+    "f1": 0.24999999999999997,
+    "avg_latency_ms": 17668.882083691034,
+    "p50_latency_ms": 10338.842625031248,
+    "total_llm_call_count": 12.0,
+    "avg_llm_call_count": 4.0,
+    "avg_node_count": 3.0,
+    "avg_graph_depth": 2.6666666666666665,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.0,
+    "total_runtime_ms": 54653.51779200137
+  }
+}

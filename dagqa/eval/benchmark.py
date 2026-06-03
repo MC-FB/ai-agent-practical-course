@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from dagqa.client import DagQaClient
 from dagqa.eval.hotpot_loader import (
@@ -18,7 +18,13 @@ from dagqa.eval.hotpot_loader import (
 )
 from dagqa.eval.metrics import answer_f1, exact_match
 from dagqa.graph.render import render_mermaid
-from dagqa.schemas import LLMRequest
+from dagqa.nodes.prompts import render_evidence_section
+from dagqa.schemas import (
+    EvidenceCitationEvaluation,
+    EvidenceSelection,
+    GoldSupportingFact,
+    LLMRequest,
+)
 
 
 class BenchmarkRecord(BaseModel):
@@ -35,6 +41,12 @@ class BenchmarkRecord(BaseModel):
     structural_valid: bool | None = None
     structural_issues: list[str] = []
     structural_failure: bool = False
+    gold_supporting_facts: list[GoldSupportingFact] = Field(default_factory=list)
+    evidence_citation_count: int | None = None
+    correct_evidence_citation_count: int | None = None
+    wrong_evidence_citation_count: int | None = None
+    wrong_supporting_text_rate: float | None = None
+    gold_supporting_fact_recall: float | None = None
     run_trace: dict[str, Any] | None = None
     error: str | None = None
 
@@ -109,10 +121,19 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
     started = time.perf_counter()
     try:
         if system == "direct_llm":
+            evidence = EvidenceSelection(
+                strategy="all_documents",
+                total_available=len(example.context),
+                documents=example.context,
+            )
             response = await client.llm.complete(
                 LLMRequest(
                     system="Answer the question concisely.",
-                    prompt=f"Question: {example.question}\nReturn only the answer.",
+                    prompt=(
+                        f"Question: {example.question}"
+                        f"{render_evidence_section(evidence, require_citations=False)}"
+                        "\nReturn only the answer."
+                    ),
                 )
             )
             prediction = response.text.strip()
@@ -123,7 +144,8 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
             structural_issues = []
             structural_failure = False
         else:
-            run = await client.ask(example.question)
+            run = await client.ask(example.question, evidence_documents=example.context)
+            evidence_metrics = _evaluate_evidence_citations(run, example.supporting_facts)
             run_trace = run.model_dump(mode="json")
             run_trace["mermaid"] = render_mermaid(run.plan, run.nodes)
             prediction = _extract_answer(run.final_answer)
@@ -135,6 +157,7 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
             structural_failure = run.status.value != "succeeded"
         if system == "direct_llm":
             run_trace = None
+            evidence_metrics = {}
         return BenchmarkRecord(
             id=example.id,
             question=example.question,
@@ -149,6 +172,8 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
             structural_valid=structural_valid,
             structural_issues=structural_issues,
             structural_failure=structural_failure,
+            gold_supporting_facts=example.supporting_facts,
+            **evidence_metrics,
             run_trace=run_trace,
         )
     except Exception as exc:
@@ -209,6 +234,63 @@ def _structural_issues(run: Any) -> list[str]:
     return issues
 
 
+def _evaluate_evidence_citations(
+    run: Any,
+    gold_supporting_facts: list[GoldSupportingFact],
+) -> dict[str, int | float | None]:
+    gold_by_key = {
+        (_normalize_title(fact.title), fact.sentence_index): fact for fact in gold_supporting_facts
+    }
+    matched_gold_keys: set[tuple[str, int]] = set()
+    citation_count = 0
+    correct_count = 0
+
+    for trace in run.nodes:
+        evaluations = []
+        evidence_titles = {
+            document.id: document.title
+            for document in (
+                trace.supporting_evidence.documents if trace.supporting_evidence is not None else []
+            )
+        }
+        for citation in trace.evidence_citations:
+            citation_count += 1
+            cited_title = evidence_titles.get(citation.document_id, citation.title)
+            matched = [
+                gold_by_key[key]
+                for sentence_index in citation.sentence_indices
+                if (key := (_normalize_title(cited_title), sentence_index)) in gold_by_key
+            ]
+            matched_gold_keys.update(
+                (_normalize_title(fact.title), fact.sentence_index) for fact in matched
+            )
+            if matched:
+                correct_count += 1
+            evaluations.append(
+                EvidenceCitationEvaluation(
+                    citation=citation,
+                    matches_gold=bool(matched),
+                    matched_gold_facts=matched,
+                )
+            )
+        trace.evidence_citation_evaluations = evaluations
+
+    wrong_count = citation_count - correct_count
+    return {
+        "evidence_citation_count": citation_count,
+        "correct_evidence_citation_count": correct_count,
+        "wrong_evidence_citation_count": wrong_count,
+        "wrong_supporting_text_rate": wrong_count / citation_count if citation_count else None,
+        "gold_supporting_fact_recall": (
+            len(matched_gold_keys) / len(gold_by_key) if gold_by_key else None
+        ),
+    }
+
+
+def _normalize_title(title: str) -> str:
+    return title.strip().casefold()
+
+
 def _aggregate(records: list[BenchmarkRecord]) -> dict[str, float]:
     if not records:
         return {}
@@ -223,6 +305,26 @@ def _aggregate(records: list[BenchmarkRecord]) -> dict[str, float]:
     node_count_records = [record.node_count for record in records if record.node_count is not None]
     graph_depth_records = [
         record.graph_depth for record in records if record.graph_depth is not None
+    ]
+    citation_records = [
+        record.evidence_citation_count
+        for record in records
+        if record.evidence_citation_count is not None
+    ]
+    correct_citation_records = [
+        record.correct_evidence_citation_count
+        for record in records
+        if record.correct_evidence_citation_count is not None
+    ]
+    wrong_citation_records = [
+        record.wrong_evidence_citation_count
+        for record in records
+        if record.wrong_evidence_citation_count is not None
+    ]
+    gold_recall_records = [
+        record.gold_supporting_fact_recall
+        for record in records
+        if record.gold_supporting_fact_recall is not None
     ]
     sorted_latencies = sorted(record.latency_ms for record in records)
     p50_latency_ms = sorted_latencies[len(sorted_latencies) // 2]
@@ -251,6 +353,15 @@ def _aggregate(records: list[BenchmarkRecord]) -> dict[str, float]:
         / len(records),
         "structural_failure_rate": sum(record.structural_failure for record in records)
         / len(records),
+        "total_evidence_citation_count": float(sum(citation_records)),
+        "correct_evidence_citation_count": float(sum(correct_citation_records)),
+        "wrong_evidence_citation_count": float(sum(wrong_citation_records)),
+        "wrong_supporting_text_rate": (
+            sum(wrong_citation_records) / sum(citation_records) if sum(citation_records) else 0.0
+        ),
+        "avg_gold_supporting_fact_recall": (
+            sum(gold_recall_records) / len(gold_recall_records) if gold_recall_records else 0.0
+        ),
     }
 
 

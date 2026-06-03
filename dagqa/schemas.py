@@ -77,6 +77,37 @@ class ValidationResult(BaseModel):
     errors: list[str] = Field(default_factory=list)
 
 
+class EvidenceDocument(BaseModel):
+    id: str
+    title: str
+    text: str
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class EvidenceSelection(BaseModel):
+    strategy: str
+    total_available: int
+    documents: list[EvidenceDocument] = Field(default_factory=list)
+
+
+class EvidenceCitation(BaseModel):
+    document_id: str
+    title: str
+    sentence_indices: list[int] = Field(default_factory=list)
+    fact: str
+
+
+class GoldSupportingFact(BaseModel):
+    title: str
+    sentence_index: int
+
+
+class EvidenceCitationEvaluation(BaseModel):
+    citation: EvidenceCitation
+    matches_gold: bool
+    matched_gold_facts: list[GoldSupportingFact] = Field(default_factory=list)
+
+
 class NodeTrace(BaseModel):
     node_id: str
     label: str
@@ -90,6 +121,9 @@ class NodeTrace(BaseModel):
     parsed_output: dict[str, Any] | None = None
     returned_value: dict[str, Any] | None = None
     validation: ValidationResult = Field(default_factory=lambda: ValidationResult(valid=True))
+    supporting_evidence: EvidenceSelection | None = None
+    evidence_citations: list[EvidenceCitation] = Field(default_factory=list)
+    evidence_citation_evaluations: list[EvidenceCitationEvaluation] = Field(default_factory=list)
     repair_attempts: int = 0
     started_at: str | None = None
     finished_at: str | None = None

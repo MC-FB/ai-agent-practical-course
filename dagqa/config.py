@@ -30,7 +30,7 @@ class PlannerConfig(BaseModel):
 
 class ExecutionConfig(BaseModel):
     max_parallel_nodes: int = Field(default=4, ge=1)
-    node_timeout_seconds: float = Field(default=45.0, gt=0)
+    node_timeout_seconds: float = Field(default=120.0, gt=0)
     node_repair_rounds: int = Field(default=1, ge=0)
     fail_fast: bool = False
 

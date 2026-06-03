@@ -419,12 +419,7 @@ def list_benchmark_results() -> dict[str, Any]:
     output_dir = _benchmark_output_dir()
     output_dir.mkdir(parents=True, exist_ok=True)
     items = []
-    result_paths = sorted(
-        output_dir.glob("*.json"),
-        key=lambda item: item.stat().st_mtime,
-        reverse=True,
-    )
-    for path in result_paths:
+    for path in output_dir.glob("*.json"):
         try:
             data = json.loads(path.read_text())
         except Exception:
@@ -444,6 +439,10 @@ def list_benchmark_results() -> dict[str, Any]:
                 "path": str(path),
             }
         )
+    items.sort(
+        key=lambda item: (item.get("created_at") or "", item.get("run_id") or ""),
+        reverse=True,
+    )
     return {"results": items}
 
 
@@ -523,6 +522,12 @@ def _normalize_benchmark_record(record: dict[str, Any]) -> dict[str, Any]:
         if record.get("structural_valid") is not None
         else structure.get("valid"),
         "structural_issues": record.get("structural_issues") or structure.get("problems", []),
+        "gold_supporting_facts": record.get("gold_supporting_facts") or [],
+        "evidence_citation_count": record.get("evidence_citation_count"),
+        "correct_evidence_citation_count": record.get("correct_evidence_citation_count"),
+        "wrong_evidence_citation_count": record.get("wrong_evidence_citation_count"),
+        "wrong_supporting_text_rate": record.get("wrong_supporting_text_rate"),
+        "gold_supporting_fact_recall": record.get("gold_supporting_fact_recall"),
         "run_trace": run_trace,
         "error": record.get("error"),
     }

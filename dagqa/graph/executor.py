@@ -11,7 +11,7 @@ from dagqa.llm.base import LanguageModel
 from dagqa.nodes.runner import NodeRunner
 from dagqa.planning.normalizer import normalize_plan_dependencies
 from dagqa.planning.validator import validate_plan
-from dagqa.schemas import DagPlan, NodeStatus, NodeTrace, RunTrace, SchedulerWave
+from dagqa.schemas import DagPlan, EvidenceDocument, NodeStatus, NodeTrace, RunTrace, SchedulerWave
 
 
 class ExecutionError(RuntimeError):
@@ -25,7 +25,11 @@ class DagExecutor:
         self.scheduler = Scheduler()
         self.runner = NodeRunner(llm, config.execution, config.llm)
 
-    async def execute(self, plan: DagPlan) -> RunTrace:
+    async def execute(
+        self,
+        plan: DagPlan,
+        evidence_documents: list[EvidenceDocument] | None = None,
+    ) -> RunTrace:
         plan = normalize_plan_dependencies(plan)
         validation = validate_plan(plan, self.config.planner)
         if not validation.valid:
@@ -42,7 +46,7 @@ class DagExecutor:
         async def run_node(node_id: str) -> NodeTrace:
             async with semaphore:
                 return await asyncio.wait_for(
-                    self.runner.run(by_id[node_id], outputs),
+                    self.runner.run(by_id[node_id], outputs, evidence_documents),
                     timeout=self.config.execution.node_timeout_seconds,
                 )
 

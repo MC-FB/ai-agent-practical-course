@@ -10,9 +10,43 @@ export type NodeTrace = {
   raw_response?: string;
   parsed_output?: Record<string, unknown>;
   returned_value?: Record<string, unknown>;
+  supporting_evidence?: EvidenceSelection | null;
+  evidence_citations?: EvidenceCitation[];
+  evidence_citation_evaluations?: EvidenceCitationEvaluation[];
   validation: { valid: boolean; errors: string[] };
   duration_ms?: number;
   error?: string;
+};
+
+export type EvidenceDocument = {
+  id: string;
+  title: string;
+  text: string;
+  metadata: Record<string, unknown>;
+};
+
+export type EvidenceSelection = {
+  strategy: string;
+  total_available: number;
+  documents: EvidenceDocument[];
+};
+
+export type EvidenceCitation = {
+  document_id: string;
+  title: string;
+  sentence_indices: number[];
+  fact: string;
+};
+
+export type GoldSupportingFact = {
+  title: string;
+  sentence_index: number;
+};
+
+export type EvidenceCitationEvaluation = {
+  citation: EvidenceCitation;
+  matches_gold: boolean;
+  matched_gold_facts: GoldSupportingFact[];
 };
 
 export type DagNode = {
@@ -113,6 +147,12 @@ export type HotpotBenchmarkRecord = {
   structural_valid?: boolean | null;
   structural_issues?: string[];
   structural_failure: boolean;
+  gold_supporting_facts?: GoldSupportingFact[];
+  evidence_citation_count?: number | null;
+  correct_evidence_citation_count?: number | null;
+  wrong_evidence_citation_count?: number | null;
+  wrong_supporting_text_rate?: number | null;
+  gold_supporting_fact_recall?: number | null;
   run_trace?: RunTrace | null;
   error?: string | null;
 };
