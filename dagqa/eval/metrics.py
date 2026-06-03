@@ -58,6 +58,9 @@ def answer_f1(prediction: str, ground_truth: str) -> float:
     return 2 * precision * recall / (precision + recall)
 
 def cosine_sim(prediction: str, ground_truth: str) -> float:
+    if prediction == ground_truth:
+        return 1.0
+    
     if prediction == "" or ground_truth == "":
         return 0.0
     
