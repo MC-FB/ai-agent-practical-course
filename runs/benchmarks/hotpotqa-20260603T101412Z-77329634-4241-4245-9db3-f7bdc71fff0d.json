@@ -1,0 +1,2050 @@
+{
+  "run_id": "77329634-4241-4245-9db3-f7bdc71fff0d",
+  "system": "dag_agent",
+  "limit": 3,
+  "model": "azure/gpt-4o-mini",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "dataset_size": 7405,
+  "seed": 1265650976,
+  "created_at": "2026-06-03T10:14:12Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260603T101412Z-77329634-4241-4245-9db3-f7bdc71fff0d.json",
+  "total_runtime_ms": 275450.0223750001,
+  "records": [
+    {
+      "id": "5ac19f405542991316484b5b",
+      "question": "Pandikona and Berger Blanc Suisse are both what kinds of animals?",
+      "gold_answer": "dogs",
+      "prediction": "dog",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 36426.19189199991,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 2,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Pandikona",
+          "sentence_index": 3
+        },
+        {
+          "title": "Berger Blanc Suisse",
+          "sentence_index": 1
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 0,
+      "wrong_evidence_citation_count": 2,
+      "wrong_supporting_text_rate": 1.0,
+      "gold_supporting_fact_recall": 0.0,
+      "run_trace": {
+        "run_id": "22b6042e-cfba-4609-8587-ec8e4f10f692",
+        "question": "Pandikona and Berger Blanc Suisse are both what kinds of animals?",
+        "plan": {
+          "question": "Pandikona and Berger Blanc Suisse are both what kinds of animals?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Identify Pandikona",
+              "task_type": "fact_lookup",
+              "question": "What kind of animal is a Pandikona?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the type of animal for 'Pandikona'."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "animal_type"
+                ],
+                "properties": {
+                  "animal_type": {
+                    "type": "string",
+                    "description": "The type of animal Pandikona is."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Identify Berger Blanc Suisse",
+              "task_type": "fact_lookup",
+              "question": "What kind of animal is a Berger Blanc Suisse?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the type of animal for 'Berger Blanc Suisse'."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "animal_type"
+                ],
+                "properties": {
+                  "animal_type": {
+                    "type": "string",
+                    "description": "The type of animal Berger Blanc Suisse is."
+                  }
+                }
+              }
+            },
+            {
+              "id": "s1",
+              "label": "Synthesize animal types",
+              "task_type": "synthesis",
+              "question": "Pandikona and Berger Blanc Suisse are both what kinds of animals?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q1",
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Based on the information: Pandikona is a {q1.animal_type} and Berger Blanc Suisse is a {q2.animal_type}, determine what kinds of animals they are collectively."
+              },
+              "input_map": {
+                "pandikona_type": "q1.animal_type",
+                "berger_blanc_suisse_type": "q2.animal_type"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The kinds of animals Pandikona and Berger Blanc Suisse are."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "s1"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1",
+              "q2"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "s1"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "Identify Pandikona",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "What kind of animal is a Pandikona?",
+            "rendered_prompt": "Identify the type of animal for 'Pandikona'.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Jurassic Park Builder\n  (0) Jurassic Park Builder is an Apple and later Android and Facebook application produced by Ludia in 2012.\n  (1)  It is a construction and management simulation game in which the player builds a theme park featuring extinct animals.\n  (2)  Three kinds of parks can be made: \"Jurassic Park\", located on Isla Nublar, featuring dinosaurs and other Mesozoic animals; \"Aquatic Park\", located on a seabed featuring extinct aquatic animals; and \"Glacier Park\", located in Patagonia, featuring extinct animals from the Cenozoic era along with some Mesozoic crocodilians.\n  (3)  The game is similar to \"\" and \"\".\n\nDocument ID: context-1\nTitle: Pandikona\n  (0) The Pandikona is a primitive-type hunting dog from Pattikonda taluk-Kurnool district of Andhra Pradesh and Madhya Pradesh state, India.\n  (1)  \"Pandikona\" is a medium size sight hound which is adapted to harsh climatic conditions of Kurnool district.\n  (2)  This breed is associated with shepherd families of that region.\n  (3)  PandiKona dogs need very little care.\n\nDocument ID: context-2\nTitle: Progression of Animals\n  (0) Progression of Animals (or \"On the Gait of Animals\"; Greek: Περὶ πορείας ζῴων ; Latin: \"De incessu animalium\" ) is one of Aristotle's major texts on biology.\n  (1)  It gives details of gait and movement in various kinds of animals.\n\nDocument ID: context-3\nTitle: On the Soul\n  (0) On the Soul (Greek Περὶ Ψυχῆς , \"Peri Psuchēs\"; Latin \"De Anima\") is a major treatise written by Aristotle c.350 B.C..\n  (1)  Although its topic is the soul, it is not about spirituality but rather a work in what \"might best be described as biology\" .\n  (2)  His discussion centres on the kinds of souls possessed by different kinds of living things, distinguished by their different operations.\n  (3)  Thus plants have the capacity for nourishment and reproduction, the minimum that must be possessed by any kind of living organism.\n  (4)  Lower animals have, in addition, the powers of sense-perception and self-motion (action) Humans have all these as well as intellect.\n\nDocument ID: context-4\nTitle: Berger Blanc Suisse\n  (0) The Berger Blanc Suisse (English: White Swiss Shepherd , German: \"Weisser Schweizer Schäferhund\" , Italian: \"Pastore Svizzero Bianco\" ) is a breed of dog from Switzerland.\n  (1)  It is of the same origins as the White Shepherd and the German Shepherd Dog, and has been recognized as a separate breed by the FCI.\n\nDocument ID: context-5\nTitle: Piranha: Wolf In The Water\n  (0) Piranha: Wolf In The Water is a 1999 educational film.\n  (1)  It was shown both in IMAX3D and normal versions.\n  (2)  It covers different kinds of piranhas and tries to uncover the mystery behind those animals, which are often described in an overly sensationalist way.\n  (3)  This movie is part of the Killer Instincts series, a movie series covering different kinds of predators.\n\nDocument ID: context-6\nTitle: Prosthetic Neuronal Memory Silicon Chips\n  (0) Prosthetic Neuronal Memory Silicon Chip is a device that imitates the brain's process of creating long-term memories.\n  (1)  This device was designed by Theodore Berger, a Biomedical Engineer and Neurologist at University of Southern California.\n  (2)  Berger started to work on this chip in the early 1990s.\n  (3)  He and his colleagues have been able to implant electrodes into rats and monkeys that restore their memories after previously being impaired.\n  (4)  While researchers are well into developing an actual memory prosthesis in animals, they still need to show that their chips can form long-term memories in many different behavioral situations.\n  (5)  Berger hopes to eventually use these chips as electronic implants for humans whose brains that suffer from diseases such as Alzheimer's that disrupt neuronal networks.\n\nDocument ID: context-7\nTitle: Tentacle\n  (0) In zoology, a tentacle is a flexible, mobile, elongated organ present in some species of animals, most of them invertebrates.\n  (1)  In animal anatomy, tentacles usually occur in one or more pairs.\n  (2)  Anatomically, the tentacles of animals work mainly like muscular hydrostats. Most forms of tentacles are used for grasping and feeding.\n  (3)  Many are sensory organs, variously receptive to touch, vision, or to the smell or taste of particular foods or threats.\n  (4)  Examples of such tentacles are the \"eye stalks\" of various kinds of snails.\n  (5)  Some kinds of tentacles have both sensory and manipulatory functions.\n\nDocument ID: context-8\nTitle: Shopnopuri artificial amusement park\n  (0) Shopnopuri artificial amusement park is an artificial sport for tourist situated in Dinajpur district of Rangpur division in Bangladesh.\n  (1)  There are Rides, Zoo, Rest house, Garden, Lakes, Fish World, ‘Rongdhonu’ Art Gallery, ‘Moha Maya Indrojal’ and central Picnic center and countless shopping area.\n  (2)  One can find, Fish World with artificial fishes and various wet animals.\n  (3)  Small Rides for activities.\n  (4)  Animal Kingdom, for artificial statue of some animals like Amy, Flamingo, Dinosaur, Pegasus and many other animals.\n  (5)  ‘Rongdhonu’ Art Gallery, for many different types of sculptures and paintings.\n  (6)  At ‘Moha Maya Indrojal’, can enjoy magic.\n  (7)  At Zoo, full of several kinds of animals.\n  (8)  Anyone can enjoy his full day with family watching this artificial and natural beauties and activities.\n  (9)  It is also an idle Picnic spot where lots of picnic parties come every year.\n\nDocument ID: context-9\nTitle: Ticks of domestic animals\n  (0) Ticks of domestic animals directly cause poor health and loss of production to their hosts by many parasitic mechanisms.\n  (1)  Ticks also transmit numerous kinds of viruses, bacteria, and protozoa between domestic animals.\n  (2)  These microbes cause diseases which can be severely debilitating or fatal to domestic animals, and may also affect humans.\n  (3)  Ticks are especially important to domestic animals in tropical and subtropical countries, where the warm climate enables many species of ticks to flourish.\n  (4)  Also, the large populations of wild animals in warm countries provide a reservoir of ticks and infective microbes that spread to domestic animals.\n  (5)  Farmers of livestock animals use many methods to control ticks, and related treatments are used to reduce infestation of companion animals.\n  (6)  Veterinarians and animal health agencies work at private, national, and international scales to reduce the harm caused by ticks and their associated diseases.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"animal_type\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"animal_type\": {\n      \"type\": \"string\",\n      \"description\": \"The type of animal Pandikona is.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"animal_type\": \"dog\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-1\",\n      \"title\": \"Pandikona\",\n      \"sentence_indices\": [0],\n      \"fact\": \"The Pandikona is a primitive-type hunting dog from Pattikonda taluk-Kurnool district of Andhra Pradesh and Madhya Pradesh state, India.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "animal_type": "dog",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-1",
+                  "title": "Pandikona",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "The Pandikona is a primitive-type hunting dog from Pattikonda taluk-Kurnool district of Andhra Pradesh and Madhya Pradesh state, India."
+                }
+              ]
+            },
+            "returned_value": {
+              "animal_type": "dog"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Jurassic Park Builder",
+                  "text": "Jurassic Park Builder is an Apple and later Android and Facebook application produced by Ludia in 2012. It is a construction and management simulation game in which the player builds a theme park featuring extinct animals. Three kinds of parks can be made: \"Jurassic Park\", located on Isla Nublar, featuring dinosaurs and other Mesozoic animals; \"Aquatic Park\", located on a seabed featuring extinct aquatic animals; and \"Glacier Park\", located in Patagonia, featuring extinct animals from the Cenozoic era along with some Mesozoic crocodilians. The game is similar to \"\" and \"\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Jurassic Park Builder is an Apple and later Android and Facebook application produced by Ludia in 2012.",
+                      " It is a construction and management simulation game in which the player builds a theme park featuring extinct animals.",
+                      " Three kinds of parks can be made: \"Jurassic Park\", located on Isla Nublar, featuring dinosaurs and other Mesozoic animals; \"Aquatic Park\", located on a seabed featuring extinct aquatic animals; and \"Glacier Park\", located in Patagonia, featuring extinct animals from the Cenozoic era along with some Mesozoic crocodilians.",
+                      " The game is similar to \"\" and \"\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Pandikona",
+                  "text": "The Pandikona is a primitive-type hunting dog from Pattikonda taluk-Kurnool district of Andhra Pradesh and Madhya Pradesh state, India. \"Pandikona\" is a medium size sight hound which is adapted to harsh climatic conditions of Kurnool district. This breed is associated with shepherd families of that region. PandiKona dogs need very little care.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "The Pandikona is a primitive-type hunting dog from Pattikonda taluk-Kurnool district of Andhra Pradesh and Madhya Pradesh state, India.",
+                      " \"Pandikona\" is a medium size sight hound which is adapted to harsh climatic conditions of Kurnool district.",
+                      " This breed is associated with shepherd families of that region.",
+                      " PandiKona dogs need very little care."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Progression of Animals",
+                  "text": "Progression of Animals (or \"On the Gait of Animals\"; Greek: Περὶ πορείας ζῴων ; Latin: \"De incessu animalium\" ) is one of Aristotle's major texts on biology. It gives details of gait and movement in various kinds of animals.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "Progression of Animals (or \"On the Gait of Animals\"; Greek: Περὶ πορείας ζῴων ; Latin: \"De incessu animalium\" ) is one of Aristotle's major texts on biology.",
+                      " It gives details of gait and movement in various kinds of animals."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "On the Soul",
+                  "text": "On the Soul (Greek Περὶ Ψυχῆς , \"Peri Psuchēs\"; Latin \"De Anima\") is a major treatise written by Aristotle c.350 B.C.. Although its topic is the soul, it is not about spirituality but rather a work in what \"might best be described as biology\" . His discussion centres on the kinds of souls possessed by different kinds of living things, distinguished by their different operations. Thus plants have the capacity for nourishment and reproduction, the minimum that must be possessed by any kind of living organism. Lower animals have, in addition, the powers of sense-perception and self-motion (action) Humans have all these as well as intellect.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "On the Soul (Greek Περὶ Ψυχῆς , \"Peri Psuchēs\"; Latin \"De Anima\") is a major treatise written by Aristotle c.350 B.C..",
+                      " Although its topic is the soul, it is not about spirituality but rather a work in what \"might best be described as biology\" .",
+                      " His discussion centres on the kinds of souls possessed by different kinds of living things, distinguished by their different operations.",
+                      " Thus plants have the capacity for nourishment and reproduction, the minimum that must be possessed by any kind of living organism.",
+                      " Lower animals have, in addition, the powers of sense-perception and self-motion (action) Humans have all these as well as intellect."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Berger Blanc Suisse",
+                  "text": "The Berger Blanc Suisse (English: White Swiss Shepherd , German: \"Weisser Schweizer Schäferhund\" , Italian: \"Pastore Svizzero Bianco\" ) is a breed of dog from Switzerland. It is of the same origins as the White Shepherd and the German Shepherd Dog, and has been recognized as a separate breed by the FCI.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "The Berger Blanc Suisse (English: White Swiss Shepherd , German: \"Weisser Schweizer Schäferhund\" , Italian: \"Pastore Svizzero Bianco\" ) is a breed of dog from Switzerland.",
+                      " It is of the same origins as the White Shepherd and the German Shepherd Dog, and has been recognized as a separate breed by the FCI."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Piranha: Wolf In The Water",
+                  "text": "Piranha: Wolf In The Water is a 1999 educational film. It was shown both in IMAX3D and normal versions. It covers different kinds of piranhas and tries to uncover the mystery behind those animals, which are often described in an overly sensationalist way. This movie is part of the Killer Instincts series, a movie series covering different kinds of predators.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Piranha: Wolf In The Water is a 1999 educational film.",
+                      " It was shown both in IMAX3D and normal versions.",
+                      " It covers different kinds of piranhas and tries to uncover the mystery behind those animals, which are often described in an overly sensationalist way.",
+                      " This movie is part of the Killer Instincts series, a movie series covering different kinds of predators."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Prosthetic Neuronal Memory Silicon Chips",
+                  "text": "Prosthetic Neuronal Memory Silicon Chip is a device that imitates the brain's process of creating long-term memories. This device was designed by Theodore Berger, a Biomedical Engineer and Neurologist at University of Southern California. Berger started to work on this chip in the early 1990s. He and his colleagues have been able to implant electrodes into rats and monkeys that restore their memories after previously being impaired. While researchers are well into developing an actual memory prosthesis in animals, they still need to show that their chips can form long-term memories in many different behavioral situations. Berger hopes to eventually use these chips as electronic implants for humans whose brains that suffer from diseases such as Alzheimer's that disrupt neuronal networks.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Prosthetic Neuronal Memory Silicon Chip is a device that imitates the brain's process of creating long-term memories.",
+                      " This device was designed by Theodore Berger, a Biomedical Engineer and Neurologist at University of Southern California.",
+                      " Berger started to work on this chip in the early 1990s.",
+                      " He and his colleagues have been able to implant electrodes into rats and monkeys that restore their memories after previously being impaired.",
+                      " While researchers are well into developing an actual memory prosthesis in animals, they still need to show that their chips can form long-term memories in many different behavioral situations.",
+                      " Berger hopes to eventually use these chips as electronic implants for humans whose brains that suffer from diseases such as Alzheimer's that disrupt neuronal networks."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Tentacle",
+                  "text": "In zoology, a tentacle is a flexible, mobile, elongated organ present in some species of animals, most of them invertebrates. In animal anatomy, tentacles usually occur in one or more pairs. Anatomically, the tentacles of animals work mainly like muscular hydrostats. Most forms of tentacles are used for grasping and feeding. Many are sensory organs, variously receptive to touch, vision, or to the smell or taste of particular foods or threats. Examples of such tentacles are the \"eye stalks\" of various kinds of snails. Some kinds of tentacles have both sensory and manipulatory functions.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "In zoology, a tentacle is a flexible, mobile, elongated organ present in some species of animals, most of them invertebrates.",
+                      " In animal anatomy, tentacles usually occur in one or more pairs.",
+                      " Anatomically, the tentacles of animals work mainly like muscular hydrostats. Most forms of tentacles are used for grasping and feeding.",
+                      " Many are sensory organs, variously receptive to touch, vision, or to the smell or taste of particular foods or threats.",
+                      " Examples of such tentacles are the \"eye stalks\" of various kinds of snails.",
+                      " Some kinds of tentacles have both sensory and manipulatory functions."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Shopnopuri artificial amusement park",
+                  "text": "Shopnopuri artificial amusement park is an artificial sport for tourist situated in Dinajpur district of Rangpur division in Bangladesh. There are Rides, Zoo, Rest house, Garden, Lakes, Fish World, ‘Rongdhonu’ Art Gallery, ‘Moha Maya Indrojal’ and central Picnic center and countless shopping area. One can find, Fish World with artificial fishes and various wet animals. Small Rides for activities. Animal Kingdom, for artificial statue of some animals like Amy, Flamingo, Dinosaur, Pegasus and many other animals. ‘Rongdhonu’ Art Gallery, for many different types of sculptures and paintings. At ‘Moha Maya Indrojal’, can enjoy magic. At Zoo, full of several kinds of animals. Anyone can enjoy his full day with family watching this artificial and natural beauties and activities. It is also an idle Picnic spot where lots of picnic parties come every year.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Shopnopuri artificial amusement park is an artificial sport for tourist situated in Dinajpur district of Rangpur division in Bangladesh.",
+                      " There are Rides, Zoo, Rest house, Garden, Lakes, Fish World, ‘Rongdhonu’ Art Gallery, ‘Moha Maya Indrojal’ and central Picnic center and countless shopping area.",
+                      " One can find, Fish World with artificial fishes and various wet animals.",
+                      " Small Rides for activities.",
+                      " Animal Kingdom, for artificial statue of some animals like Amy, Flamingo, Dinosaur, Pegasus and many other animals.",
+                      " ‘Rongdhonu’ Art Gallery, for many different types of sculptures and paintings.",
+                      " At ‘Moha Maya Indrojal’, can enjoy magic.",
+                      " At Zoo, full of several kinds of animals.",
+                      " Anyone can enjoy his full day with family watching this artificial and natural beauties and activities.",
+                      " It is also an idle Picnic spot where lots of picnic parties come every year."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Ticks of domestic animals",
+                  "text": "Ticks of domestic animals directly cause poor health and loss of production to their hosts by many parasitic mechanisms. Ticks also transmit numerous kinds of viruses, bacteria, and protozoa between domestic animals. These microbes cause diseases which can be severely debilitating or fatal to domestic animals, and may also affect humans. Ticks are especially important to domestic animals in tropical and subtropical countries, where the warm climate enables many species of ticks to flourish. Also, the large populations of wild animals in warm countries provide a reservoir of ticks and infective microbes that spread to domestic animals. Farmers of livestock animals use many methods to control ticks, and related treatments are used to reduce infestation of companion animals. Veterinarians and animal health agencies work at private, national, and international scales to reduce the harm caused by ticks and their associated diseases.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Ticks of domestic animals directly cause poor health and loss of production to their hosts by many parasitic mechanisms.",
+                      " Ticks also transmit numerous kinds of viruses, bacteria, and protozoa between domestic animals.",
+                      " These microbes cause diseases which can be severely debilitating or fatal to domestic animals, and may also affect humans.",
+                      " Ticks are especially important to domestic animals in tropical and subtropical countries, where the warm climate enables many species of ticks to flourish.",
+                      " Also, the large populations of wild animals in warm countries provide a reservoir of ticks and infective microbes that spread to domestic animals.",
+                      " Farmers of livestock animals use many methods to control ticks, and related treatments are used to reduce infestation of companion animals.",
+                      " Veterinarians and animal health agencies work at private, national, and international scales to reduce the harm caused by ticks and their associated diseases."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-1",
+                "title": "Pandikona",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "The Pandikona is a primitive-type hunting dog from Pattikonda taluk-Kurnool district of Andhra Pradesh and Madhya Pradesh state, India."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-1",
+                  "title": "Pandikona",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "The Pandikona is a primitive-type hunting dog from Pattikonda taluk-Kurnool district of Andhra Pradesh and Madhya Pradesh state, India."
+                },
+                "matches_gold": false,
+                "matched_gold_facts": []
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T10:15:18.222599+00:00",
+            "finished_at": "2026-06-03T10:15:20.392785+00:00",
+            "duration_ms": 2170.198042000038,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Identify Berger Blanc Suisse",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "What kind of animal is a Berger Blanc Suisse?",
+            "rendered_prompt": "Identify the type of animal for 'Berger Blanc Suisse'.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Jurassic Park Builder\n  (0) Jurassic Park Builder is an Apple and later Android and Facebook application produced by Ludia in 2012.\n  (1)  It is a construction and management simulation game in which the player builds a theme park featuring extinct animals.\n  (2)  Three kinds of parks can be made: \"Jurassic Park\", located on Isla Nublar, featuring dinosaurs and other Mesozoic animals; \"Aquatic Park\", located on a seabed featuring extinct aquatic animals; and \"Glacier Park\", located in Patagonia, featuring extinct animals from the Cenozoic era along with some Mesozoic crocodilians.\n  (3)  The game is similar to \"\" and \"\".\n\nDocument ID: context-1\nTitle: Pandikona\n  (0) The Pandikona is a primitive-type hunting dog from Pattikonda taluk-Kurnool district of Andhra Pradesh and Madhya Pradesh state, India.\n  (1)  \"Pandikona\" is a medium size sight hound which is adapted to harsh climatic conditions of Kurnool district.\n  (2)  This breed is associated with shepherd families of that region.\n  (3)  PandiKona dogs need very little care.\n\nDocument ID: context-2\nTitle: Progression of Animals\n  (0) Progression of Animals (or \"On the Gait of Animals\"; Greek: Περὶ πορείας ζῴων ; Latin: \"De incessu animalium\" ) is one of Aristotle's major texts on biology.\n  (1)  It gives details of gait and movement in various kinds of animals.\n\nDocument ID: context-3\nTitle: On the Soul\n  (0) On the Soul (Greek Περὶ Ψυχῆς , \"Peri Psuchēs\"; Latin \"De Anima\") is a major treatise written by Aristotle c.350 B.C..\n  (1)  Although its topic is the soul, it is not about spirituality but rather a work in what \"might best be described as biology\" .\n  (2)  His discussion centres on the kinds of souls possessed by different kinds of living things, distinguished by their different operations.\n  (3)  Thus plants have the capacity for nourishment and reproduction, the minimum that must be possessed by any kind of living organism.\n  (4)  Lower animals have, in addition, the powers of sense-perception and self-motion (action) Humans have all these as well as intellect.\n\nDocument ID: context-4\nTitle: Berger Blanc Suisse\n  (0) The Berger Blanc Suisse (English: White Swiss Shepherd , German: \"Weisser Schweizer Schäferhund\" , Italian: \"Pastore Svizzero Bianco\" ) is a breed of dog from Switzerland.\n  (1)  It is of the same origins as the White Shepherd and the German Shepherd Dog, and has been recognized as a separate breed by the FCI.\n\nDocument ID: context-5\nTitle: Piranha: Wolf In The Water\n  (0) Piranha: Wolf In The Water is a 1999 educational film.\n  (1)  It was shown both in IMAX3D and normal versions.\n  (2)  It covers different kinds of piranhas and tries to uncover the mystery behind those animals, which are often described in an overly sensationalist way.\n  (3)  This movie is part of the Killer Instincts series, a movie series covering different kinds of predators.\n\nDocument ID: context-6\nTitle: Prosthetic Neuronal Memory Silicon Chips\n  (0) Prosthetic Neuronal Memory Silicon Chip is a device that imitates the brain's process of creating long-term memories.\n  (1)  This device was designed by Theodore Berger, a Biomedical Engineer and Neurologist at University of Southern California.\n  (2)  Berger started to work on this chip in the early 1990s.\n  (3)  He and his colleagues have been able to implant electrodes into rats and monkeys that restore their memories after previously being impaired.\n  (4)  While researchers are well into developing an actual memory prosthesis in animals, they still need to show that their chips can form long-term memories in many different behavioral situations.\n  (5)  Berger hopes to eventually use these chips as electronic implants for humans whose brains that suffer from diseases such as Alzheimer's that disrupt neuronal networks.\n\nDocument ID: context-7\nTitle: Tentacle\n  (0) In zoology, a tentacle is a flexible, mobile, elongated organ present in some species of animals, most of them invertebrates.\n  (1)  In animal anatomy, tentacles usually occur in one or more pairs.\n  (2)  Anatomically, the tentacles of animals work mainly like muscular hydrostats. Most forms of tentacles are used for grasping and feeding.\n  (3)  Many are sensory organs, variously receptive to touch, vision, or to the smell or taste of particular foods or threats.\n  (4)  Examples of such tentacles are the \"eye stalks\" of various kinds of snails.\n  (5)  Some kinds of tentacles have both sensory and manipulatory functions.\n\nDocument ID: context-8\nTitle: Shopnopuri artificial amusement park\n  (0) Shopnopuri artificial amusement park is an artificial sport for tourist situated in Dinajpur district of Rangpur division in Bangladesh.\n  (1)  There are Rides, Zoo, Rest house, Garden, Lakes, Fish World, ‘Rongdhonu’ Art Gallery, ‘Moha Maya Indrojal’ and central Picnic center and countless shopping area.\n  (2)  One can find, Fish World with artificial fishes and various wet animals.\n  (3)  Small Rides for activities.\n  (4)  Animal Kingdom, for artificial statue of some animals like Amy, Flamingo, Dinosaur, Pegasus and many other animals.\n  (5)  ‘Rongdhonu’ Art Gallery, for many different types of sculptures and paintings.\n  (6)  At ‘Moha Maya Indrojal’, can enjoy magic.\n  (7)  At Zoo, full of several kinds of animals.\n  (8)  Anyone can enjoy his full day with family watching this artificial and natural beauties and activities.\n  (9)  It is also an idle Picnic spot where lots of picnic parties come every year.\n\nDocument ID: context-9\nTitle: Ticks of domestic animals\n  (0) Ticks of domestic animals directly cause poor health and loss of production to their hosts by many parasitic mechanisms.\n  (1)  Ticks also transmit numerous kinds of viruses, bacteria, and protozoa between domestic animals.\n  (2)  These microbes cause diseases which can be severely debilitating or fatal to domestic animals, and may also affect humans.\n  (3)  Ticks are especially important to domestic animals in tropical and subtropical countries, where the warm climate enables many species of ticks to flourish.\n  (4)  Also, the large populations of wild animals in warm countries provide a reservoir of ticks and infective microbes that spread to domestic animals.\n  (5)  Farmers of livestock animals use many methods to control ticks, and related treatments are used to reduce infestation of companion animals.\n  (6)  Veterinarians and animal health agencies work at private, national, and international scales to reduce the harm caused by ticks and their associated diseases.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"animal_type\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"animal_type\": {\n      \"type\": \"string\",\n      \"description\": \"The type of animal Berger Blanc Suisse is.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"animal_type\": \"dog\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-4\",\n      \"title\": \"Berger Blanc Suisse\",\n      \"sentence_indices\": [0],\n      \"fact\": \"The Berger Blanc Suisse (English: White Swiss Shepherd , German: 'Weisser Schweizer Schäferhund' , Italian: 'Pastore Svizzero Bianco') is a breed of dog from Switzerland.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "animal_type": "dog",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-4",
+                  "title": "Berger Blanc Suisse",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "The Berger Blanc Suisse (English: White Swiss Shepherd , German: 'Weisser Schweizer Schäferhund' , Italian: 'Pastore Svizzero Bianco') is a breed of dog from Switzerland."
+                }
+              ]
+            },
+            "returned_value": {
+              "animal_type": "dog"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Jurassic Park Builder",
+                  "text": "Jurassic Park Builder is an Apple and later Android and Facebook application produced by Ludia in 2012. It is a construction and management simulation game in which the player builds a theme park featuring extinct animals. Three kinds of parks can be made: \"Jurassic Park\", located on Isla Nublar, featuring dinosaurs and other Mesozoic animals; \"Aquatic Park\", located on a seabed featuring extinct aquatic animals; and \"Glacier Park\", located in Patagonia, featuring extinct animals from the Cenozoic era along with some Mesozoic crocodilians. The game is similar to \"\" and \"\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Jurassic Park Builder is an Apple and later Android and Facebook application produced by Ludia in 2012.",
+                      " It is a construction and management simulation game in which the player builds a theme park featuring extinct animals.",
+                      " Three kinds of parks can be made: \"Jurassic Park\", located on Isla Nublar, featuring dinosaurs and other Mesozoic animals; \"Aquatic Park\", located on a seabed featuring extinct aquatic animals; and \"Glacier Park\", located in Patagonia, featuring extinct animals from the Cenozoic era along with some Mesozoic crocodilians.",
+                      " The game is similar to \"\" and \"\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Pandikona",
+                  "text": "The Pandikona is a primitive-type hunting dog from Pattikonda taluk-Kurnool district of Andhra Pradesh and Madhya Pradesh state, India. \"Pandikona\" is a medium size sight hound which is adapted to harsh climatic conditions of Kurnool district. This breed is associated with shepherd families of that region. PandiKona dogs need very little care.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "The Pandikona is a primitive-type hunting dog from Pattikonda taluk-Kurnool district of Andhra Pradesh and Madhya Pradesh state, India.",
+                      " \"Pandikona\" is a medium size sight hound which is adapted to harsh climatic conditions of Kurnool district.",
+                      " This breed is associated with shepherd families of that region.",
+                      " PandiKona dogs need very little care."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Progression of Animals",
+                  "text": "Progression of Animals (or \"On the Gait of Animals\"; Greek: Περὶ πορείας ζῴων ; Latin: \"De incessu animalium\" ) is one of Aristotle's major texts on biology. It gives details of gait and movement in various kinds of animals.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "Progression of Animals (or \"On the Gait of Animals\"; Greek: Περὶ πορείας ζῴων ; Latin: \"De incessu animalium\" ) is one of Aristotle's major texts on biology.",
+                      " It gives details of gait and movement in various kinds of animals."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "On the Soul",
+                  "text": "On the Soul (Greek Περὶ Ψυχῆς , \"Peri Psuchēs\"; Latin \"De Anima\") is a major treatise written by Aristotle c.350 B.C.. Although its topic is the soul, it is not about spirituality but rather a work in what \"might best be described as biology\" . His discussion centres on the kinds of souls possessed by different kinds of living things, distinguished by their different operations. Thus plants have the capacity for nourishment and reproduction, the minimum that must be possessed by any kind of living organism. Lower animals have, in addition, the powers of sense-perception and self-motion (action) Humans have all these as well as intellect.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "On the Soul (Greek Περὶ Ψυχῆς , \"Peri Psuchēs\"; Latin \"De Anima\") is a major treatise written by Aristotle c.350 B.C..",
+                      " Although its topic is the soul, it is not about spirituality but rather a work in what \"might best be described as biology\" .",
+                      " His discussion centres on the kinds of souls possessed by different kinds of living things, distinguished by their different operations.",
+                      " Thus plants have the capacity for nourishment and reproduction, the minimum that must be possessed by any kind of living organism.",
+                      " Lower animals have, in addition, the powers of sense-perception and self-motion (action) Humans have all these as well as intellect."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Berger Blanc Suisse",
+                  "text": "The Berger Blanc Suisse (English: White Swiss Shepherd , German: \"Weisser Schweizer Schäferhund\" , Italian: \"Pastore Svizzero Bianco\" ) is a breed of dog from Switzerland. It is of the same origins as the White Shepherd and the German Shepherd Dog, and has been recognized as a separate breed by the FCI.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "The Berger Blanc Suisse (English: White Swiss Shepherd , German: \"Weisser Schweizer Schäferhund\" , Italian: \"Pastore Svizzero Bianco\" ) is a breed of dog from Switzerland.",
+                      " It is of the same origins as the White Shepherd and the German Shepherd Dog, and has been recognized as a separate breed by the FCI."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Piranha: Wolf In The Water",
+                  "text": "Piranha: Wolf In The Water is a 1999 educational film. It was shown both in IMAX3D and normal versions. It covers different kinds of piranhas and tries to uncover the mystery behind those animals, which are often described in an overly sensationalist way. This movie is part of the Killer Instincts series, a movie series covering different kinds of predators.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Piranha: Wolf In The Water is a 1999 educational film.",
+                      " It was shown both in IMAX3D and normal versions.",
+                      " It covers different kinds of piranhas and tries to uncover the mystery behind those animals, which are often described in an overly sensationalist way.",
+                      " This movie is part of the Killer Instincts series, a movie series covering different kinds of predators."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Prosthetic Neuronal Memory Silicon Chips",
+                  "text": "Prosthetic Neuronal Memory Silicon Chip is a device that imitates the brain's process of creating long-term memories. This device was designed by Theodore Berger, a Biomedical Engineer and Neurologist at University of Southern California. Berger started to work on this chip in the early 1990s. He and his colleagues have been able to implant electrodes into rats and monkeys that restore their memories after previously being impaired. While researchers are well into developing an actual memory prosthesis in animals, they still need to show that their chips can form long-term memories in many different behavioral situations. Berger hopes to eventually use these chips as electronic implants for humans whose brains that suffer from diseases such as Alzheimer's that disrupt neuronal networks.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Prosthetic Neuronal Memory Silicon Chip is a device that imitates the brain's process of creating long-term memories.",
+                      " This device was designed by Theodore Berger, a Biomedical Engineer and Neurologist at University of Southern California.",
+                      " Berger started to work on this chip in the early 1990s.",
+                      " He and his colleagues have been able to implant electrodes into rats and monkeys that restore their memories after previously being impaired.",
+                      " While researchers are well into developing an actual memory prosthesis in animals, they still need to show that their chips can form long-term memories in many different behavioral situations.",
+                      " Berger hopes to eventually use these chips as electronic implants for humans whose brains that suffer from diseases such as Alzheimer's that disrupt neuronal networks."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Tentacle",
+                  "text": "In zoology, a tentacle is a flexible, mobile, elongated organ present in some species of animals, most of them invertebrates. In animal anatomy, tentacles usually occur in one or more pairs. Anatomically, the tentacles of animals work mainly like muscular hydrostats. Most forms of tentacles are used for grasping and feeding. Many are sensory organs, variously receptive to touch, vision, or to the smell or taste of particular foods or threats. Examples of such tentacles are the \"eye stalks\" of various kinds of snails. Some kinds of tentacles have both sensory and manipulatory functions.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "In zoology, a tentacle is a flexible, mobile, elongated organ present in some species of animals, most of them invertebrates.",
+                      " In animal anatomy, tentacles usually occur in one or more pairs.",
+                      " Anatomically, the tentacles of animals work mainly like muscular hydrostats. Most forms of tentacles are used for grasping and feeding.",
+                      " Many are sensory organs, variously receptive to touch, vision, or to the smell or taste of particular foods or threats.",
+                      " Examples of such tentacles are the \"eye stalks\" of various kinds of snails.",
+                      " Some kinds of tentacles have both sensory and manipulatory functions."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Shopnopuri artificial amusement park",
+                  "text": "Shopnopuri artificial amusement park is an artificial sport for tourist situated in Dinajpur district of Rangpur division in Bangladesh. There are Rides, Zoo, Rest house, Garden, Lakes, Fish World, ‘Rongdhonu’ Art Gallery, ‘Moha Maya Indrojal’ and central Picnic center and countless shopping area. One can find, Fish World with artificial fishes and various wet animals. Small Rides for activities. Animal Kingdom, for artificial statue of some animals like Amy, Flamingo, Dinosaur, Pegasus and many other animals. ‘Rongdhonu’ Art Gallery, for many different types of sculptures and paintings. At ‘Moha Maya Indrojal’, can enjoy magic. At Zoo, full of several kinds of animals. Anyone can enjoy his full day with family watching this artificial and natural beauties and activities. It is also an idle Picnic spot where lots of picnic parties come every year.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Shopnopuri artificial amusement park is an artificial sport for tourist situated in Dinajpur district of Rangpur division in Bangladesh.",
+                      " There are Rides, Zoo, Rest house, Garden, Lakes, Fish World, ‘Rongdhonu’ Art Gallery, ‘Moha Maya Indrojal’ and central Picnic center and countless shopping area.",
+                      " One can find, Fish World with artificial fishes and various wet animals.",
+                      " Small Rides for activities.",
+                      " Animal Kingdom, for artificial statue of some animals like Amy, Flamingo, Dinosaur, Pegasus and many other animals.",
+                      " ‘Rongdhonu’ Art Gallery, for many different types of sculptures and paintings.",
+                      " At ‘Moha Maya Indrojal’, can enjoy magic.",
+                      " At Zoo, full of several kinds of animals.",
+                      " Anyone can enjoy his full day with family watching this artificial and natural beauties and activities.",
+                      " It is also an idle Picnic spot where lots of picnic parties come every year."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Ticks of domestic animals",
+                  "text": "Ticks of domestic animals directly cause poor health and loss of production to their hosts by many parasitic mechanisms. Ticks also transmit numerous kinds of viruses, bacteria, and protozoa between domestic animals. These microbes cause diseases which can be severely debilitating or fatal to domestic animals, and may also affect humans. Ticks are especially important to domestic animals in tropical and subtropical countries, where the warm climate enables many species of ticks to flourish. Also, the large populations of wild animals in warm countries provide a reservoir of ticks and infective microbes that spread to domestic animals. Farmers of livestock animals use many methods to control ticks, and related treatments are used to reduce infestation of companion animals. Veterinarians and animal health agencies work at private, national, and international scales to reduce the harm caused by ticks and their associated diseases.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Ticks of domestic animals directly cause poor health and loss of production to their hosts by many parasitic mechanisms.",
+                      " Ticks also transmit numerous kinds of viruses, bacteria, and protozoa between domestic animals.",
+                      " These microbes cause diseases which can be severely debilitating or fatal to domestic animals, and may also affect humans.",
+                      " Ticks are especially important to domestic animals in tropical and subtropical countries, where the warm climate enables many species of ticks to flourish.",
+                      " Also, the large populations of wild animals in warm countries provide a reservoir of ticks and infective microbes that spread to domestic animals.",
+                      " Farmers of livestock animals use many methods to control ticks, and related treatments are used to reduce infestation of companion animals.",
+                      " Veterinarians and animal health agencies work at private, national, and international scales to reduce the harm caused by ticks and their associated diseases."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-4",
+                "title": "Berger Blanc Suisse",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "The Berger Blanc Suisse (English: White Swiss Shepherd , German: 'Weisser Schweizer Schäferhund' , Italian: 'Pastore Svizzero Bianco') is a breed of dog from Switzerland."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-4",
+                  "title": "Berger Blanc Suisse",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "The Berger Blanc Suisse (English: White Swiss Shepherd , German: 'Weisser Schweizer Schäferhund' , Italian: 'Pastore Svizzero Bianco') is a breed of dog from Switzerland."
+                },
+                "matches_gold": false,
+                "matched_gold_facts": []
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T10:15:18.222946+00:00",
+            "finished_at": "2026-06-03T10:15:20.433355+00:00",
+            "duration_ms": 2210.4169179999644,
+            "error": null
+          },
+          {
+            "node_id": "s1",
+            "label": "Synthesize animal types",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "pandikona_type": "dog",
+              "berger_blanc_suisse_type": "dog"
+            },
+            "resolved_question": "Pandikona and Berger Blanc Suisse are both what kinds of animals?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"pandikona_type\": \"dog\",\n  \"berger_blanc_suisse_type\": \"dog\"\n}\n\nBased on the information: Pandikona is a dog and Berger Blanc Suisse is a dog, determine what kinds of animals they are collectively.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The kinds of animals Pandikona and Berger Blanc Suisse are.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"dog\"\n}",
+            "parsed_output": {
+              "answer": "dog"
+            },
+            "returned_value": {
+              "answer": "dog"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": null,
+            "evidence_citations": [],
+            "evidence_citation_evaluations": [],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T10:15:20.433424+00:00",
+            "finished_at": "2026-06-03T10:15:48.217839+00:00",
+            "duration_ms": 27785.5928460001,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "dog"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 29996.664680999857,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o-mini",
+            "model_env": "AZURE_OPENAI_MODEL",
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Identify Pandikona\\nfact_lookup\\nsucceeded\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: Identify Berger Blanc Suisse\\nfact_lookup\\nsucceeded\"]\n  click q2 dagqaSelectGraphNode\n  s1[\"s1: Synthesize animal types\\nsynthesis\\nsucceeded\"]\n  click s1 dagqaSelectGraphNode\n  q1 --> s1\n  q2 --> s1"
+      },
+      "error": null
+    },
+    {
+      "id": "5ae142c455429920d5234355",
+      "question": "What colloquial umbrella do Rutgers and the many Ivy league schools fall under?",
+      "gold_answer": "colonial colleges",
+      "prediction": "Prestigious Universities",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 97798.05866900005,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 2,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Rutgers University–Newark",
+          "sentence_index": 2
+        },
+        {
+          "title": "Colonial colleges",
+          "sentence_index": 0
+        },
+        {
+          "title": "Colonial colleges",
+          "sentence_index": 2
+        }
+      ],
+      "evidence_citation_count": 3,
+      "correct_evidence_citation_count": 1,
+      "wrong_evidence_citation_count": 2,
+      "wrong_supporting_text_rate": 0.6666666666666666,
+      "gold_supporting_fact_recall": 0.3333333333333333,
+      "run_trace": {
+        "run_id": "22b1286d-08ae-44fe-8353-f6d27345e821",
+        "question": "What colloquial umbrella do Rutgers and the many Ivy league schools fall under?",
+        "plan": {
+          "question": "What colloquial umbrella do Rutgers and the many Ivy league schools fall under?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Identify Rutgers' colloquial umbrella",
+              "task_type": "fact_lookup",
+              "question": "What colloquial umbrella does Rutgers University fall under?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the colloquial umbrella term that Rutgers University is categorized under."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "umbrella"
+                ],
+                "properties": {
+                  "umbrella": {
+                    "type": "string",
+                    "description": "The colloquial umbrella term for Rutgers University."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Identify Ivy League schools' colloquial umbrella",
+              "task_type": "fact_lookup",
+              "question": "What colloquial umbrella do Ivy League schools fall under?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the colloquial umbrella term that Ivy League schools are categorized under."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "umbrella"
+                ],
+                "properties": {
+                  "umbrella": {
+                    "type": "string",
+                    "description": "The colloquial umbrella term for Ivy League schools."
+                  }
+                }
+              }
+            },
+            {
+              "id": "s1",
+              "label": "Synthesize the umbrellas",
+              "task_type": "synthesis",
+              "question": "What colloquial umbrella do Rutgers and the many Ivy League schools fall under?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q1",
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Based on the following information: Rutgers University is categorized under {q1.umbrella}, and Ivy League schools are categorized under {q2.umbrella}, determine the shared or related colloquial umbrella term for these institutions."
+              },
+              "input_map": {
+                "rutgers_umbrella": "q1.umbrella",
+                "ivy_league_umbrella": "q2.umbrella"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The shared or related colloquial umbrella term for Rutgers and Ivy League schools."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "s1"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1",
+              "q2"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "s1"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "Identify Rutgers' colloquial umbrella",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "What colloquial umbrella does Rutgers University fall under?",
+            "rendered_prompt": "Identify the colloquial umbrella term that Rutgers University is categorized under.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Rutgers University–Newark\n  (0) Rutgers–Newark is one of three regional campuses of Rutgers University, the public research university of the U.S. state of New Jersey, located in the city of Newark.\n  (1)  Rutgers, founded in 1766 in New Brunswick, is the eighth oldest college in the United States and a member of the Association of American Universities.\n  (2)  In 1945, the state legislature voted to make Rutgers University, then a private liberal arts college, into the state university and the following year merged the school with the former University of Newark (1936–1946), which became the Rutgers–Newark campus.\n  (3)  Rutgers also incorporated the College of South Jersey and South Jersey Law School, in Camden, as a constituent campus of the university and renamed it Rutgers–Camden in 1950.\n\nDocument ID: context-1\nTitle: Southern Ivy\n  (0) Southern Ivy is an informal term, and not an official body, that has been used in the U.S. to compare Southern universities to the schools of the northeastern Ivy League in some way, usually in academic quality or in social prestige.\n  (1)  The \"Southern Ivy League,\" referred to as the \"Magnolia League\", was also a failed attempt to construct an athletic conference with schools that had similar \"academic missions and philosophies\".\n  (2)  Given that the term is colloquial, there is no comprehensive, objective or definitive list of schools that are considered \"Southern Ivies\".\n\nDocument ID: context-2\nTitle: Eastern Intercollegiate Baseball League\n  (0) The Eastern Intercollegiate Baseball League was a baseball-only conference that existed from 1930 to 1992.\n  (1)  It consisted of the eight Ivy League schools along with Army and Navy.\n  (2)  The league disbanded after the 1992 season, when Army and Navy joined the Patriot League and the Ivy League began sponsoring baseball.\n\nDocument ID: context-3\nTitle: Cornell Big Red men's ice hockey\n  (0) The Cornell Big Red men's ice hockey team is a National Collegiate Athletic Association (NCAA) Division I college ice hockey program that represents Cornell University.\n  (1)  Cornell competes in the ECAC Hockey conference and plays its home games at Lynah Rink in Ithaca, New York.\n  (2)  Six of the eight Ivy League schools sponsor men's hockey and all six teams play in the twelve-team ECAC.\n  (3)  The Ivy League crowns a champion based on the results of the games played between its members during the ECAC season.\n\nDocument ID: context-4\nTitle: Benjamin Banneker Academy\n  (0) Benjamin Banneker Academy for Community Development (usually called Banneker) is a public high school located in the Clinton Hill section of Brooklyn, New York City.\n  (1)  The school was originally a Drake's Cakes factory.\n  (2)  Still today, different floors of the school are in Drake's colors, blue and yellow.\n  (3)  It has a small, but family type atmosphere for a high school.\n  (4)  It is usually called a junior college because the faculty and students are so focused on college.\n  (5)  Banneker, which serves grades 9 through 12+, is operated by the New York City Department of Education.\n  (6)  Many of the graduates attend SUNY schools, HBCUs (historically black colleges and universities) and CUNY schools.\n  (7)  There are also a few that attend Ivy League schools and a few are recruited for Posse schools.\n  (8)  The school's graduation rate has been at least 90% since 2002.\n\nDocument ID: context-5\nTitle: Colonial colleges\n  (0) The colonial colleges are nine institutions of higher education chartered in the Thirteen Colonies before the United States of America became a sovereign nation after the American Revolution.\n  (1)  These nine have long been considered together, notably in the survey of their origins in the 1907 \"The Cambridge History of English and American Literature\".\n  (2)  Seven of the nine colonial colleges are part of the Ivy League athletic conference: Harvard, Yale, Princeton, Columbia, University of Pennsylvania, Brown, and Dartmouth.\n  (3)  (The eighth member of the Ivy League, Cornell University, was founded in 1865.)\n\nDocument ID: context-6\nTitle: Ivy Film Festival\n  (0) Ivy Film Festival (IFF) is the world's largest student-run film festival, hosted annually on the campus of Brown University.\n  (1)  The Festival was started in 2001 by then-Brown juniors David Peck and Justin Slosky in collaboration with students of the other seven Ivy League schools.\n  (2)  The founders' goal was to create a venue to showcase and honor the work of talented student filmmakers.\n  (3)  Ivy Film Festival currently accepts submissions from around the world for both its short film and screenplay competitions.\n\nDocument ID: context-7\nTitle: Ivy Rugby Conference\n  (0) The Ivy Rugby Conference is an annual rugby union competition played among the eight member schools of the Ivy League.\n  (1)  The Ivy Rugby Conference was formed in 2009.\n  (2)  The Ivy Rugby Conference was formed to foster better competition among rugby teams from the Ivy League schools and to raise the quality of play.\n  (3)  Ivy Rugby formed committees to manage the league, independently of the LAUs and TUs.\n  (4)  The Ivy Rugby Conference, and specifically its sevens tournament, has enabled the Ivy schools to tap into existing rivalries and fan bases.\n\nDocument ID: context-8\nTitle: Public Ivy\n  (0) \"Public Ivy\" is a term coined by Richard Moll in his 1985 book \"Public Ivies: A Guide to America's Best Public Undergraduate Colleges and Universities\" to refer to US universities that are claimed to provide an Ivy League collegiate experience at a public school price.\n  (1)  Public Ivies are considered, according to \"The Journal of Blacks in Higher Education\", to be capable of \"successfully competing with the Ivy League schools in academic rigor... attracting superstar faculty and in competing for the best and brightest students of all races.\"\n\nDocument ID: context-9\nTitle: List of Ivy League medical schools\n  (0) This list of Ivy League medical schools outlines the seven universities of the Ivy League that host a medical school.\n  (1)  Only one Ivy League university, Princeton University, does not have a medical school.\n  (2)  All Ivy League medical schools are located in the Northeast region of the United States and are privately owned and controlled.\n  (3)  Only two of the schools, at Dartmouth and Penn, are located adjacent to the undergraduate campuses.\n  (4)  The schools at Brown, Columbia, Harvard, and Yale, are located on separate campuses in the same metropolitan area as the university.\n  (5)  The school at Cornell, Weill Cornell Medicine, is located in New York City, far from the main Ithaca campus.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"umbrella\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"umbrella\": {\n      \"type\": \"string\",\n      \"description\": \"The colloquial umbrella term for Rutgers University.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"umbrella\": \"Public Ivy\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-8\",\n      \"title\": \"Public Ivy\",\n      \"sentence_indices\": [0],\n      \"fact\": \"\\\"Public Ivy\\\" is a term coined by Richard Moll in his 1985 book \\\"Public Ivies: A Guide to America's Best Public Undergraduate Colleges and Universities\\\" to refer to US universities that are claimed to provide an Ivy League collegiate experience at a public school price.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "umbrella": "Public Ivy",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-8",
+                  "title": "Public Ivy",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "\"Public Ivy\" is a term coined by Richard Moll in his 1985 book \"Public Ivies: A Guide to America's Best Public Undergraduate Colleges and Universities\" to refer to US universities that are claimed to provide an Ivy League collegiate experience at a public school price."
+                }
+              ]
+            },
+            "returned_value": {
+              "umbrella": "Public Ivy"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Rutgers University–Newark",
+                  "text": "Rutgers–Newark is one of three regional campuses of Rutgers University, the public research university of the U.S. state of New Jersey, located in the city of Newark. Rutgers, founded in 1766 in New Brunswick, is the eighth oldest college in the United States and a member of the Association of American Universities. In 1945, the state legislature voted to make Rutgers University, then a private liberal arts college, into the state university and the following year merged the school with the former University of Newark (1936–1946), which became the Rutgers–Newark campus. Rutgers also incorporated the College of South Jersey and South Jersey Law School, in Camden, as a constituent campus of the university and renamed it Rutgers–Camden in 1950.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Rutgers–Newark is one of three regional campuses of Rutgers University, the public research university of the U.S. state of New Jersey, located in the city of Newark.",
+                      " Rutgers, founded in 1766 in New Brunswick, is the eighth oldest college in the United States and a member of the Association of American Universities.",
+                      " In 1945, the state legislature voted to make Rutgers University, then a private liberal arts college, into the state university and the following year merged the school with the former University of Newark (1936–1946), which became the Rutgers–Newark campus.",
+                      " Rutgers also incorporated the College of South Jersey and South Jersey Law School, in Camden, as a constituent campus of the university and renamed it Rutgers–Camden in 1950."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Southern Ivy",
+                  "text": "Southern Ivy is an informal term, and not an official body, that has been used in the U.S. to compare Southern universities to the schools of the northeastern Ivy League in some way, usually in academic quality or in social prestige. The \"Southern Ivy League,\" referred to as the \"Magnolia League\", was also a failed attempt to construct an athletic conference with schools that had similar \"academic missions and philosophies\". Given that the term is colloquial, there is no comprehensive, objective or definitive list of schools that are considered \"Southern Ivies\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Southern Ivy is an informal term, and not an official body, that has been used in the U.S. to compare Southern universities to the schools of the northeastern Ivy League in some way, usually in academic quality or in social prestige.",
+                      " The \"Southern Ivy League,\" referred to as the \"Magnolia League\", was also a failed attempt to construct an athletic conference with schools that had similar \"academic missions and philosophies\".",
+                      " Given that the term is colloquial, there is no comprehensive, objective or definitive list of schools that are considered \"Southern Ivies\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Eastern Intercollegiate Baseball League",
+                  "text": "The Eastern Intercollegiate Baseball League was a baseball-only conference that existed from 1930 to 1992. It consisted of the eight Ivy League schools along with Army and Navy. The league disbanded after the 1992 season, when Army and Navy joined the Patriot League and the Ivy League began sponsoring baseball.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The Eastern Intercollegiate Baseball League was a baseball-only conference that existed from 1930 to 1992.",
+                      " It consisted of the eight Ivy League schools along with Army and Navy.",
+                      " The league disbanded after the 1992 season, when Army and Navy joined the Patriot League and the Ivy League began sponsoring baseball."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Cornell Big Red men's ice hockey",
+                  "text": "The Cornell Big Red men's ice hockey team is a National Collegiate Athletic Association (NCAA) Division I college ice hockey program that represents Cornell University. Cornell competes in the ECAC Hockey conference and plays its home games at Lynah Rink in Ithaca, New York. Six of the eight Ivy League schools sponsor men's hockey and all six teams play in the twelve-team ECAC. The Ivy League crowns a champion based on the results of the games played between its members during the ECAC season.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "The Cornell Big Red men's ice hockey team is a National Collegiate Athletic Association (NCAA) Division I college ice hockey program that represents Cornell University.",
+                      " Cornell competes in the ECAC Hockey conference and plays its home games at Lynah Rink in Ithaca, New York.",
+                      " Six of the eight Ivy League schools sponsor men's hockey and all six teams play in the twelve-team ECAC.",
+                      " The Ivy League crowns a champion based on the results of the games played between its members during the ECAC season."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Benjamin Banneker Academy",
+                  "text": "Benjamin Banneker Academy for Community Development (usually called Banneker) is a public high school located in the Clinton Hill section of Brooklyn, New York City. The school was originally a Drake's Cakes factory. Still today, different floors of the school are in Drake's colors, blue and yellow. It has a small, but family type atmosphere for a high school. It is usually called a junior college because the faculty and students are so focused on college. Banneker, which serves grades 9 through 12+, is operated by the New York City Department of Education. Many of the graduates attend SUNY schools, HBCUs (historically black colleges and universities) and CUNY schools. There are also a few that attend Ivy League schools and a few are recruited for Posse schools. The school's graduation rate has been at least 90% since 2002.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Benjamin Banneker Academy for Community Development (usually called Banneker) is a public high school located in the Clinton Hill section of Brooklyn, New York City.",
+                      " The school was originally a Drake's Cakes factory.",
+                      " Still today, different floors of the school are in Drake's colors, blue and yellow.",
+                      " It has a small, but family type atmosphere for a high school.",
+                      " It is usually called a junior college because the faculty and students are so focused on college.",
+                      " Banneker, which serves grades 9 through 12+, is operated by the New York City Department of Education.",
+                      " Many of the graduates attend SUNY schools, HBCUs (historically black colleges and universities) and CUNY schools.",
+                      " There are also a few that attend Ivy League schools and a few are recruited for Posse schools.",
+                      " The school's graduation rate has been at least 90% since 2002."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Colonial colleges",
+                  "text": "The colonial colleges are nine institutions of higher education chartered in the Thirteen Colonies before the United States of America became a sovereign nation after the American Revolution. These nine have long been considered together, notably in the survey of their origins in the 1907 \"The Cambridge History of English and American Literature\". Seven of the nine colonial colleges are part of the Ivy League athletic conference: Harvard, Yale, Princeton, Columbia, University of Pennsylvania, Brown, and Dartmouth. (The eighth member of the Ivy League, Cornell University, was founded in 1865.)",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "The colonial colleges are nine institutions of higher education chartered in the Thirteen Colonies before the United States of America became a sovereign nation after the American Revolution.",
+                      " These nine have long been considered together, notably in the survey of their origins in the 1907 \"The Cambridge History of English and American Literature\".",
+                      " Seven of the nine colonial colleges are part of the Ivy League athletic conference: Harvard, Yale, Princeton, Columbia, University of Pennsylvania, Brown, and Dartmouth.",
+                      " (The eighth member of the Ivy League, Cornell University, was founded in 1865.)"
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Ivy Film Festival",
+                  "text": "Ivy Film Festival (IFF) is the world's largest student-run film festival, hosted annually on the campus of Brown University. The Festival was started in 2001 by then-Brown juniors David Peck and Justin Slosky in collaboration with students of the other seven Ivy League schools. The founders' goal was to create a venue to showcase and honor the work of talented student filmmakers. Ivy Film Festival currently accepts submissions from around the world for both its short film and screenplay competitions.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Ivy Film Festival (IFF) is the world's largest student-run film festival, hosted annually on the campus of Brown University.",
+                      " The Festival was started in 2001 by then-Brown juniors David Peck and Justin Slosky in collaboration with students of the other seven Ivy League schools.",
+                      " The founders' goal was to create a venue to showcase and honor the work of talented student filmmakers.",
+                      " Ivy Film Festival currently accepts submissions from around the world for both its short film and screenplay competitions."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Ivy Rugby Conference",
+                  "text": "The Ivy Rugby Conference is an annual rugby union competition played among the eight member schools of the Ivy League. The Ivy Rugby Conference was formed in 2009. The Ivy Rugby Conference was formed to foster better competition among rugby teams from the Ivy League schools and to raise the quality of play. Ivy Rugby formed committees to manage the league, independently of the LAUs and TUs. The Ivy Rugby Conference, and specifically its sevens tournament, has enabled the Ivy schools to tap into existing rivalries and fan bases.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "The Ivy Rugby Conference is an annual rugby union competition played among the eight member schools of the Ivy League.",
+                      " The Ivy Rugby Conference was formed in 2009.",
+                      " The Ivy Rugby Conference was formed to foster better competition among rugby teams from the Ivy League schools and to raise the quality of play.",
+                      " Ivy Rugby formed committees to manage the league, independently of the LAUs and TUs.",
+                      " The Ivy Rugby Conference, and specifically its sevens tournament, has enabled the Ivy schools to tap into existing rivalries and fan bases."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Public Ivy",
+                  "text": "\"Public Ivy\" is a term coined by Richard Moll in his 1985 book \"Public Ivies: A Guide to America's Best Public Undergraduate Colleges and Universities\" to refer to US universities that are claimed to provide an Ivy League collegiate experience at a public school price. Public Ivies are considered, according to \"The Journal of Blacks in Higher Education\", to be capable of \"successfully competing with the Ivy League schools in academic rigor... attracting superstar faculty and in competing for the best and brightest students of all races.\"",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "\"Public Ivy\" is a term coined by Richard Moll in his 1985 book \"Public Ivies: A Guide to America's Best Public Undergraduate Colleges and Universities\" to refer to US universities that are claimed to provide an Ivy League collegiate experience at a public school price.",
+                      " Public Ivies are considered, according to \"The Journal of Blacks in Higher Education\", to be capable of \"successfully competing with the Ivy League schools in academic rigor... attracting superstar faculty and in competing for the best and brightest students of all races.\""
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "List of Ivy League medical schools",
+                  "text": "This list of Ivy League medical schools outlines the seven universities of the Ivy League that host a medical school. Only one Ivy League university, Princeton University, does not have a medical school. All Ivy League medical schools are located in the Northeast region of the United States and are privately owned and controlled. Only two of the schools, at Dartmouth and Penn, are located adjacent to the undergraduate campuses. The schools at Brown, Columbia, Harvard, and Yale, are located on separate campuses in the same metropolitan area as the university. The school at Cornell, Weill Cornell Medicine, is located in New York City, far from the main Ithaca campus.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "This list of Ivy League medical schools outlines the seven universities of the Ivy League that host a medical school.",
+                      " Only one Ivy League university, Princeton University, does not have a medical school.",
+                      " All Ivy League medical schools are located in the Northeast region of the United States and are privately owned and controlled.",
+                      " Only two of the schools, at Dartmouth and Penn, are located adjacent to the undergraduate campuses.",
+                      " The schools at Brown, Columbia, Harvard, and Yale, are located on separate campuses in the same metropolitan area as the university.",
+                      " The school at Cornell, Weill Cornell Medicine, is located in New York City, far from the main Ithaca campus."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-8",
+                "title": "Public Ivy",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "\"Public Ivy\" is a term coined by Richard Moll in his 1985 book \"Public Ivies: A Guide to America's Best Public Undergraduate Colleges and Universities\" to refer to US universities that are claimed to provide an Ivy League collegiate experience at a public school price."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-8",
+                  "title": "Public Ivy",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "\"Public Ivy\" is a term coined by Richard Moll in his 1985 book \"Public Ivies: A Guide to America's Best Public Undergraduate Colleges and Universities\" to refer to US universities that are claimed to provide an Ivy League collegiate experience at a public school price."
+                },
+                "matches_gold": false,
+                "matched_gold_facts": []
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T10:15:56.980191+00:00",
+            "finished_at": "2026-06-03T10:16:07.938117+00:00",
+            "duration_ms": 10957.943005000061,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Identify Ivy League schools' colloquial umbrella",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "What colloquial umbrella do Ivy League schools fall under?",
+            "rendered_prompt": "Identify the colloquial umbrella term that Ivy League schools are categorized under.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Rutgers University–Newark\n  (0) Rutgers–Newark is one of three regional campuses of Rutgers University, the public research university of the U.S. state of New Jersey, located in the city of Newark.\n  (1)  Rutgers, founded in 1766 in New Brunswick, is the eighth oldest college in the United States and a member of the Association of American Universities.\n  (2)  In 1945, the state legislature voted to make Rutgers University, then a private liberal arts college, into the state university and the following year merged the school with the former University of Newark (1936–1946), which became the Rutgers–Newark campus.\n  (3)  Rutgers also incorporated the College of South Jersey and South Jersey Law School, in Camden, as a constituent campus of the university and renamed it Rutgers–Camden in 1950.\n\nDocument ID: context-1\nTitle: Southern Ivy\n  (0) Southern Ivy is an informal term, and not an official body, that has been used in the U.S. to compare Southern universities to the schools of the northeastern Ivy League in some way, usually in academic quality or in social prestige.\n  (1)  The \"Southern Ivy League,\" referred to as the \"Magnolia League\", was also a failed attempt to construct an athletic conference with schools that had similar \"academic missions and philosophies\".\n  (2)  Given that the term is colloquial, there is no comprehensive, objective or definitive list of schools that are considered \"Southern Ivies\".\n\nDocument ID: context-2\nTitle: Eastern Intercollegiate Baseball League\n  (0) The Eastern Intercollegiate Baseball League was a baseball-only conference that existed from 1930 to 1992.\n  (1)  It consisted of the eight Ivy League schools along with Army and Navy.\n  (2)  The league disbanded after the 1992 season, when Army and Navy joined the Patriot League and the Ivy League began sponsoring baseball.\n\nDocument ID: context-3\nTitle: Cornell Big Red men's ice hockey\n  (0) The Cornell Big Red men's ice hockey team is a National Collegiate Athletic Association (NCAA) Division I college ice hockey program that represents Cornell University.\n  (1)  Cornell competes in the ECAC Hockey conference and plays its home games at Lynah Rink in Ithaca, New York.\n  (2)  Six of the eight Ivy League schools sponsor men's hockey and all six teams play in the twelve-team ECAC.\n  (3)  The Ivy League crowns a champion based on the results of the games played between its members during the ECAC season.\n\nDocument ID: context-4\nTitle: Benjamin Banneker Academy\n  (0) Benjamin Banneker Academy for Community Development (usually called Banneker) is a public high school located in the Clinton Hill section of Brooklyn, New York City.\n  (1)  The school was originally a Drake's Cakes factory.\n  (2)  Still today, different floors of the school are in Drake's colors, blue and yellow.\n  (3)  It has a small, but family type atmosphere for a high school.\n  (4)  It is usually called a junior college because the faculty and students are so focused on college.\n  (5)  Banneker, which serves grades 9 through 12+, is operated by the New York City Department of Education.\n  (6)  Many of the graduates attend SUNY schools, HBCUs (historically black colleges and universities) and CUNY schools.\n  (7)  There are also a few that attend Ivy League schools and a few are recruited for Posse schools.\n  (8)  The school's graduation rate has been at least 90% since 2002.\n\nDocument ID: context-5\nTitle: Colonial colleges\n  (0) The colonial colleges are nine institutions of higher education chartered in the Thirteen Colonies before the United States of America became a sovereign nation after the American Revolution.\n  (1)  These nine have long been considered together, notably in the survey of their origins in the 1907 \"The Cambridge History of English and American Literature\".\n  (2)  Seven of the nine colonial colleges are part of the Ivy League athletic conference: Harvard, Yale, Princeton, Columbia, University of Pennsylvania, Brown, and Dartmouth.\n  (3)  (The eighth member of the Ivy League, Cornell University, was founded in 1865.)\n\nDocument ID: context-6\nTitle: Ivy Film Festival\n  (0) Ivy Film Festival (IFF) is the world's largest student-run film festival, hosted annually on the campus of Brown University.\n  (1)  The Festival was started in 2001 by then-Brown juniors David Peck and Justin Slosky in collaboration with students of the other seven Ivy League schools.\n  (2)  The founders' goal was to create a venue to showcase and honor the work of talented student filmmakers.\n  (3)  Ivy Film Festival currently accepts submissions from around the world for both its short film and screenplay competitions.\n\nDocument ID: context-7\nTitle: Ivy Rugby Conference\n  (0) The Ivy Rugby Conference is an annual rugby union competition played among the eight member schools of the Ivy League.\n  (1)  The Ivy Rugby Conference was formed in 2009.\n  (2)  The Ivy Rugby Conference was formed to foster better competition among rugby teams from the Ivy League schools and to raise the quality of play.\n  (3)  Ivy Rugby formed committees to manage the league, independently of the LAUs and TUs.\n  (4)  The Ivy Rugby Conference, and specifically its sevens tournament, has enabled the Ivy schools to tap into existing rivalries and fan bases.\n\nDocument ID: context-8\nTitle: Public Ivy\n  (0) \"Public Ivy\" is a term coined by Richard Moll in his 1985 book \"Public Ivies: A Guide to America's Best Public Undergraduate Colleges and Universities\" to refer to US universities that are claimed to provide an Ivy League collegiate experience at a public school price.\n  (1)  Public Ivies are considered, according to \"The Journal of Blacks in Higher Education\", to be capable of \"successfully competing with the Ivy League schools in academic rigor... attracting superstar faculty and in competing for the best and brightest students of all races.\"\n\nDocument ID: context-9\nTitle: List of Ivy League medical schools\n  (0) This list of Ivy League medical schools outlines the seven universities of the Ivy League that host a medical school.\n  (1)  Only one Ivy League university, Princeton University, does not have a medical school.\n  (2)  All Ivy League medical schools are located in the Northeast region of the United States and are privately owned and controlled.\n  (3)  Only two of the schools, at Dartmouth and Penn, are located adjacent to the undergraduate campuses.\n  (4)  The schools at Brown, Columbia, Harvard, and Yale, are located on separate campuses in the same metropolitan area as the university.\n  (5)  The school at Cornell, Weill Cornell Medicine, is located in New York City, far from the main Ithaca campus.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"umbrella\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"umbrella\": {\n      \"type\": \"string\",\n      \"description\": \"The colloquial umbrella term for Ivy League schools.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"umbrella\": \"Ivy League\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-2\",\n      \"title\": \"Eastern Intercollegiate Baseball League\",\n      \"sentence_indices\": [1],\n      \"fact\": \"It consisted of the eight Ivy League schools along with Army and Navy.\"\n    },\n    {\n      \"document_id\": \"context-5\",\n      \"title\": \"Colonial colleges\",\n      \"sentence_indices\": [2],\n      \"fact\": \"Seven of the nine colonial colleges are part of the Ivy League athletic conference: Harvard, Yale, Princeton, Columbia, University of Pennsylvania, Brown, and Dartmouth.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "umbrella": "Ivy League",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-2",
+                  "title": "Eastern Intercollegiate Baseball League",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "It consisted of the eight Ivy League schools along with Army and Navy."
+                },
+                {
+                  "document_id": "context-5",
+                  "title": "Colonial colleges",
+                  "sentence_indices": [
+                    2
+                  ],
+                  "fact": "Seven of the nine colonial colleges are part of the Ivy League athletic conference: Harvard, Yale, Princeton, Columbia, University of Pennsylvania, Brown, and Dartmouth."
+                }
+              ]
+            },
+            "returned_value": {
+              "umbrella": "Ivy League"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Rutgers University–Newark",
+                  "text": "Rutgers–Newark is one of three regional campuses of Rutgers University, the public research university of the U.S. state of New Jersey, located in the city of Newark. Rutgers, founded in 1766 in New Brunswick, is the eighth oldest college in the United States and a member of the Association of American Universities. In 1945, the state legislature voted to make Rutgers University, then a private liberal arts college, into the state university and the following year merged the school with the former University of Newark (1936–1946), which became the Rutgers–Newark campus. Rutgers also incorporated the College of South Jersey and South Jersey Law School, in Camden, as a constituent campus of the university and renamed it Rutgers–Camden in 1950.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Rutgers–Newark is one of three regional campuses of Rutgers University, the public research university of the U.S. state of New Jersey, located in the city of Newark.",
+                      " Rutgers, founded in 1766 in New Brunswick, is the eighth oldest college in the United States and a member of the Association of American Universities.",
+                      " In 1945, the state legislature voted to make Rutgers University, then a private liberal arts college, into the state university and the following year merged the school with the former University of Newark (1936–1946), which became the Rutgers–Newark campus.",
+                      " Rutgers also incorporated the College of South Jersey and South Jersey Law School, in Camden, as a constituent campus of the university and renamed it Rutgers–Camden in 1950."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Southern Ivy",
+                  "text": "Southern Ivy is an informal term, and not an official body, that has been used in the U.S. to compare Southern universities to the schools of the northeastern Ivy League in some way, usually in academic quality or in social prestige. The \"Southern Ivy League,\" referred to as the \"Magnolia League\", was also a failed attempt to construct an athletic conference with schools that had similar \"academic missions and philosophies\". Given that the term is colloquial, there is no comprehensive, objective or definitive list of schools that are considered \"Southern Ivies\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Southern Ivy is an informal term, and not an official body, that has been used in the U.S. to compare Southern universities to the schools of the northeastern Ivy League in some way, usually in academic quality or in social prestige.",
+                      " The \"Southern Ivy League,\" referred to as the \"Magnolia League\", was also a failed attempt to construct an athletic conference with schools that had similar \"academic missions and philosophies\".",
+                      " Given that the term is colloquial, there is no comprehensive, objective or definitive list of schools that are considered \"Southern Ivies\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Eastern Intercollegiate Baseball League",
+                  "text": "The Eastern Intercollegiate Baseball League was a baseball-only conference that existed from 1930 to 1992. It consisted of the eight Ivy League schools along with Army and Navy. The league disbanded after the 1992 season, when Army and Navy joined the Patriot League and the Ivy League began sponsoring baseball.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The Eastern Intercollegiate Baseball League was a baseball-only conference that existed from 1930 to 1992.",
+                      " It consisted of the eight Ivy League schools along with Army and Navy.",
+                      " The league disbanded after the 1992 season, when Army and Navy joined the Patriot League and the Ivy League began sponsoring baseball."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Cornell Big Red men's ice hockey",
+                  "text": "The Cornell Big Red men's ice hockey team is a National Collegiate Athletic Association (NCAA) Division I college ice hockey program that represents Cornell University. Cornell competes in the ECAC Hockey conference and plays its home games at Lynah Rink in Ithaca, New York. Six of the eight Ivy League schools sponsor men's hockey and all six teams play in the twelve-team ECAC. The Ivy League crowns a champion based on the results of the games played between its members during the ECAC season.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "The Cornell Big Red men's ice hockey team is a National Collegiate Athletic Association (NCAA) Division I college ice hockey program that represents Cornell University.",
+                      " Cornell competes in the ECAC Hockey conference and plays its home games at Lynah Rink in Ithaca, New York.",
+                      " Six of the eight Ivy League schools sponsor men's hockey and all six teams play in the twelve-team ECAC.",
+                      " The Ivy League crowns a champion based on the results of the games played between its members during the ECAC season."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Benjamin Banneker Academy",
+                  "text": "Benjamin Banneker Academy for Community Development (usually called Banneker) is a public high school located in the Clinton Hill section of Brooklyn, New York City. The school was originally a Drake's Cakes factory. Still today, different floors of the school are in Drake's colors, blue and yellow. It has a small, but family type atmosphere for a high school. It is usually called a junior college because the faculty and students are so focused on college. Banneker, which serves grades 9 through 12+, is operated by the New York City Department of Education. Many of the graduates attend SUNY schools, HBCUs (historically black colleges and universities) and CUNY schools. There are also a few that attend Ivy League schools and a few are recruited for Posse schools. The school's graduation rate has been at least 90% since 2002.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Benjamin Banneker Academy for Community Development (usually called Banneker) is a public high school located in the Clinton Hill section of Brooklyn, New York City.",
+                      " The school was originally a Drake's Cakes factory.",
+                      " Still today, different floors of the school are in Drake's colors, blue and yellow.",
+                      " It has a small, but family type atmosphere for a high school.",
+                      " It is usually called a junior college because the faculty and students are so focused on college.",
+                      " Banneker, which serves grades 9 through 12+, is operated by the New York City Department of Education.",
+                      " Many of the graduates attend SUNY schools, HBCUs (historically black colleges and universities) and CUNY schools.",
+                      " There are also a few that attend Ivy League schools and a few are recruited for Posse schools.",
+                      " The school's graduation rate has been at least 90% since 2002."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Colonial colleges",
+                  "text": "The colonial colleges are nine institutions of higher education chartered in the Thirteen Colonies before the United States of America became a sovereign nation after the American Revolution. These nine have long been considered together, notably in the survey of their origins in the 1907 \"The Cambridge History of English and American Literature\". Seven of the nine colonial colleges are part of the Ivy League athletic conference: Harvard, Yale, Princeton, Columbia, University of Pennsylvania, Brown, and Dartmouth. (The eighth member of the Ivy League, Cornell University, was founded in 1865.)",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "The colonial colleges are nine institutions of higher education chartered in the Thirteen Colonies before the United States of America became a sovereign nation after the American Revolution.",
+                      " These nine have long been considered together, notably in the survey of their origins in the 1907 \"The Cambridge History of English and American Literature\".",
+                      " Seven of the nine colonial colleges are part of the Ivy League athletic conference: Harvard, Yale, Princeton, Columbia, University of Pennsylvania, Brown, and Dartmouth.",
+                      " (The eighth member of the Ivy League, Cornell University, was founded in 1865.)"
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Ivy Film Festival",
+                  "text": "Ivy Film Festival (IFF) is the world's largest student-run film festival, hosted annually on the campus of Brown University. The Festival was started in 2001 by then-Brown juniors David Peck and Justin Slosky in collaboration with students of the other seven Ivy League schools. The founders' goal was to create a venue to showcase and honor the work of talented student filmmakers. Ivy Film Festival currently accepts submissions from around the world for both its short film and screenplay competitions.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Ivy Film Festival (IFF) is the world's largest student-run film festival, hosted annually on the campus of Brown University.",
+                      " The Festival was started in 2001 by then-Brown juniors David Peck and Justin Slosky in collaboration with students of the other seven Ivy League schools.",
+                      " The founders' goal was to create a venue to showcase and honor the work of talented student filmmakers.",
+                      " Ivy Film Festival currently accepts submissions from around the world for both its short film and screenplay competitions."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Ivy Rugby Conference",
+                  "text": "The Ivy Rugby Conference is an annual rugby union competition played among the eight member schools of the Ivy League. The Ivy Rugby Conference was formed in 2009. The Ivy Rugby Conference was formed to foster better competition among rugby teams from the Ivy League schools and to raise the quality of play. Ivy Rugby formed committees to manage the league, independently of the LAUs and TUs. The Ivy Rugby Conference, and specifically its sevens tournament, has enabled the Ivy schools to tap into existing rivalries and fan bases.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "The Ivy Rugby Conference is an annual rugby union competition played among the eight member schools of the Ivy League.",
+                      " The Ivy Rugby Conference was formed in 2009.",
+                      " The Ivy Rugby Conference was formed to foster better competition among rugby teams from the Ivy League schools and to raise the quality of play.",
+                      " Ivy Rugby formed committees to manage the league, independently of the LAUs and TUs.",
+                      " The Ivy Rugby Conference, and specifically its sevens tournament, has enabled the Ivy schools to tap into existing rivalries and fan bases."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Public Ivy",
+                  "text": "\"Public Ivy\" is a term coined by Richard Moll in his 1985 book \"Public Ivies: A Guide to America's Best Public Undergraduate Colleges and Universities\" to refer to US universities that are claimed to provide an Ivy League collegiate experience at a public school price. Public Ivies are considered, according to \"The Journal of Blacks in Higher Education\", to be capable of \"successfully competing with the Ivy League schools in academic rigor... attracting superstar faculty and in competing for the best and brightest students of all races.\"",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "\"Public Ivy\" is a term coined by Richard Moll in his 1985 book \"Public Ivies: A Guide to America's Best Public Undergraduate Colleges and Universities\" to refer to US universities that are claimed to provide an Ivy League collegiate experience at a public school price.",
+                      " Public Ivies are considered, according to \"The Journal of Blacks in Higher Education\", to be capable of \"successfully competing with the Ivy League schools in academic rigor... attracting superstar faculty and in competing for the best and brightest students of all races.\""
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "List of Ivy League medical schools",
+                  "text": "This list of Ivy League medical schools outlines the seven universities of the Ivy League that host a medical school. Only one Ivy League university, Princeton University, does not have a medical school. All Ivy League medical schools are located in the Northeast region of the United States and are privately owned and controlled. Only two of the schools, at Dartmouth and Penn, are located adjacent to the undergraduate campuses. The schools at Brown, Columbia, Harvard, and Yale, are located on separate campuses in the same metropolitan area as the university. The school at Cornell, Weill Cornell Medicine, is located in New York City, far from the main Ithaca campus.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "This list of Ivy League medical schools outlines the seven universities of the Ivy League that host a medical school.",
+                      " Only one Ivy League university, Princeton University, does not have a medical school.",
+                      " All Ivy League medical schools are located in the Northeast region of the United States and are privately owned and controlled.",
+                      " Only two of the schools, at Dartmouth and Penn, are located adjacent to the undergraduate campuses.",
+                      " The schools at Brown, Columbia, Harvard, and Yale, are located on separate campuses in the same metropolitan area as the university.",
+                      " The school at Cornell, Weill Cornell Medicine, is located in New York City, far from the main Ithaca campus."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-2",
+                "title": "Eastern Intercollegiate Baseball League",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "It consisted of the eight Ivy League schools along with Army and Navy."
+              },
+              {
+                "document_id": "context-5",
+                "title": "Colonial colleges",
+                "sentence_indices": [
+                  2
+                ],
+                "fact": "Seven of the nine colonial colleges are part of the Ivy League athletic conference: Harvard, Yale, Princeton, Columbia, University of Pennsylvania, Brown, and Dartmouth."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-2",
+                  "title": "Eastern Intercollegiate Baseball League",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "It consisted of the eight Ivy League schools along with Army and Navy."
+                },
+                "matches_gold": false,
+                "matched_gold_facts": []
+              },
+              {
+                "citation": {
+                  "document_id": "context-5",
+                  "title": "Colonial colleges",
+                  "sentence_indices": [
+                    2
+                  ],
+                  "fact": "Seven of the nine colonial colleges are part of the Ivy League athletic conference: Harvard, Yale, Princeton, Columbia, University of Pennsylvania, Brown, and Dartmouth."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Colonial colleges",
+                    "sentence_index": 2
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T10:15:56.980460+00:00",
+            "finished_at": "2026-06-03T10:16:48.353334+00:00",
+            "duration_ms": 51373.26193900003,
+            "error": null
+          },
+          {
+            "node_id": "s1",
+            "label": "Synthesize the umbrellas",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "rutgers_umbrella": "Public Ivy",
+              "ivy_league_umbrella": "Ivy League"
+            },
+            "resolved_question": "What colloquial umbrella do Rutgers and the many Ivy League schools fall under?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"rutgers_umbrella\": \"Public Ivy\",\n  \"ivy_league_umbrella\": \"Ivy League\"\n}\n\nBased on the following information: Rutgers University is categorized under Public Ivy, and Ivy League schools are categorized under Ivy League, determine the shared or related colloquial umbrella term for these institutions.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The shared or related colloquial umbrella term for Rutgers and Ivy League schools.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"Prestigious Universities\"\n}",
+            "parsed_output": {
+              "answer": "Prestigious Universities"
+            },
+            "returned_value": {
+              "answer": "Prestigious Universities"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": null,
+            "evidence_citations": [],
+            "evidence_citation_evaluations": [],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T10:16:48.353502+00:00",
+            "finished_at": "2026-06-03T10:17:26.015494+00:00",
+            "duration_ms": 37662.01143299986,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Prestigious Universities"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 89035.97108099985,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o-mini",
+            "model_env": "AZURE_OPENAI_MODEL",
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Identify Rutgers' colloquial umbrella\\nfact_lookup\\nsucceeded\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: Identify Ivy League schools' colloquial umbrella\\nfact_lookup\\nsucceeded\"]\n  click q2 dagqaSelectGraphNode\n  s1[\"s1: Synthesize the umbrellas\\nsynthesis\\nsucceeded\"]\n  click s1 dagqaSelectGraphNode\n  q1 --> s1\n  q2 --> s1"
+      },
+      "error": null
+    },
+    {
+      "id": "5ae24abc5542994d89d5b3c3",
+      "question": "Where is the company that owns thanKing Horse pub restaurant chain based ?",
+      "gold_answer": "Bury St Edmunds,",
+      "prediction": "Greene King Brewery, headquartered in Bury St Edmunds, Suffolk, England, owns the thanKing Horse pub restaurant chain.",
+      "exact_match": 0.0,
+      "f1": 0.3157894736842105,
+      "latency_ms": 81640.35362000004,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 3,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Hungry Horse",
+          "sentence_index": 0
+        },
+        {
+          "title": "Greene King",
+          "sentence_index": 1
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 1.0,
+      "run_trace": {
+        "run_id": "2211dbf0-dc5d-425e-bba9-1cd5a70d3dcd",
+        "question": "Where is the company that owns thanKing Horse pub restaurant chain based?",
+        "plan": {
+          "question": "Where is the company that owns thanKing Horse pub restaurant chain based?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Identify the owning company",
+              "task_type": "entity_resolution",
+              "question": "What is the name of the company that owns the thanKing Horse pub restaurant chain?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the company that owns the thanKing Horse pub restaurant chain."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "company_name"
+                ],
+                "properties": {
+                  "company_name": {
+                    "type": "string",
+                    "description": "The name of the company that owns the thanKing Horse pub restaurant chain."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Find company headquarters",
+              "task_type": "fact_lookup",
+              "question": "Where is the headquarters of {q1.company_name} located?",
+              "operation": "answer",
+              "depends_on": [
+                "q1"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Determine the location of the headquarters of the company {q1.company_name}."
+              },
+              "input_map": {
+                "company_name": "q1.company_name"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "headquarters_location"
+                ],
+                "properties": {
+                  "headquarters_location": {
+                    "type": "string",
+                    "description": "The location of the company's headquarters."
+                  }
+                }
+              }
+            },
+            {
+              "id": "s1",
+              "label": "Provide final answer",
+              "task_type": "synthesis",
+              "question": "Where is the company that owns thanKing Horse pub restaurant chain based?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q1",
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Based on the information: the company owning the thanKing Horse pub restaurant chain is {q1.company_name}, and its headquarters is located in {q2.headquarters_location}. Provide a concise answer to the question."
+              },
+              "input_map": {
+                "company_name": "q1.company_name",
+                "headquarters_location": "q2.headquarters_location"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The concise answer to the user's question."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "s1"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "q2"
+            ]
+          },
+          {
+            "index": 3,
+            "node_ids": [
+              "s1"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "Identify the owning company",
+            "task_type": "entity_resolution",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "What is the name of the company that owns the thanKing Horse pub restaurant chain?",
+            "rendered_prompt": "Identify the company that owns the thanKing Horse pub restaurant chain.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Hungry Horse\n  (0) Hungry Horse is a chain of 225 pub-restaurants in England, Wales and Scotland, owned by Greene King Brewery.\n  (1)  It was founded in 1995, and promotes itself as offering low cost meals for families and groups.\n\nDocument ID: context-1\nTitle: Klenger Burger\n  (0) Klenger Burger is an Indonesian restaurant chain based in Jakarta, operated by PT Kinarya Anak Negeri.\n  (1)  The restaurant chain served halal hamburgers designed to suit the Indonesian palate.\n  (2)  The company sold a variety of burgers, including a 25 cm Raja Klenger (King Klenger) designed to serve seven people.\n  (3)  It also sold pizza, grilled and fried duck and chicken, and Indonesian snacks such as rempeyek and emping.\n\nDocument ID: context-2\nTitle: VIP's\n  (0) VIP's, alternatively written Vip's, is a defunct restaurant chain in the Western United States that operated from 1968 until the late 1980s, based in Salem, Oregon.\n  (1)  With more than 50 locations, it was once the largest restaurant chain based in Oregon.\n  (2)  It was a Denny's-style restaurant, a type that was commonly known at that time as a \"coffee shop\" but is now more commonly known as a casual dining restaurant.\n  (3)  Most restaurants were located near freeways and were open 24 hours.\n  (4)  At its peak, the chain had locations in five states: Oregon, Washington, Idaho, Nevada and northern California.\n\nDocument ID: context-3\nTitle: Fazoli's\n  (0) Fazoli's is an Italian-American fast casual restaurant chain based out of Lexington, Kentucky.\n  (1)  It was founded in 1988 and is now owned by Seed Restaurant Group, Inc.\n  (2)  Today, there are more than 200 Fazoli's located nationwide with plans to expand overseas.\n  (3)  The restaurant chain specializes in Italian cuisine and dishes.\n  (4)  Carl Howard is the company's president and CEO.\n\nDocument ID: context-4\nTitle: Greene King\n  (0) Greene King is the UK's largest pub retailer and brewer.\n  (1)  It is based in Bury St Edmunds, Suffolk, England.\n  (2)  The company owns pubs, restaurants and hotels.\n  (3)  It is listed on the London Stock Exchange and is a constituent of the FTSE 250 Index.\n\nDocument ID: context-5\nTitle: Todai (restaurant)\n  (0) Todai is a restaurant chain based in the United States.\n  (1)  As of 2016, the chain had over 19 restaurants in the United States, 7 restaurants in South Korea, one restaurant in Hong Kong, one restaurant in Canada, one restaurant in Indonesia, one restaurant in Singapore and one restaurant in Malaysia.\n\nDocument ID: context-6\nTitle: Chefette\n  (0) Chefette Restaurants is the largest fast food restaurant chain based in the Caribbean island nation of Barbados.\n  (1)  Currently operating throughout the island in 14 locations, Chefette is known for its broasted chicken meals as well as a local curried-'meat + vegetable' (similar to the European Gyro) roll-up or wrap, locally known as a roti.\n  (2)  Chefette was founded by a Trinidadian businessman named Assad John Haloute, who migrated to Barbados in 1971.\n  (3)  In 1972, he opened the first Chefette Restaurant at Fontabelle, St. Michael.\n  (4)  As the success of the chain grew over the next three decades, the restaurant chain continued its expansion.\n  (5)  The company's trademark colours are yellow and purple.\n\nDocument ID: context-7\nTitle: The Works (restaurant)\n  (0) The Works is a Canadian restaurant chain based in Ottawa, Ontario.\n  (1)  The restaurant chain started by Brad Fennema in Ottawa in 2001, has grown to 27 locations across southern Ontario.\n\nDocument ID: context-8\nTitle: Piccadilly Pub\n  (0) Piccadilly Pub was a chain of casual dining restaurants headquartered in the US state of Massachusetts.\n  (1)  The first Piccadilly Pub restaurant was opened by William C. Martin in 1973 in the town of Westborough, Massachusetts.\n\nDocument ID: context-9\nTitle: The Chessels\n  (0) The Chessels is an area of Bedminster, Bristol that runs from the midsection of Luckwell Rd to the former White Horse pub on West Street.\n  (1)  Chessel Street is the main road.\n  (2)  The name \"Chessel\" is taken from the name of a field, recorded in 1350.\n  (3)  The White Horse was redeveloped into flats by 2013, but was once used as a location for the fictional Nags Head pub in the BBC television series \"Only Fools and Horses\".\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"company_name\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"company_name\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the company that owns the thanKing Horse pub restaurant chain.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"company_name\": \"Greene King Brewery\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-0\",\n      \"title\": \"Hungry Horse\",\n      \"sentence_indices\": [0],\n      \"fact\": \"Hungry Horse is a chain of 225 pub-restaurants in England, Wales and Scotland, owned by Greene King Brewery.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "company_name": "Greene King Brewery",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-0",
+                  "title": "Hungry Horse",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Hungry Horse is a chain of 225 pub-restaurants in England, Wales and Scotland, owned by Greene King Brewery."
+                }
+              ]
+            },
+            "returned_value": {
+              "company_name": "Greene King Brewery"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Hungry Horse",
+                  "text": "Hungry Horse is a chain of 225 pub-restaurants in England, Wales and Scotland, owned by Greene King Brewery. It was founded in 1995, and promotes itself as offering low cost meals for families and groups.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Hungry Horse is a chain of 225 pub-restaurants in England, Wales and Scotland, owned by Greene King Brewery.",
+                      " It was founded in 1995, and promotes itself as offering low cost meals for families and groups."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Klenger Burger",
+                  "text": "Klenger Burger is an Indonesian restaurant chain based in Jakarta, operated by PT Kinarya Anak Negeri. The restaurant chain served halal hamburgers designed to suit the Indonesian palate. The company sold a variety of burgers, including a 25 cm Raja Klenger (King Klenger) designed to serve seven people. It also sold pizza, grilled and fried duck and chicken, and Indonesian snacks such as rempeyek and emping.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Klenger Burger is an Indonesian restaurant chain based in Jakarta, operated by PT Kinarya Anak Negeri.",
+                      " The restaurant chain served halal hamburgers designed to suit the Indonesian palate.",
+                      " The company sold a variety of burgers, including a 25 cm Raja Klenger (King Klenger) designed to serve seven people.",
+                      " It also sold pizza, grilled and fried duck and chicken, and Indonesian snacks such as rempeyek and emping."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "VIP's",
+                  "text": "VIP's, alternatively written Vip's, is a defunct restaurant chain in the Western United States that operated from 1968 until the late 1980s, based in Salem, Oregon. With more than 50 locations, it was once the largest restaurant chain based in Oregon. It was a Denny's-style restaurant, a type that was commonly known at that time as a \"coffee shop\" but is now more commonly known as a casual dining restaurant. Most restaurants were located near freeways and were open 24 hours. At its peak, the chain had locations in five states: Oregon, Washington, Idaho, Nevada and northern California.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "VIP's, alternatively written Vip's, is a defunct restaurant chain in the Western United States that operated from 1968 until the late 1980s, based in Salem, Oregon.",
+                      " With more than 50 locations, it was once the largest restaurant chain based in Oregon.",
+                      " It was a Denny's-style restaurant, a type that was commonly known at that time as a \"coffee shop\" but is now more commonly known as a casual dining restaurant.",
+                      " Most restaurants were located near freeways and were open 24 hours.",
+                      " At its peak, the chain had locations in five states: Oregon, Washington, Idaho, Nevada and northern California."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Fazoli's",
+                  "text": "Fazoli's is an Italian-American fast casual restaurant chain based out of Lexington, Kentucky. It was founded in 1988 and is now owned by Seed Restaurant Group, Inc. Today, there are more than 200 Fazoli's located nationwide with plans to expand overseas. The restaurant chain specializes in Italian cuisine and dishes. Carl Howard is the company's president and CEO.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Fazoli's is an Italian-American fast casual restaurant chain based out of Lexington, Kentucky.",
+                      " It was founded in 1988 and is now owned by Seed Restaurant Group, Inc.",
+                      " Today, there are more than 200 Fazoli's located nationwide with plans to expand overseas.",
+                      " The restaurant chain specializes in Italian cuisine and dishes.",
+                      " Carl Howard is the company's president and CEO."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Greene King",
+                  "text": "Greene King is the UK's largest pub retailer and brewer. It is based in Bury St Edmunds, Suffolk, England. The company owns pubs, restaurants and hotels. It is listed on the London Stock Exchange and is a constituent of the FTSE 250 Index.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Greene King is the UK's largest pub retailer and brewer.",
+                      " It is based in Bury St Edmunds, Suffolk, England.",
+                      " The company owns pubs, restaurants and hotels.",
+                      " It is listed on the London Stock Exchange and is a constituent of the FTSE 250 Index."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Todai (restaurant)",
+                  "text": "Todai is a restaurant chain based in the United States. As of 2016, the chain had over 19 restaurants in the United States, 7 restaurants in South Korea, one restaurant in Hong Kong, one restaurant in Canada, one restaurant in Indonesia, one restaurant in Singapore and one restaurant in Malaysia.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Todai is a restaurant chain based in the United States.",
+                      " As of 2016, the chain had over 19 restaurants in the United States, 7 restaurants in South Korea, one restaurant in Hong Kong, one restaurant in Canada, one restaurant in Indonesia, one restaurant in Singapore and one restaurant in Malaysia."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Chefette",
+                  "text": "Chefette Restaurants is the largest fast food restaurant chain based in the Caribbean island nation of Barbados. Currently operating throughout the island in 14 locations, Chefette is known for its broasted chicken meals as well as a local curried-'meat + vegetable' (similar to the European Gyro) roll-up or wrap, locally known as a roti. Chefette was founded by a Trinidadian businessman named Assad John Haloute, who migrated to Barbados in 1971. In 1972, he opened the first Chefette Restaurant at Fontabelle, St. Michael. As the success of the chain grew over the next three decades, the restaurant chain continued its expansion. The company's trademark colours are yellow and purple.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Chefette Restaurants is the largest fast food restaurant chain based in the Caribbean island nation of Barbados.",
+                      " Currently operating throughout the island in 14 locations, Chefette is known for its broasted chicken meals as well as a local curried-'meat + vegetable' (similar to the European Gyro) roll-up or wrap, locally known as a roti.",
+                      " Chefette was founded by a Trinidadian businessman named Assad John Haloute, who migrated to Barbados in 1971.",
+                      " In 1972, he opened the first Chefette Restaurant at Fontabelle, St. Michael.",
+                      " As the success of the chain grew over the next three decades, the restaurant chain continued its expansion.",
+                      " The company's trademark colours are yellow and purple."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "The Works (restaurant)",
+                  "text": "The Works is a Canadian restaurant chain based in Ottawa, Ontario. The restaurant chain started by Brad Fennema in Ottawa in 2001, has grown to 27 locations across southern Ontario.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "The Works is a Canadian restaurant chain based in Ottawa, Ontario.",
+                      " The restaurant chain started by Brad Fennema in Ottawa in 2001, has grown to 27 locations across southern Ontario."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Piccadilly Pub",
+                  "text": "Piccadilly Pub was a chain of casual dining restaurants headquartered in the US state of Massachusetts. The first Piccadilly Pub restaurant was opened by William C. Martin in 1973 in the town of Westborough, Massachusetts.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Piccadilly Pub was a chain of casual dining restaurants headquartered in the US state of Massachusetts.",
+                      " The first Piccadilly Pub restaurant was opened by William C. Martin in 1973 in the town of Westborough, Massachusetts."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "The Chessels",
+                  "text": "The Chessels is an area of Bedminster, Bristol that runs from the midsection of Luckwell Rd to the former White Horse pub on West Street. Chessel Street is the main road. The name \"Chessel\" is taken from the name of a field, recorded in 1350. The White Horse was redeveloped into flats by 2013, but was once used as a location for the fictional Nags Head pub in the BBC television series \"Only Fools and Horses\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "The Chessels is an area of Bedminster, Bristol that runs from the midsection of Luckwell Rd to the former White Horse pub on West Street.",
+                      " Chessel Street is the main road.",
+                      " The name \"Chessel\" is taken from the name of a field, recorded in 1350.",
+                      " The White Horse was redeveloped into flats by 2013, but was once used as a location for the fictional Nags Head pub in the BBC television series \"Only Fools and Horses\"."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-0",
+                "title": "Hungry Horse",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Hungry Horse is a chain of 225 pub-restaurants in England, Wales and Scotland, owned by Greene King Brewery."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-0",
+                  "title": "Hungry Horse",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Hungry Horse is a chain of 225 pub-restaurants in England, Wales and Scotland, owned by Greene King Brewery."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Hungry Horse",
+                    "sentence_index": 0
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T10:17:35.947620+00:00",
+            "finished_at": "2026-06-03T10:17:45.978579+00:00",
+            "duration_ms": 10030.979587000274,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Find company headquarters",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {
+              "company_name": "Greene King Brewery"
+            },
+            "resolved_question": "Where is the headquarters of Greene King Brewery located?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"company_name\": \"Greene King Brewery\"\n}\n\nDetermine the location of the headquarters of the company Greene King Brewery.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Hungry Horse\n  (0) Hungry Horse is a chain of 225 pub-restaurants in England, Wales and Scotland, owned by Greene King Brewery.\n  (1)  It was founded in 1995, and promotes itself as offering low cost meals for families and groups.\n\nDocument ID: context-1\nTitle: Klenger Burger\n  (0) Klenger Burger is an Indonesian restaurant chain based in Jakarta, operated by PT Kinarya Anak Negeri.\n  (1)  The restaurant chain served halal hamburgers designed to suit the Indonesian palate.\n  (2)  The company sold a variety of burgers, including a 25 cm Raja Klenger (King Klenger) designed to serve seven people.\n  (3)  It also sold pizza, grilled and fried duck and chicken, and Indonesian snacks such as rempeyek and emping.\n\nDocument ID: context-2\nTitle: VIP's\n  (0) VIP's, alternatively written Vip's, is a defunct restaurant chain in the Western United States that operated from 1968 until the late 1980s, based in Salem, Oregon.\n  (1)  With more than 50 locations, it was once the largest restaurant chain based in Oregon.\n  (2)  It was a Denny's-style restaurant, a type that was commonly known at that time as a \"coffee shop\" but is now more commonly known as a casual dining restaurant.\n  (3)  Most restaurants were located near freeways and were open 24 hours.\n  (4)  At its peak, the chain had locations in five states: Oregon, Washington, Idaho, Nevada and northern California.\n\nDocument ID: context-3\nTitle: Fazoli's\n  (0) Fazoli's is an Italian-American fast casual restaurant chain based out of Lexington, Kentucky.\n  (1)  It was founded in 1988 and is now owned by Seed Restaurant Group, Inc.\n  (2)  Today, there are more than 200 Fazoli's located nationwide with plans to expand overseas.\n  (3)  The restaurant chain specializes in Italian cuisine and dishes.\n  (4)  Carl Howard is the company's president and CEO.\n\nDocument ID: context-4\nTitle: Greene King\n  (0) Greene King is the UK's largest pub retailer and brewer.\n  (1)  It is based in Bury St Edmunds, Suffolk, England.\n  (2)  The company owns pubs, restaurants and hotels.\n  (3)  It is listed on the London Stock Exchange and is a constituent of the FTSE 250 Index.\n\nDocument ID: context-5\nTitle: Todai (restaurant)\n  (0) Todai is a restaurant chain based in the United States.\n  (1)  As of 2016, the chain had over 19 restaurants in the United States, 7 restaurants in South Korea, one restaurant in Hong Kong, one restaurant in Canada, one restaurant in Indonesia, one restaurant in Singapore and one restaurant in Malaysia.\n\nDocument ID: context-6\nTitle: Chefette\n  (0) Chefette Restaurants is the largest fast food restaurant chain based in the Caribbean island nation of Barbados.\n  (1)  Currently operating throughout the island in 14 locations, Chefette is known for its broasted chicken meals as well as a local curried-'meat + vegetable' (similar to the European Gyro) roll-up or wrap, locally known as a roti.\n  (2)  Chefette was founded by a Trinidadian businessman named Assad John Haloute, who migrated to Barbados in 1971.\n  (3)  In 1972, he opened the first Chefette Restaurant at Fontabelle, St. Michael.\n  (4)  As the success of the chain grew over the next three decades, the restaurant chain continued its expansion.\n  (5)  The company's trademark colours are yellow and purple.\n\nDocument ID: context-7\nTitle: The Works (restaurant)\n  (0) The Works is a Canadian restaurant chain based in Ottawa, Ontario.\n  (1)  The restaurant chain started by Brad Fennema in Ottawa in 2001, has grown to 27 locations across southern Ontario.\n\nDocument ID: context-8\nTitle: Piccadilly Pub\n  (0) Piccadilly Pub was a chain of casual dining restaurants headquartered in the US state of Massachusetts.\n  (1)  The first Piccadilly Pub restaurant was opened by William C. Martin in 1973 in the town of Westborough, Massachusetts.\n\nDocument ID: context-9\nTitle: The Chessels\n  (0) The Chessels is an area of Bedminster, Bristol that runs from the midsection of Luckwell Rd to the former White Horse pub on West Street.\n  (1)  Chessel Street is the main road.\n  (2)  The name \"Chessel\" is taken from the name of a field, recorded in 1350.\n  (3)  The White Horse was redeveloped into flats by 2013, but was once used as a location for the fictional Nags Head pub in the BBC television series \"Only Fools and Horses\".\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"headquarters_location\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"headquarters_location\": {\n      \"type\": \"string\",\n      \"description\": \"The location of the company's headquarters.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"headquarters_location\": \"Bury St Edmunds, Suffolk, England\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-4\",\n      \"title\": \"Greene King\",\n      \"sentence_indices\": [1],\n      \"fact\": \"It is based in Bury St Edmunds, Suffolk, England.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "headquarters_location": "Bury St Edmunds, Suffolk, England",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-4",
+                  "title": "Greene King",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "It is based in Bury St Edmunds, Suffolk, England."
+                }
+              ]
+            },
+            "returned_value": {
+              "headquarters_location": "Bury St Edmunds, Suffolk, England"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Hungry Horse",
+                  "text": "Hungry Horse is a chain of 225 pub-restaurants in England, Wales and Scotland, owned by Greene King Brewery. It was founded in 1995, and promotes itself as offering low cost meals for families and groups.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Hungry Horse is a chain of 225 pub-restaurants in England, Wales and Scotland, owned by Greene King Brewery.",
+                      " It was founded in 1995, and promotes itself as offering low cost meals for families and groups."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Klenger Burger",
+                  "text": "Klenger Burger is an Indonesian restaurant chain based in Jakarta, operated by PT Kinarya Anak Negeri. The restaurant chain served halal hamburgers designed to suit the Indonesian palate. The company sold a variety of burgers, including a 25 cm Raja Klenger (King Klenger) designed to serve seven people. It also sold pizza, grilled and fried duck and chicken, and Indonesian snacks such as rempeyek and emping.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Klenger Burger is an Indonesian restaurant chain based in Jakarta, operated by PT Kinarya Anak Negeri.",
+                      " The restaurant chain served halal hamburgers designed to suit the Indonesian palate.",
+                      " The company sold a variety of burgers, including a 25 cm Raja Klenger (King Klenger) designed to serve seven people.",
+                      " It also sold pizza, grilled and fried duck and chicken, and Indonesian snacks such as rempeyek and emping."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "VIP's",
+                  "text": "VIP's, alternatively written Vip's, is a defunct restaurant chain in the Western United States that operated from 1968 until the late 1980s, based in Salem, Oregon. With more than 50 locations, it was once the largest restaurant chain based in Oregon. It was a Denny's-style restaurant, a type that was commonly known at that time as a \"coffee shop\" but is now more commonly known as a casual dining restaurant. Most restaurants were located near freeways and were open 24 hours. At its peak, the chain had locations in five states: Oregon, Washington, Idaho, Nevada and northern California.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "VIP's, alternatively written Vip's, is a defunct restaurant chain in the Western United States that operated from 1968 until the late 1980s, based in Salem, Oregon.",
+                      " With more than 50 locations, it was once the largest restaurant chain based in Oregon.",
+                      " It was a Denny's-style restaurant, a type that was commonly known at that time as a \"coffee shop\" but is now more commonly known as a casual dining restaurant.",
+                      " Most restaurants were located near freeways and were open 24 hours.",
+                      " At its peak, the chain had locations in five states: Oregon, Washington, Idaho, Nevada and northern California."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Fazoli's",
+                  "text": "Fazoli's is an Italian-American fast casual restaurant chain based out of Lexington, Kentucky. It was founded in 1988 and is now owned by Seed Restaurant Group, Inc. Today, there are more than 200 Fazoli's located nationwide with plans to expand overseas. The restaurant chain specializes in Italian cuisine and dishes. Carl Howard is the company's president and CEO.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Fazoli's is an Italian-American fast casual restaurant chain based out of Lexington, Kentucky.",
+                      " It was founded in 1988 and is now owned by Seed Restaurant Group, Inc.",
+                      " Today, there are more than 200 Fazoli's located nationwide with plans to expand overseas.",
+                      " The restaurant chain specializes in Italian cuisine and dishes.",
+                      " Carl Howard is the company's president and CEO."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Greene King",
+                  "text": "Greene King is the UK's largest pub retailer and brewer. It is based in Bury St Edmunds, Suffolk, England. The company owns pubs, restaurants and hotels. It is listed on the London Stock Exchange and is a constituent of the FTSE 250 Index.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Greene King is the UK's largest pub retailer and brewer.",
+                      " It is based in Bury St Edmunds, Suffolk, England.",
+                      " The company owns pubs, restaurants and hotels.",
+                      " It is listed on the London Stock Exchange and is a constituent of the FTSE 250 Index."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Todai (restaurant)",
+                  "text": "Todai is a restaurant chain based in the United States. As of 2016, the chain had over 19 restaurants in the United States, 7 restaurants in South Korea, one restaurant in Hong Kong, one restaurant in Canada, one restaurant in Indonesia, one restaurant in Singapore and one restaurant in Malaysia.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Todai is a restaurant chain based in the United States.",
+                      " As of 2016, the chain had over 19 restaurants in the United States, 7 restaurants in South Korea, one restaurant in Hong Kong, one restaurant in Canada, one restaurant in Indonesia, one restaurant in Singapore and one restaurant in Malaysia."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Chefette",
+                  "text": "Chefette Restaurants is the largest fast food restaurant chain based in the Caribbean island nation of Barbados. Currently operating throughout the island in 14 locations, Chefette is known for its broasted chicken meals as well as a local curried-'meat + vegetable' (similar to the European Gyro) roll-up or wrap, locally known as a roti. Chefette was founded by a Trinidadian businessman named Assad John Haloute, who migrated to Barbados in 1971. In 1972, he opened the first Chefette Restaurant at Fontabelle, St. Michael. As the success of the chain grew over the next three decades, the restaurant chain continued its expansion. The company's trademark colours are yellow and purple.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Chefette Restaurants is the largest fast food restaurant chain based in the Caribbean island nation of Barbados.",
+                      " Currently operating throughout the island in 14 locations, Chefette is known for its broasted chicken meals as well as a local curried-'meat + vegetable' (similar to the European Gyro) roll-up or wrap, locally known as a roti.",
+                      " Chefette was founded by a Trinidadian businessman named Assad John Haloute, who migrated to Barbados in 1971.",
+                      " In 1972, he opened the first Chefette Restaurant at Fontabelle, St. Michael.",
+                      " As the success of the chain grew over the next three decades, the restaurant chain continued its expansion.",
+                      " The company's trademark colours are yellow and purple."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "The Works (restaurant)",
+                  "text": "The Works is a Canadian restaurant chain based in Ottawa, Ontario. The restaurant chain started by Brad Fennema in Ottawa in 2001, has grown to 27 locations across southern Ontario.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "The Works is a Canadian restaurant chain based in Ottawa, Ontario.",
+                      " The restaurant chain started by Brad Fennema in Ottawa in 2001, has grown to 27 locations across southern Ontario."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Piccadilly Pub",
+                  "text": "Piccadilly Pub was a chain of casual dining restaurants headquartered in the US state of Massachusetts. The first Piccadilly Pub restaurant was opened by William C. Martin in 1973 in the town of Westborough, Massachusetts.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Piccadilly Pub was a chain of casual dining restaurants headquartered in the US state of Massachusetts.",
+                      " The first Piccadilly Pub restaurant was opened by William C. Martin in 1973 in the town of Westborough, Massachusetts."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "The Chessels",
+                  "text": "The Chessels is an area of Bedminster, Bristol that runs from the midsection of Luckwell Rd to the former White Horse pub on West Street. Chessel Street is the main road. The name \"Chessel\" is taken from the name of a field, recorded in 1350. The White Horse was redeveloped into flats by 2013, but was once used as a location for the fictional Nags Head pub in the BBC television series \"Only Fools and Horses\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "The Chessels is an area of Bedminster, Bristol that runs from the midsection of Luckwell Rd to the former White Horse pub on West Street.",
+                      " Chessel Street is the main road.",
+                      " The name \"Chessel\" is taken from the name of a field, recorded in 1350.",
+                      " The White Horse was redeveloped into flats by 2013, but was once used as a location for the fictional Nags Head pub in the BBC television series \"Only Fools and Horses\"."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-4",
+                "title": "Greene King",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "It is based in Bury St Edmunds, Suffolk, England."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-4",
+                  "title": "Greene King",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "It is based in Bury St Edmunds, Suffolk, England."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Greene King",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T10:17:45.978664+00:00",
+            "finished_at": "2026-06-03T10:18:16.797296+00:00",
+            "duration_ms": 30818.819348000034,
+            "error": null
+          },
+          {
+            "node_id": "s1",
+            "label": "Provide final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "company_name": "Greene King Brewery",
+              "headquarters_location": "Bury St Edmunds, Suffolk, England"
+            },
+            "resolved_question": "Where is the company that owns thanKing Horse pub restaurant chain based?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"company_name\": \"Greene King Brewery\",\n  \"headquarters_location\": \"Bury St Edmunds, Suffolk, England\"\n}\n\nBased on the information: the company owning the thanKing Horse pub restaurant chain is Greene King Brewery, and its headquarters is located in Bury St Edmunds, Suffolk, England. Provide a concise answer to the question.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The concise answer to the user's question.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"Greene King Brewery, headquartered in Bury St Edmunds, Suffolk, England, owns the thanKing Horse pub restaurant chain.\"\n}",
+            "parsed_output": {
+              "answer": "Greene King Brewery, headquartered in Bury St Edmunds, Suffolk, England, owns the thanKing Horse pub restaurant chain."
+            },
+            "returned_value": {
+              "answer": "Greene King Brewery, headquartered in Bury St Edmunds, Suffolk, England, owns the thanKing Horse pub restaurant chain."
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": null,
+            "evidence_citations": [],
+            "evidence_citation_evaluations": [],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T10:18:16.797366+00:00",
+            "finished_at": "2026-06-03T10:18:47.656172+00:00",
+            "duration_ms": 30858.819055999902,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Greene King Brewery, headquartered in Bury St Edmunds, Suffolk, England, owns the thanKing Horse pub restaurant chain."
+        },
+        "status": "succeeded",
+        "total_duration_ms": 71709.12953199967,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o-mini",
+            "model_env": "AZURE_OPENAI_MODEL",
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Identify the owning company\\nentity_resolution\\nsucceeded\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: Find company headquarters\\nfact_lookup\\nsucceeded\"]\n  click q2 dagqaSelectGraphNode\n  q1 --> q2\n  s1[\"s1: Provide final answer\\nsynthesis\\nsucceeded\"]\n  click s1 dagqaSelectGraphNode\n  q1 --> s1\n  q2 --> s1"
+      },
+      "error": null
+    }
+  ],
+  "metrics": {
+    "example_count": 3.0,
+    "success_count": 3.0,
+    "failure_count": 0.0,
+    "error_count": 0.0,
+    "exact_match": 0.0,
+    "f1": 0.10526315789473684,
+    "avg_latency_ms": 71954.86806033333,
+    "p50_latency_ms": 81640.35362000004,
+    "total_llm_call_count": 12.0,
+    "avg_llm_call_count": 4.0,
+    "avg_node_count": 3.0,
+    "avg_graph_depth": 2.3333333333333335,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.0,
+    "total_evidence_citation_count": 7.0,
+    "correct_evidence_citation_count": 3.0,
+    "wrong_evidence_citation_count": 4.0,
+    "wrong_supporting_text_rate": 0.5714285714285714,
+    "avg_gold_supporting_fact_recall": 0.4444444444444444,
+    "total_runtime_ms": 275450.0223750001
+  }
+}

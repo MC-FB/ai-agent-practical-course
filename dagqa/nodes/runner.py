@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from dagqa.config import ExecutionConfig, LLMConfig
+from dagqa.evidence import select_evidence
 from dagqa.graph.substitution import (
     MissingDependencyValue,
     resolve_input_map,
@@ -12,8 +13,17 @@ from dagqa.graph.substitution import (
 )
 from dagqa.llm.base import LanguageModel
 from dagqa.nodes.output_validation import parse_node_output, validate_node_output
-from dagqa.nodes.prompts import render_node_prompt, render_repair_prompt
-from dagqa.schemas import DagNode, LLMRequest, NodeStatus, NodeTrace, ValidationResult
+from dagqa.nodes.prompts import node_output_schema, render_node_prompt, render_repair_prompt
+from dagqa.schemas import (
+    DagNode,
+    EvidenceCitation,
+    EvidenceDocument,
+    EvidenceSelection,
+    LLMRequest,
+    NodeStatus,
+    NodeTrace,
+    ValidationResult,
+)
 
 
 class NodeRunner:
@@ -27,7 +37,12 @@ class NodeRunner:
         self.execution = execution
         self.llm_config = llm_config
 
-    async def run(self, node: DagNode, outputs: dict[str, dict[str, Any]]) -> NodeTrace:
+    async def run(
+        self,
+        node: DagNode,
+        outputs: dict[str, dict[str, Any]],
+        evidence_documents: list[EvidenceDocument] | None = None,
+    ) -> NodeTrace:
         started_perf = time.perf_counter()
         started_at = datetime.now(UTC).isoformat()
         trace = NodeTrace(
@@ -41,15 +56,34 @@ class NodeRunner:
         try:
             dependency_values = resolve_input_map(node.input_map, outputs)
             resolved_question = resolve_question(node.question, outputs)
-            prompt = render_node_prompt(node, resolved_question, dependency_values, outputs)
+            supporting_evidence = select_evidence(node, evidence_documents)
+            prompt = render_node_prompt(
+                node,
+                resolved_question,
+                dependency_values,
+                outputs,
+                supporting_evidence,
+            )
             trace.dependency_values = dependency_values
             trace.resolved_question = resolved_question
+            trace.supporting_evidence = supporting_evidence
             trace.rendered_prompt = prompt
             raw_response = await self._call_llm(node.prompt.system, prompt)
             trace.raw_response = raw_response
-            parsed, validation = await self._parse_validate_repair(node, raw_response)
+            parsed, validation = await self._parse_validate_repair(
+                node,
+                raw_response,
+                supporting_evidence,
+            )
             trace.parsed_output = parsed
-            trace.returned_value = parsed
+            if parsed is not None:
+                trace.evidence_citations = [
+                    EvidenceCitation.model_validate(citation)
+                    for citation in parsed.get("_evidence_citations", [])
+                ]
+                trace.returned_value = {
+                    key: value for key, value in parsed.items() if key != "_evidence_citations"
+                }
             trace.validation = validation
             trace.repair_attempts = 0 if validation.valid else self.execution.node_repair_rounds
             trace.status = NodeStatus.succeeded if validation.valid else NodeStatus.failed
@@ -63,11 +97,15 @@ class NodeRunner:
         return trace
 
     async def _parse_validate_repair(
-        self, node: DagNode, raw_response: str
+        self,
+        node: DagNode,
+        raw_response: str,
+        supporting_evidence: EvidenceSelection | None,
     ) -> tuple[dict[str, Any] | None, ValidationResult]:
         current_raw = raw_response
         last_output: dict[str, Any] | None = None
         last_validation = ValidationResult(valid=False, errors=["No validation attempted."])
+        schema = node_output_schema(node, supporting_evidence)
 
         for attempt in range(self.execution.node_repair_rounds + 1):
             try:
@@ -75,14 +113,14 @@ class NodeRunner:
             except Exception as exc:
                 last_validation = ValidationResult(valid=False, errors=[str(exc)])
             else:
-                last_validation = validate_node_output(last_output, node.output_schema)
+                last_validation = validate_node_output(last_output, schema)
                 if last_validation.valid:
                     return last_output, last_validation
 
             if attempt < self.execution.node_repair_rounds:
                 current_raw = await self._call_llm(
                     "Repair malformed node output.",
-                    render_repair_prompt(current_raw, node.output_schema, last_validation.errors),
+                    render_repair_prompt(current_raw, schema, last_validation.errors),
                 )
 
         return last_output, last_validation

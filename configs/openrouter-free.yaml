@@ -10,7 +10,7 @@ planner:
   repair_rounds: 1
 execution:
   max_parallel_nodes: 4
-  node_timeout_seconds: 45
+  node_timeout_seconds: 120
   node_repair_rounds: 1
   fail_fast: false
 validation:

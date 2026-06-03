@@ -7,7 +7,7 @@ from dagqa.graph.executor import DagExecutor
 from dagqa.llm.base import LanguageModel
 from dagqa.llm.factory import build_llm
 from dagqa.planning.planner import Planner
-from dagqa.schemas import DagPlan, RunTrace
+from dagqa.schemas import DagPlan, EvidenceDocument, RunTrace
 
 
 class DagQaClient:
@@ -24,9 +24,17 @@ class DagQaClient:
     async def plan(self, question: str) -> DagPlan:
         return await self.planner.plan(question)
 
-    async def execute(self, plan: DagPlan) -> RunTrace:
-        return await self.executor.execute(plan)
+    async def execute(
+        self,
+        plan: DagPlan,
+        evidence_documents: list[EvidenceDocument] | None = None,
+    ) -> RunTrace:
+        return await self.executor.execute(plan, evidence_documents)
 
-    async def ask(self, question: str) -> RunTrace:
+    async def ask(
+        self,
+        question: str,
+        evidence_documents: list[EvidenceDocument] | None = None,
+    ) -> RunTrace:
         plan = await self.plan(question)
-        return await self.execute(plan)
+        return await self.execute(plan, evidence_documents)
