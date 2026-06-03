@@ -1,0 +1,2049 @@
+{
+  "run_id": "22352754-30d0-445d-a6d2-7c7cc42d68d8",
+  "system": "dag_agent",
+  "limit": 3,
+  "provider": "azure_openai",
+  "model": "azure/gpt-4o",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "dataset_size": 7405,
+  "seed": 20260603,
+  "created_at": "2026-06-03T16:05:09Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260603T160509Z-22352754-30d0-445d-a6d2-7c7cc42d68d8.json",
+  "total_runtime_ms": 328300.55773200013,
+  "records": [
+    {
+      "id": "5ab5a7f45542997d4ad1f1a5",
+      "question": "What organization does Sandra Pizzarello and Doctorate have in common?",
+      "gold_answer": "University",
+      "prediction": "None",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "cosine_sim": 0.20125822722911835,
+      "latency_ms": 122328.68497200002,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 2,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Sandra Pizzarello",
+          "sentence_index": 3
+        },
+        {
+          "title": "Doctorate",
+          "sentence_index": 4
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 0,
+      "wrong_evidence_citation_count": 2,
+      "wrong_supporting_text_rate": 1.0,
+      "gold_supporting_fact_recall": 0.0,
+      "run_trace": {
+        "run_id": "831da655-2ccb-402d-a0e0-5515a6fb2033",
+        "question": "What organization does Sandra Pizzarello and Doctorate have in common?",
+        "plan": {
+          "question": "What organization does Sandra Pizzarello and Doctorate have in common?",
+          "nodes": [
+            {
+              "id": "lookup_sandra_organization",
+              "label": "Lookup Sandra Pizzarello's organization",
+              "task_type": "fact_lookup",
+              "question": "What organization is associated with Sandra Pizzarello?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the organization associated with Sandra Pizzarello."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "organization"
+                ],
+                "properties": {
+                  "organization": {
+                    "type": "string",
+                    "description": "The organization associated with Sandra Pizzarello."
+                  }
+                }
+              }
+            },
+            {
+              "id": "lookup_doctorate_organization",
+              "label": "Lookup Doctorate's organization",
+              "task_type": "fact_lookup",
+              "question": "What organization is associated with Doctorate?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the organization associated with Doctorate."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "organization"
+                ],
+                "properties": {
+                  "organization": {
+                    "type": "string",
+                    "description": "The organization associated with Doctorate."
+                  }
+                }
+              }
+            },
+            {
+              "id": "synthesize_common_organization",
+              "label": "Synthesize common organization",
+              "task_type": "synthesis",
+              "question": "What organization is common between Sandra Pizzarello and Doctorate?",
+              "operation": "synthesize",
+              "depends_on": [
+                "lookup_sandra_organization",
+                "lookup_doctorate_organization"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Determine the common organization between Sandra Pizzarello and Doctorate based on the following information: {dependencies}."
+              },
+              "input_map": {
+                "sandra_organization": "lookup_sandra_organization.organization",
+                "doctorate_organization": "lookup_doctorate_organization.organization"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The organization common to both Sandra Pizzarello and Doctorate."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "synthesize_common_organization"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "lookup_doctorate_organization",
+              "lookup_sandra_organization"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "synthesize_common_organization"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "lookup_doctorate_organization",
+            "label": "Lookup Doctorate's organization",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "What organization is associated with Doctorate?",
+            "rendered_prompt": "Identify the organization associated with Doctorate.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Sandra Eades\n  (0) Sandra Eades (born 1967) is a Noongar physician, researcher and professor, and the first Aboriginal medical practitioner to be awarded a Doctorate of Philosophy in 2003.\n  (1)  She was also recognized as the NSW (New South Wales) Woman of the Year for 2006.\n\nDocument ID: context-1\nTitle: Doctorate\n  (0) A doctorate (from Latin \"docere\", \"to teach\") or doctor's degree (from Latin \"doctor\", \"teacher\") or doctoral degree (from the ancient formalism \"licentia docendi\") is an academic degree awarded by universities that is, in most countries, a research degree that qualifies the holder to teach at the university level in the degree's field, or to work in a specific profession.\n  (1)  There are a variety of doctoral degrees, with the most common being the Doctor of Philosophy (PhD), which is awarded in many different fields, ranging from the humanities to the scientific disciplines.\n  (2)  There are also some doctorates in the US, such as the Juris Doctor (JD), Doctor of Medicine (MD), Doctor of Dental Medicine (DMD), Doctor of Dental Surgery (DDS), Doctor of Osteopathic Medicine (DO), Doctor of Chiropractic (DC), and Doctor of Pharmacy (Pharm.D.)\n  (3)  which are generally regarded internationally as professional degrees rather than doctorates, as they are not research degrees and no defense of any dissertation or thesis is performed.\n  (4)  Many universities also award \"honorary doctorates\" to individuals who have been deemed worthy of special recognition, either for scholarly work or for other contributions to the university or to society.\n\nDocument ID: context-2\nTitle: John C. Sigler\n  (0) John C. Sigler is a former Chairman of the Republican State Committee of Delaware and a former President of the National Rifle Association (NRA), an American gun-owners' rights organization.\n  (1)  He succeeded Sandra Froman in 2007, and was the organization's 59th President since it was founded in 1871.\n  (2)  He was succeeded by Ron Schmeits in 2009, after his second term.\n\nDocument ID: context-3\nTitle: Jubilee doctor\n  (0) A jubilee doctor (Swedish: \"jubeldoktor\" , Latin: \"doctor jubilaris\" ) or golden doctor (German: \"Goldene Doktor\" ) is in some countries a person who has held a doctorate for 50 years or more.\n  (1)  When 50 years have passed, the doctor is invited again by his or her university to the ceremony where the doctorates are conferred and is made \"jubilee/golden doctor\" and celebrated as a guest of honour.\n  (2)  This custom is common in Germany, Sweden and Finland.\n  (3)  In Germany, this ceremony is referred to as the \"Golden Promotion\" (\"Goldene Promotion\").\n  (4)  In Sweden, a person so honoured who holds, for instance, a doctorate of philosophy, may use the academic title \"fil.jubeldr\" instead of the regular \"fil.dr\".\n\nDocument ID: context-4\nTitle: Kevin Franklin\n  (0) Kevin Franklin, EdD was born in Virginia, where he received degrees in Psychology and Education from Old Dominion University.\n  (1)  He holds a Doctorate of Education in Organization and Leadership from the University of San Francisco.\n  (2)  Formerly Executive Director of the University of California system-wide Humanities Research Institute (UCHRI) and a Deputy Director of the San Diego Supercomputer Center (SDSC), Franklin was appointed as Executive Director of the Institute for Computing in Humanities, Arts, and Social Science, (I-CHASS), Research Professor, Education Policy, Organization and Leadership, Adjunct Associate Professor, African American Studies, and Senior Research Scientist for the National Center for Supercomputing Applications at the University of Illinois in July 2007.\n  (3)  In addition Franklin was appointed Associate Director for the National Center for Supercomputing Applications (NCSA) in 2014.\n\nDocument ID: context-5\nTitle: Sandra Pizzarello\n  (0) Sandra Pizzarello, D.Bi.Sc.\n  (1)  is an Italian biochemist known for her co-discovery of amino acid enantiomeric excess in carbonaceous chondrite meteorites.\n  (2)  Her research interests concern the characterization of meteoritic organic compounds in elucidating the evolution of planetary homochirality.\n  (3)  Pizzarello is a project collaborator and co-investigator for the NASA Astrobiology Institute (NAI), the president of the International Society for the Study of the Origin of Life, and an emerita professor at Arizona State University (ASU).\n\nDocument ID: context-6\nTitle: Willemijn Posthumus-van der Goot\n  (0) Willemijn Posthumus-van der Goot (2 May 1897-16 January 1989, who occasionally wrote under the pen-name Peggy Vlug) was a Dutch economist, feminist and radio broadcaster.\n  (1)  As the first woman to attain a doctorate in economics in The Netherlands, her work focused on the impact of working women on the economy.\n  (2)  Recognizing that there were few sources, she joined with other feminists to create the International Archives for the Women's Movement in 1935.\n  (3)  Writing reports on women's work, she refuted government claims that women working outside the home was of no benefit.\n  (4)  First proposed in 1939, the Household Council, which she saw as an organization to foster training and organize domestic laborers was instituted in 1950.\n  (5)  She founded the International Association of Women in Radio, as an organization for professional development and networking in 1949.\n  (6)  As a peace activist, she was involved in the promotion of pacifism and believing women had unique qualities for solving world problems, she established the International Scientific Institute for Feminine Interpretation.\n  (7)  In 1982, in recognition of her significant contributions to the Dutch Women's Movement, Posthumus-van der Goot was appointed as an officer in the Order of Orange-Nassau.\n  (8)  In 2008, she, her husband and sister, were honored as Righteous Among the Nations by the government of Israel, for their fostering children during the Dutch occupation by the Nazis.\n\nDocument ID: context-7\nTitle: Sandra Stotsky\n  (0) Sandra Stotsky is Professor emerita in the Department of Education Reform  at the University of Arkansas, and held the 21st Century Chair in Teacher Quality.\n  (1)  Her research ranges from teacher licensure tests, e.g., (1), coherence in the literature and reading curriculum, e.g., (2), and academic achievement in single-sex classrooms, e.g., (3) to critiques of Common Core’s standards in English language arts, e.g., (4) mathematics.\n  (2) (5), and US History and civic education (6), and other aspects of the Common Core project, e.g., (7), and to reviews of books in education, e.g., (8) She is an advocate of standards-based reform and strong academic standards and assessments for students and teachers.\n\nDocument ID: context-8\nTitle: Thomas Reid\n  (0) Thomas Reid FRSE ( ; 26 April 1710 – 7 October 1796) was a religiously trained Scottish philosopher, a contemporary of David Hume as well as \"Hume's earliest and fiercest critic\".\n  (1)  He was the founder of the Scottish School of Common Sense and played an integral role in the Scottish Enlightenment.\n  (2)  The early part of his life was spent in Aberdeen and he graduated from the University of Aberdeen.\n  (3)  He began his career as a Minister of the Church of Scotland but ceased to be a Minister (or called 'Reverend') when he was given a professorship at King's College, Aberdeen in 1752.\n  (4)  He obtained his doctorate and wrote \"An Inquiry Into the Human Mind on the Principles of Common Sense\" (published in 1764).\n  (5)  He and his colleagues founded the 'Aberdeen Philosophical Society' which was popularly known as the 'Wise Club' (a literary-philosophical association).\n  (6)  Shortly after the publication of his first book, he was given the prestigious Professorship of Moral Philosophy at the University of Glasgow when he was called to replace Adam Smith.\n  (7)  He resigned from this position in 1781, after which he prepared his university lectures for publication in two books: \"Essays on the Intellectual Powers of Man\" (1785) and \"Essays on the Active Powers of the Human Mind\" (1788).\n  (8)  Reid was buried at Blackfriars Church in the grounds of Glasgow College and when the university moved to Gilmorehill in the west of Glasgow, his tombstone was inserted in the main building.\n  (9)  See separate article on Thomas Reid's tombstone.\n\nDocument ID: context-9\nTitle: Herbert A. Shepard\n  (0) Herbert Allen Shepard (1930–1985) was an American economist who made a significant contribution to Organization Development<ref name=\"C4WDefault-10.1111/j.1468-232X.1968.tb010\"> </ref> He held faculty posts at several universities including M.I.T., where he received his doctorate in Industrial Economics.\n  (1)  He founded and directed the first doctoral program in Organization Development at Case Western Reserve; developed a residency in administrative psychiatry at Yale University School of Medicine, and was also President of The Gestalt Institute of Cleveland and The Professional Development Institute.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"organization\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"organization\": {\n      \"type\": \"string\",\n      \"description\": \"The organization associated with Doctorate.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"organization\": \"Universities\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-1\",\n      \"title\": \"Doctorate\",\n      \"sentence_indices\": [0],\n      \"fact\": \"A doctorate is an academic degree awarded by universities.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "organization": "Universities",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-1",
+                  "title": "Doctorate",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "A doctorate is an academic degree awarded by universities."
+                }
+              ]
+            },
+            "returned_value": {
+              "organization": "Universities"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Sandra Eades",
+                  "text": "Sandra Eades (born 1967) is a Noongar physician, researcher and professor, and the first Aboriginal medical practitioner to be awarded a Doctorate of Philosophy in 2003. She was also recognized as the NSW (New South Wales) Woman of the Year for 2006.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Sandra Eades (born 1967) is a Noongar physician, researcher and professor, and the first Aboriginal medical practitioner to be awarded a Doctorate of Philosophy in 2003.",
+                      " She was also recognized as the NSW (New South Wales) Woman of the Year for 2006."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Doctorate",
+                  "text": "A doctorate (from Latin \"docere\", \"to teach\") or doctor's degree (from Latin \"doctor\", \"teacher\") or doctoral degree (from the ancient formalism \"licentia docendi\") is an academic degree awarded by universities that is, in most countries, a research degree that qualifies the holder to teach at the university level in the degree's field, or to work in a specific profession. There are a variety of doctoral degrees, with the most common being the Doctor of Philosophy (PhD), which is awarded in many different fields, ranging from the humanities to the scientific disciplines. There are also some doctorates in the US, such as the Juris Doctor (JD), Doctor of Medicine (MD), Doctor of Dental Medicine (DMD), Doctor of Dental Surgery (DDS), Doctor of Osteopathic Medicine (DO), Doctor of Chiropractic (DC), and Doctor of Pharmacy (Pharm.D.) which are generally regarded internationally as professional degrees rather than doctorates, as they are not research degrees and no defense of any dissertation or thesis is performed. Many universities also award \"honorary doctorates\" to individuals who have been deemed worthy of special recognition, either for scholarly work or for other contributions to the university or to society.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "A doctorate (from Latin \"docere\", \"to teach\") or doctor's degree (from Latin \"doctor\", \"teacher\") or doctoral degree (from the ancient formalism \"licentia docendi\") is an academic degree awarded by universities that is, in most countries, a research degree that qualifies the holder to teach at the university level in the degree's field, or to work in a specific profession.",
+                      " There are a variety of doctoral degrees, with the most common being the Doctor of Philosophy (PhD), which is awarded in many different fields, ranging from the humanities to the scientific disciplines.",
+                      " There are also some doctorates in the US, such as the Juris Doctor (JD), Doctor of Medicine (MD), Doctor of Dental Medicine (DMD), Doctor of Dental Surgery (DDS), Doctor of Osteopathic Medicine (DO), Doctor of Chiropractic (DC), and Doctor of Pharmacy (Pharm.D.)",
+                      " which are generally regarded internationally as professional degrees rather than doctorates, as they are not research degrees and no defense of any dissertation or thesis is performed.",
+                      " Many universities also award \"honorary doctorates\" to individuals who have been deemed worthy of special recognition, either for scholarly work or for other contributions to the university or to society."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "John C. Sigler",
+                  "text": "John C. Sigler is a former Chairman of the Republican State Committee of Delaware and a former President of the National Rifle Association (NRA), an American gun-owners' rights organization. He succeeded Sandra Froman in 2007, and was the organization's 59th President since it was founded in 1871. He was succeeded by Ron Schmeits in 2009, after his second term.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "John C. Sigler is a former Chairman of the Republican State Committee of Delaware and a former President of the National Rifle Association (NRA), an American gun-owners' rights organization.",
+                      " He succeeded Sandra Froman in 2007, and was the organization's 59th President since it was founded in 1871.",
+                      " He was succeeded by Ron Schmeits in 2009, after his second term."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Jubilee doctor",
+                  "text": "A jubilee doctor (Swedish: \"jubeldoktor\" , Latin: \"doctor jubilaris\" ) or golden doctor (German: \"Goldene Doktor\" ) is in some countries a person who has held a doctorate for 50 years or more. When 50 years have passed, the doctor is invited again by his or her university to the ceremony where the doctorates are conferred and is made \"jubilee/golden doctor\" and celebrated as a guest of honour. This custom is common in Germany, Sweden and Finland. In Germany, this ceremony is referred to as the \"Golden Promotion\" (\"Goldene Promotion\"). In Sweden, a person so honoured who holds, for instance, a doctorate of philosophy, may use the academic title \"fil.jubeldr\" instead of the regular \"fil.dr\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "A jubilee doctor (Swedish: \"jubeldoktor\" , Latin: \"doctor jubilaris\" ) or golden doctor (German: \"Goldene Doktor\" ) is in some countries a person who has held a doctorate for 50 years or more.",
+                      " When 50 years have passed, the doctor is invited again by his or her university to the ceremony where the doctorates are conferred and is made \"jubilee/golden doctor\" and celebrated as a guest of honour.",
+                      " This custom is common in Germany, Sweden and Finland.",
+                      " In Germany, this ceremony is referred to as the \"Golden Promotion\" (\"Goldene Promotion\").",
+                      " In Sweden, a person so honoured who holds, for instance, a doctorate of philosophy, may use the academic title \"fil.jubeldr\" instead of the regular \"fil.dr\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Kevin Franklin",
+                  "text": "Kevin Franklin, EdD was born in Virginia, where he received degrees in Psychology and Education from Old Dominion University. He holds a Doctorate of Education in Organization and Leadership from the University of San Francisco. Formerly Executive Director of the University of California system-wide Humanities Research Institute (UCHRI) and a Deputy Director of the San Diego Supercomputer Center (SDSC), Franklin was appointed as Executive Director of the Institute for Computing in Humanities, Arts, and Social Science, (I-CHASS), Research Professor, Education Policy, Organization and Leadership, Adjunct Associate Professor, African American Studies, and Senior Research Scientist for the National Center for Supercomputing Applications at the University of Illinois in July 2007. In addition Franklin was appointed Associate Director for the National Center for Supercomputing Applications (NCSA) in 2014.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Kevin Franklin, EdD was born in Virginia, where he received degrees in Psychology and Education from Old Dominion University.",
+                      " He holds a Doctorate of Education in Organization and Leadership from the University of San Francisco.",
+                      " Formerly Executive Director of the University of California system-wide Humanities Research Institute (UCHRI) and a Deputy Director of the San Diego Supercomputer Center (SDSC), Franklin was appointed as Executive Director of the Institute for Computing in Humanities, Arts, and Social Science, (I-CHASS), Research Professor, Education Policy, Organization and Leadership, Adjunct Associate Professor, African American Studies, and Senior Research Scientist for the National Center for Supercomputing Applications at the University of Illinois in July 2007.",
+                      " In addition Franklin was appointed Associate Director for the National Center for Supercomputing Applications (NCSA) in 2014."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Sandra Pizzarello",
+                  "text": "Sandra Pizzarello, D.Bi.Sc. is an Italian biochemist known for her co-discovery of amino acid enantiomeric excess in carbonaceous chondrite meteorites. Her research interests concern the characterization of meteoritic organic compounds in elucidating the evolution of planetary homochirality. Pizzarello is a project collaborator and co-investigator for the NASA Astrobiology Institute (NAI), the president of the International Society for the Study of the Origin of Life, and an emerita professor at Arizona State University (ASU).",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Sandra Pizzarello, D.Bi.Sc.",
+                      " is an Italian biochemist known for her co-discovery of amino acid enantiomeric excess in carbonaceous chondrite meteorites.",
+                      " Her research interests concern the characterization of meteoritic organic compounds in elucidating the evolution of planetary homochirality.",
+                      " Pizzarello is a project collaborator and co-investigator for the NASA Astrobiology Institute (NAI), the president of the International Society for the Study of the Origin of Life, and an emerita professor at Arizona State University (ASU)."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Willemijn Posthumus-van der Goot",
+                  "text": "Willemijn Posthumus-van der Goot (2 May 1897-16 January 1989, who occasionally wrote under the pen-name Peggy Vlug) was a Dutch economist, feminist and radio broadcaster. As the first woman to attain a doctorate in economics in The Netherlands, her work focused on the impact of working women on the economy. Recognizing that there were few sources, she joined with other feminists to create the International Archives for the Women's Movement in 1935. Writing reports on women's work, she refuted government claims that women working outside the home was of no benefit. First proposed in 1939, the Household Council, which she saw as an organization to foster training and organize domestic laborers was instituted in 1950. She founded the International Association of Women in Radio, as an organization for professional development and networking in 1949. As a peace activist, she was involved in the promotion of pacifism and believing women had unique qualities for solving world problems, she established the International Scientific Institute for Feminine Interpretation. In 1982, in recognition of her significant contributions to the Dutch Women's Movement, Posthumus-van der Goot was appointed as an officer in the Order of Orange-Nassau. In 2008, she, her husband and sister, were honored as Righteous Among the Nations by the government of Israel, for their fostering children during the Dutch occupation by the Nazis.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Willemijn Posthumus-van der Goot (2 May 1897-16 January 1989, who occasionally wrote under the pen-name Peggy Vlug) was a Dutch economist, feminist and radio broadcaster.",
+                      " As the first woman to attain a doctorate in economics in The Netherlands, her work focused on the impact of working women on the economy.",
+                      " Recognizing that there were few sources, she joined with other feminists to create the International Archives for the Women's Movement in 1935.",
+                      " Writing reports on women's work, she refuted government claims that women working outside the home was of no benefit.",
+                      " First proposed in 1939, the Household Council, which she saw as an organization to foster training and organize domestic laborers was instituted in 1950.",
+                      " She founded the International Association of Women in Radio, as an organization for professional development and networking in 1949.",
+                      " As a peace activist, she was involved in the promotion of pacifism and believing women had unique qualities for solving world problems, she established the International Scientific Institute for Feminine Interpretation.",
+                      " In 1982, in recognition of her significant contributions to the Dutch Women's Movement, Posthumus-van der Goot was appointed as an officer in the Order of Orange-Nassau.",
+                      " In 2008, she, her husband and sister, were honored as Righteous Among the Nations by the government of Israel, for their fostering children during the Dutch occupation by the Nazis."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Sandra Stotsky",
+                  "text": "Sandra Stotsky is Professor emerita in the Department of Education Reform  at the University of Arkansas, and held the 21st Century Chair in Teacher Quality. Her research ranges from teacher licensure tests, e.g., (1), coherence in the literature and reading curriculum, e.g., (2), and academic achievement in single-sex classrooms, e.g., (3) to critiques of Common Core’s standards in English language arts, e.g., (4) mathematics.(5), and US History and civic education (6), and other aspects of the Common Core project, e.g., (7), and to reviews of books in education, e.g., (8) She is an advocate of standards-based reform and strong academic standards and assessments for students and teachers.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Sandra Stotsky is Professor emerita in the Department of Education Reform  at the University of Arkansas, and held the 21st Century Chair in Teacher Quality.",
+                      " Her research ranges from teacher licensure tests, e.g., (1), coherence in the literature and reading curriculum, e.g., (2), and academic achievement in single-sex classrooms, e.g., (3) to critiques of Common Core’s standards in English language arts, e.g., (4) mathematics.",
+                      "(5), and US History and civic education (6), and other aspects of the Common Core project, e.g., (7), and to reviews of books in education, e.g., (8) She is an advocate of standards-based reform and strong academic standards and assessments for students and teachers."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Thomas Reid",
+                  "text": "Thomas Reid FRSE ( ; 26 April 1710 – 7 October 1796) was a religiously trained Scottish philosopher, a contemporary of David Hume as well as \"Hume's earliest and fiercest critic\". He was the founder of the Scottish School of Common Sense and played an integral role in the Scottish Enlightenment. The early part of his life was spent in Aberdeen and he graduated from the University of Aberdeen. He began his career as a Minister of the Church of Scotland but ceased to be a Minister (or called 'Reverend') when he was given a professorship at King's College, Aberdeen in 1752. He obtained his doctorate and wrote \"An Inquiry Into the Human Mind on the Principles of Common Sense\" (published in 1764). He and his colleagues founded the 'Aberdeen Philosophical Society' which was popularly known as the 'Wise Club' (a literary-philosophical association). Shortly after the publication of his first book, he was given the prestigious Professorship of Moral Philosophy at the University of Glasgow when he was called to replace Adam Smith. He resigned from this position in 1781, after which he prepared his university lectures for publication in two books: \"Essays on the Intellectual Powers of Man\" (1785) and \"Essays on the Active Powers of the Human Mind\" (1788). Reid was buried at Blackfriars Church in the grounds of Glasgow College and when the university moved to Gilmorehill in the west of Glasgow, his tombstone was inserted in the main building. See separate article on Thomas Reid's tombstone.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Thomas Reid FRSE ( ; 26 April 1710 – 7 October 1796) was a religiously trained Scottish philosopher, a contemporary of David Hume as well as \"Hume's earliest and fiercest critic\".",
+                      " He was the founder of the Scottish School of Common Sense and played an integral role in the Scottish Enlightenment.",
+                      " The early part of his life was spent in Aberdeen and he graduated from the University of Aberdeen.",
+                      " He began his career as a Minister of the Church of Scotland but ceased to be a Minister (or called 'Reverend') when he was given a professorship at King's College, Aberdeen in 1752.",
+                      " He obtained his doctorate and wrote \"An Inquiry Into the Human Mind on the Principles of Common Sense\" (published in 1764).",
+                      " He and his colleagues founded the 'Aberdeen Philosophical Society' which was popularly known as the 'Wise Club' (a literary-philosophical association).",
+                      " Shortly after the publication of his first book, he was given the prestigious Professorship of Moral Philosophy at the University of Glasgow when he was called to replace Adam Smith.",
+                      " He resigned from this position in 1781, after which he prepared his university lectures for publication in two books: \"Essays on the Intellectual Powers of Man\" (1785) and \"Essays on the Active Powers of the Human Mind\" (1788).",
+                      " Reid was buried at Blackfriars Church in the grounds of Glasgow College and when the university moved to Gilmorehill in the west of Glasgow, his tombstone was inserted in the main building.",
+                      " See separate article on Thomas Reid's tombstone."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Herbert A. Shepard",
+                  "text": "Herbert Allen Shepard (1930–1985) was an American economist who made a significant contribution to Organization Development<ref name=\"C4WDefault-10.1111/j.1468-232X.1968.tb010\"> </ref> He held faculty posts at several universities including M.I.T., where he received his doctorate in Industrial Economics. He founded and directed the first doctoral program in Organization Development at Case Western Reserve; developed a residency in administrative psychiatry at Yale University School of Medicine, and was also President of The Gestalt Institute of Cleveland and The Professional Development Institute.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Herbert Allen Shepard (1930–1985) was an American economist who made a significant contribution to Organization Development<ref name=\"C4WDefault-10.1111/j.1468-232X.1968.tb010\"> </ref> He held faculty posts at several universities including M.I.T., where he received his doctorate in Industrial Economics.",
+                      " He founded and directed the first doctoral program in Organization Development at Case Western Reserve; developed a residency in administrative psychiatry at Yale University School of Medicine, and was also President of The Gestalt Institute of Cleveland and The Professional Development Institute."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-1",
+                "title": "Doctorate",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "A doctorate is an academic degree awarded by universities."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-1",
+                  "title": "Doctorate",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "A doctorate is an academic degree awarded by universities."
+                },
+                "matches_gold": false,
+                "matched_gold_facts": []
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:06:12.135622+00:00",
+            "finished_at": "2026-06-03T16:06:13.620508+00:00",
+            "duration_ms": 1484.9012090000997,
+            "error": null
+          },
+          {
+            "node_id": "lookup_sandra_organization",
+            "label": "Lookup Sandra Pizzarello's organization",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "What organization is associated with Sandra Pizzarello?",
+            "rendered_prompt": "Identify the organization associated with Sandra Pizzarello.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Sandra Eades\n  (0) Sandra Eades (born 1967) is a Noongar physician, researcher and professor, and the first Aboriginal medical practitioner to be awarded a Doctorate of Philosophy in 2003.\n  (1)  She was also recognized as the NSW (New South Wales) Woman of the Year for 2006.\n\nDocument ID: context-1\nTitle: Doctorate\n  (0) A doctorate (from Latin \"docere\", \"to teach\") or doctor's degree (from Latin \"doctor\", \"teacher\") or doctoral degree (from the ancient formalism \"licentia docendi\") is an academic degree awarded by universities that is, in most countries, a research degree that qualifies the holder to teach at the university level in the degree's field, or to work in a specific profession.\n  (1)  There are a variety of doctoral degrees, with the most common being the Doctor of Philosophy (PhD), which is awarded in many different fields, ranging from the humanities to the scientific disciplines.\n  (2)  There are also some doctorates in the US, such as the Juris Doctor (JD), Doctor of Medicine (MD), Doctor of Dental Medicine (DMD), Doctor of Dental Surgery (DDS), Doctor of Osteopathic Medicine (DO), Doctor of Chiropractic (DC), and Doctor of Pharmacy (Pharm.D.)\n  (3)  which are generally regarded internationally as professional degrees rather than doctorates, as they are not research degrees and no defense of any dissertation or thesis is performed.\n  (4)  Many universities also award \"honorary doctorates\" to individuals who have been deemed worthy of special recognition, either for scholarly work or for other contributions to the university or to society.\n\nDocument ID: context-2\nTitle: John C. Sigler\n  (0) John C. Sigler is a former Chairman of the Republican State Committee of Delaware and a former President of the National Rifle Association (NRA), an American gun-owners' rights organization.\n  (1)  He succeeded Sandra Froman in 2007, and was the organization's 59th President since it was founded in 1871.\n  (2)  He was succeeded by Ron Schmeits in 2009, after his second term.\n\nDocument ID: context-3\nTitle: Jubilee doctor\n  (0) A jubilee doctor (Swedish: \"jubeldoktor\" , Latin: \"doctor jubilaris\" ) or golden doctor (German: \"Goldene Doktor\" ) is in some countries a person who has held a doctorate for 50 years or more.\n  (1)  When 50 years have passed, the doctor is invited again by his or her university to the ceremony where the doctorates are conferred and is made \"jubilee/golden doctor\" and celebrated as a guest of honour.\n  (2)  This custom is common in Germany, Sweden and Finland.\n  (3)  In Germany, this ceremony is referred to as the \"Golden Promotion\" (\"Goldene Promotion\").\n  (4)  In Sweden, a person so honoured who holds, for instance, a doctorate of philosophy, may use the academic title \"fil.jubeldr\" instead of the regular \"fil.dr\".\n\nDocument ID: context-4\nTitle: Kevin Franklin\n  (0) Kevin Franklin, EdD was born in Virginia, where he received degrees in Psychology and Education from Old Dominion University.\n  (1)  He holds a Doctorate of Education in Organization and Leadership from the University of San Francisco.\n  (2)  Formerly Executive Director of the University of California system-wide Humanities Research Institute (UCHRI) and a Deputy Director of the San Diego Supercomputer Center (SDSC), Franklin was appointed as Executive Director of the Institute for Computing in Humanities, Arts, and Social Science, (I-CHASS), Research Professor, Education Policy, Organization and Leadership, Adjunct Associate Professor, African American Studies, and Senior Research Scientist for the National Center for Supercomputing Applications at the University of Illinois in July 2007.\n  (3)  In addition Franklin was appointed Associate Director for the National Center for Supercomputing Applications (NCSA) in 2014.\n\nDocument ID: context-5\nTitle: Sandra Pizzarello\n  (0) Sandra Pizzarello, D.Bi.Sc.\n  (1)  is an Italian biochemist known for her co-discovery of amino acid enantiomeric excess in carbonaceous chondrite meteorites.\n  (2)  Her research interests concern the characterization of meteoritic organic compounds in elucidating the evolution of planetary homochirality.\n  (3)  Pizzarello is a project collaborator and co-investigator for the NASA Astrobiology Institute (NAI), the president of the International Society for the Study of the Origin of Life, and an emerita professor at Arizona State University (ASU).\n\nDocument ID: context-6\nTitle: Willemijn Posthumus-van der Goot\n  (0) Willemijn Posthumus-van der Goot (2 May 1897-16 January 1989, who occasionally wrote under the pen-name Peggy Vlug) was a Dutch economist, feminist and radio broadcaster.\n  (1)  As the first woman to attain a doctorate in economics in The Netherlands, her work focused on the impact of working women on the economy.\n  (2)  Recognizing that there were few sources, she joined with other feminists to create the International Archives for the Women's Movement in 1935.\n  (3)  Writing reports on women's work, she refuted government claims that women working outside the home was of no benefit.\n  (4)  First proposed in 1939, the Household Council, which she saw as an organization to foster training and organize domestic laborers was instituted in 1950.\n  (5)  She founded the International Association of Women in Radio, as an organization for professional development and networking in 1949.\n  (6)  As a peace activist, she was involved in the promotion of pacifism and believing women had unique qualities for solving world problems, she established the International Scientific Institute for Feminine Interpretation.\n  (7)  In 1982, in recognition of her significant contributions to the Dutch Women's Movement, Posthumus-van der Goot was appointed as an officer in the Order of Orange-Nassau.\n  (8)  In 2008, she, her husband and sister, were honored as Righteous Among the Nations by the government of Israel, for their fostering children during the Dutch occupation by the Nazis.\n\nDocument ID: context-7\nTitle: Sandra Stotsky\n  (0) Sandra Stotsky is Professor emerita in the Department of Education Reform  at the University of Arkansas, and held the 21st Century Chair in Teacher Quality.\n  (1)  Her research ranges from teacher licensure tests, e.g., (1), coherence in the literature and reading curriculum, e.g., (2), and academic achievement in single-sex classrooms, e.g., (3) to critiques of Common Core’s standards in English language arts, e.g., (4) mathematics.\n  (2) (5), and US History and civic education (6), and other aspects of the Common Core project, e.g., (7), and to reviews of books in education, e.g., (8) She is an advocate of standards-based reform and strong academic standards and assessments for students and teachers.\n\nDocument ID: context-8\nTitle: Thomas Reid\n  (0) Thomas Reid FRSE ( ; 26 April 1710 – 7 October 1796) was a religiously trained Scottish philosopher, a contemporary of David Hume as well as \"Hume's earliest and fiercest critic\".\n  (1)  He was the founder of the Scottish School of Common Sense and played an integral role in the Scottish Enlightenment.\n  (2)  The early part of his life was spent in Aberdeen and he graduated from the University of Aberdeen.\n  (3)  He began his career as a Minister of the Church of Scotland but ceased to be a Minister (or called 'Reverend') when he was given a professorship at King's College, Aberdeen in 1752.\n  (4)  He obtained his doctorate and wrote \"An Inquiry Into the Human Mind on the Principles of Common Sense\" (published in 1764).\n  (5)  He and his colleagues founded the 'Aberdeen Philosophical Society' which was popularly known as the 'Wise Club' (a literary-philosophical association).\n  (6)  Shortly after the publication of his first book, he was given the prestigious Professorship of Moral Philosophy at the University of Glasgow when he was called to replace Adam Smith.\n  (7)  He resigned from this position in 1781, after which he prepared his university lectures for publication in two books: \"Essays on the Intellectual Powers of Man\" (1785) and \"Essays on the Active Powers of the Human Mind\" (1788).\n  (8)  Reid was buried at Blackfriars Church in the grounds of Glasgow College and when the university moved to Gilmorehill in the west of Glasgow, his tombstone was inserted in the main building.\n  (9)  See separate article on Thomas Reid's tombstone.\n\nDocument ID: context-9\nTitle: Herbert A. Shepard\n  (0) Herbert Allen Shepard (1930–1985) was an American economist who made a significant contribution to Organization Development<ref name=\"C4WDefault-10.1111/j.1468-232X.1968.tb010\"> </ref> He held faculty posts at several universities including M.I.T., where he received his doctorate in Industrial Economics.\n  (1)  He founded and directed the first doctoral program in Organization Development at Case Western Reserve; developed a residency in administrative psychiatry at Yale University School of Medicine, and was also President of The Gestalt Institute of Cleveland and The Professional Development Institute.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"organization\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"organization\": {\n      \"type\": \"string\",\n      \"description\": \"The organization associated with Sandra Pizzarello.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"organization\": \"NASA Astrobiology Institute\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-5\",\n      \"title\": \"Sandra Pizzarello\",\n      \"sentence_indices\": [2],\n      \"fact\": \"Pizzarello is a project collaborator and co-investigator for the NASA Astrobiology Institute (NAI).\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "organization": "NASA Astrobiology Institute",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-5",
+                  "title": "Sandra Pizzarello",
+                  "sentence_indices": [
+                    2
+                  ],
+                  "fact": "Pizzarello is a project collaborator and co-investigator for the NASA Astrobiology Institute (NAI)."
+                }
+              ]
+            },
+            "returned_value": {
+              "organization": "NASA Astrobiology Institute"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Sandra Eades",
+                  "text": "Sandra Eades (born 1967) is a Noongar physician, researcher and professor, and the first Aboriginal medical practitioner to be awarded a Doctorate of Philosophy in 2003. She was also recognized as the NSW (New South Wales) Woman of the Year for 2006.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Sandra Eades (born 1967) is a Noongar physician, researcher and professor, and the first Aboriginal medical practitioner to be awarded a Doctorate of Philosophy in 2003.",
+                      " She was also recognized as the NSW (New South Wales) Woman of the Year for 2006."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Doctorate",
+                  "text": "A doctorate (from Latin \"docere\", \"to teach\") or doctor's degree (from Latin \"doctor\", \"teacher\") or doctoral degree (from the ancient formalism \"licentia docendi\") is an academic degree awarded by universities that is, in most countries, a research degree that qualifies the holder to teach at the university level in the degree's field, or to work in a specific profession. There are a variety of doctoral degrees, with the most common being the Doctor of Philosophy (PhD), which is awarded in many different fields, ranging from the humanities to the scientific disciplines. There are also some doctorates in the US, such as the Juris Doctor (JD), Doctor of Medicine (MD), Doctor of Dental Medicine (DMD), Doctor of Dental Surgery (DDS), Doctor of Osteopathic Medicine (DO), Doctor of Chiropractic (DC), and Doctor of Pharmacy (Pharm.D.) which are generally regarded internationally as professional degrees rather than doctorates, as they are not research degrees and no defense of any dissertation or thesis is performed. Many universities also award \"honorary doctorates\" to individuals who have been deemed worthy of special recognition, either for scholarly work or for other contributions to the university or to society.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "A doctorate (from Latin \"docere\", \"to teach\") or doctor's degree (from Latin \"doctor\", \"teacher\") or doctoral degree (from the ancient formalism \"licentia docendi\") is an academic degree awarded by universities that is, in most countries, a research degree that qualifies the holder to teach at the university level in the degree's field, or to work in a specific profession.",
+                      " There are a variety of doctoral degrees, with the most common being the Doctor of Philosophy (PhD), which is awarded in many different fields, ranging from the humanities to the scientific disciplines.",
+                      " There are also some doctorates in the US, such as the Juris Doctor (JD), Doctor of Medicine (MD), Doctor of Dental Medicine (DMD), Doctor of Dental Surgery (DDS), Doctor of Osteopathic Medicine (DO), Doctor of Chiropractic (DC), and Doctor of Pharmacy (Pharm.D.)",
+                      " which are generally regarded internationally as professional degrees rather than doctorates, as they are not research degrees and no defense of any dissertation or thesis is performed.",
+                      " Many universities also award \"honorary doctorates\" to individuals who have been deemed worthy of special recognition, either for scholarly work or for other contributions to the university or to society."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "John C. Sigler",
+                  "text": "John C. Sigler is a former Chairman of the Republican State Committee of Delaware and a former President of the National Rifle Association (NRA), an American gun-owners' rights organization. He succeeded Sandra Froman in 2007, and was the organization's 59th President since it was founded in 1871. He was succeeded by Ron Schmeits in 2009, after his second term.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "John C. Sigler is a former Chairman of the Republican State Committee of Delaware and a former President of the National Rifle Association (NRA), an American gun-owners' rights organization.",
+                      " He succeeded Sandra Froman in 2007, and was the organization's 59th President since it was founded in 1871.",
+                      " He was succeeded by Ron Schmeits in 2009, after his second term."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Jubilee doctor",
+                  "text": "A jubilee doctor (Swedish: \"jubeldoktor\" , Latin: \"doctor jubilaris\" ) or golden doctor (German: \"Goldene Doktor\" ) is in some countries a person who has held a doctorate for 50 years or more. When 50 years have passed, the doctor is invited again by his or her university to the ceremony where the doctorates are conferred and is made \"jubilee/golden doctor\" and celebrated as a guest of honour. This custom is common in Germany, Sweden and Finland. In Germany, this ceremony is referred to as the \"Golden Promotion\" (\"Goldene Promotion\"). In Sweden, a person so honoured who holds, for instance, a doctorate of philosophy, may use the academic title \"fil.jubeldr\" instead of the regular \"fil.dr\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "A jubilee doctor (Swedish: \"jubeldoktor\" , Latin: \"doctor jubilaris\" ) or golden doctor (German: \"Goldene Doktor\" ) is in some countries a person who has held a doctorate for 50 years or more.",
+                      " When 50 years have passed, the doctor is invited again by his or her university to the ceremony where the doctorates are conferred and is made \"jubilee/golden doctor\" and celebrated as a guest of honour.",
+                      " This custom is common in Germany, Sweden and Finland.",
+                      " In Germany, this ceremony is referred to as the \"Golden Promotion\" (\"Goldene Promotion\").",
+                      " In Sweden, a person so honoured who holds, for instance, a doctorate of philosophy, may use the academic title \"fil.jubeldr\" instead of the regular \"fil.dr\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Kevin Franklin",
+                  "text": "Kevin Franklin, EdD was born in Virginia, where he received degrees in Psychology and Education from Old Dominion University. He holds a Doctorate of Education in Organization and Leadership from the University of San Francisco. Formerly Executive Director of the University of California system-wide Humanities Research Institute (UCHRI) and a Deputy Director of the San Diego Supercomputer Center (SDSC), Franklin was appointed as Executive Director of the Institute for Computing in Humanities, Arts, and Social Science, (I-CHASS), Research Professor, Education Policy, Organization and Leadership, Adjunct Associate Professor, African American Studies, and Senior Research Scientist for the National Center for Supercomputing Applications at the University of Illinois in July 2007. In addition Franklin was appointed Associate Director for the National Center for Supercomputing Applications (NCSA) in 2014.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Kevin Franklin, EdD was born in Virginia, where he received degrees in Psychology and Education from Old Dominion University.",
+                      " He holds a Doctorate of Education in Organization and Leadership from the University of San Francisco.",
+                      " Formerly Executive Director of the University of California system-wide Humanities Research Institute (UCHRI) and a Deputy Director of the San Diego Supercomputer Center (SDSC), Franklin was appointed as Executive Director of the Institute for Computing in Humanities, Arts, and Social Science, (I-CHASS), Research Professor, Education Policy, Organization and Leadership, Adjunct Associate Professor, African American Studies, and Senior Research Scientist for the National Center for Supercomputing Applications at the University of Illinois in July 2007.",
+                      " In addition Franklin was appointed Associate Director for the National Center for Supercomputing Applications (NCSA) in 2014."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Sandra Pizzarello",
+                  "text": "Sandra Pizzarello, D.Bi.Sc. is an Italian biochemist known for her co-discovery of amino acid enantiomeric excess in carbonaceous chondrite meteorites. Her research interests concern the characterization of meteoritic organic compounds in elucidating the evolution of planetary homochirality. Pizzarello is a project collaborator and co-investigator for the NASA Astrobiology Institute (NAI), the president of the International Society for the Study of the Origin of Life, and an emerita professor at Arizona State University (ASU).",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Sandra Pizzarello, D.Bi.Sc.",
+                      " is an Italian biochemist known for her co-discovery of amino acid enantiomeric excess in carbonaceous chondrite meteorites.",
+                      " Her research interests concern the characterization of meteoritic organic compounds in elucidating the evolution of planetary homochirality.",
+                      " Pizzarello is a project collaborator and co-investigator for the NASA Astrobiology Institute (NAI), the president of the International Society for the Study of the Origin of Life, and an emerita professor at Arizona State University (ASU)."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Willemijn Posthumus-van der Goot",
+                  "text": "Willemijn Posthumus-van der Goot (2 May 1897-16 January 1989, who occasionally wrote under the pen-name Peggy Vlug) was a Dutch economist, feminist and radio broadcaster. As the first woman to attain a doctorate in economics in The Netherlands, her work focused on the impact of working women on the economy. Recognizing that there were few sources, she joined with other feminists to create the International Archives for the Women's Movement in 1935. Writing reports on women's work, she refuted government claims that women working outside the home was of no benefit. First proposed in 1939, the Household Council, which she saw as an organization to foster training and organize domestic laborers was instituted in 1950. She founded the International Association of Women in Radio, as an organization for professional development and networking in 1949. As a peace activist, she was involved in the promotion of pacifism and believing women had unique qualities for solving world problems, she established the International Scientific Institute for Feminine Interpretation. In 1982, in recognition of her significant contributions to the Dutch Women's Movement, Posthumus-van der Goot was appointed as an officer in the Order of Orange-Nassau. In 2008, she, her husband and sister, were honored as Righteous Among the Nations by the government of Israel, for their fostering children during the Dutch occupation by the Nazis.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Willemijn Posthumus-van der Goot (2 May 1897-16 January 1989, who occasionally wrote under the pen-name Peggy Vlug) was a Dutch economist, feminist and radio broadcaster.",
+                      " As the first woman to attain a doctorate in economics in The Netherlands, her work focused on the impact of working women on the economy.",
+                      " Recognizing that there were few sources, she joined with other feminists to create the International Archives for the Women's Movement in 1935.",
+                      " Writing reports on women's work, she refuted government claims that women working outside the home was of no benefit.",
+                      " First proposed in 1939, the Household Council, which she saw as an organization to foster training and organize domestic laborers was instituted in 1950.",
+                      " She founded the International Association of Women in Radio, as an organization for professional development and networking in 1949.",
+                      " As a peace activist, she was involved in the promotion of pacifism and believing women had unique qualities for solving world problems, she established the International Scientific Institute for Feminine Interpretation.",
+                      " In 1982, in recognition of her significant contributions to the Dutch Women's Movement, Posthumus-van der Goot was appointed as an officer in the Order of Orange-Nassau.",
+                      " In 2008, she, her husband and sister, were honored as Righteous Among the Nations by the government of Israel, for their fostering children during the Dutch occupation by the Nazis."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Sandra Stotsky",
+                  "text": "Sandra Stotsky is Professor emerita in the Department of Education Reform  at the University of Arkansas, and held the 21st Century Chair in Teacher Quality. Her research ranges from teacher licensure tests, e.g., (1), coherence in the literature and reading curriculum, e.g., (2), and academic achievement in single-sex classrooms, e.g., (3) to critiques of Common Core’s standards in English language arts, e.g., (4) mathematics.(5), and US History and civic education (6), and other aspects of the Common Core project, e.g., (7), and to reviews of books in education, e.g., (8) She is an advocate of standards-based reform and strong academic standards and assessments for students and teachers.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Sandra Stotsky is Professor emerita in the Department of Education Reform  at the University of Arkansas, and held the 21st Century Chair in Teacher Quality.",
+                      " Her research ranges from teacher licensure tests, e.g., (1), coherence in the literature and reading curriculum, e.g., (2), and academic achievement in single-sex classrooms, e.g., (3) to critiques of Common Core’s standards in English language arts, e.g., (4) mathematics.",
+                      "(5), and US History and civic education (6), and other aspects of the Common Core project, e.g., (7), and to reviews of books in education, e.g., (8) She is an advocate of standards-based reform and strong academic standards and assessments for students and teachers."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Thomas Reid",
+                  "text": "Thomas Reid FRSE ( ; 26 April 1710 – 7 October 1796) was a religiously trained Scottish philosopher, a contemporary of David Hume as well as \"Hume's earliest and fiercest critic\". He was the founder of the Scottish School of Common Sense and played an integral role in the Scottish Enlightenment. The early part of his life was spent in Aberdeen and he graduated from the University of Aberdeen. He began his career as a Minister of the Church of Scotland but ceased to be a Minister (or called 'Reverend') when he was given a professorship at King's College, Aberdeen in 1752. He obtained his doctorate and wrote \"An Inquiry Into the Human Mind on the Principles of Common Sense\" (published in 1764). He and his colleagues founded the 'Aberdeen Philosophical Society' which was popularly known as the 'Wise Club' (a literary-philosophical association). Shortly after the publication of his first book, he was given the prestigious Professorship of Moral Philosophy at the University of Glasgow when he was called to replace Adam Smith. He resigned from this position in 1781, after which he prepared his university lectures for publication in two books: \"Essays on the Intellectual Powers of Man\" (1785) and \"Essays on the Active Powers of the Human Mind\" (1788). Reid was buried at Blackfriars Church in the grounds of Glasgow College and when the university moved to Gilmorehill in the west of Glasgow, his tombstone was inserted in the main building. See separate article on Thomas Reid's tombstone.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Thomas Reid FRSE ( ; 26 April 1710 – 7 October 1796) was a religiously trained Scottish philosopher, a contemporary of David Hume as well as \"Hume's earliest and fiercest critic\".",
+                      " He was the founder of the Scottish School of Common Sense and played an integral role in the Scottish Enlightenment.",
+                      " The early part of his life was spent in Aberdeen and he graduated from the University of Aberdeen.",
+                      " He began his career as a Minister of the Church of Scotland but ceased to be a Minister (or called 'Reverend') when he was given a professorship at King's College, Aberdeen in 1752.",
+                      " He obtained his doctorate and wrote \"An Inquiry Into the Human Mind on the Principles of Common Sense\" (published in 1764).",
+                      " He and his colleagues founded the 'Aberdeen Philosophical Society' which was popularly known as the 'Wise Club' (a literary-philosophical association).",
+                      " Shortly after the publication of his first book, he was given the prestigious Professorship of Moral Philosophy at the University of Glasgow when he was called to replace Adam Smith.",
+                      " He resigned from this position in 1781, after which he prepared his university lectures for publication in two books: \"Essays on the Intellectual Powers of Man\" (1785) and \"Essays on the Active Powers of the Human Mind\" (1788).",
+                      " Reid was buried at Blackfriars Church in the grounds of Glasgow College and when the university moved to Gilmorehill in the west of Glasgow, his tombstone was inserted in the main building.",
+                      " See separate article on Thomas Reid's tombstone."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Herbert A. Shepard",
+                  "text": "Herbert Allen Shepard (1930–1985) was an American economist who made a significant contribution to Organization Development<ref name=\"C4WDefault-10.1111/j.1468-232X.1968.tb010\"> </ref> He held faculty posts at several universities including M.I.T., where he received his doctorate in Industrial Economics. He founded and directed the first doctoral program in Organization Development at Case Western Reserve; developed a residency in administrative psychiatry at Yale University School of Medicine, and was also President of The Gestalt Institute of Cleveland and The Professional Development Institute.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Herbert Allen Shepard (1930–1985) was an American economist who made a significant contribution to Organization Development<ref name=\"C4WDefault-10.1111/j.1468-232X.1968.tb010\"> </ref> He held faculty posts at several universities including M.I.T., where he received his doctorate in Industrial Economics.",
+                      " He founded and directed the first doctoral program in Organization Development at Case Western Reserve; developed a residency in administrative psychiatry at Yale University School of Medicine, and was also President of The Gestalt Institute of Cleveland and The Professional Development Institute."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-5",
+                "title": "Sandra Pizzarello",
+                "sentence_indices": [
+                  2
+                ],
+                "fact": "Pizzarello is a project collaborator and co-investigator for the NASA Astrobiology Institute (NAI)."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-5",
+                  "title": "Sandra Pizzarello",
+                  "sentence_indices": [
+                    2
+                  ],
+                  "fact": "Pizzarello is a project collaborator and co-investigator for the NASA Astrobiology Institute (NAI)."
+                },
+                "matches_gold": false,
+                "matched_gold_facts": []
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:06:12.136020+00:00",
+            "finished_at": "2026-06-03T16:06:14.671519+00:00",
+            "duration_ms": 2535.5093339999257,
+            "error": null
+          },
+          {
+            "node_id": "synthesize_common_organization",
+            "label": "Synthesize common organization",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "sandra_organization": "NASA Astrobiology Institute",
+              "doctorate_organization": "Universities"
+            },
+            "resolved_question": "What organization is common between Sandra Pizzarello and Doctorate?",
+            "rendered_prompt": "Determine the common organization between Sandra Pizzarello and Doctorate based on the following information: {\n  \"sandra_organization\": \"NASA Astrobiology Institute\",\n  \"doctorate_organization\": \"Universities\"\n}.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The organization common to both Sandra Pizzarello and Doctorate.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"None\"\n}",
+            "parsed_output": {
+              "answer": "None"
+            },
+            "returned_value": {
+              "answer": "None"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": null,
+            "evidence_citations": [],
+            "evidence_citation_evaluations": [],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:06:14.671619+00:00",
+            "finished_at": "2026-06-03T16:07:05.115266+00:00",
+            "duration_ms": 50444.27581399998,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "None"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 52980.49331599998,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  lookup_sandra_organization[\"lookup_sandra_organization: Lookup Sandra Pizzarello's organization\\nfact_lookup\\nsucceeded\"]\n  click lookup_sandra_organization dagqaSelectGraphNode\n  lookup_doctorate_organization[\"lookup_doctorate_organization: Lookup Doctorate's organization\\nfact_lookup\\nsucceeded\"]\n  click lookup_doctorate_organization dagqaSelectGraphNode\n  synthesize_common_organization[\"synthesize_common_organization: Synthesize common organization\\nsynthesis\\nsucceeded\"]\n  click synthesize_common_organization dagqaSelectGraphNode\n  lookup_sandra_organization --> synthesize_common_organization\n  lookup_doctorate_organization --> synthesize_common_organization"
+      },
+      "error": null
+    },
+    {
+      "id": "5ae32ce75542992f92d8223d",
+      "question": "What month did the an online adult website whose last print magazine was published in the summer of 2007 recognize Nikita Gross?",
+      "gold_answer": "January",
+      "prediction": "January",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0,
+      "latency_ms": 36936.42001800003,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 3,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Nikita Gross",
+          "sentence_index": 0
+        },
+        {
+          "title": "Nikita Gross",
+          "sentence_index": 3
+        },
+        {
+          "title": "Perfect 10",
+          "sentence_index": 0
+        },
+        {
+          "title": "Perfect 10",
+          "sentence_index": 2
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 0.75,
+      "run_trace": {
+        "run_id": "46e7ea60-7e88-4c0d-8ee9-e979c524bee9",
+        "question": "What month did the an online adult website whose last print magazine was published in the summer of 2007 recognize Nikita Gross?",
+        "plan": {
+          "question": "What month did the an online adult website whose last print magazine was published in the summer of 2007 recognize Nikita Gross?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Identify the website",
+              "task_type": "fact_lookup",
+              "question": "Which online adult website published its last print magazine in the summer of 2007?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the online adult website that published its last print magazine in the summer of 2007."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "website_name"
+                ],
+                "properties": {
+                  "website_name": {
+                    "type": "string",
+                    "description": "The name of the online adult website."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Find recognition month",
+              "task_type": "fact_lookup",
+              "question": "In which month did {q1.website_name} recognize Nikita Gross?",
+              "operation": "answer",
+              "depends_on": [
+                "q1"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Determine the month in which {q1.website_name} recognized Nikita Gross."
+              },
+              "input_map": {
+                "website_name": "q1.website_name"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "recognition_month"
+                ],
+                "properties": {
+                  "recognition_month": {
+                    "type": "string",
+                    "description": "The month of recognition for Nikita Gross."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q3",
+              "label": "Provide final answer",
+              "task_type": "synthesis",
+              "question": "What month did the online adult website recognize Nikita Gross?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Based on the information, the month of recognition is {q2.recognition_month}."
+              },
+              "input_map": {
+                "recognition_month": "q2.recognition_month"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The final answer to the user's question."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q3"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "q2"
+            ]
+          },
+          {
+            "index": 3,
+            "node_ids": [
+              "q3"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "Identify the website",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Which online adult website published its last print magazine in the summer of 2007?",
+            "rendered_prompt": "Identify the online adult website that published its last print magazine in the summer of 2007.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: M Magazine\n  (0) M Magazine is an online teen-focused website and was a monthly print teen magazine.\n  (1)  The website is owned by, and the print magazine was published, by Bauer Publishing, the United States division of the German firm Bauer Verlagsgruppe.\n  (2)  The first issue was released in January 2000.\n\nDocument ID: context-1\nTitle: Twist (magazine)\n  (0) Twist is an online teen-focused website and was a monthly print teen magazine.\n  (1)  The website is owned by, and the print magazine was published, by Bauer Publishing, the United States division of the German firm Bauer Verlagsgruppe.\n  (2)  The first issue was released in 1997.\n\nDocument ID: context-2\nTitle: China Business Review\n  (0) The China Business Review is the official online magazine of the US-China Business Council, covering business, economics, and politics in both the United States and China that affect business in China across a wide variety of industries.\n  (1)  The print magazine, published bimonthly, was established in 1974 as a source of trade and investment news.\n  (2)  In 2011, the print magazine switched to a quarterly publication schedule.\n  (3)  In April 2013, the magazine ceased print publication, going to an online-only format.\n\nDocument ID: context-3\nTitle: Grooby Productions\n  (0) Grooby Productions is a company founded in 1996 and based in Los Angeles, California, that produces transgender online adult entertainment.\n  (1)  It established itself as one of the pioneer companies of online adult transgender entertainment with its website Shemale Yum, \"the first transsexual pay site with original content\".\n  (2)  The company owns a number of transsexual adult websites, produces its own DVD line, and has other interests in forums, blogs and social networking in the transsexual niche genre including the Transgender Erotica Awards.\n\nDocument ID: context-4\nTitle: Animation Magazine\n  (0) Animation Magazine is an American print magazine and website covering the animation industry and education, as well as visual effects.\n  (1)  The print magazine is published 10 times a year in the United States.\n\nDocument ID: context-5\nTitle: CzechBoys\n  (0) CzechBoys is an adult film studio, adult website and adult content provider in the gay pornography niche.\n  (1)  CzechBoys was founded in 1999 by Pavel Rada and is based in Prague, Czech Republic.\n  (2)  The company's primary website, CzechBoys.com, is presented in the format of a gay erotic online magazine of which a new issue is published daily.\n  (3)  The majority of the models and performers in CzechBoys video and photo content are heterosexual young men from Eastern Europe who go Gay-for-pay.\n\nDocument ID: context-6\nTitle: Seed (magazine)\n  (0) Seed (subtitled \"Science Is Culture\"; originally \"Beneath the Surface\") is an online science magazine published by Seed Media Group.\n  (1)  The magazine looks at big ideas in science, important issues at the intersection of science and society, and the people driving global science culture.\n  (2)  \"Seed\" was founded in Montreal by Adam Bly and the magazine is now headquartered in New York with bureaus around the world.\n  (3)  May/June 2009 (Issue No. 22) was the last print issue.\n  (4)  Content continues to be published on the website.\n\nDocument ID: context-7\nTitle: Perfect 10\n  (0) Perfect 10 is an online adult website – and formerly a monthly and then quarterly men's magazine – that features high resolution topless or nude photographs of 'all natural' women who have not had cosmetic surgery.\n  (1)  Perfect 10 also promoted and filmed boxing matches between a number of their models, aired most recently as \"Perfect 10: Model Boxing\" on the Showtime and HDNet cable channels.\n  (2)  The last print edition of the magazine was published in the summer of 2007 (issue 43).\n  (3)  Since then it has switched to a subscription-based website only presentation.\n\nDocument ID: context-8\nTitle: Worldwide brands\n  (0) Worldwide Brands is a Maitland, Florida based company that was founded by Chris Malta in 1999, and registered in 2001 as a corporation.\n  (1)  It is a product sourcing research company that operates WorldwideBrands.com, a website whose primary function is to locate and qualify factory-authorized wholesale suppliers and wholesale manufacturers that are willing to sell to home businesses and Internet retailers.\n  (2)  Worldwide Brands publishes the results of its findings in an online wholesale directory.\n  (3)  The company's target market consists of small to medium sized retailers, home businesses, and online merchants who sell on popular ecommerce platforms like eBay,Amazon, as well as on independent ecommerce websites.\n\nDocument ID: context-9\nTitle: Nikita Gross\n  (0) Nikita Gross is a Russian glamour model and former pornographic actress.\n  (1)  In 1998 she won the X-Rated Critics Organization Award for Best New Starlet.\n  (2)  She was \"Penthouse\" Pet of the Month for July 1998 and 2000 \"Penthouse\" Pet of the Year runner-up.\n  (3)  She was a \"Perfect 10\" girl in January 2000.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"website_name\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"website_name\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the online adult website.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"website_name\": \"Perfect 10\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-7\",\n      \"title\": \"Perfect 10\",\n      \"sentence_indices\": [0, 2],\n      \"fact\": \"Perfect 10 is an online adult website – and formerly a monthly and then quarterly men's magazine. The last print edition of the magazine was published in the summer of 2007 (issue 43).\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "website_name": "Perfect 10",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-7",
+                  "title": "Perfect 10",
+                  "sentence_indices": [
+                    0,
+                    2
+                  ],
+                  "fact": "Perfect 10 is an online adult website – and formerly a monthly and then quarterly men's magazine. The last print edition of the magazine was published in the summer of 2007 (issue 43)."
+                }
+              ]
+            },
+            "returned_value": {
+              "website_name": "Perfect 10"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "M Magazine",
+                  "text": "M Magazine is an online teen-focused website and was a monthly print teen magazine. The website is owned by, and the print magazine was published, by Bauer Publishing, the United States division of the German firm Bauer Verlagsgruppe. The first issue was released in January 2000.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "M Magazine is an online teen-focused website and was a monthly print teen magazine.",
+                      " The website is owned by, and the print magazine was published, by Bauer Publishing, the United States division of the German firm Bauer Verlagsgruppe.",
+                      " The first issue was released in January 2000."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Twist (magazine)",
+                  "text": "Twist is an online teen-focused website and was a monthly print teen magazine. The website is owned by, and the print magazine was published, by Bauer Publishing, the United States division of the German firm Bauer Verlagsgruppe. The first issue was released in 1997.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Twist is an online teen-focused website and was a monthly print teen magazine.",
+                      " The website is owned by, and the print magazine was published, by Bauer Publishing, the United States division of the German firm Bauer Verlagsgruppe.",
+                      " The first issue was released in 1997."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "China Business Review",
+                  "text": "The China Business Review is the official online magazine of the US-China Business Council, covering business, economics, and politics in both the United States and China that affect business in China across a wide variety of industries. The print magazine, published bimonthly, was established in 1974 as a source of trade and investment news. In 2011, the print magazine switched to a quarterly publication schedule. In April 2013, the magazine ceased print publication, going to an online-only format.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The China Business Review is the official online magazine of the US-China Business Council, covering business, economics, and politics in both the United States and China that affect business in China across a wide variety of industries.",
+                      " The print magazine, published bimonthly, was established in 1974 as a source of trade and investment news.",
+                      " In 2011, the print magazine switched to a quarterly publication schedule.",
+                      " In April 2013, the magazine ceased print publication, going to an online-only format."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Grooby Productions",
+                  "text": "Grooby Productions is a company founded in 1996 and based in Los Angeles, California, that produces transgender online adult entertainment. It established itself as one of the pioneer companies of online adult transgender entertainment with its website Shemale Yum, \"the first transsexual pay site with original content\". The company owns a number of transsexual adult websites, produces its own DVD line, and has other interests in forums, blogs and social networking in the transsexual niche genre including the Transgender Erotica Awards.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Grooby Productions is a company founded in 1996 and based in Los Angeles, California, that produces transgender online adult entertainment.",
+                      " It established itself as one of the pioneer companies of online adult transgender entertainment with its website Shemale Yum, \"the first transsexual pay site with original content\".",
+                      " The company owns a number of transsexual adult websites, produces its own DVD line, and has other interests in forums, blogs and social networking in the transsexual niche genre including the Transgender Erotica Awards."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Animation Magazine",
+                  "text": "Animation Magazine is an American print magazine and website covering the animation industry and education, as well as visual effects. The print magazine is published 10 times a year in the United States.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Animation Magazine is an American print magazine and website covering the animation industry and education, as well as visual effects.",
+                      " The print magazine is published 10 times a year in the United States."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "CzechBoys",
+                  "text": "CzechBoys is an adult film studio, adult website and adult content provider in the gay pornography niche. CzechBoys was founded in 1999 by Pavel Rada and is based in Prague, Czech Republic. The company's primary website, CzechBoys.com, is presented in the format of a gay erotic online magazine of which a new issue is published daily. The majority of the models and performers in CzechBoys video and photo content are heterosexual young men from Eastern Europe who go Gay-for-pay.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "CzechBoys is an adult film studio, adult website and adult content provider in the gay pornography niche.",
+                      " CzechBoys was founded in 1999 by Pavel Rada and is based in Prague, Czech Republic.",
+                      " The company's primary website, CzechBoys.com, is presented in the format of a gay erotic online magazine of which a new issue is published daily.",
+                      " The majority of the models and performers in CzechBoys video and photo content are heterosexual young men from Eastern Europe who go Gay-for-pay."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Seed (magazine)",
+                  "text": "Seed (subtitled \"Science Is Culture\"; originally \"Beneath the Surface\") is an online science magazine published by Seed Media Group. The magazine looks at big ideas in science, important issues at the intersection of science and society, and the people driving global science culture. \"Seed\" was founded in Montreal by Adam Bly and the magazine is now headquartered in New York with bureaus around the world. May/June 2009 (Issue No. 22) was the last print issue. Content continues to be published on the website.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Seed (subtitled \"Science Is Culture\"; originally \"Beneath the Surface\") is an online science magazine published by Seed Media Group.",
+                      " The magazine looks at big ideas in science, important issues at the intersection of science and society, and the people driving global science culture.",
+                      " \"Seed\" was founded in Montreal by Adam Bly and the magazine is now headquartered in New York with bureaus around the world.",
+                      " May/June 2009 (Issue No. 22) was the last print issue.",
+                      " Content continues to be published on the website."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Perfect 10",
+                  "text": "Perfect 10 is an online adult website – and formerly a monthly and then quarterly men's magazine – that features high resolution topless or nude photographs of 'all natural' women who have not had cosmetic surgery. Perfect 10 also promoted and filmed boxing matches between a number of their models, aired most recently as \"Perfect 10: Model Boxing\" on the Showtime and HDNet cable channels. The last print edition of the magazine was published in the summer of 2007 (issue 43). Since then it has switched to a subscription-based website only presentation.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Perfect 10 is an online adult website – and formerly a monthly and then quarterly men's magazine – that features high resolution topless or nude photographs of 'all natural' women who have not had cosmetic surgery.",
+                      " Perfect 10 also promoted and filmed boxing matches between a number of their models, aired most recently as \"Perfect 10: Model Boxing\" on the Showtime and HDNet cable channels.",
+                      " The last print edition of the magazine was published in the summer of 2007 (issue 43).",
+                      " Since then it has switched to a subscription-based website only presentation."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Worldwide brands",
+                  "text": "Worldwide Brands is a Maitland, Florida based company that was founded by Chris Malta in 1999, and registered in 2001 as a corporation. It is a product sourcing research company that operates WorldwideBrands.com, a website whose primary function is to locate and qualify factory-authorized wholesale suppliers and wholesale manufacturers that are willing to sell to home businesses and Internet retailers. Worldwide Brands publishes the results of its findings in an online wholesale directory. The company's target market consists of small to medium sized retailers, home businesses, and online merchants who sell on popular ecommerce platforms like eBay,Amazon, as well as on independent ecommerce websites.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Worldwide Brands is a Maitland, Florida based company that was founded by Chris Malta in 1999, and registered in 2001 as a corporation.",
+                      " It is a product sourcing research company that operates WorldwideBrands.com, a website whose primary function is to locate and qualify factory-authorized wholesale suppliers and wholesale manufacturers that are willing to sell to home businesses and Internet retailers.",
+                      " Worldwide Brands publishes the results of its findings in an online wholesale directory.",
+                      " The company's target market consists of small to medium sized retailers, home businesses, and online merchants who sell on popular ecommerce platforms like eBay,Amazon, as well as on independent ecommerce websites."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Nikita Gross",
+                  "text": "Nikita Gross is a Russian glamour model and former pornographic actress. In 1998 she won the X-Rated Critics Organization Award for Best New Starlet. She was \"Penthouse\" Pet of the Month for July 1998 and 2000 \"Penthouse\" Pet of the Year runner-up. She was a \"Perfect 10\" girl in January 2000.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Nikita Gross is a Russian glamour model and former pornographic actress.",
+                      " In 1998 she won the X-Rated Critics Organization Award for Best New Starlet.",
+                      " She was \"Penthouse\" Pet of the Month for July 1998 and 2000 \"Penthouse\" Pet of the Year runner-up.",
+                      " She was a \"Perfect 10\" girl in January 2000."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-7",
+                "title": "Perfect 10",
+                "sentence_indices": [
+                  0,
+                  2
+                ],
+                "fact": "Perfect 10 is an online adult website – and formerly a monthly and then quarterly men's magazine. The last print edition of the magazine was published in the summer of 2007 (issue 43)."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-7",
+                  "title": "Perfect 10",
+                  "sentence_indices": [
+                    0,
+                    2
+                  ],
+                  "fact": "Perfect 10 is an online adult website – and formerly a monthly and then quarterly men's magazine. The last print edition of the magazine was published in the summer of 2007 (issue 43)."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Perfect 10",
+                    "sentence_index": 0
+                  },
+                  {
+                    "title": "Perfect 10",
+                    "sentence_index": 2
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:08:27.836832+00:00",
+            "finished_at": "2026-06-03T16:08:29.640815+00:00",
+            "duration_ms": 1803.9942089999386,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Find recognition month",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {
+              "website_name": "Perfect 10"
+            },
+            "resolved_question": "In which month did Perfect 10 recognize Nikita Gross?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"website_name\": \"Perfect 10\"\n}\n\nDetermine the month in which Perfect 10 recognized Nikita Gross.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: M Magazine\n  (0) M Magazine is an online teen-focused website and was a monthly print teen magazine.\n  (1)  The website is owned by, and the print magazine was published, by Bauer Publishing, the United States division of the German firm Bauer Verlagsgruppe.\n  (2)  The first issue was released in January 2000.\n\nDocument ID: context-1\nTitle: Twist (magazine)\n  (0) Twist is an online teen-focused website and was a monthly print teen magazine.\n  (1)  The website is owned by, and the print magazine was published, by Bauer Publishing, the United States division of the German firm Bauer Verlagsgruppe.\n  (2)  The first issue was released in 1997.\n\nDocument ID: context-2\nTitle: China Business Review\n  (0) The China Business Review is the official online magazine of the US-China Business Council, covering business, economics, and politics in both the United States and China that affect business in China across a wide variety of industries.\n  (1)  The print magazine, published bimonthly, was established in 1974 as a source of trade and investment news.\n  (2)  In 2011, the print magazine switched to a quarterly publication schedule.\n  (3)  In April 2013, the magazine ceased print publication, going to an online-only format.\n\nDocument ID: context-3\nTitle: Grooby Productions\n  (0) Grooby Productions is a company founded in 1996 and based in Los Angeles, California, that produces transgender online adult entertainment.\n  (1)  It established itself as one of the pioneer companies of online adult transgender entertainment with its website Shemale Yum, \"the first transsexual pay site with original content\".\n  (2)  The company owns a number of transsexual adult websites, produces its own DVD line, and has other interests in forums, blogs and social networking in the transsexual niche genre including the Transgender Erotica Awards.\n\nDocument ID: context-4\nTitle: Animation Magazine\n  (0) Animation Magazine is an American print magazine and website covering the animation industry and education, as well as visual effects.\n  (1)  The print magazine is published 10 times a year in the United States.\n\nDocument ID: context-5\nTitle: CzechBoys\n  (0) CzechBoys is an adult film studio, adult website and adult content provider in the gay pornography niche.\n  (1)  CzechBoys was founded in 1999 by Pavel Rada and is based in Prague, Czech Republic.\n  (2)  The company's primary website, CzechBoys.com, is presented in the format of a gay erotic online magazine of which a new issue is published daily.\n  (3)  The majority of the models and performers in CzechBoys video and photo content are heterosexual young men from Eastern Europe who go Gay-for-pay.\n\nDocument ID: context-6\nTitle: Seed (magazine)\n  (0) Seed (subtitled \"Science Is Culture\"; originally \"Beneath the Surface\") is an online science magazine published by Seed Media Group.\n  (1)  The magazine looks at big ideas in science, important issues at the intersection of science and society, and the people driving global science culture.\n  (2)  \"Seed\" was founded in Montreal by Adam Bly and the magazine is now headquartered in New York with bureaus around the world.\n  (3)  May/June 2009 (Issue No. 22) was the last print issue.\n  (4)  Content continues to be published on the website.\n\nDocument ID: context-7\nTitle: Perfect 10\n  (0) Perfect 10 is an online adult website – and formerly a monthly and then quarterly men's magazine – that features high resolution topless or nude photographs of 'all natural' women who have not had cosmetic surgery.\n  (1)  Perfect 10 also promoted and filmed boxing matches between a number of their models, aired most recently as \"Perfect 10: Model Boxing\" on the Showtime and HDNet cable channels.\n  (2)  The last print edition of the magazine was published in the summer of 2007 (issue 43).\n  (3)  Since then it has switched to a subscription-based website only presentation.\n\nDocument ID: context-8\nTitle: Worldwide brands\n  (0) Worldwide Brands is a Maitland, Florida based company that was founded by Chris Malta in 1999, and registered in 2001 as a corporation.\n  (1)  It is a product sourcing research company that operates WorldwideBrands.com, a website whose primary function is to locate and qualify factory-authorized wholesale suppliers and wholesale manufacturers that are willing to sell to home businesses and Internet retailers.\n  (2)  Worldwide Brands publishes the results of its findings in an online wholesale directory.\n  (3)  The company's target market consists of small to medium sized retailers, home businesses, and online merchants who sell on popular ecommerce platforms like eBay,Amazon, as well as on independent ecommerce websites.\n\nDocument ID: context-9\nTitle: Nikita Gross\n  (0) Nikita Gross is a Russian glamour model and former pornographic actress.\n  (1)  In 1998 she won the X-Rated Critics Organization Award for Best New Starlet.\n  (2)  She was \"Penthouse\" Pet of the Month for July 1998 and 2000 \"Penthouse\" Pet of the Year runner-up.\n  (3)  She was a \"Perfect 10\" girl in January 2000.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"recognition_month\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"recognition_month\": {\n      \"type\": \"string\",\n      \"description\": \"The month of recognition for Nikita Gross.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"recognition_month\": \"January\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-9\",\n      \"title\": \"Nikita Gross\",\n      \"sentence_indices\": [3],\n      \"fact\": \"She was a 'Perfect 10' girl in January 2000.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "recognition_month": "January",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-9",
+                  "title": "Nikita Gross",
+                  "sentence_indices": [
+                    3
+                  ],
+                  "fact": "She was a 'Perfect 10' girl in January 2000."
+                }
+              ]
+            },
+            "returned_value": {
+              "recognition_month": "January"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "M Magazine",
+                  "text": "M Magazine is an online teen-focused website and was a monthly print teen magazine. The website is owned by, and the print magazine was published, by Bauer Publishing, the United States division of the German firm Bauer Verlagsgruppe. The first issue was released in January 2000.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "M Magazine is an online teen-focused website and was a monthly print teen magazine.",
+                      " The website is owned by, and the print magazine was published, by Bauer Publishing, the United States division of the German firm Bauer Verlagsgruppe.",
+                      " The first issue was released in January 2000."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Twist (magazine)",
+                  "text": "Twist is an online teen-focused website and was a monthly print teen magazine. The website is owned by, and the print magazine was published, by Bauer Publishing, the United States division of the German firm Bauer Verlagsgruppe. The first issue was released in 1997.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Twist is an online teen-focused website and was a monthly print teen magazine.",
+                      " The website is owned by, and the print magazine was published, by Bauer Publishing, the United States division of the German firm Bauer Verlagsgruppe.",
+                      " The first issue was released in 1997."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "China Business Review",
+                  "text": "The China Business Review is the official online magazine of the US-China Business Council, covering business, economics, and politics in both the United States and China that affect business in China across a wide variety of industries. The print magazine, published bimonthly, was established in 1974 as a source of trade and investment news. In 2011, the print magazine switched to a quarterly publication schedule. In April 2013, the magazine ceased print publication, going to an online-only format.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The China Business Review is the official online magazine of the US-China Business Council, covering business, economics, and politics in both the United States and China that affect business in China across a wide variety of industries.",
+                      " The print magazine, published bimonthly, was established in 1974 as a source of trade and investment news.",
+                      " In 2011, the print magazine switched to a quarterly publication schedule.",
+                      " In April 2013, the magazine ceased print publication, going to an online-only format."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Grooby Productions",
+                  "text": "Grooby Productions is a company founded in 1996 and based in Los Angeles, California, that produces transgender online adult entertainment. It established itself as one of the pioneer companies of online adult transgender entertainment with its website Shemale Yum, \"the first transsexual pay site with original content\". The company owns a number of transsexual adult websites, produces its own DVD line, and has other interests in forums, blogs and social networking in the transsexual niche genre including the Transgender Erotica Awards.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Grooby Productions is a company founded in 1996 and based in Los Angeles, California, that produces transgender online adult entertainment.",
+                      " It established itself as one of the pioneer companies of online adult transgender entertainment with its website Shemale Yum, \"the first transsexual pay site with original content\".",
+                      " The company owns a number of transsexual adult websites, produces its own DVD line, and has other interests in forums, blogs and social networking in the transsexual niche genre including the Transgender Erotica Awards."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Animation Magazine",
+                  "text": "Animation Magazine is an American print magazine and website covering the animation industry and education, as well as visual effects. The print magazine is published 10 times a year in the United States.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Animation Magazine is an American print magazine and website covering the animation industry and education, as well as visual effects.",
+                      " The print magazine is published 10 times a year in the United States."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "CzechBoys",
+                  "text": "CzechBoys is an adult film studio, adult website and adult content provider in the gay pornography niche. CzechBoys was founded in 1999 by Pavel Rada and is based in Prague, Czech Republic. The company's primary website, CzechBoys.com, is presented in the format of a gay erotic online magazine of which a new issue is published daily. The majority of the models and performers in CzechBoys video and photo content are heterosexual young men from Eastern Europe who go Gay-for-pay.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "CzechBoys is an adult film studio, adult website and adult content provider in the gay pornography niche.",
+                      " CzechBoys was founded in 1999 by Pavel Rada and is based in Prague, Czech Republic.",
+                      " The company's primary website, CzechBoys.com, is presented in the format of a gay erotic online magazine of which a new issue is published daily.",
+                      " The majority of the models and performers in CzechBoys video and photo content are heterosexual young men from Eastern Europe who go Gay-for-pay."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Seed (magazine)",
+                  "text": "Seed (subtitled \"Science Is Culture\"; originally \"Beneath the Surface\") is an online science magazine published by Seed Media Group. The magazine looks at big ideas in science, important issues at the intersection of science and society, and the people driving global science culture. \"Seed\" was founded in Montreal by Adam Bly and the magazine is now headquartered in New York with bureaus around the world. May/June 2009 (Issue No. 22) was the last print issue. Content continues to be published on the website.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Seed (subtitled \"Science Is Culture\"; originally \"Beneath the Surface\") is an online science magazine published by Seed Media Group.",
+                      " The magazine looks at big ideas in science, important issues at the intersection of science and society, and the people driving global science culture.",
+                      " \"Seed\" was founded in Montreal by Adam Bly and the magazine is now headquartered in New York with bureaus around the world.",
+                      " May/June 2009 (Issue No. 22) was the last print issue.",
+                      " Content continues to be published on the website."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Perfect 10",
+                  "text": "Perfect 10 is an online adult website – and formerly a monthly and then quarterly men's magazine – that features high resolution topless or nude photographs of 'all natural' women who have not had cosmetic surgery. Perfect 10 also promoted and filmed boxing matches between a number of their models, aired most recently as \"Perfect 10: Model Boxing\" on the Showtime and HDNet cable channels. The last print edition of the magazine was published in the summer of 2007 (issue 43). Since then it has switched to a subscription-based website only presentation.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Perfect 10 is an online adult website – and formerly a monthly and then quarterly men's magazine – that features high resolution topless or nude photographs of 'all natural' women who have not had cosmetic surgery.",
+                      " Perfect 10 also promoted and filmed boxing matches between a number of their models, aired most recently as \"Perfect 10: Model Boxing\" on the Showtime and HDNet cable channels.",
+                      " The last print edition of the magazine was published in the summer of 2007 (issue 43).",
+                      " Since then it has switched to a subscription-based website only presentation."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Worldwide brands",
+                  "text": "Worldwide Brands is a Maitland, Florida based company that was founded by Chris Malta in 1999, and registered in 2001 as a corporation. It is a product sourcing research company that operates WorldwideBrands.com, a website whose primary function is to locate and qualify factory-authorized wholesale suppliers and wholesale manufacturers that are willing to sell to home businesses and Internet retailers. Worldwide Brands publishes the results of its findings in an online wholesale directory. The company's target market consists of small to medium sized retailers, home businesses, and online merchants who sell on popular ecommerce platforms like eBay,Amazon, as well as on independent ecommerce websites.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Worldwide Brands is a Maitland, Florida based company that was founded by Chris Malta in 1999, and registered in 2001 as a corporation.",
+                      " It is a product sourcing research company that operates WorldwideBrands.com, a website whose primary function is to locate and qualify factory-authorized wholesale suppliers and wholesale manufacturers that are willing to sell to home businesses and Internet retailers.",
+                      " Worldwide Brands publishes the results of its findings in an online wholesale directory.",
+                      " The company's target market consists of small to medium sized retailers, home businesses, and online merchants who sell on popular ecommerce platforms like eBay,Amazon, as well as on independent ecommerce websites."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Nikita Gross",
+                  "text": "Nikita Gross is a Russian glamour model and former pornographic actress. In 1998 she won the X-Rated Critics Organization Award for Best New Starlet. She was \"Penthouse\" Pet of the Month for July 1998 and 2000 \"Penthouse\" Pet of the Year runner-up. She was a \"Perfect 10\" girl in January 2000.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Nikita Gross is a Russian glamour model and former pornographic actress.",
+                      " In 1998 she won the X-Rated Critics Organization Award for Best New Starlet.",
+                      " She was \"Penthouse\" Pet of the Month for July 1998 and 2000 \"Penthouse\" Pet of the Year runner-up.",
+                      " She was a \"Perfect 10\" girl in January 2000."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-9",
+                "title": "Nikita Gross",
+                "sentence_indices": [
+                  3
+                ],
+                "fact": "She was a 'Perfect 10' girl in January 2000."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-9",
+                  "title": "Nikita Gross",
+                  "sentence_indices": [
+                    3
+                  ],
+                  "fact": "She was a 'Perfect 10' girl in January 2000."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Nikita Gross",
+                    "sentence_index": 3
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:08:29.640911+00:00",
+            "finished_at": "2026-06-03T16:08:31.191830+00:00",
+            "duration_ms": 1550.9342510001716,
+            "error": null
+          },
+          {
+            "node_id": "q3",
+            "label": "Provide final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "recognition_month": "January"
+            },
+            "resolved_question": "What month did the online adult website recognize Nikita Gross?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"recognition_month\": \"January\"\n}\n\nBased on the information, the month of recognition is January.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The final answer to the user's question.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"January\"\n}",
+            "parsed_output": {
+              "answer": "January"
+            },
+            "returned_value": {
+              "answer": "January"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": null,
+            "evidence_citations": [],
+            "evidence_citation_evaluations": [],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:08:31.191975+00:00",
+            "finished_at": "2026-06-03T16:08:46.734487+00:00",
+            "duration_ms": 15542.532132999895,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "January"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 18897.885508999934,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Identify the website\\nfact_lookup\\nsucceeded\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: Find recognition month\\nfact_lookup\\nsucceeded\"]\n  click q2 dagqaSelectGraphNode\n  q1 --> q2\n  q3[\"q3: Provide final answer\\nsynthesis\\nsucceeded\"]\n  click q3 dagqaSelectGraphNode\n  q2 --> q3"
+      },
+      "error": null
+    },
+    {
+      "id": "5a88db445542993b751ca88a",
+      "question": "Which Italian classical composer, conductor, and teacher born in 1750 composed this four-movement serenade in B-flat major for five instruments (2 oboes, 2 horns and 1 bassoon)?",
+      "gold_answer": "Antonio Salieri",
+      "prediction": "Antonio Salieri",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0,
+      "latency_ms": 110658.45963400012,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 2,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Picciola serenata",
+          "sentence_index": 0
+        },
+        {
+          "title": "Picciola serenata",
+          "sentence_index": 1
+        },
+        {
+          "title": "Antonio Salieri",
+          "sentence_index": 0
+        }
+      ],
+      "evidence_citation_count": 3,
+      "correct_evidence_citation_count": 3,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 1.0,
+      "run_trace": {
+        "run_id": "c674e052-6a2e-4689-9311-73973a24327a",
+        "question": "Which Italian classical composer, conductor, and teacher born in 1750 composed this four-movement serenade in B-flat major for five instruments (2 oboes, 2 horns and 1 bassoon)?",
+        "plan": {
+          "question": "Which Italian classical composer, conductor, and teacher born in 1750 composed this four-movement serenade in B-flat major for five instruments (2 oboes, 2 horns and 1 bassoon)?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Identify Italian composers born in 1750",
+              "task_type": "fact_lookup",
+              "question": "List Italian classical composers, conductors, and teachers born in 1750.",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Provide a list of Italian classical composers, conductors, and teachers born in 1750."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "composer"
+                ],
+                "properties": {
+                  "composer": {
+                    "type": "string",
+                    "description": "The name of the composer."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Find composer of the serenade",
+              "task_type": "fact_lookup",
+              "question": "Who composed the four-movement serenade in B-flat major for 2 oboes, 2 horns, and 1 bassoon?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the composer of the four-movement serenade in B-flat major for 2 oboes, 2 horns, and 1 bassoon."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "composer"
+                ],
+                "properties": {
+                  "composer": {
+                    "type": "string",
+                    "description": "The name of the composer."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q3",
+              "label": "Determine the matching composer",
+              "task_type": "synthesis",
+              "question": "Which composer matches both criteria?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q1",
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "From the list of Italian composers born in 1750 ({q1.composer}) and the composer of the serenade ({q2.composer}), determine the matching individual."
+              },
+              "input_map": {
+                "composers_born_1750": "q1.composer",
+                "serenade_composer": "q2.composer"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The name of the composer who matches both criteria."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q3"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1",
+              "q2"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "q3"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "Identify Italian composers born in 1750",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "List Italian classical composers, conductors, and teachers born in 1750.",
+            "rendered_prompt": "Provide a list of Italian classical composers, conductors, and teachers born in 1750.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Symphony No. 56 (Haydn)\n  (0) The Symphony No. 56 in C major, Hoboken I/56, is a symphony by Joseph Haydn, composed by 1774.\n  (1)  It is scored for 2 oboes, bassoon, 2 horns (C alto and F), 2 trumpets, timpani and strings.\n  (2)  It is in four movements:\n\nDocument ID: context-1\nTitle: Symphony No. 36 (Haydn)\n  (0) Joseph Haydn wrote Symphony No. 36 in E♭ major, Hoboken 1/36, some time in the first half of the 1760s.\n  (1)  Scored for 2 oboes, bassoon, 2 horns, strings and continuo, the slow movement features solos for violin and cello.\n  (2)  It is in four movements:\n\nDocument ID: context-2\nTitle: Symphony No. 25 (Michael Haydn)\n  (0) The Symphony No. 25 in G major, Perger 16, Sherman 25, MH 334 is a classical symphony that was composed by Michael Haydn in 1783, with a completion date of May 23.\n  (1)  It is scored for flute (in the second movement), 2 oboes, 2 bassoons, 2 horns and strings.\n\nDocument ID: context-3\nTitle: Symphony No. 55 (Haydn)\n  (0) The Symphony No. 55 in E♭ major, Hoboken I/55, is a symphony by Joseph Haydn, composed by 1774.\n  (1)  It is scored for 2 oboes, bassoon, 2 horns and strings.\n  (2)  It is in four movements:\n\nDocument ID: context-4\nTitle: Chamber Symphony No. 2 (Schoenberg)\n  (0) Chamber Symphony No. 2, Op. 38, by Arnold Schoenberg was begun in 1906 and completed in 1939.\n  (1)  The work is scored for 2 flutes (2nd doubling piccolo), 2 oboes (2nd doubling cor anglais), 2 clarinets, 2 bassoons, 2 horns, 2 trumpets and strings and is divided into two movements, the first (in E flat minor) marked Adagio and the second (in G major) marked Con Fuoco-Lento.\n  (2)  The belated completion of the work was prompted by a request from the conductor Fritz Stiedry who asked Schoenberg for an orchestral piece for his New Friends of Music Orchestra in New York.\n  (3)  The work was first performed there on December 14, 1940 under Stiedry's direction.\n\nDocument ID: context-5\nTitle: Antonio Salieri\n  (0) Antonio Salieri (] ; 18 August 17507 May 1825) was an Italian classical composer, conductor, and teacher.\n  (1)  He was born in Legnago, south of Verona, in the Republic of Venice, and spent his adult life and career as a subject of the Habsburg Monarchy.\n\nDocument ID: context-6\nTitle: Picciola serenata\n  (0) Picciola serenata (little serenade) in B-flat major is a serenade written by Italian composer Antonio Salieri scored for five instruments: 2 oboes, 2 horns and 1 bassoon.\n  (1)  The piece was composed in 1778 and consists of four movements.\n\nDocument ID: context-7\nTitle: Symphony for Classical Orchestra (Shapero)\n  (0) Harold Shapero completed the Symphony for Classical Orchestra in B-flat major on March 10, 1947, in Newton Centre, Massachusetts.\n  (1)  It is written for an orchestra consisting of piccolo, 2 flutes, 2 oboes, 2 clarinets in B-flat, 2 bassoons, contrabassoon, 2 horns in F, 2 trumpets in C, 2 tenor trombones and one bass (silent until the Finale), timpani and strings.\n  (2)  Although labelled \"Classical,\" many of the work's features point to Beethoven rather than Haydn or Mozart, such as \"the way in which Shapero paces himself, alternating long passages in the tonic and the dominant, with fast, dramatic modulations often reserved for transitions and developments.\"\n  (3)  Nicolas Slonimsky remarked on how the piece is \"premeditatedly cast in the proclamatory key of B-flat major, the natural tonality of the bugle, and ending in a display of tonic major triads.\"\n  (4)  But there are modern features as well, with \"the work's orchestration, in general, ... distinctively bright and brassy, and undoubtedly derived a fair amount from Piston and Copland, as well as from the composer's experience as a dance band arranger.\"\n\nDocument ID: context-8\nTitle: Harmoniemesse\n  (0) The Harmoniemesse in B-flat major by Joseph Haydn, Hob.\n  (1)  XXII:14, Novello 6, was written in 1802.\n  (2)  It was Haydn's last major work.\n  (3)  It is because of the prominence of the winds in this mass and \"the German terminology for a kind of wind ensemble, \"Harmonie\",\" that this mass setting is called \"Harmoniemesse\" or \"Wind Band Mass\".\n  (4)  Besides flute, 2 oboes, 2 clarinets, 2 bassoons, 2 horns in B-flat, 2 trumpets in B-flat, the mass also calls for choir, timpani, strings, and organ, the latter supplying figured bass for most of the duration.\n\nDocument ID: context-9\nTitle: Deutsche Messe (Schubert)\n  (0) Deutsche Messe (\"German Mass\"), D 872, is a mass composed by Franz Schubert in 1827.\n  (1)  Its text is not the Latin liturgical text, but a sequence of poems in German by Johann Philipp Neumann who commissioned the work.\n  (2)  It was originally scored for SATB choir, 2 oboes, 2 clarinets, 2 bassoons, 2 horns, 2 trumpets, 3 trombones, timpani and basso continuo .\n  (3)  It is also known as the \"Gesänge zur Feier des heiligen Opfers der Messe \" (\"Songs for the celebration of the holy offering of the Mass\"), and the \"Wind Mass\" due to its orchestration of primarily wind instruments.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"composer\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"composer\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the composer.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"composer\": \"Antonio Salieri\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-5\",\n      \"title\": \"Antonio Salieri\",\n      \"sentence_indices\": [0],\n      \"fact\": \"Antonio Salieri (18 August 1750 – 7 May 1825) was an Italian classical composer, conductor, and teacher.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "composer": "Antonio Salieri",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-5",
+                  "title": "Antonio Salieri",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Antonio Salieri (18 August 1750 – 7 May 1825) was an Italian classical composer, conductor, and teacher."
+                }
+              ]
+            },
+            "returned_value": {
+              "composer": "Antonio Salieri"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Symphony No. 56 (Haydn)",
+                  "text": "The Symphony No. 56 in C major, Hoboken I/56, is a symphony by Joseph Haydn, composed by 1774. It is scored for 2 oboes, bassoon, 2 horns (C alto and F), 2 trumpets, timpani and strings. It is in four movements:",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "The Symphony No. 56 in C major, Hoboken I/56, is a symphony by Joseph Haydn, composed by 1774.",
+                      " It is scored for 2 oboes, bassoon, 2 horns (C alto and F), 2 trumpets, timpani and strings.",
+                      " It is in four movements:"
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Symphony No. 36 (Haydn)",
+                  "text": "Joseph Haydn wrote Symphony No. 36 in E♭ major, Hoboken 1/36, some time in the first half of the 1760s. Scored for 2 oboes, bassoon, 2 horns, strings and continuo, the slow movement features solos for violin and cello. It is in four movements:",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Joseph Haydn wrote Symphony No. 36 in E♭ major, Hoboken 1/36, some time in the first half of the 1760s.",
+                      " Scored for 2 oboes, bassoon, 2 horns, strings and continuo, the slow movement features solos for violin and cello.",
+                      " It is in four movements:"
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Symphony No. 25 (Michael Haydn)",
+                  "text": "The Symphony No. 25 in G major, Perger 16, Sherman 25, MH 334 is a classical symphony that was composed by Michael Haydn in 1783, with a completion date of May 23. It is scored for flute (in the second movement), 2 oboes, 2 bassoons, 2 horns and strings.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The Symphony No. 25 in G major, Perger 16, Sherman 25, MH 334 is a classical symphony that was composed by Michael Haydn in 1783, with a completion date of May 23.",
+                      " It is scored for flute (in the second movement), 2 oboes, 2 bassoons, 2 horns and strings."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Symphony No. 55 (Haydn)",
+                  "text": "The Symphony No. 55 in E♭ major, Hoboken I/55, is a symphony by Joseph Haydn, composed by 1774. It is scored for 2 oboes, bassoon, 2 horns and strings. It is in four movements:",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "The Symphony No. 55 in E♭ major, Hoboken I/55, is a symphony by Joseph Haydn, composed by 1774.",
+                      " It is scored for 2 oboes, bassoon, 2 horns and strings.",
+                      " It is in four movements:"
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Chamber Symphony No. 2 (Schoenberg)",
+                  "text": "Chamber Symphony No. 2, Op. 38, by Arnold Schoenberg was begun in 1906 and completed in 1939. The work is scored for 2 flutes (2nd doubling piccolo), 2 oboes (2nd doubling cor anglais), 2 clarinets, 2 bassoons, 2 horns, 2 trumpets and strings and is divided into two movements, the first (in E flat minor) marked Adagio and the second (in G major) marked Con Fuoco-Lento. The belated completion of the work was prompted by a request from the conductor Fritz Stiedry who asked Schoenberg for an orchestral piece for his New Friends of Music Orchestra in New York. The work was first performed there on December 14, 1940 under Stiedry's direction.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Chamber Symphony No. 2, Op. 38, by Arnold Schoenberg was begun in 1906 and completed in 1939.",
+                      " The work is scored for 2 flutes (2nd doubling piccolo), 2 oboes (2nd doubling cor anglais), 2 clarinets, 2 bassoons, 2 horns, 2 trumpets and strings and is divided into two movements, the first (in E flat minor) marked Adagio and the second (in G major) marked Con Fuoco-Lento.",
+                      " The belated completion of the work was prompted by a request from the conductor Fritz Stiedry who asked Schoenberg for an orchestral piece for his New Friends of Music Orchestra in New York.",
+                      " The work was first performed there on December 14, 1940 under Stiedry's direction."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Antonio Salieri",
+                  "text": "Antonio Salieri (] ; 18 August 17507 May 1825) was an Italian classical composer, conductor, and teacher. He was born in Legnago, south of Verona, in the Republic of Venice, and spent his adult life and career as a subject of the Habsburg Monarchy.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Antonio Salieri (] ; 18 August 17507 May 1825) was an Italian classical composer, conductor, and teacher.",
+                      " He was born in Legnago, south of Verona, in the Republic of Venice, and spent his adult life and career as a subject of the Habsburg Monarchy."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Picciola serenata",
+                  "text": "Picciola serenata (little serenade) in B-flat major is a serenade written by Italian composer Antonio Salieri scored for five instruments: 2 oboes, 2 horns and 1 bassoon. The piece was composed in 1778 and consists of four movements.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Picciola serenata (little serenade) in B-flat major is a serenade written by Italian composer Antonio Salieri scored for five instruments: 2 oboes, 2 horns and 1 bassoon.",
+                      " The piece was composed in 1778 and consists of four movements."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Symphony for Classical Orchestra (Shapero)",
+                  "text": "Harold Shapero completed the Symphony for Classical Orchestra in B-flat major on March 10, 1947, in Newton Centre, Massachusetts. It is written for an orchestra consisting of piccolo, 2 flutes, 2 oboes, 2 clarinets in B-flat, 2 bassoons, contrabassoon, 2 horns in F, 2 trumpets in C, 2 tenor trombones and one bass (silent until the Finale), timpani and strings. Although labelled \"Classical,\" many of the work's features point to Beethoven rather than Haydn or Mozart, such as \"the way in which Shapero paces himself, alternating long passages in the tonic and the dominant, with fast, dramatic modulations often reserved for transitions and developments.\" Nicolas Slonimsky remarked on how the piece is \"premeditatedly cast in the proclamatory key of B-flat major, the natural tonality of the bugle, and ending in a display of tonic major triads.\" But there are modern features as well, with \"the work's orchestration, in general, ... distinctively bright and brassy, and undoubtedly derived a fair amount from Piston and Copland, as well as from the composer's experience as a dance band arranger.\"",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Harold Shapero completed the Symphony for Classical Orchestra in B-flat major on March 10, 1947, in Newton Centre, Massachusetts.",
+                      " It is written for an orchestra consisting of piccolo, 2 flutes, 2 oboes, 2 clarinets in B-flat, 2 bassoons, contrabassoon, 2 horns in F, 2 trumpets in C, 2 tenor trombones and one bass (silent until the Finale), timpani and strings.",
+                      " Although labelled \"Classical,\" many of the work's features point to Beethoven rather than Haydn or Mozart, such as \"the way in which Shapero paces himself, alternating long passages in the tonic and the dominant, with fast, dramatic modulations often reserved for transitions and developments.\"",
+                      " Nicolas Slonimsky remarked on how the piece is \"premeditatedly cast in the proclamatory key of B-flat major, the natural tonality of the bugle, and ending in a display of tonic major triads.\"",
+                      " But there are modern features as well, with \"the work's orchestration, in general, ... distinctively bright and brassy, and undoubtedly derived a fair amount from Piston and Copland, as well as from the composer's experience as a dance band arranger.\""
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Harmoniemesse",
+                  "text": "The Harmoniemesse in B-flat major by Joseph Haydn, Hob. XXII:14, Novello 6, was written in 1802. It was Haydn's last major work. It is because of the prominence of the winds in this mass and \"the German terminology for a kind of wind ensemble, \"Harmonie\",\" that this mass setting is called \"Harmoniemesse\" or \"Wind Band Mass\". Besides flute, 2 oboes, 2 clarinets, 2 bassoons, 2 horns in B-flat, 2 trumpets in B-flat, the mass also calls for choir, timpani, strings, and organ, the latter supplying figured bass for most of the duration.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "The Harmoniemesse in B-flat major by Joseph Haydn, Hob.",
+                      " XXII:14, Novello 6, was written in 1802.",
+                      " It was Haydn's last major work.",
+                      " It is because of the prominence of the winds in this mass and \"the German terminology for a kind of wind ensemble, \"Harmonie\",\" that this mass setting is called \"Harmoniemesse\" or \"Wind Band Mass\".",
+                      " Besides flute, 2 oboes, 2 clarinets, 2 bassoons, 2 horns in B-flat, 2 trumpets in B-flat, the mass also calls for choir, timpani, strings, and organ, the latter supplying figured bass for most of the duration."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Deutsche Messe (Schubert)",
+                  "text": "Deutsche Messe (\"German Mass\"), D 872, is a mass composed by Franz Schubert in 1827. Its text is not the Latin liturgical text, but a sequence of poems in German by Johann Philipp Neumann who commissioned the work. It was originally scored for SATB choir, 2 oboes, 2 clarinets, 2 bassoons, 2 horns, 2 trumpets, 3 trombones, timpani and basso continuo . It is also known as the \"Gesänge zur Feier des heiligen Opfers der Messe \" (\"Songs for the celebration of the holy offering of the Mass\"), and the \"Wind Mass\" due to its orchestration of primarily wind instruments.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Deutsche Messe (\"German Mass\"), D 872, is a mass composed by Franz Schubert in 1827.",
+                      " Its text is not the Latin liturgical text, but a sequence of poems in German by Johann Philipp Neumann who commissioned the work.",
+                      " It was originally scored for SATB choir, 2 oboes, 2 clarinets, 2 bassoons, 2 horns, 2 trumpets, 3 trombones, timpani and basso continuo .",
+                      " It is also known as the \"Gesänge zur Feier des heiligen Opfers der Messe \" (\"Songs for the celebration of the holy offering of the Mass\"), and the \"Wind Mass\" due to its orchestration of primarily wind instruments."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-5",
+                "title": "Antonio Salieri",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Antonio Salieri (18 August 1750 – 7 May 1825) was an Italian classical composer, conductor, and teacher."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-5",
+                  "title": "Antonio Salieri",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Antonio Salieri (18 August 1750 – 7 May 1825) was an Italian classical composer, conductor, and teacher."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Antonio Salieri",
+                    "sentence_index": 0
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:09:10.336755+00:00",
+            "finished_at": "2026-06-03T16:09:22.371292+00:00",
+            "duration_ms": 12034.545464000075,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Find composer of the serenade",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Who composed the four-movement serenade in B-flat major for 2 oboes, 2 horns, and 1 bassoon?",
+            "rendered_prompt": "Identify the composer of the four-movement serenade in B-flat major for 2 oboes, 2 horns, and 1 bassoon.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Symphony No. 56 (Haydn)\n  (0) The Symphony No. 56 in C major, Hoboken I/56, is a symphony by Joseph Haydn, composed by 1774.\n  (1)  It is scored for 2 oboes, bassoon, 2 horns (C alto and F), 2 trumpets, timpani and strings.\n  (2)  It is in four movements:\n\nDocument ID: context-1\nTitle: Symphony No. 36 (Haydn)\n  (0) Joseph Haydn wrote Symphony No. 36 in E♭ major, Hoboken 1/36, some time in the first half of the 1760s.\n  (1)  Scored for 2 oboes, bassoon, 2 horns, strings and continuo, the slow movement features solos for violin and cello.\n  (2)  It is in four movements:\n\nDocument ID: context-2\nTitle: Symphony No. 25 (Michael Haydn)\n  (0) The Symphony No. 25 in G major, Perger 16, Sherman 25, MH 334 is a classical symphony that was composed by Michael Haydn in 1783, with a completion date of May 23.\n  (1)  It is scored for flute (in the second movement), 2 oboes, 2 bassoons, 2 horns and strings.\n\nDocument ID: context-3\nTitle: Symphony No. 55 (Haydn)\n  (0) The Symphony No. 55 in E♭ major, Hoboken I/55, is a symphony by Joseph Haydn, composed by 1774.\n  (1)  It is scored for 2 oboes, bassoon, 2 horns and strings.\n  (2)  It is in four movements:\n\nDocument ID: context-4\nTitle: Chamber Symphony No. 2 (Schoenberg)\n  (0) Chamber Symphony No. 2, Op. 38, by Arnold Schoenberg was begun in 1906 and completed in 1939.\n  (1)  The work is scored for 2 flutes (2nd doubling piccolo), 2 oboes (2nd doubling cor anglais), 2 clarinets, 2 bassoons, 2 horns, 2 trumpets and strings and is divided into two movements, the first (in E flat minor) marked Adagio and the second (in G major) marked Con Fuoco-Lento.\n  (2)  The belated completion of the work was prompted by a request from the conductor Fritz Stiedry who asked Schoenberg for an orchestral piece for his New Friends of Music Orchestra in New York.\n  (3)  The work was first performed there on December 14, 1940 under Stiedry's direction.\n\nDocument ID: context-5\nTitle: Antonio Salieri\n  (0) Antonio Salieri (] ; 18 August 17507 May 1825) was an Italian classical composer, conductor, and teacher.\n  (1)  He was born in Legnago, south of Verona, in the Republic of Venice, and spent his adult life and career as a subject of the Habsburg Monarchy.\n\nDocument ID: context-6\nTitle: Picciola serenata\n  (0) Picciola serenata (little serenade) in B-flat major is a serenade written by Italian composer Antonio Salieri scored for five instruments: 2 oboes, 2 horns and 1 bassoon.\n  (1)  The piece was composed in 1778 and consists of four movements.\n\nDocument ID: context-7\nTitle: Symphony for Classical Orchestra (Shapero)\n  (0) Harold Shapero completed the Symphony for Classical Orchestra in B-flat major on March 10, 1947, in Newton Centre, Massachusetts.\n  (1)  It is written for an orchestra consisting of piccolo, 2 flutes, 2 oboes, 2 clarinets in B-flat, 2 bassoons, contrabassoon, 2 horns in F, 2 trumpets in C, 2 tenor trombones and one bass (silent until the Finale), timpani and strings.\n  (2)  Although labelled \"Classical,\" many of the work's features point to Beethoven rather than Haydn or Mozart, such as \"the way in which Shapero paces himself, alternating long passages in the tonic and the dominant, with fast, dramatic modulations often reserved for transitions and developments.\"\n  (3)  Nicolas Slonimsky remarked on how the piece is \"premeditatedly cast in the proclamatory key of B-flat major, the natural tonality of the bugle, and ending in a display of tonic major triads.\"\n  (4)  But there are modern features as well, with \"the work's orchestration, in general, ... distinctively bright and brassy, and undoubtedly derived a fair amount from Piston and Copland, as well as from the composer's experience as a dance band arranger.\"\n\nDocument ID: context-8\nTitle: Harmoniemesse\n  (0) The Harmoniemesse in B-flat major by Joseph Haydn, Hob.\n  (1)  XXII:14, Novello 6, was written in 1802.\n  (2)  It was Haydn's last major work.\n  (3)  It is because of the prominence of the winds in this mass and \"the German terminology for a kind of wind ensemble, \"Harmonie\",\" that this mass setting is called \"Harmoniemesse\" or \"Wind Band Mass\".\n  (4)  Besides flute, 2 oboes, 2 clarinets, 2 bassoons, 2 horns in B-flat, 2 trumpets in B-flat, the mass also calls for choir, timpani, strings, and organ, the latter supplying figured bass for most of the duration.\n\nDocument ID: context-9\nTitle: Deutsche Messe (Schubert)\n  (0) Deutsche Messe (\"German Mass\"), D 872, is a mass composed by Franz Schubert in 1827.\n  (1)  Its text is not the Latin liturgical text, but a sequence of poems in German by Johann Philipp Neumann who commissioned the work.\n  (2)  It was originally scored for SATB choir, 2 oboes, 2 clarinets, 2 bassoons, 2 horns, 2 trumpets, 3 trombones, timpani and basso continuo .\n  (3)  It is also known as the \"Gesänge zur Feier des heiligen Opfers der Messe \" (\"Songs for the celebration of the holy offering of the Mass\"), and the \"Wind Mass\" due to its orchestration of primarily wind instruments.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"composer\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"composer\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the composer.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"composer\": \"Antonio Salieri\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-6\",\n      \"title\": \"Picciola serenata\",\n      \"sentence_indices\": [0],\n      \"fact\": \"Picciola serenata (little serenade) in B-flat major is a serenade written by Italian composer Antonio Salieri scored for five instruments: 2 oboes, 2 horns and 1 bassoon.\"\n    },\n    {\n      \"document_id\": \"context-6\",\n      \"title\": \"Picciola serenata\",\n      \"sentence_indices\": [1],\n      \"fact\": \"The piece was composed in 1778 and consists of four movements.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "composer": "Antonio Salieri",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-6",
+                  "title": "Picciola serenata",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Picciola serenata (little serenade) in B-flat major is a serenade written by Italian composer Antonio Salieri scored for five instruments: 2 oboes, 2 horns and 1 bassoon."
+                },
+                {
+                  "document_id": "context-6",
+                  "title": "Picciola serenata",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "The piece was composed in 1778 and consists of four movements."
+                }
+              ]
+            },
+            "returned_value": {
+              "composer": "Antonio Salieri"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Symphony No. 56 (Haydn)",
+                  "text": "The Symphony No. 56 in C major, Hoboken I/56, is a symphony by Joseph Haydn, composed by 1774. It is scored for 2 oboes, bassoon, 2 horns (C alto and F), 2 trumpets, timpani and strings. It is in four movements:",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "The Symphony No. 56 in C major, Hoboken I/56, is a symphony by Joseph Haydn, composed by 1774.",
+                      " It is scored for 2 oboes, bassoon, 2 horns (C alto and F), 2 trumpets, timpani and strings.",
+                      " It is in four movements:"
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Symphony No. 36 (Haydn)",
+                  "text": "Joseph Haydn wrote Symphony No. 36 in E♭ major, Hoboken 1/36, some time in the first half of the 1760s. Scored for 2 oboes, bassoon, 2 horns, strings and continuo, the slow movement features solos for violin and cello. It is in four movements:",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Joseph Haydn wrote Symphony No. 36 in E♭ major, Hoboken 1/36, some time in the first half of the 1760s.",
+                      " Scored for 2 oboes, bassoon, 2 horns, strings and continuo, the slow movement features solos for violin and cello.",
+                      " It is in four movements:"
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Symphony No. 25 (Michael Haydn)",
+                  "text": "The Symphony No. 25 in G major, Perger 16, Sherman 25, MH 334 is a classical symphony that was composed by Michael Haydn in 1783, with a completion date of May 23. It is scored for flute (in the second movement), 2 oboes, 2 bassoons, 2 horns and strings.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The Symphony No. 25 in G major, Perger 16, Sherman 25, MH 334 is a classical symphony that was composed by Michael Haydn in 1783, with a completion date of May 23.",
+                      " It is scored for flute (in the second movement), 2 oboes, 2 bassoons, 2 horns and strings."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Symphony No. 55 (Haydn)",
+                  "text": "The Symphony No. 55 in E♭ major, Hoboken I/55, is a symphony by Joseph Haydn, composed by 1774. It is scored for 2 oboes, bassoon, 2 horns and strings. It is in four movements:",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "The Symphony No. 55 in E♭ major, Hoboken I/55, is a symphony by Joseph Haydn, composed by 1774.",
+                      " It is scored for 2 oboes, bassoon, 2 horns and strings.",
+                      " It is in four movements:"
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Chamber Symphony No. 2 (Schoenberg)",
+                  "text": "Chamber Symphony No. 2, Op. 38, by Arnold Schoenberg was begun in 1906 and completed in 1939. The work is scored for 2 flutes (2nd doubling piccolo), 2 oboes (2nd doubling cor anglais), 2 clarinets, 2 bassoons, 2 horns, 2 trumpets and strings and is divided into two movements, the first (in E flat minor) marked Adagio and the second (in G major) marked Con Fuoco-Lento. The belated completion of the work was prompted by a request from the conductor Fritz Stiedry who asked Schoenberg for an orchestral piece for his New Friends of Music Orchestra in New York. The work was first performed there on December 14, 1940 under Stiedry's direction.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Chamber Symphony No. 2, Op. 38, by Arnold Schoenberg was begun in 1906 and completed in 1939.",
+                      " The work is scored for 2 flutes (2nd doubling piccolo), 2 oboes (2nd doubling cor anglais), 2 clarinets, 2 bassoons, 2 horns, 2 trumpets and strings and is divided into two movements, the first (in E flat minor) marked Adagio and the second (in G major) marked Con Fuoco-Lento.",
+                      " The belated completion of the work was prompted by a request from the conductor Fritz Stiedry who asked Schoenberg for an orchestral piece for his New Friends of Music Orchestra in New York.",
+                      " The work was first performed there on December 14, 1940 under Stiedry's direction."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Antonio Salieri",
+                  "text": "Antonio Salieri (] ; 18 August 17507 May 1825) was an Italian classical composer, conductor, and teacher. He was born in Legnago, south of Verona, in the Republic of Venice, and spent his adult life and career as a subject of the Habsburg Monarchy.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Antonio Salieri (] ; 18 August 17507 May 1825) was an Italian classical composer, conductor, and teacher.",
+                      " He was born in Legnago, south of Verona, in the Republic of Venice, and spent his adult life and career as a subject of the Habsburg Monarchy."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Picciola serenata",
+                  "text": "Picciola serenata (little serenade) in B-flat major is a serenade written by Italian composer Antonio Salieri scored for five instruments: 2 oboes, 2 horns and 1 bassoon. The piece was composed in 1778 and consists of four movements.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Picciola serenata (little serenade) in B-flat major is a serenade written by Italian composer Antonio Salieri scored for five instruments: 2 oboes, 2 horns and 1 bassoon.",
+                      " The piece was composed in 1778 and consists of four movements."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Symphony for Classical Orchestra (Shapero)",
+                  "text": "Harold Shapero completed the Symphony for Classical Orchestra in B-flat major on March 10, 1947, in Newton Centre, Massachusetts. It is written for an orchestra consisting of piccolo, 2 flutes, 2 oboes, 2 clarinets in B-flat, 2 bassoons, contrabassoon, 2 horns in F, 2 trumpets in C, 2 tenor trombones and one bass (silent until the Finale), timpani and strings. Although labelled \"Classical,\" many of the work's features point to Beethoven rather than Haydn or Mozart, such as \"the way in which Shapero paces himself, alternating long passages in the tonic and the dominant, with fast, dramatic modulations often reserved for transitions and developments.\" Nicolas Slonimsky remarked on how the piece is \"premeditatedly cast in the proclamatory key of B-flat major, the natural tonality of the bugle, and ending in a display of tonic major triads.\" But there are modern features as well, with \"the work's orchestration, in general, ... distinctively bright and brassy, and undoubtedly derived a fair amount from Piston and Copland, as well as from the composer's experience as a dance band arranger.\"",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Harold Shapero completed the Symphony for Classical Orchestra in B-flat major on March 10, 1947, in Newton Centre, Massachusetts.",
+                      " It is written for an orchestra consisting of piccolo, 2 flutes, 2 oboes, 2 clarinets in B-flat, 2 bassoons, contrabassoon, 2 horns in F, 2 trumpets in C, 2 tenor trombones and one bass (silent until the Finale), timpani and strings.",
+                      " Although labelled \"Classical,\" many of the work's features point to Beethoven rather than Haydn or Mozart, such as \"the way in which Shapero paces himself, alternating long passages in the tonic and the dominant, with fast, dramatic modulations often reserved for transitions and developments.\"",
+                      " Nicolas Slonimsky remarked on how the piece is \"premeditatedly cast in the proclamatory key of B-flat major, the natural tonality of the bugle, and ending in a display of tonic major triads.\"",
+                      " But there are modern features as well, with \"the work's orchestration, in general, ... distinctively bright and brassy, and undoubtedly derived a fair amount from Piston and Copland, as well as from the composer's experience as a dance band arranger.\""
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Harmoniemesse",
+                  "text": "The Harmoniemesse in B-flat major by Joseph Haydn, Hob. XXII:14, Novello 6, was written in 1802. It was Haydn's last major work. It is because of the prominence of the winds in this mass and \"the German terminology for a kind of wind ensemble, \"Harmonie\",\" that this mass setting is called \"Harmoniemesse\" or \"Wind Band Mass\". Besides flute, 2 oboes, 2 clarinets, 2 bassoons, 2 horns in B-flat, 2 trumpets in B-flat, the mass also calls for choir, timpani, strings, and organ, the latter supplying figured bass for most of the duration.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "The Harmoniemesse in B-flat major by Joseph Haydn, Hob.",
+                      " XXII:14, Novello 6, was written in 1802.",
+                      " It was Haydn's last major work.",
+                      " It is because of the prominence of the winds in this mass and \"the German terminology for a kind of wind ensemble, \"Harmonie\",\" that this mass setting is called \"Harmoniemesse\" or \"Wind Band Mass\".",
+                      " Besides flute, 2 oboes, 2 clarinets, 2 bassoons, 2 horns in B-flat, 2 trumpets in B-flat, the mass also calls for choir, timpani, strings, and organ, the latter supplying figured bass for most of the duration."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Deutsche Messe (Schubert)",
+                  "text": "Deutsche Messe (\"German Mass\"), D 872, is a mass composed by Franz Schubert in 1827. Its text is not the Latin liturgical text, but a sequence of poems in German by Johann Philipp Neumann who commissioned the work. It was originally scored for SATB choir, 2 oboes, 2 clarinets, 2 bassoons, 2 horns, 2 trumpets, 3 trombones, timpani and basso continuo . It is also known as the \"Gesänge zur Feier des heiligen Opfers der Messe \" (\"Songs for the celebration of the holy offering of the Mass\"), and the \"Wind Mass\" due to its orchestration of primarily wind instruments.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Deutsche Messe (\"German Mass\"), D 872, is a mass composed by Franz Schubert in 1827.",
+                      " Its text is not the Latin liturgical text, but a sequence of poems in German by Johann Philipp Neumann who commissioned the work.",
+                      " It was originally scored for SATB choir, 2 oboes, 2 clarinets, 2 bassoons, 2 horns, 2 trumpets, 3 trombones, timpani and basso continuo .",
+                      " It is also known as the \"Gesänge zur Feier des heiligen Opfers der Messe \" (\"Songs for the celebration of the holy offering of the Mass\"), and the \"Wind Mass\" due to its orchestration of primarily wind instruments."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-6",
+                "title": "Picciola serenata",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Picciola serenata (little serenade) in B-flat major is a serenade written by Italian composer Antonio Salieri scored for five instruments: 2 oboes, 2 horns and 1 bassoon."
+              },
+              {
+                "document_id": "context-6",
+                "title": "Picciola serenata",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "The piece was composed in 1778 and consists of four movements."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-6",
+                  "title": "Picciola serenata",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Picciola serenata (little serenade) in B-flat major is a serenade written by Italian composer Antonio Salieri scored for five instruments: 2 oboes, 2 horns and 1 bassoon."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Picciola serenata",
+                    "sentence_index": 0
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-6",
+                  "title": "Picciola serenata",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "The piece was composed in 1778 and consists of four movements."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Picciola serenata",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:09:10.336926+00:00",
+            "finished_at": "2026-06-03T16:10:00.465382+00:00",
+            "duration_ms": 50128.5856049999,
+            "error": null
+          },
+          {
+            "node_id": "q3",
+            "label": "Determine the matching composer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "composers_born_1750": "Antonio Salieri",
+              "serenade_composer": "Antonio Salieri"
+            },
+            "resolved_question": "Which composer matches both criteria?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"composers_born_1750\": \"Antonio Salieri\",\n  \"serenade_composer\": \"Antonio Salieri\"\n}\n\nFrom the list of Italian composers born in 1750 (Antonio Salieri) and the composer of the serenade (Antonio Salieri), determine the matching individual.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the composer who matches both criteria.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"Antonio Salieri\"\n}",
+            "parsed_output": {
+              "answer": "Antonio Salieri"
+            },
+            "returned_value": {
+              "answer": "Antonio Salieri"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": null,
+            "evidence_citations": [],
+            "evidence_citation_evaluations": [],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:10:00.465479+00:00",
+            "finished_at": "2026-06-03T16:10:37.476596+00:00",
+            "duration_ms": 37011.44968400012,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Antonio Salieri"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 87140.44299700003,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Identify Italian composers born in 1750\\nfact_lookup\\nsucceeded\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: Find composer of the serenade\\nfact_lookup\\nsucceeded\"]\n  click q2 dagqaSelectGraphNode\n  q3[\"q3: Determine the matching composer\\nsynthesis\\nsucceeded\"]\n  click q3 dagqaSelectGraphNode\n  q1 --> q3\n  q2 --> q3"
+      },
+      "error": null
+    }
+  ],
+  "metrics": {
+    "example_count": 3.0,
+    "success_count": 3.0,
+    "failure_count": 0.0,
+    "error_count": 0.0,
+    "exact_match": 0.6666666666666666,
+    "f1": 0.6666666666666666,
+    "cosine_sim": 0.7337527424097061,
+    "avg_latency_ms": 89974.5215413334,
+    "p50_latency_ms": 110658.45963400012,
+    "total_llm_call_count": 12.0,
+    "avg_llm_call_count": 4.0,
+    "avg_node_count": 3.0,
+    "avg_graph_depth": 2.3333333333333335,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.0,
+    "total_evidence_citation_count": 7.0,
+    "correct_evidence_citation_count": 5.0,
+    "wrong_evidence_citation_count": 2.0,
+    "wrong_supporting_text_rate": 0.2857142857142857,
+    "avg_gold_supporting_fact_recall": 0.5833333333333334,
+    "total_runtime_ms": 328300.55773200013
+  }
+}

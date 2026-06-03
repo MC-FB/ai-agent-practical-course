@@ -113,6 +113,39 @@ button {
   font-size: 12px;
 }
 
+.sidebar-controls {
+  display: grid;
+  gap: 14px;
+}
+
+.model-picker {
+  display: grid;
+  gap: 6px;
+}
+
+.model-picker label {
+  color: #516169;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.model-picker select {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #cbd6da;
+  border-radius: 8px;
+  background: #fbfcfc;
+  color: #1e2a30;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.model-picker small {
+  color: #8f2f22;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
 .workspace {
   display: grid;
   grid-template-columns: minmax(460px, 0.95fr) minmax(420px, 1.05fr);

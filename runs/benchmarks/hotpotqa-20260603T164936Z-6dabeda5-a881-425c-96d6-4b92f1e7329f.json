@@ -1,0 +1,2187 @@
+{
+  "run_id": "6dabeda5-a881-425c-96d6-4b92f1e7329f",
+  "system": "dag_agent",
+  "limit": 3,
+  "provider": "cluster",
+  "model": "openai/gpt-oss-120b",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "dataset_size": 7405,
+  "seed": 540194133,
+  "created_at": "2026-06-03T16:49:36Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260603T164936Z-6dabeda5-a881-425c-96d6-4b92f1e7329f.json",
+  "total_runtime_ms": 54337.319191999995,
+  "records": [
+    {
+      "id": "5ab7c87d55429928e1fe38de",
+      "question": "What number album is the first W.A.S.P. album to feature Steven Edward Duren playing guitar?",
+      "gold_answer": "third",
+      "prediction": "3 Inside the Electric Circus",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "cosine_sim": 0.3259845972061157,
+      "latency_ms": 15346.629673999814,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 2,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Inside the Electric Circus",
+          "sentence_index": 0
+        },
+        {
+          "title": "Inside the Electric Circus",
+          "sentence_index": 1
+        },
+        {
+          "title": "Blackie Lawless",
+          "sentence_index": 0
+        }
+      ],
+      "evidence_citation_count": 4,
+      "correct_evidence_citation_count": 3,
+      "wrong_evidence_citation_count": 1,
+      "wrong_supporting_text_rate": 0.25,
+      "gold_supporting_fact_recall": 1.0,
+      "run_trace": {
+        "run_id": "8eccb664-9f56-4c84-9177-e3c22e7f9929",
+        "question": "What number album is the first W.A.S.P. album to feature Steven Edward Duren playing guitar?",
+        "plan": {
+          "question": "What number album is the first W.A.S.P. album to feature Steven Edward Duren playing guitar?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "W.A.S.P. discography",
+              "task_type": "fact_lookup",
+              "question": "List all studio albums released by the band W.A.S.P. in chronological order. Provide each album's title and its sequential number (starting at 1 for the debut album). Return as a JSON array of objects with fields 'title' and 'number'.",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable music encyclopedia.",
+                "user_template": "List all studio albums released by the band W.A.S.P. in chronological order. Provide each album's title and its sequential number (starting at 1 for the debut album). Return as a JSON array of objects with fields 'title' and 'number'."
+              },
+              "input_map": {},
+              "child_output_policy": "none",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "albums"
+                ],
+                "properties": {
+                  "albums": {
+                    "type": "array",
+                    "description": "Array of album objects with title and sequential number in the band's discography order."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Steven Edward Duren guitar credits",
+              "task_type": "fact_lookup",
+              "question": "Which W.A.S.P. albums feature Steven Edward Duren as a guitarist? List the album titles.",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are an expert on band personnel and album credits.",
+                "user_template": "Which W.A.S.P. albums feature Steven Edward Duren as a guitarist? List the album titles."
+              },
+              "input_map": {},
+              "child_output_policy": "none",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "duren_albums"
+                ],
+                "properties": {
+                  "duren_albums": {
+                    "type": "array",
+                    "description": "Array of album titles that include Steven Edward Duren on guitar."
+                  }
+                }
+              }
+            },
+            {
+              "id": "final",
+              "label": "Determine first album featuring Steven Edward Duren",
+              "task_type": "synthesis",
+              "question": "Identify the first W.A.S.P. album (by sequential number) that features Steven Edward Duren on guitar.",
+              "operation": "answer",
+              "depends_on": [
+                "q1",
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a logical reasoning assistant.",
+                "user_template": "Using the album list {albums} and the list of albums featuring Steven Edward Duren {duren_titles}, identify the album with the lowest sequential number that appears in both lists. Provide the album's sequential number and title as the answer."
+              },
+              "input_map": {
+                "albums": "q1.albums",
+                "duren_titles": "q2.duren_albums"
+              },
+              "child_output_policy": "none",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The sequential number and title of the first W.A.S.P. album that features Steven Edward Duren on guitar."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "final"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1",
+              "q2"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "final"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "W.A.S.P. discography",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "List all studio albums released by the band W.A.S.P. in chronological order. Provide each album's title and its sequential number (starting at 1 for the debut album). Return as a JSON array of objects with fields 'title' and 'number'.",
+            "rendered_prompt": "List all studio albums released by the band W.A.S.P. in chronological order. Provide each album's title and its sequential number (starting at 1 for the debut album). Return as a JSON array of objects with fields 'title' and 'number'.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Will Wallner\n  (0) Will Wallner (born 24 January 1987) is an English rock guitarist and songwriter.\n  (1)  His main influences are Ritchie Blackmore, Gary Moore and John Sykes.\n  (2)  He began playing guitar at age 16 and received his first \"real guitar\", a Gibson Les Paul Custom, which he has played his entire career, at the age of 18.\n  (3)  He began playing guitar by ear, then had taken his first formal guitar lessons from a rock guitar teacher in his home town of Devon, England.\n  (4)  He is an alumnus of the prestigious Colyton Grammar School and a graduate of the University of Portsmouth with a BSc in Music and Sound Technology and has also studied at the Musicians Institute, in Hollywood.\n  (5)  Since 2012 he has been a regular contributor to Guitar World magazine with his weekly blog 'Bent Out of Shape'.\n  (6)  He currently resides in Los Angeles, California and also owns a recording studio in Berlin, Germany.\n\nDocument ID: context-1\nTitle: Friðrik Karlsson\n  (0) Friðrik Karlsson is an Icelandic musician and songwriter.\n  (1)  He studied classical and jazz/rock guitar and had success with the group Mezzoforte in 1983 with the U.K. top 20 hit, \"Garden Party\".\n  (2)  He has contributed to the soundtracks of musicals such as Jesus Christ Superstar and Saturday Night Fever and to that of movies such as Evita and Hercules.\n  (3)  His TV work includes accompanying singers Madonna, José Carreras and Tom Jones.\n  (4)  Karlsson has also appeared on albums and singles from Boyzone and Cliff Richard, among others.\n  (5)  Karlsson has moved back home to his native Iceland,after living in London,where he among other jobs worked as a session musician playing guitar in the musical Jesus Christ Superstar.\n  (6)  He has released numerous new-age and relaxation music albums known as \"The Feel Good Collection\".\n  (7)  In 2014, Karlsson also played as session musician for Kate Bush's first live performances in 35 years, playing guitar for 22 dates.\n\nDocument ID: context-2\nTitle: The Last Command (album)\n  (0) The Last Command is the second album by heavy metal band W.A.S.P., released in November 9, 1985.\n  (1)  The album was produced by Spencer Proffer, who was perhaps best known for producing the six-time Platinum selling album \"Metal Health\" by Quiet Riot in 1983.\n  (2)  \"The Last Command\" is the first W.A.S.P. album to feature the work of drummer Steve Riley.\n  (3)  The album reached No. 47 on the \"Billboard\" 200 album chart in early 1986 and sold over one million copies, their first album to do so.\n  (4)  It was also the last album to feature founding member Randy Piper on guitar.\n\nDocument ID: context-3\nTitle: Inside the Electric Circus\n  (0) Inside the Electric Circus is the third studio album by heavy metal band W.A.S.P., released in October 1986 through Capitol Records; a remastered edition featuring two bonus tracks was reissued in 1997 through Snapper Music.\n  (1)  The album is the band's first to feature singer and bandleader Blackie Lawless playing guitar, having switched from bass to rhythm guitar.\n  (2)  It reached No. 17 and 35 on the Norwegian and Swedish albums chart respectively, and No. 60 on the U.S. \"Billboard\" 200; it remained on the latter for 19 weeks.\n\nDocument ID: context-4\nTitle: Steve Phillips (footballer, born 1954)\n  (0) Steven Edward Phillips (born 4 August 1954) is an English former professional footballer who had a long career as a forward for a number of teams in the Football League in the 1970s and 1980s.\n  (1)  He scored 200 goals from 562 league appearances.\n\nDocument ID: context-5\nTitle: Live...In the Raw\n  (0) Live...In the Raw is the first live album by W.A.S.P. (fourth album overall), released in 1987.\n  (1)  This album can be seen as something of a breakwater between the 'old' W.A.S.P. of the first three albums and the more mature sound of the releases that would follow.\n  (2)  It is also the album to feature \"Harder Faster\", which is about the PMRC declaring them \"sexual perverts\".\n\nDocument ID: context-6\nTitle: Blackie Lawless\n  (0) Blackie Lawless (born Steven Edward Duren; September 4, 1956) is an American songwriter and musician best known as the lead singer and rhythm guitarist (formerly bassist) for the heavy metal band W.A.S.P.\n\nDocument ID: context-7\nTitle: Blizzard Beasts\n  (0) Blizzard Beasts is the fourth studio album by Norwegian black metal band Immortal.\n  (1)  It was released on 20 March 1997 through Osmose Productions.\n  (2)  It is the last Immortal album to feature founding member Demonaz Doom Occulta on guitar, and the first to feature Horgh on drums.\n  (3)  Demonaz was later diagnosed with acute tendinitis which prevented him from playing guitar at the required speed for Immortal's music.\n  (4)  Stylistically, \"Blizzard Beasts\" has primarily songs that are less than three minutes long, contrasting with Immortal's usual longer song lengths.\n\nDocument ID: context-8\nTitle: Anatude\n  (0) Anatude is the eleventh studio album by Finnish pop singer Antti Tuisku, released on 15 September 2017 through Warner Music Finland.\n  (1)  In its first week of release, the album debuted at number one on the Finnish Albums Chart, becoming Tuisku's fifth number album.\n\nDocument ID: context-9\nTitle: Jon MacLennan\n  (0) Jon MacLennan is a Los Angeles-based musician, composer, producer and music educator.\n  (1)  MacLennan's session work includes playing guitar on Julian Lennon and Steven Tyler’s song, \"Someday\", from Lennon's album, \"Everything Changes\" (2013), and backing vocals on Jamie Cullum's album, \"The Pursuit\" (2009).\n  (2)  He’s also played guitar on songs for Holly Knight, Mark Spiro and Tim Miner.\n  (3)  MacLennan’s original song, \"Fallin' Deeper\", is featured in the Twentieth Century Fox film (2011) soundtrack.\n  (4)  MacLennan's published works include: three self-produced albums, two instructional music iBooks, \"Melodic Expressions: The Art of the Line\" (2012), \"Play Ukulele\" (2012) and hundreds of instructional workshop videos on his YouTube channel with over 1.48 million views.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"albums\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"albums\": {\n      \"type\": \"array\",\n      \"description\": \"Array of album objects with title and sequential number in the band's discography order.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"albums\": [\n    {\n      \"title\": \"The Last Command\",\n      \"number\": 2\n    },\n    {\n      \"title\": \"Inside the Electric Circus\",\n      \"number\": 3\n    }\n  ],\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-2\",\n      \"title\": \"The Last Command (album)\",\n      \"sentence_indices\": [0],\n      \"fact\": \"The Last Command is the second album by heavy metal band W.A.S.P.\"\n    },\n    {\n      \"document_id\": \"context-3\",\n      \"title\": \"Inside the Electric Circus\",\n      \"sentence_indices\": [0],\n      \"fact\": \"Inside the Electric Circus is the third studio album by heavy metal band W.A.S.P.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "albums": [
+                {
+                  "title": "The Last Command",
+                  "number": 2
+                },
+                {
+                  "title": "Inside the Electric Circus",
+                  "number": 3
+                }
+              ],
+              "_evidence_citations": [
+                {
+                  "document_id": "context-2",
+                  "title": "The Last Command (album)",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "The Last Command is the second album by heavy metal band W.A.S.P."
+                },
+                {
+                  "document_id": "context-3",
+                  "title": "Inside the Electric Circus",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Inside the Electric Circus is the third studio album by heavy metal band W.A.S.P."
+                }
+              ]
+            },
+            "returned_value": {
+              "albums": [
+                {
+                  "title": "The Last Command",
+                  "number": 2
+                },
+                {
+                  "title": "Inside the Electric Circus",
+                  "number": 3
+                }
+              ]
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Will Wallner",
+                  "text": "Will Wallner (born 24 January 1987) is an English rock guitarist and songwriter. His main influences are Ritchie Blackmore, Gary Moore and John Sykes. He began playing guitar at age 16 and received his first \"real guitar\", a Gibson Les Paul Custom, which he has played his entire career, at the age of 18. He began playing guitar by ear, then had taken his first formal guitar lessons from a rock guitar teacher in his home town of Devon, England. He is an alumnus of the prestigious Colyton Grammar School and a graduate of the University of Portsmouth with a BSc in Music and Sound Technology and has also studied at the Musicians Institute, in Hollywood. Since 2012 he has been a regular contributor to Guitar World magazine with his weekly blog 'Bent Out of Shape'. He currently resides in Los Angeles, California and also owns a recording studio in Berlin, Germany.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Will Wallner (born 24 January 1987) is an English rock guitarist and songwriter.",
+                      " His main influences are Ritchie Blackmore, Gary Moore and John Sykes.",
+                      " He began playing guitar at age 16 and received his first \"real guitar\", a Gibson Les Paul Custom, which he has played his entire career, at the age of 18.",
+                      " He began playing guitar by ear, then had taken his first formal guitar lessons from a rock guitar teacher in his home town of Devon, England.",
+                      " He is an alumnus of the prestigious Colyton Grammar School and a graduate of the University of Portsmouth with a BSc in Music and Sound Technology and has also studied at the Musicians Institute, in Hollywood.",
+                      " Since 2012 he has been a regular contributor to Guitar World magazine with his weekly blog 'Bent Out of Shape'.",
+                      " He currently resides in Los Angeles, California and also owns a recording studio in Berlin, Germany."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Friðrik Karlsson",
+                  "text": "Friðrik Karlsson is an Icelandic musician and songwriter. He studied classical and jazz/rock guitar and had success with the group Mezzoforte in 1983 with the U.K. top 20 hit, \"Garden Party\". He has contributed to the soundtracks of musicals such as Jesus Christ Superstar and Saturday Night Fever and to that of movies such as Evita and Hercules. His TV work includes accompanying singers Madonna, José Carreras and Tom Jones. Karlsson has also appeared on albums and singles from Boyzone and Cliff Richard, among others. Karlsson has moved back home to his native Iceland,after living in London,where he among other jobs worked as a session musician playing guitar in the musical Jesus Christ Superstar. He has released numerous new-age and relaxation music albums known as \"The Feel Good Collection\". In 2014, Karlsson also played as session musician for Kate Bush's first live performances in 35 years, playing guitar for 22 dates.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Friðrik Karlsson is an Icelandic musician and songwriter.",
+                      " He studied classical and jazz/rock guitar and had success with the group Mezzoforte in 1983 with the U.K. top 20 hit, \"Garden Party\".",
+                      " He has contributed to the soundtracks of musicals such as Jesus Christ Superstar and Saturday Night Fever and to that of movies such as Evita and Hercules.",
+                      " His TV work includes accompanying singers Madonna, José Carreras and Tom Jones.",
+                      " Karlsson has also appeared on albums and singles from Boyzone and Cliff Richard, among others.",
+                      " Karlsson has moved back home to his native Iceland,after living in London,where he among other jobs worked as a session musician playing guitar in the musical Jesus Christ Superstar.",
+                      " He has released numerous new-age and relaxation music albums known as \"The Feel Good Collection\".",
+                      " In 2014, Karlsson also played as session musician for Kate Bush's first live performances in 35 years, playing guitar for 22 dates."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "The Last Command (album)",
+                  "text": "The Last Command is the second album by heavy metal band W.A.S.P., released in November 9, 1985. The album was produced by Spencer Proffer, who was perhaps best known for producing the six-time Platinum selling album \"Metal Health\" by Quiet Riot in 1983. \"The Last Command\" is the first W.A.S.P. album to feature the work of drummer Steve Riley. The album reached No. 47 on the \"Billboard\" 200 album chart in early 1986 and sold over one million copies, their first album to do so. It was also the last album to feature founding member Randy Piper on guitar.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The Last Command is the second album by heavy metal band W.A.S.P., released in November 9, 1985.",
+                      " The album was produced by Spencer Proffer, who was perhaps best known for producing the six-time Platinum selling album \"Metal Health\" by Quiet Riot in 1983.",
+                      " \"The Last Command\" is the first W.A.S.P. album to feature the work of drummer Steve Riley.",
+                      " The album reached No. 47 on the \"Billboard\" 200 album chart in early 1986 and sold over one million copies, their first album to do so.",
+                      " It was also the last album to feature founding member Randy Piper on guitar."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Inside the Electric Circus",
+                  "text": "Inside the Electric Circus is the third studio album by heavy metal band W.A.S.P., released in October 1986 through Capitol Records; a remastered edition featuring two bonus tracks was reissued in 1997 through Snapper Music. The album is the band's first to feature singer and bandleader Blackie Lawless playing guitar, having switched from bass to rhythm guitar. It reached No. 17 and 35 on the Norwegian and Swedish albums chart respectively, and No. 60 on the U.S. \"Billboard\" 200; it remained on the latter for 19 weeks.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Inside the Electric Circus is the third studio album by heavy metal band W.A.S.P., released in October 1986 through Capitol Records; a remastered edition featuring two bonus tracks was reissued in 1997 through Snapper Music.",
+                      " The album is the band's first to feature singer and bandleader Blackie Lawless playing guitar, having switched from bass to rhythm guitar.",
+                      " It reached No. 17 and 35 on the Norwegian and Swedish albums chart respectively, and No. 60 on the U.S. \"Billboard\" 200; it remained on the latter for 19 weeks."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Steve Phillips (footballer, born 1954)",
+                  "text": "Steven Edward Phillips (born 4 August 1954) is an English former professional footballer who had a long career as a forward for a number of teams in the Football League in the 1970s and 1980s. He scored 200 goals from 562 league appearances.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Steven Edward Phillips (born 4 August 1954) is an English former professional footballer who had a long career as a forward for a number of teams in the Football League in the 1970s and 1980s.",
+                      " He scored 200 goals from 562 league appearances."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Live...In the Raw",
+                  "text": "Live...In the Raw is the first live album by W.A.S.P. (fourth album overall), released in 1987. This album can be seen as something of a breakwater between the 'old' W.A.S.P. of the first three albums and the more mature sound of the releases that would follow. It is also the album to feature \"Harder Faster\", which is about the PMRC declaring them \"sexual perverts\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Live...In the Raw is the first live album by W.A.S.P. (fourth album overall), released in 1987.",
+                      " This album can be seen as something of a breakwater between the 'old' W.A.S.P. of the first three albums and the more mature sound of the releases that would follow.",
+                      " It is also the album to feature \"Harder Faster\", which is about the PMRC declaring them \"sexual perverts\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Blackie Lawless",
+                  "text": "Blackie Lawless (born Steven Edward Duren; September 4, 1956) is an American songwriter and musician best known as the lead singer and rhythm guitarist (formerly bassist) for the heavy metal band W.A.S.P.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Blackie Lawless (born Steven Edward Duren; September 4, 1956) is an American songwriter and musician best known as the lead singer and rhythm guitarist (formerly bassist) for the heavy metal band W.A.S.P."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Blizzard Beasts",
+                  "text": "Blizzard Beasts is the fourth studio album by Norwegian black metal band Immortal. It was released on 20 March 1997 through Osmose Productions. It is the last Immortal album to feature founding member Demonaz Doom Occulta on guitar, and the first to feature Horgh on drums. Demonaz was later diagnosed with acute tendinitis which prevented him from playing guitar at the required speed for Immortal's music. Stylistically, \"Blizzard Beasts\" has primarily songs that are less than three minutes long, contrasting with Immortal's usual longer song lengths.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Blizzard Beasts is the fourth studio album by Norwegian black metal band Immortal.",
+                      " It was released on 20 March 1997 through Osmose Productions.",
+                      " It is the last Immortal album to feature founding member Demonaz Doom Occulta on guitar, and the first to feature Horgh on drums.",
+                      " Demonaz was later diagnosed with acute tendinitis which prevented him from playing guitar at the required speed for Immortal's music.",
+                      " Stylistically, \"Blizzard Beasts\" has primarily songs that are less than three minutes long, contrasting with Immortal's usual longer song lengths."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Anatude",
+                  "text": "Anatude is the eleventh studio album by Finnish pop singer Antti Tuisku, released on 15 September 2017 through Warner Music Finland. In its first week of release, the album debuted at number one on the Finnish Albums Chart, becoming Tuisku's fifth number album.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Anatude is the eleventh studio album by Finnish pop singer Antti Tuisku, released on 15 September 2017 through Warner Music Finland.",
+                      " In its first week of release, the album debuted at number one on the Finnish Albums Chart, becoming Tuisku's fifth number album."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Jon MacLennan",
+                  "text": "Jon MacLennan is a Los Angeles-based musician, composer, producer and music educator. MacLennan's session work includes playing guitar on Julian Lennon and Steven Tyler’s song, \"Someday\", from Lennon's album, \"Everything Changes\" (2013), and backing vocals on Jamie Cullum's album, \"The Pursuit\" (2009). He’s also played guitar on songs for Holly Knight, Mark Spiro and Tim Miner. MacLennan’s original song, \"Fallin' Deeper\", is featured in the Twentieth Century Fox film (2011) soundtrack. MacLennan's published works include: three self-produced albums, two instructional music iBooks, \"Melodic Expressions: The Art of the Line\" (2012), \"Play Ukulele\" (2012) and hundreds of instructional workshop videos on his YouTube channel with over 1.48 million views.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Jon MacLennan is a Los Angeles-based musician, composer, producer and music educator.",
+                      " MacLennan's session work includes playing guitar on Julian Lennon and Steven Tyler’s song, \"Someday\", from Lennon's album, \"Everything Changes\" (2013), and backing vocals on Jamie Cullum's album, \"The Pursuit\" (2009).",
+                      " He’s also played guitar on songs for Holly Knight, Mark Spiro and Tim Miner.",
+                      " MacLennan’s original song, \"Fallin' Deeper\", is featured in the Twentieth Century Fox film (2011) soundtrack.",
+                      " MacLennan's published works include: three self-produced albums, two instructional music iBooks, \"Melodic Expressions: The Art of the Line\" (2012), \"Play Ukulele\" (2012) and hundreds of instructional workshop videos on his YouTube channel with over 1.48 million views."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-2",
+                "title": "The Last Command (album)",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "The Last Command is the second album by heavy metal band W.A.S.P."
+              },
+              {
+                "document_id": "context-3",
+                "title": "Inside the Electric Circus",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Inside the Electric Circus is the third studio album by heavy metal band W.A.S.P."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-2",
+                  "title": "The Last Command (album)",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "The Last Command is the second album by heavy metal band W.A.S.P."
+                },
+                "matches_gold": false,
+                "matched_gold_facts": []
+              },
+              {
+                "citation": {
+                  "document_id": "context-3",
+                  "title": "Inside the Electric Circus",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Inside the Electric Circus is the third studio album by heavy metal band W.A.S.P."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Inside the Electric Circus",
+                    "sentence_index": 0
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:49:49.497499+00:00",
+            "finished_at": "2026-06-03T16:49:53.446476+00:00",
+            "duration_ms": 3949.022710999998,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Steven Edward Duren guitar credits",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Which W.A.S.P. albums feature Steven Edward Duren as a guitarist? List the album titles.",
+            "rendered_prompt": "Which W.A.S.P. albums feature Steven Edward Duren as a guitarist? List the album titles.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Will Wallner\n  (0) Will Wallner (born 24 January 1987) is an English rock guitarist and songwriter.\n  (1)  His main influences are Ritchie Blackmore, Gary Moore and John Sykes.\n  (2)  He began playing guitar at age 16 and received his first \"real guitar\", a Gibson Les Paul Custom, which he has played his entire career, at the age of 18.\n  (3)  He began playing guitar by ear, then had taken his first formal guitar lessons from a rock guitar teacher in his home town of Devon, England.\n  (4)  He is an alumnus of the prestigious Colyton Grammar School and a graduate of the University of Portsmouth with a BSc in Music and Sound Technology and has also studied at the Musicians Institute, in Hollywood.\n  (5)  Since 2012 he has been a regular contributor to Guitar World magazine with his weekly blog 'Bent Out of Shape'.\n  (6)  He currently resides in Los Angeles, California and also owns a recording studio in Berlin, Germany.\n\nDocument ID: context-1\nTitle: Friðrik Karlsson\n  (0) Friðrik Karlsson is an Icelandic musician and songwriter.\n  (1)  He studied classical and jazz/rock guitar and had success with the group Mezzoforte in 1983 with the U.K. top 20 hit, \"Garden Party\".\n  (2)  He has contributed to the soundtracks of musicals such as Jesus Christ Superstar and Saturday Night Fever and to that of movies such as Evita and Hercules.\n  (3)  His TV work includes accompanying singers Madonna, José Carreras and Tom Jones.\n  (4)  Karlsson has also appeared on albums and singles from Boyzone and Cliff Richard, among others.\n  (5)  Karlsson has moved back home to his native Iceland,after living in London,where he among other jobs worked as a session musician playing guitar in the musical Jesus Christ Superstar.\n  (6)  He has released numerous new-age and relaxation music albums known as \"The Feel Good Collection\".\n  (7)  In 2014, Karlsson also played as session musician for Kate Bush's first live performances in 35 years, playing guitar for 22 dates.\n\nDocument ID: context-2\nTitle: The Last Command (album)\n  (0) The Last Command is the second album by heavy metal band W.A.S.P., released in November 9, 1985.\n  (1)  The album was produced by Spencer Proffer, who was perhaps best known for producing the six-time Platinum selling album \"Metal Health\" by Quiet Riot in 1983.\n  (2)  \"The Last Command\" is the first W.A.S.P. album to feature the work of drummer Steve Riley.\n  (3)  The album reached No. 47 on the \"Billboard\" 200 album chart in early 1986 and sold over one million copies, their first album to do so.\n  (4)  It was also the last album to feature founding member Randy Piper on guitar.\n\nDocument ID: context-3\nTitle: Inside the Electric Circus\n  (0) Inside the Electric Circus is the third studio album by heavy metal band W.A.S.P., released in October 1986 through Capitol Records; a remastered edition featuring two bonus tracks was reissued in 1997 through Snapper Music.\n  (1)  The album is the band's first to feature singer and bandleader Blackie Lawless playing guitar, having switched from bass to rhythm guitar.\n  (2)  It reached No. 17 and 35 on the Norwegian and Swedish albums chart respectively, and No. 60 on the U.S. \"Billboard\" 200; it remained on the latter for 19 weeks.\n\nDocument ID: context-4\nTitle: Steve Phillips (footballer, born 1954)\n  (0) Steven Edward Phillips (born 4 August 1954) is an English former professional footballer who had a long career as a forward for a number of teams in the Football League in the 1970s and 1980s.\n  (1)  He scored 200 goals from 562 league appearances.\n\nDocument ID: context-5\nTitle: Live...In the Raw\n  (0) Live...In the Raw is the first live album by W.A.S.P. (fourth album overall), released in 1987.\n  (1)  This album can be seen as something of a breakwater between the 'old' W.A.S.P. of the first three albums and the more mature sound of the releases that would follow.\n  (2)  It is also the album to feature \"Harder Faster\", which is about the PMRC declaring them \"sexual perverts\".\n\nDocument ID: context-6\nTitle: Blackie Lawless\n  (0) Blackie Lawless (born Steven Edward Duren; September 4, 1956) is an American songwriter and musician best known as the lead singer and rhythm guitarist (formerly bassist) for the heavy metal band W.A.S.P.\n\nDocument ID: context-7\nTitle: Blizzard Beasts\n  (0) Blizzard Beasts is the fourth studio album by Norwegian black metal band Immortal.\n  (1)  It was released on 20 March 1997 through Osmose Productions.\n  (2)  It is the last Immortal album to feature founding member Demonaz Doom Occulta on guitar, and the first to feature Horgh on drums.\n  (3)  Demonaz was later diagnosed with acute tendinitis which prevented him from playing guitar at the required speed for Immortal's music.\n  (4)  Stylistically, \"Blizzard Beasts\" has primarily songs that are less than three minutes long, contrasting with Immortal's usual longer song lengths.\n\nDocument ID: context-8\nTitle: Anatude\n  (0) Anatude is the eleventh studio album by Finnish pop singer Antti Tuisku, released on 15 September 2017 through Warner Music Finland.\n  (1)  In its first week of release, the album debuted at number one on the Finnish Albums Chart, becoming Tuisku's fifth number album.\n\nDocument ID: context-9\nTitle: Jon MacLennan\n  (0) Jon MacLennan is a Los Angeles-based musician, composer, producer and music educator.\n  (1)  MacLennan's session work includes playing guitar on Julian Lennon and Steven Tyler’s song, \"Someday\", from Lennon's album, \"Everything Changes\" (2013), and backing vocals on Jamie Cullum's album, \"The Pursuit\" (2009).\n  (2)  He’s also played guitar on songs for Holly Knight, Mark Spiro and Tim Miner.\n  (3)  MacLennan’s original song, \"Fallin' Deeper\", is featured in the Twentieth Century Fox film (2011) soundtrack.\n  (4)  MacLennan's published works include: three self-produced albums, two instructional music iBooks, \"Melodic Expressions: The Art of the Line\" (2012), \"Play Ukulele\" (2012) and hundreds of instructional workshop videos on his YouTube channel with over 1.48 million views.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"duren_albums\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"duren_albums\": {\n      \"type\": \"array\",\n      \"description\": \"Array of album titles that include Steven Edward Duren on guitar.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"duren_albums\": [\n    \"Inside the Electric Circus\"\n  ],\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-6\",\n      \"title\": \"Blackie Lawless\",\n      \"sentence_indices\": [0],\n      \"fact\": \"Blackie Lawless (born Steven Edward Duren) is an American songwriter and musician best known as the lead singer and rhythm guitarist (formerly bassist) for the heavy metal band W.A.S.P.\"\n    },\n    {\n      \"document_id\": \"context-3\",\n      \"title\": \"Inside the Electric Circus\",\n      \"sentence_indices\": [1],\n      \"fact\": \"Inside the Electric Circus is the band's first to feature singer and bandleader Blackie Lawless playing guitar, having switched from bass to rhythm guitar.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "duren_albums": [
+                "Inside the Electric Circus"
+              ],
+              "_evidence_citations": [
+                {
+                  "document_id": "context-6",
+                  "title": "Blackie Lawless",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Blackie Lawless (born Steven Edward Duren) is an American songwriter and musician best known as the lead singer and rhythm guitarist (formerly bassist) for the heavy metal band W.A.S.P."
+                },
+                {
+                  "document_id": "context-3",
+                  "title": "Inside the Electric Circus",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "Inside the Electric Circus is the band's first to feature singer and bandleader Blackie Lawless playing guitar, having switched from bass to rhythm guitar."
+                }
+              ]
+            },
+            "returned_value": {
+              "duren_albums": [
+                "Inside the Electric Circus"
+              ]
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Will Wallner",
+                  "text": "Will Wallner (born 24 January 1987) is an English rock guitarist and songwriter. His main influences are Ritchie Blackmore, Gary Moore and John Sykes. He began playing guitar at age 16 and received his first \"real guitar\", a Gibson Les Paul Custom, which he has played his entire career, at the age of 18. He began playing guitar by ear, then had taken his first formal guitar lessons from a rock guitar teacher in his home town of Devon, England. He is an alumnus of the prestigious Colyton Grammar School and a graduate of the University of Portsmouth with a BSc in Music and Sound Technology and has also studied at the Musicians Institute, in Hollywood. Since 2012 he has been a regular contributor to Guitar World magazine with his weekly blog 'Bent Out of Shape'. He currently resides in Los Angeles, California and also owns a recording studio in Berlin, Germany.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Will Wallner (born 24 January 1987) is an English rock guitarist and songwriter.",
+                      " His main influences are Ritchie Blackmore, Gary Moore and John Sykes.",
+                      " He began playing guitar at age 16 and received his first \"real guitar\", a Gibson Les Paul Custom, which he has played his entire career, at the age of 18.",
+                      " He began playing guitar by ear, then had taken his first formal guitar lessons from a rock guitar teacher in his home town of Devon, England.",
+                      " He is an alumnus of the prestigious Colyton Grammar School and a graduate of the University of Portsmouth with a BSc in Music and Sound Technology and has also studied at the Musicians Institute, in Hollywood.",
+                      " Since 2012 he has been a regular contributor to Guitar World magazine with his weekly blog 'Bent Out of Shape'.",
+                      " He currently resides in Los Angeles, California and also owns a recording studio in Berlin, Germany."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Friðrik Karlsson",
+                  "text": "Friðrik Karlsson is an Icelandic musician and songwriter. He studied classical and jazz/rock guitar and had success with the group Mezzoforte in 1983 with the U.K. top 20 hit, \"Garden Party\". He has contributed to the soundtracks of musicals such as Jesus Christ Superstar and Saturday Night Fever and to that of movies such as Evita and Hercules. His TV work includes accompanying singers Madonna, José Carreras and Tom Jones. Karlsson has also appeared on albums and singles from Boyzone and Cliff Richard, among others. Karlsson has moved back home to his native Iceland,after living in London,where he among other jobs worked as a session musician playing guitar in the musical Jesus Christ Superstar. He has released numerous new-age and relaxation music albums known as \"The Feel Good Collection\". In 2014, Karlsson also played as session musician for Kate Bush's first live performances in 35 years, playing guitar for 22 dates.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Friðrik Karlsson is an Icelandic musician and songwriter.",
+                      " He studied classical and jazz/rock guitar and had success with the group Mezzoforte in 1983 with the U.K. top 20 hit, \"Garden Party\".",
+                      " He has contributed to the soundtracks of musicals such as Jesus Christ Superstar and Saturday Night Fever and to that of movies such as Evita and Hercules.",
+                      " His TV work includes accompanying singers Madonna, José Carreras and Tom Jones.",
+                      " Karlsson has also appeared on albums and singles from Boyzone and Cliff Richard, among others.",
+                      " Karlsson has moved back home to his native Iceland,after living in London,where he among other jobs worked as a session musician playing guitar in the musical Jesus Christ Superstar.",
+                      " He has released numerous new-age and relaxation music albums known as \"The Feel Good Collection\".",
+                      " In 2014, Karlsson also played as session musician for Kate Bush's first live performances in 35 years, playing guitar for 22 dates."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "The Last Command (album)",
+                  "text": "The Last Command is the second album by heavy metal band W.A.S.P., released in November 9, 1985. The album was produced by Spencer Proffer, who was perhaps best known for producing the six-time Platinum selling album \"Metal Health\" by Quiet Riot in 1983. \"The Last Command\" is the first W.A.S.P. album to feature the work of drummer Steve Riley. The album reached No. 47 on the \"Billboard\" 200 album chart in early 1986 and sold over one million copies, their first album to do so. It was also the last album to feature founding member Randy Piper on guitar.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The Last Command is the second album by heavy metal band W.A.S.P., released in November 9, 1985.",
+                      " The album was produced by Spencer Proffer, who was perhaps best known for producing the six-time Platinum selling album \"Metal Health\" by Quiet Riot in 1983.",
+                      " \"The Last Command\" is the first W.A.S.P. album to feature the work of drummer Steve Riley.",
+                      " The album reached No. 47 on the \"Billboard\" 200 album chart in early 1986 and sold over one million copies, their first album to do so.",
+                      " It was also the last album to feature founding member Randy Piper on guitar."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Inside the Electric Circus",
+                  "text": "Inside the Electric Circus is the third studio album by heavy metal band W.A.S.P., released in October 1986 through Capitol Records; a remastered edition featuring two bonus tracks was reissued in 1997 through Snapper Music. The album is the band's first to feature singer and bandleader Blackie Lawless playing guitar, having switched from bass to rhythm guitar. It reached No. 17 and 35 on the Norwegian and Swedish albums chart respectively, and No. 60 on the U.S. \"Billboard\" 200; it remained on the latter for 19 weeks.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Inside the Electric Circus is the third studio album by heavy metal band W.A.S.P., released in October 1986 through Capitol Records; a remastered edition featuring two bonus tracks was reissued in 1997 through Snapper Music.",
+                      " The album is the band's first to feature singer and bandleader Blackie Lawless playing guitar, having switched from bass to rhythm guitar.",
+                      " It reached No. 17 and 35 on the Norwegian and Swedish albums chart respectively, and No. 60 on the U.S. \"Billboard\" 200; it remained on the latter for 19 weeks."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Steve Phillips (footballer, born 1954)",
+                  "text": "Steven Edward Phillips (born 4 August 1954) is an English former professional footballer who had a long career as a forward for a number of teams in the Football League in the 1970s and 1980s. He scored 200 goals from 562 league appearances.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Steven Edward Phillips (born 4 August 1954) is an English former professional footballer who had a long career as a forward for a number of teams in the Football League in the 1970s and 1980s.",
+                      " He scored 200 goals from 562 league appearances."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Live...In the Raw",
+                  "text": "Live...In the Raw is the first live album by W.A.S.P. (fourth album overall), released in 1987. This album can be seen as something of a breakwater between the 'old' W.A.S.P. of the first three albums and the more mature sound of the releases that would follow. It is also the album to feature \"Harder Faster\", which is about the PMRC declaring them \"sexual perverts\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Live...In the Raw is the first live album by W.A.S.P. (fourth album overall), released in 1987.",
+                      " This album can be seen as something of a breakwater between the 'old' W.A.S.P. of the first three albums and the more mature sound of the releases that would follow.",
+                      " It is also the album to feature \"Harder Faster\", which is about the PMRC declaring them \"sexual perverts\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Blackie Lawless",
+                  "text": "Blackie Lawless (born Steven Edward Duren; September 4, 1956) is an American songwriter and musician best known as the lead singer and rhythm guitarist (formerly bassist) for the heavy metal band W.A.S.P.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Blackie Lawless (born Steven Edward Duren; September 4, 1956) is an American songwriter and musician best known as the lead singer and rhythm guitarist (formerly bassist) for the heavy metal band W.A.S.P."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Blizzard Beasts",
+                  "text": "Blizzard Beasts is the fourth studio album by Norwegian black metal band Immortal. It was released on 20 March 1997 through Osmose Productions. It is the last Immortal album to feature founding member Demonaz Doom Occulta on guitar, and the first to feature Horgh on drums. Demonaz was later diagnosed with acute tendinitis which prevented him from playing guitar at the required speed for Immortal's music. Stylistically, \"Blizzard Beasts\" has primarily songs that are less than three minutes long, contrasting with Immortal's usual longer song lengths.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Blizzard Beasts is the fourth studio album by Norwegian black metal band Immortal.",
+                      " It was released on 20 March 1997 through Osmose Productions.",
+                      " It is the last Immortal album to feature founding member Demonaz Doom Occulta on guitar, and the first to feature Horgh on drums.",
+                      " Demonaz was later diagnosed with acute tendinitis which prevented him from playing guitar at the required speed for Immortal's music.",
+                      " Stylistically, \"Blizzard Beasts\" has primarily songs that are less than three minutes long, contrasting with Immortal's usual longer song lengths."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Anatude",
+                  "text": "Anatude is the eleventh studio album by Finnish pop singer Antti Tuisku, released on 15 September 2017 through Warner Music Finland. In its first week of release, the album debuted at number one on the Finnish Albums Chart, becoming Tuisku's fifth number album.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Anatude is the eleventh studio album by Finnish pop singer Antti Tuisku, released on 15 September 2017 through Warner Music Finland.",
+                      " In its first week of release, the album debuted at number one on the Finnish Albums Chart, becoming Tuisku's fifth number album."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Jon MacLennan",
+                  "text": "Jon MacLennan is a Los Angeles-based musician, composer, producer and music educator. MacLennan's session work includes playing guitar on Julian Lennon and Steven Tyler’s song, \"Someday\", from Lennon's album, \"Everything Changes\" (2013), and backing vocals on Jamie Cullum's album, \"The Pursuit\" (2009). He’s also played guitar on songs for Holly Knight, Mark Spiro and Tim Miner. MacLennan’s original song, \"Fallin' Deeper\", is featured in the Twentieth Century Fox film (2011) soundtrack. MacLennan's published works include: three self-produced albums, two instructional music iBooks, \"Melodic Expressions: The Art of the Line\" (2012), \"Play Ukulele\" (2012) and hundreds of instructional workshop videos on his YouTube channel with over 1.48 million views.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Jon MacLennan is a Los Angeles-based musician, composer, producer and music educator.",
+                      " MacLennan's session work includes playing guitar on Julian Lennon and Steven Tyler’s song, \"Someday\", from Lennon's album, \"Everything Changes\" (2013), and backing vocals on Jamie Cullum's album, \"The Pursuit\" (2009).",
+                      " He’s also played guitar on songs for Holly Knight, Mark Spiro and Tim Miner.",
+                      " MacLennan’s original song, \"Fallin' Deeper\", is featured in the Twentieth Century Fox film (2011) soundtrack.",
+                      " MacLennan's published works include: three self-produced albums, two instructional music iBooks, \"Melodic Expressions: The Art of the Line\" (2012), \"Play Ukulele\" (2012) and hundreds of instructional workshop videos on his YouTube channel with over 1.48 million views."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-6",
+                "title": "Blackie Lawless",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Blackie Lawless (born Steven Edward Duren) is an American songwriter and musician best known as the lead singer and rhythm guitarist (formerly bassist) for the heavy metal band W.A.S.P."
+              },
+              {
+                "document_id": "context-3",
+                "title": "Inside the Electric Circus",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "Inside the Electric Circus is the band's first to feature singer and bandleader Blackie Lawless playing guitar, having switched from bass to rhythm guitar."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-6",
+                  "title": "Blackie Lawless",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Blackie Lawless (born Steven Edward Duren) is an American songwriter and musician best known as the lead singer and rhythm guitarist (formerly bassist) for the heavy metal band W.A.S.P."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Blackie Lawless",
+                    "sentence_index": 0
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-3",
+                  "title": "Inside the Electric Circus",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "Inside the Electric Circus is the band's first to feature singer and bandleader Blackie Lawless playing guitar, having switched from bass to rhythm guitar."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Inside the Electric Circus",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:49:49.498353+00:00",
+            "finished_at": "2026-06-03T16:49:53.566373+00:00",
+            "duration_ms": 4068.0326689998765,
+            "error": null
+          },
+          {
+            "node_id": "final",
+            "label": "Determine first album featuring Steven Edward Duren",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {
+              "albums": [
+                {
+                  "title": "The Last Command",
+                  "number": 2
+                },
+                {
+                  "title": "Inside the Electric Circus",
+                  "number": 3
+                }
+              ],
+              "duren_titles": [
+                "Inside the Electric Circus"
+              ]
+            },
+            "resolved_question": "Identify the first W.A.S.P. album (by sequential number) that features Steven Edward Duren on guitar.",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"albums\": [\n    {\n      \"title\": \"The Last Command\",\n      \"number\": 2\n    },\n    {\n      \"title\": \"Inside the Electric Circus\",\n      \"number\": 3\n    }\n  ],\n  \"duren_titles\": [\n    \"Inside the Electric Circus\"\n  ]\n}\n\nUsing the album list [{'title': 'The Last Command', 'number': 2}, {'title': 'Inside the Electric Circus', 'number': 3}] and the list of albums featuring Steven Edward Duren ['Inside the Electric Circus'], identify the album with the lowest sequential number that appears in both lists. Provide the album's sequential number and title as the answer.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The sequential number and title of the first W.A.S.P. album that features Steven Edward Duren on guitar.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"3 Inside the Electric Circus\"\n}",
+            "parsed_output": {
+              "answer": "3 Inside the Electric Circus"
+            },
+            "returned_value": {
+              "answer": "3 Inside the Electric Circus"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": null,
+            "evidence_citations": [],
+            "evidence_citation_evaluations": [],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:49:53.566457+00:00",
+            "finished_at": "2026-06-03T16:49:54.792894+00:00",
+            "duration_ms": 1226.5892499999609,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "3 Inside the Electric Circus"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 5295.844378000311,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "openai/gpt-oss-120b",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: W.A.S.P. discography\\nfact_lookup\\nsucceeded\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: Steven Edward Duren guitar credits\\nfact_lookup\\nsucceeded\"]\n  click q2 dagqaSelectGraphNode\n  final[\"final: Determine first album featuring Steven Edward Duren\\nsynthesis\\nsucceeded\"]\n  click final dagqaSelectGraphNode\n  q1 --> final\n  q2 --> final"
+      },
+      "error": null
+    },
+    {
+      "id": "5a8ed30655429917b4a5bdcd",
+      "question": "The Amsterdam Tournament 2009 was contested by what club that plays their home games at the Wanda Metropolitano?",
+      "gold_answer": "Club Atlético de Madrid",
+      "prediction": "Atlético Madrid",
+      "exact_match": 0.0,
+      "f1": 0.6666666666666666,
+      "cosine_sim": 0.8968418836593628,
+      "latency_ms": 8655.822628999886,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 2,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "2009 Amsterdam Tournament",
+          "sentence_index": 1
+        },
+        {
+          "title": "Atlético Madrid",
+          "sentence_index": 0
+        },
+        {
+          "title": "Atlético Madrid",
+          "sentence_index": 1
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 0.6666666666666666,
+      "run_trace": {
+        "run_id": "2f5e8d01-74b2-4ad1-b04e-90ae1eca44ee",
+        "question": "The Amsterdam Tournament 2009 was contested by what club that plays their home games at the Wanda Metropolitano?",
+        "plan": {
+          "question": "The Amsterdam Tournament 2009 was contested by what club that plays their home games at the Wanda Metropolitano?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "participants_lookup",
+              "task_type": "fact_lookup",
+              "question": "Which clubs participated in the Amsterdam Tournament 2009?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a factual lookup assistant.",
+                "user_template": "Which clubs participated in the Amsterdam Tournament 2009?"
+              },
+              "input_map": {},
+              "child_output_policy": "none",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "clubs"
+                ],
+                "properties": {
+                  "clubs": {
+                    "type": "array",
+                    "description": "List of clubs that contested the Amsterdam Tournament 2009."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "stadium_club_lookup",
+              "task_type": "fact_lookup",
+              "question": "Which football club plays its home games at the Wanda Metropolitano stadium?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a factual lookup assistant.",
+                "user_template": "Which football club plays its home games at the Wanda Metropolitano stadium?"
+              },
+              "input_map": {},
+              "child_output_policy": "none",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "club"
+                ],
+                "properties": {
+                  "club": {
+                    "type": "string",
+                    "description": "Club whose home stadium is Wanda Metropolitano."
+                  }
+                }
+              }
+            },
+            {
+              "id": "final",
+              "label": "final_answer",
+              "task_type": "synthesis",
+              "question": "From the list of clubs that participated in the Amsterdam Tournament 2009, which one is the club that plays its home games at Wanda Metropolitano?",
+              "operation": "answer",
+              "depends_on": [
+                "q1",
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a concise answer generator.",
+                "user_template": "From the list of clubs that participated in the Amsterdam Tournament 2009 ({q1.clubs}), which one is the club that plays its home games at Wanda Metropolitano ({q2.club})? Provide only the club name."
+              },
+              "input_map": {
+                "participants": "q1.clubs",
+                "stadium_club": "q2.club"
+              },
+              "child_output_policy": "none",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The club that both contested the Amsterdam Tournament 2009 and plays at Wanda Metropolitano."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "final"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1",
+              "q2"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "final"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "participants_lookup",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Which clubs participated in the Amsterdam Tournament 2009?",
+            "rendered_prompt": "Which clubs participated in the Amsterdam Tournament 2009?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: 2008 Amsterdam Tournament\n  (0) The Amsterdam Tournament 2008, known as the \"LG Amsterdam Tournament 2008\" for sponsorship reasons, was the tenth Amsterdam Tournament, a pre-season football tournament for club teams from around the world.\n  (1)  The 2008 tournament was contested by Ajax, Arsenal, Internazionale and Sevilla on 8 August and 9 August 2008 at the Amsterdam ArenA.\n  (2)  For the third time in four years, Arsenal won the tournament with 8 points.\n\nDocument ID: context-1\nTitle: 2004 Amsterdam Tournament\n  (0) The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.\n  (1)  The 2004 tournament was contested by Ajax, Arsenal, Panathinaikos and River Plate on 30 July and 1 August 2004.\n  (2)  Ajax won the tournament for the fourth year in a row.\n\nDocument ID: context-2\nTitle: 2009 Amsterdam Tournament\n  (0) The Amsterdam Tournament 2009 was the 11th Amsterdam Tournament, a pre-season football tournament which is contested from club teams from all over Western Europe.\n  (1)  The 2009 tournament was contested by Ajax, Sunderland, Benfica, and Atlético Madrid.\n  (2)  It was won for the first time by Portuguese side Benfica.\n\nDocument ID: context-3\nTitle: 1999 Amsterdam Tournament\n  (0) The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.\n  (1)  The 1999 tournament was contested by Ajax, Atlético Madrid, Lazio and Santos on 31 July and 1 August 1999.\n  (2)  Lazio won the tournament.\n\nDocument ID: context-4\nTitle: 2019 UEFA Champions League Final\n  (0) The 2019 UEFA Champions League Final will be the final match of the 2018–19 UEFA Champions League, the 64th season of Europe's premier club football tournament organised by UEFA, and the 27th season since it was renamed from the European Champion Clubs' Cup to the UEFA Champions League.\n  (1)  It will be played at the Wanda Metropolitano in Madrid, Spain on 1 June 2019.\n\nDocument ID: context-5\nTitle: Atlético Madrid\n  (0) Club Atlético de Madrid, SAD (] ), commonly known as Atlético Madrid, or simply as Atlético or Atleti, is a Spanish professional football club based in Madrid, that plays in La Liga.\n  (1)  The club play their home games at the Wanda Metropolitano, which has a capacity of 68,000.\n\nDocument ID: context-6\nTitle: 2002 Amsterdam Tournament\n  (0) The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.\n  (1)  The 2002 tournament was contested by Ajax, Barcelona, Manchester United and Parma on 2 August and 4 August 2002.\n  (2)  Ajax won the tournament for the second year in a row.\n\nDocument ID: context-7\nTitle: 2001 Amsterdam Tournament\n  (0) The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.\n  (1)  The 2001 tournament was contested by Ajax, Liverpool, Milan and Valencia on 26 July and 28 July 2001.\n  (2)  Ajax won the tournament for the first time.\n\nDocument ID: context-8\nTitle: 2003 Amsterdam Tournament\n  (0) The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.\n  (1)  The 2003 tournament was contested by Ajax, Galatasaray, Internazionale and Liverpool on 1 August and 3 August 2003.\n  (2)  Ajax won the tournament for the third year in a row.\n\nDocument ID: context-9\nTitle: 2000 Amsterdam Tournament\n  (0) The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.\n  (1)  The 2000 tournament was contested by Ajax, Arsenal, Barcelona and Lazio on 3 August and 5 August 2000.\n  (2)  Barcelona won the tournament.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"clubs\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"clubs\": {\n      \"type\": \"array\",\n      \"description\": \"List of clubs that contested the Amsterdam Tournament 2009.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"clubs\": [\n    \"Ajax\",\n    \"Sunderland\",\n    \"Benfica\",\n    \"Atlético Madrid\"\n  ],\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-2\",\n      \"title\": \"2009 Amsterdam Tournament\",\n      \"sentence_indices\": [1],\n      \"fact\": \"The 2009 tournament was contested by Ajax, Sunderland, Benfica, and Atlético Madrid.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "clubs": [
+                "Ajax",
+                "Sunderland",
+                "Benfica",
+                "Atlético Madrid"
+              ],
+              "_evidence_citations": [
+                {
+                  "document_id": "context-2",
+                  "title": "2009 Amsterdam Tournament",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "The 2009 tournament was contested by Ajax, Sunderland, Benfica, and Atlético Madrid."
+                }
+              ]
+            },
+            "returned_value": {
+              "clubs": [
+                "Ajax",
+                "Sunderland",
+                "Benfica",
+                "Atlético Madrid"
+              ]
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "2008 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament 2008, known as the \"LG Amsterdam Tournament 2008\" for sponsorship reasons, was the tenth Amsterdam Tournament, a pre-season football tournament for club teams from around the world. The 2008 tournament was contested by Ajax, Arsenal, Internazionale and Sevilla on 8 August and 9 August 2008 at the Amsterdam ArenA. For the third time in four years, Arsenal won the tournament with 8 points.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "The Amsterdam Tournament 2008, known as the \"LG Amsterdam Tournament 2008\" for sponsorship reasons, was the tenth Amsterdam Tournament, a pre-season football tournament for club teams from around the world.",
+                      " The 2008 tournament was contested by Ajax, Arsenal, Internazionale and Sevilla on 8 August and 9 August 2008 at the Amsterdam ArenA.",
+                      " For the third time in four years, Arsenal won the tournament with 8 points."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "2004 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA. The 2004 tournament was contested by Ajax, Arsenal, Panathinaikos and River Plate on 30 July and 1 August 2004. Ajax won the tournament for the fourth year in a row.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.",
+                      " The 2004 tournament was contested by Ajax, Arsenal, Panathinaikos and River Plate on 30 July and 1 August 2004.",
+                      " Ajax won the tournament for the fourth year in a row."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "2009 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament 2009 was the 11th Amsterdam Tournament, a pre-season football tournament which is contested from club teams from all over Western Europe. The 2009 tournament was contested by Ajax, Sunderland, Benfica, and Atlético Madrid. It was won for the first time by Portuguese side Benfica.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The Amsterdam Tournament 2009 was the 11th Amsterdam Tournament, a pre-season football tournament which is contested from club teams from all over Western Europe.",
+                      " The 2009 tournament was contested by Ajax, Sunderland, Benfica, and Atlético Madrid.",
+                      " It was won for the first time by Portuguese side Benfica."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "1999 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA. The 1999 tournament was contested by Ajax, Atlético Madrid, Lazio and Santos on 31 July and 1 August 1999. Lazio won the tournament.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.",
+                      " The 1999 tournament was contested by Ajax, Atlético Madrid, Lazio and Santos on 31 July and 1 August 1999.",
+                      " Lazio won the tournament."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "2019 UEFA Champions League Final",
+                  "text": "The 2019 UEFA Champions League Final will be the final match of the 2018–19 UEFA Champions League, the 64th season of Europe's premier club football tournament organised by UEFA, and the 27th season since it was renamed from the European Champion Clubs' Cup to the UEFA Champions League. It will be played at the Wanda Metropolitano in Madrid, Spain on 1 June 2019.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "The 2019 UEFA Champions League Final will be the final match of the 2018–19 UEFA Champions League, the 64th season of Europe's premier club football tournament organised by UEFA, and the 27th season since it was renamed from the European Champion Clubs' Cup to the UEFA Champions League.",
+                      " It will be played at the Wanda Metropolitano in Madrid, Spain on 1 June 2019."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Atlético Madrid",
+                  "text": "Club Atlético de Madrid, SAD (] ), commonly known as Atlético Madrid, or simply as Atlético or Atleti, is a Spanish professional football club based in Madrid, that plays in La Liga. The club play their home games at the Wanda Metropolitano, which has a capacity of 68,000.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Club Atlético de Madrid, SAD (] ), commonly known as Atlético Madrid, or simply as Atlético or Atleti, is a Spanish professional football club based in Madrid, that plays in La Liga.",
+                      " The club play their home games at the Wanda Metropolitano, which has a capacity of 68,000."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "2002 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA. The 2002 tournament was contested by Ajax, Barcelona, Manchester United and Parma on 2 August and 4 August 2002. Ajax won the tournament for the second year in a row.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.",
+                      " The 2002 tournament was contested by Ajax, Barcelona, Manchester United and Parma on 2 August and 4 August 2002.",
+                      " Ajax won the tournament for the second year in a row."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "2001 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA. The 2001 tournament was contested by Ajax, Liverpool, Milan and Valencia on 26 July and 28 July 2001. Ajax won the tournament for the first time.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.",
+                      " The 2001 tournament was contested by Ajax, Liverpool, Milan and Valencia on 26 July and 28 July 2001.",
+                      " Ajax won the tournament for the first time."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "2003 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA. The 2003 tournament was contested by Ajax, Galatasaray, Internazionale and Liverpool on 1 August and 3 August 2003. Ajax won the tournament for the third year in a row.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.",
+                      " The 2003 tournament was contested by Ajax, Galatasaray, Internazionale and Liverpool on 1 August and 3 August 2003.",
+                      " Ajax won the tournament for the third year in a row."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "2000 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA. The 2000 tournament was contested by Ajax, Arsenal, Barcelona and Lazio on 3 August and 5 August 2000. Barcelona won the tournament.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.",
+                      " The 2000 tournament was contested by Ajax, Arsenal, Barcelona and Lazio on 3 August and 5 August 2000.",
+                      " Barcelona won the tournament."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-2",
+                "title": "2009 Amsterdam Tournament",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "The 2009 tournament was contested by Ajax, Sunderland, Benfica, and Atlético Madrid."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-2",
+                  "title": "2009 Amsterdam Tournament",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "The 2009 tournament was contested by Ajax, Sunderland, Benfica, and Atlético Madrid."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "2009 Amsterdam Tournament",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:50:01.381689+00:00",
+            "finished_at": "2026-06-03T16:50:03.124724+00:00",
+            "duration_ms": 1743.0533760002618,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "stadium_club_lookup",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Which football club plays its home games at the Wanda Metropolitano stadium?",
+            "rendered_prompt": "Which football club plays its home games at the Wanda Metropolitano stadium?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: 2008 Amsterdam Tournament\n  (0) The Amsterdam Tournament 2008, known as the \"LG Amsterdam Tournament 2008\" for sponsorship reasons, was the tenth Amsterdam Tournament, a pre-season football tournament for club teams from around the world.\n  (1)  The 2008 tournament was contested by Ajax, Arsenal, Internazionale and Sevilla on 8 August and 9 August 2008 at the Amsterdam ArenA.\n  (2)  For the third time in four years, Arsenal won the tournament with 8 points.\n\nDocument ID: context-1\nTitle: 2004 Amsterdam Tournament\n  (0) The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.\n  (1)  The 2004 tournament was contested by Ajax, Arsenal, Panathinaikos and River Plate on 30 July and 1 August 2004.\n  (2)  Ajax won the tournament for the fourth year in a row.\n\nDocument ID: context-2\nTitle: 2009 Amsterdam Tournament\n  (0) The Amsterdam Tournament 2009 was the 11th Amsterdam Tournament, a pre-season football tournament which is contested from club teams from all over Western Europe.\n  (1)  The 2009 tournament was contested by Ajax, Sunderland, Benfica, and Atlético Madrid.\n  (2)  It was won for the first time by Portuguese side Benfica.\n\nDocument ID: context-3\nTitle: 1999 Amsterdam Tournament\n  (0) The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.\n  (1)  The 1999 tournament was contested by Ajax, Atlético Madrid, Lazio and Santos on 31 July and 1 August 1999.\n  (2)  Lazio won the tournament.\n\nDocument ID: context-4\nTitle: 2019 UEFA Champions League Final\n  (0) The 2019 UEFA Champions League Final will be the final match of the 2018–19 UEFA Champions League, the 64th season of Europe's premier club football tournament organised by UEFA, and the 27th season since it was renamed from the European Champion Clubs' Cup to the UEFA Champions League.\n  (1)  It will be played at the Wanda Metropolitano in Madrid, Spain on 1 June 2019.\n\nDocument ID: context-5\nTitle: Atlético Madrid\n  (0) Club Atlético de Madrid, SAD (] ), commonly known as Atlético Madrid, or simply as Atlético or Atleti, is a Spanish professional football club based in Madrid, that plays in La Liga.\n  (1)  The club play their home games at the Wanda Metropolitano, which has a capacity of 68,000.\n\nDocument ID: context-6\nTitle: 2002 Amsterdam Tournament\n  (0) The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.\n  (1)  The 2002 tournament was contested by Ajax, Barcelona, Manchester United and Parma on 2 August and 4 August 2002.\n  (2)  Ajax won the tournament for the second year in a row.\n\nDocument ID: context-7\nTitle: 2001 Amsterdam Tournament\n  (0) The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.\n  (1)  The 2001 tournament was contested by Ajax, Liverpool, Milan and Valencia on 26 July and 28 July 2001.\n  (2)  Ajax won the tournament for the first time.\n\nDocument ID: context-8\nTitle: 2003 Amsterdam Tournament\n  (0) The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.\n  (1)  The 2003 tournament was contested by Ajax, Galatasaray, Internazionale and Liverpool on 1 August and 3 August 2003.\n  (2)  Ajax won the tournament for the third year in a row.\n\nDocument ID: context-9\nTitle: 2000 Amsterdam Tournament\n  (0) The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.\n  (1)  The 2000 tournament was contested by Ajax, Arsenal, Barcelona and Lazio on 3 August and 5 August 2000.\n  (2)  Barcelona won the tournament.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"club\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"club\": {\n      \"type\": \"string\",\n      \"description\": \"Club whose home stadium is Wanda Metropolitano.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"club\": \"Atlético Madrid\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-5\",\n      \"title\": \"Atlético Madrid\",\n      \"sentence_indices\": [1],\n      \"fact\": \"The club play their home games at the Wanda Metropolitano, which has a capacity of 68,000.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "club": "Atlético Madrid",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-5",
+                  "title": "Atlético Madrid",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "The club play their home games at the Wanda Metropolitano, which has a capacity of 68,000."
+                }
+              ]
+            },
+            "returned_value": {
+              "club": "Atlético Madrid"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "2008 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament 2008, known as the \"LG Amsterdam Tournament 2008\" for sponsorship reasons, was the tenth Amsterdam Tournament, a pre-season football tournament for club teams from around the world. The 2008 tournament was contested by Ajax, Arsenal, Internazionale and Sevilla on 8 August and 9 August 2008 at the Amsterdam ArenA. For the third time in four years, Arsenal won the tournament with 8 points.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "The Amsterdam Tournament 2008, known as the \"LG Amsterdam Tournament 2008\" for sponsorship reasons, was the tenth Amsterdam Tournament, a pre-season football tournament for club teams from around the world.",
+                      " The 2008 tournament was contested by Ajax, Arsenal, Internazionale and Sevilla on 8 August and 9 August 2008 at the Amsterdam ArenA.",
+                      " For the third time in four years, Arsenal won the tournament with 8 points."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "2004 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA. The 2004 tournament was contested by Ajax, Arsenal, Panathinaikos and River Plate on 30 July and 1 August 2004. Ajax won the tournament for the fourth year in a row.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.",
+                      " The 2004 tournament was contested by Ajax, Arsenal, Panathinaikos and River Plate on 30 July and 1 August 2004.",
+                      " Ajax won the tournament for the fourth year in a row."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "2009 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament 2009 was the 11th Amsterdam Tournament, a pre-season football tournament which is contested from club teams from all over Western Europe. The 2009 tournament was contested by Ajax, Sunderland, Benfica, and Atlético Madrid. It was won for the first time by Portuguese side Benfica.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The Amsterdam Tournament 2009 was the 11th Amsterdam Tournament, a pre-season football tournament which is contested from club teams from all over Western Europe.",
+                      " The 2009 tournament was contested by Ajax, Sunderland, Benfica, and Atlético Madrid.",
+                      " It was won for the first time by Portuguese side Benfica."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "1999 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA. The 1999 tournament was contested by Ajax, Atlético Madrid, Lazio and Santos on 31 July and 1 August 1999. Lazio won the tournament.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.",
+                      " The 1999 tournament was contested by Ajax, Atlético Madrid, Lazio and Santos on 31 July and 1 August 1999.",
+                      " Lazio won the tournament."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "2019 UEFA Champions League Final",
+                  "text": "The 2019 UEFA Champions League Final will be the final match of the 2018–19 UEFA Champions League, the 64th season of Europe's premier club football tournament organised by UEFA, and the 27th season since it was renamed from the European Champion Clubs' Cup to the UEFA Champions League. It will be played at the Wanda Metropolitano in Madrid, Spain on 1 June 2019.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "The 2019 UEFA Champions League Final will be the final match of the 2018–19 UEFA Champions League, the 64th season of Europe's premier club football tournament organised by UEFA, and the 27th season since it was renamed from the European Champion Clubs' Cup to the UEFA Champions League.",
+                      " It will be played at the Wanda Metropolitano in Madrid, Spain on 1 June 2019."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Atlético Madrid",
+                  "text": "Club Atlético de Madrid, SAD (] ), commonly known as Atlético Madrid, or simply as Atlético or Atleti, is a Spanish professional football club based in Madrid, that plays in La Liga. The club play their home games at the Wanda Metropolitano, which has a capacity of 68,000.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Club Atlético de Madrid, SAD (] ), commonly known as Atlético Madrid, or simply as Atlético or Atleti, is a Spanish professional football club based in Madrid, that plays in La Liga.",
+                      " The club play their home games at the Wanda Metropolitano, which has a capacity of 68,000."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "2002 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA. The 2002 tournament was contested by Ajax, Barcelona, Manchester United and Parma on 2 August and 4 August 2002. Ajax won the tournament for the second year in a row.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.",
+                      " The 2002 tournament was contested by Ajax, Barcelona, Manchester United and Parma on 2 August and 4 August 2002.",
+                      " Ajax won the tournament for the second year in a row."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "2001 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA. The 2001 tournament was contested by Ajax, Liverpool, Milan and Valencia on 26 July and 28 July 2001. Ajax won the tournament for the first time.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.",
+                      " The 2001 tournament was contested by Ajax, Liverpool, Milan and Valencia on 26 July and 28 July 2001.",
+                      " Ajax won the tournament for the first time."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "2003 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA. The 2003 tournament was contested by Ajax, Galatasaray, Internazionale and Liverpool on 1 August and 3 August 2003. Ajax won the tournament for the third year in a row.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.",
+                      " The 2003 tournament was contested by Ajax, Galatasaray, Internazionale and Liverpool on 1 August and 3 August 2003.",
+                      " Ajax won the tournament for the third year in a row."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "2000 Amsterdam Tournament",
+                  "text": "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA. The 2000 tournament was contested by Ajax, Arsenal, Barcelona and Lazio on 3 August and 5 August 2000. Barcelona won the tournament.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "The Amsterdam Tournament is a pre-season football tournament held for club teams from around the world, hosted at the Amsterdam ArenA.",
+                      " The 2000 tournament was contested by Ajax, Arsenal, Barcelona and Lazio on 3 August and 5 August 2000.",
+                      " Barcelona won the tournament."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-5",
+                "title": "Atlético Madrid",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "The club play their home games at the Wanda Metropolitano, which has a capacity of 68,000."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-5",
+                  "title": "Atlético Madrid",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "The club play their home games at the Wanda Metropolitano, which has a capacity of 68,000."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Atlético Madrid",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:50:01.384193+00:00",
+            "finished_at": "2026-06-03T16:50:03.256171+00:00",
+            "duration_ms": 1872.0197510001526,
+            "error": null
+          },
+          {
+            "node_id": "final",
+            "label": "final_answer",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {
+              "participants": [
+                "Ajax",
+                "Sunderland",
+                "Benfica",
+                "Atlético Madrid"
+              ],
+              "stadium_club": "Atlético Madrid"
+            },
+            "resolved_question": "From the list of clubs that participated in the Amsterdam Tournament 2009, which one is the club that plays its home games at Wanda Metropolitano?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"participants\": [\n    \"Ajax\",\n    \"Sunderland\",\n    \"Benfica\",\n    \"Atlético Madrid\"\n  ],\n  \"stadium_club\": \"Atlético Madrid\"\n}\n\nFrom the list of clubs that participated in the Amsterdam Tournament 2009 (['Ajax', 'Sunderland', 'Benfica', 'Atlético Madrid']), which one is the club that plays its home games at Wanda Metropolitano (Atlético Madrid)? Provide only the club name.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The club that both contested the Amsterdam Tournament 2009 and plays at Wanda Metropolitano.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"Atlético Madrid\"\n}",
+            "parsed_output": {
+              "answer": "Atlético Madrid"
+            },
+            "returned_value": {
+              "answer": "Atlético Madrid"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": null,
+            "evidence_citations": [],
+            "evidence_citation_evaluations": [],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:50:03.256556+00:00",
+            "finished_at": "2026-06-03T16:50:03.703292+00:00",
+            "duration_ms": 446.75116700000217,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Atlético Madrid"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 2321.925043000192,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "openai/gpt-oss-120b",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: participants_lookup\\nfact_lookup\\nsucceeded\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: stadium_club_lookup\\nfact_lookup\\nsucceeded\"]\n  click q2 dagqaSelectGraphNode\n  final[\"final: final_answer\\nsynthesis\\nsucceeded\"]\n  click final dagqaSelectGraphNode\n  q1 --> final\n  q2 --> final"
+      },
+      "error": null
+    },
+    {
+      "id": "5a84a97f5542992a431d1a87",
+      "question": "Which British engineering company is best known for its luxury motor cars in the era of British history that covers the brief reign of King Edward VII?",
+      "gold_answer": "D. Napier & Son",
+      "prediction": "D. Napier & Son Limited",
+      "exact_match": 0.0,
+      "f1": 0.8571428571428571,
+      "cosine_sim": 0.8117568492889404,
+      "latency_ms": 27148.50572000023,
+      "llm_call_count": 5,
+      "node_count": 4,
+      "graph_depth": 3,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "D. Napier &amp; Son",
+          "sentence_index": 0
+        },
+        {
+          "title": "Edwardian era",
+          "sentence_index": 0
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 1.0,
+      "run_trace": {
+        "run_id": "ebe561fa-d0cb-48fd-b241-d1fb25c50e8e",
+        "question": "Which British engineering company is best known for its luxury motor cars in the era of British history that covers the brief reign of King Edward VII?",
+        "plan": {
+          "question": "Which British engineering company is best known for its luxury motor cars in the era of British history that covers the brief reign of King Edward VII?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "EdwardVIIReign",
+              "task_type": "fact_lookup",
+              "question": "Provide the start and end year of the reign of King Edward VII of the United Kingdom.",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a factual lookup assistant.",
+                "user_template": "Provide the start and end year of the reign of King Edward VII of the United Kingdom."
+              },
+              "input_map": {},
+              "child_output_policy": "none",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "reign_start_year",
+                  "reign_end_year"
+                ],
+                "properties": {
+                  "reign_start_year": {
+                    "type": "integer",
+                    "description": "The year King Edward VII began his reign."
+                  },
+                  "reign_end_year": {
+                    "type": "integer",
+                    "description": "The year King Edward VII's reign ended."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "LuxuryCarCompanies",
+              "task_type": "fact_lookup",
+              "question": "List British engineering companies historically recognized for producing luxury motor cars, including each company's name and founding year.",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a factual lookup assistant.",
+                "user_template": "List British engineering companies that are historically recognized for producing luxury motor cars, and provide each company's name and the year it was founded."
+              },
+              "input_map": {},
+              "child_output_policy": "none",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "companies"
+                ],
+                "properties": {
+                  "companies": {
+                    "type": "array",
+                    "description": "Array of objects, each with fields 'name' (string) and 'founded_year' (integer)."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q3",
+              "label": "CandidateCompanies",
+              "task_type": "comparison",
+              "question": "Identify companies founded on or before the end of Edward VII's reign and that produced cars during his reign.",
+              "operation": "answer",
+              "depends_on": [
+                "q1",
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a comparison assistant.",
+                "user_template": "From the list of companies provided ({q2.companies}), identify those that were founded on or before {q1.reign_end_year} and had active car production during the period {q1.reign_start_year}-{q1.reign_end_year}. Return only their names as an array."
+              },
+              "input_map": {
+                "reign_start_year": "q1.reign_start_year",
+                "reign_end_year": "q1.reign_end_year",
+                "companies": "q2.companies"
+              },
+              "child_output_policy": "none",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "candidate_companies"
+                ],
+                "properties": {
+                  "candidate_companies": {
+                    "type": "array",
+                    "description": "Array of company names (strings) that meet the criteria."
+                  }
+                }
+              }
+            },
+            {
+              "id": "final",
+              "label": "BestKnownCompany",
+              "task_type": "synthesis",
+              "question": "Which of the candidate companies is most famously associated with luxury motor cars in the Edwardian era?",
+              "operation": "answer",
+              "depends_on": [
+                "q3"
+              ],
+              "prompt": {
+                "system": "You are a synthesis assistant.",
+                "user_template": "Given the candidate companies ({q3.candidate_companies}) that operated during King Edward VII's reign, identify which one is most famously associated with luxury motor cars of that era. Respond with the company name only."
+              },
+              "input_map": {
+                "candidate_companies": "q3.candidate_companies"
+              },
+              "child_output_policy": "none",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The name of the British engineering company best known for luxury motor cars in the Edwardian era."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "final"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1",
+              "q2"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "q3"
+            ]
+          },
+          {
+            "index": 3,
+            "node_ids": [
+              "final"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "EdwardVIIReign",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Provide the start and end year of the reign of King Edward VII of the United Kingdom.",
+            "rendered_prompt": "Provide the start and end year of the reign of King Edward VII of the United Kingdom.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: King Edward VII Land\n  (0) King Edward VII Land or King Edward VII Peninsula is a large, ice-covered peninsula which forms the northwestern extremity of Marie Byrd Land in Antarctica.\n  (1)  The peninsula projects into the Ross Sea between Sulzberger Bay and the northeast corner of the Ross Ice Shelf, and forms part of the Ross Dependency.\n  (2)  Edward VII Peninsula is defined by the Ross Ice Shelf on the southwest, Okuma Bay on the west, and to the east by Sulzberger Bay and the Saunders Coast, all essentially on the Ross Sea / Southern Ocean in Antarctica.\n  (3)  The northwest extremity of the peninsula is Cape Colbeck.\n  (4)  Edward VII Peninsula is located at .\n\nDocument ID: context-1\nTitle: D. Napier &amp; Son\n  (0) D. Napier & Son Limited was a British engineering company best known for its luxury motor cars in the Edwardian era and for its aero engines throughout the early to mid-20th century.\n\nDocument ID: context-2\nTitle: The Coronation of Edward VII\n  (0) The Coronation of Edward VII (French: Le Sacre d'Édouard VII ), also released as Reproduction, Coronation Ceremonies, King Edward VII and as Coronation of King Edward, is a 1902 short silent film directed by Georges Méliès and produced by Charles Urban.\n  (1)  The film is a staged simulation of the coronation of King Edward VII and Queen Alexandra, produced in advance of the actual coronation for release on the same day.\n\nDocument ID: context-3\nTitle: King Edward VII Science and Sport College\n  (0) King Edward VII Science and Sport College (formerly \"King Edward VII Community College\", and earlier \"King Edward VII Grammar School\") is a mixed upper school and sixth form located in Coalville in the English county of Leicestershire.\n\nDocument ID: context-4\nTitle: Tip Htila\n  (0) Sao Nang Tip Htila was a Shan Princess and sister of the 52nd Saopha (ruling prince) of the Shan state of Kengtung, and also of the 53rd Saopha, Kawng Kiao Intaleng.\n  (1)  Along with Kawng Kiao Intaleng she attended the Delhi Durbar in 1903, in celebration of the coronation of King Edward VII and Queen Alexandra.\n  (2)  She was a shrewd and powerful businesswoman, involved in sales of elephants and motor cars, and later in teak extraction and road-building.\n\nDocument ID: context-5\nTitle: Arthur Collins (courtier)\n  (0) Arthur Collins CB, MVO, Commander, Hohenzollern Order (26 June 1845 – 21 November 1911), was Equerry and Comptroller for Princess Louise, Queen Victoria's 4th daughter and Gentleman Usher in the households of Queen Victoria and King Edward VII.\n  (1)  He attended Princess Louise in her role as the wife of John Campbell, 9th Duke of Argyll (at that time Marquis of Lorne), who was Governor General and Vice Regent of Canada between 1878 and 1883.\n  (2)  Collins represented Princess Louise at the funerals of Lord Beaconsfield, Benjamin Disraeli, and William Ewart Gladstone, the two competing Prime Ministers during Queen Victoria's reign.\n  (3)  Collins attended as a Gentleman Usher the coronation of King Edward VII and probably Victoria's funeral.\n\nDocument ID: context-6\nTitle: HMS Commonwealth (1903)\n  (0) HMS \"Commonwealth\", was a \"King Edward VII\"-class battleship of the British Royal Navy.\n  (1)  Like all ships of the class (apart from  ) she was named after an important part of the British Empire, namely the Commonwealth of Australia.\n  (2)  After commissioning in 1905, she served with the Atlantic Fleet until she was involved in a collision with HMS \"Albemarle\" in early 1907.\n  (3)  While being repaired, she was transferred into what would become known as the Home Fleet.\n  (4)  Following a reorganisation of the fleet in 1912, she, along with her \"King Edward VII\"-class sister ships formed the 3rd Battle Squadron, which served in the Mediterranean.\n\nDocument ID: context-7\nTitle: Statue of King Edward VII, Bootle\n  (0) The Statue of Edward VII stands in Stanley Park, Bootle, Sefton, Merseyside, England.\n  (1)  It was erected to commemorate the Coronation of King Edward VII and consists of a bronze statue of Edward VII on a granite pedestal.\n  (2)  The sculptor was George Wade.\n  (3)  The statue was given to the borough by the local Member of Parliament, and stands on land given to the borough by Lord Derby.\n  (4)  It was unveiled by Lady Derby in 1904.\n\nDocument ID: context-8\nTitle: Edwardian era\n  (0) The Edwardian era or Edwardian period of British history covers the brief reign of King Edward VII, 1901 to 1910, and is sometimes extended in both directions to capture long-term trends from the 1890s to the First World War.\n  (1)  The death of Queen Victoria in January 1901 marked the end of the Victorian era.\n  (2)  The new king Edward VII was already the leader of a fashionable elite that set a style influenced by the art and fashions of continental Europe.\n  (3)  Samuel Hynes described the Edwardian era as a \"leisurely time when women wore picture hats and did not vote, when the rich were not ashamed to live conspicuously, and the sun really never set on the British flag'\".\n\nDocument ID: context-9\nTitle: HMS Hibernia (1905)\n  (0) HMS \"Hibernia\" was a \"King Edward VII\"-class pre-dreadnought battleship of Britain's Royal Navy.\n  (1)  Like all ships of the class (apart from HMS \"King Edward VII\") she was named after an important part of the British Empire, namely Ireland.\n  (2)  Commissioned in early 1907, she served as the flagship of the Rear Admirals of firstly the Atlantic Fleet and then the Channel Fleet.\n  (3)  When the latter fleet was reorganised to the Home Fleet, she was based at the Nore.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"reign_start_year\",\n    \"reign_end_year\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"reign_start_year\": {\n      \"type\": \"integer\",\n      \"description\": \"The year King Edward VII began his reign.\"\n    },\n    \"reign_end_year\": {\n      \"type\": \"integer\",\n      \"description\": \"The year King Edward VII's reign ended.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"reign_start_year\": 1901,\n  \"reign_end_year\": 1910,\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-8\",\n      \"title\": \"Edwardian era\",\n      \"sentence_indices\": [0],\n      \"fact\": \"The Edwardian era or Edwardian period of British history covers the brief reign of King Edward VII, 1901 to 1910.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "reign_start_year": 1901,
+              "reign_end_year": 1910,
+              "_evidence_citations": [
+                {
+                  "document_id": "context-8",
+                  "title": "Edwardian era",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "The Edwardian era or Edwardian period of British history covers the brief reign of King Edward VII, 1901 to 1910."
+                }
+              ]
+            },
+            "returned_value": {
+              "reign_start_year": 1901,
+              "reign_end_year": 1910
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "King Edward VII Land",
+                  "text": "King Edward VII Land or King Edward VII Peninsula is a large, ice-covered peninsula which forms the northwestern extremity of Marie Byrd Land in Antarctica. The peninsula projects into the Ross Sea between Sulzberger Bay and the northeast corner of the Ross Ice Shelf, and forms part of the Ross Dependency. Edward VII Peninsula is defined by the Ross Ice Shelf on the southwest, Okuma Bay on the west, and to the east by Sulzberger Bay and the Saunders Coast, all essentially on the Ross Sea / Southern Ocean in Antarctica. The northwest extremity of the peninsula is Cape Colbeck. Edward VII Peninsula is located at .",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "King Edward VII Land or King Edward VII Peninsula is a large, ice-covered peninsula which forms the northwestern extremity of Marie Byrd Land in Antarctica.",
+                      " The peninsula projects into the Ross Sea between Sulzberger Bay and the northeast corner of the Ross Ice Shelf, and forms part of the Ross Dependency.",
+                      " Edward VII Peninsula is defined by the Ross Ice Shelf on the southwest, Okuma Bay on the west, and to the east by Sulzberger Bay and the Saunders Coast, all essentially on the Ross Sea / Southern Ocean in Antarctica.",
+                      " The northwest extremity of the peninsula is Cape Colbeck.",
+                      " Edward VII Peninsula is located at ."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "D. Napier &amp; Son",
+                  "text": "D. Napier & Son Limited was a British engineering company best known for its luxury motor cars in the Edwardian era and for its aero engines throughout the early to mid-20th century.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "D. Napier & Son Limited was a British engineering company best known for its luxury motor cars in the Edwardian era and for its aero engines throughout the early to mid-20th century."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "The Coronation of Edward VII",
+                  "text": "The Coronation of Edward VII (French: Le Sacre d'Édouard VII ), also released as Reproduction, Coronation Ceremonies, King Edward VII and as Coronation of King Edward, is a 1902 short silent film directed by Georges Méliès and produced by Charles Urban. The film is a staged simulation of the coronation of King Edward VII and Queen Alexandra, produced in advance of the actual coronation for release on the same day.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The Coronation of Edward VII (French: Le Sacre d'Édouard VII ), also released as Reproduction, Coronation Ceremonies, King Edward VII and as Coronation of King Edward, is a 1902 short silent film directed by Georges Méliès and produced by Charles Urban.",
+                      " The film is a staged simulation of the coronation of King Edward VII and Queen Alexandra, produced in advance of the actual coronation for release on the same day."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "King Edward VII Science and Sport College",
+                  "text": "King Edward VII Science and Sport College (formerly \"King Edward VII Community College\", and earlier \"King Edward VII Grammar School\") is a mixed upper school and sixth form located in Coalville in the English county of Leicestershire.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "King Edward VII Science and Sport College (formerly \"King Edward VII Community College\", and earlier \"King Edward VII Grammar School\") is a mixed upper school and sixth form located in Coalville in the English county of Leicestershire."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Tip Htila",
+                  "text": "Sao Nang Tip Htila was a Shan Princess and sister of the 52nd Saopha (ruling prince) of the Shan state of Kengtung, and also of the 53rd Saopha, Kawng Kiao Intaleng. Along with Kawng Kiao Intaleng she attended the Delhi Durbar in 1903, in celebration of the coronation of King Edward VII and Queen Alexandra. She was a shrewd and powerful businesswoman, involved in sales of elephants and motor cars, and later in teak extraction and road-building.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Sao Nang Tip Htila was a Shan Princess and sister of the 52nd Saopha (ruling prince) of the Shan state of Kengtung, and also of the 53rd Saopha, Kawng Kiao Intaleng.",
+                      " Along with Kawng Kiao Intaleng she attended the Delhi Durbar in 1903, in celebration of the coronation of King Edward VII and Queen Alexandra.",
+                      " She was a shrewd and powerful businesswoman, involved in sales of elephants and motor cars, and later in teak extraction and road-building."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Arthur Collins (courtier)",
+                  "text": "Arthur Collins CB, MVO, Commander, Hohenzollern Order (26 June 1845 – 21 November 1911), was Equerry and Comptroller for Princess Louise, Queen Victoria's 4th daughter and Gentleman Usher in the households of Queen Victoria and King Edward VII. He attended Princess Louise in her role as the wife of John Campbell, 9th Duke of Argyll (at that time Marquis of Lorne), who was Governor General and Vice Regent of Canada between 1878 and 1883. Collins represented Princess Louise at the funerals of Lord Beaconsfield, Benjamin Disraeli, and William Ewart Gladstone, the two competing Prime Ministers during Queen Victoria's reign. Collins attended as a Gentleman Usher the coronation of King Edward VII and probably Victoria's funeral.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Arthur Collins CB, MVO, Commander, Hohenzollern Order (26 June 1845 – 21 November 1911), was Equerry and Comptroller for Princess Louise, Queen Victoria's 4th daughter and Gentleman Usher in the households of Queen Victoria and King Edward VII.",
+                      " He attended Princess Louise in her role as the wife of John Campbell, 9th Duke of Argyll (at that time Marquis of Lorne), who was Governor General and Vice Regent of Canada between 1878 and 1883.",
+                      " Collins represented Princess Louise at the funerals of Lord Beaconsfield, Benjamin Disraeli, and William Ewart Gladstone, the two competing Prime Ministers during Queen Victoria's reign.",
+                      " Collins attended as a Gentleman Usher the coronation of King Edward VII and probably Victoria's funeral."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "HMS Commonwealth (1903)",
+                  "text": "HMS \"Commonwealth\", was a \"King Edward VII\"-class battleship of the British Royal Navy. Like all ships of the class (apart from  ) she was named after an important part of the British Empire, namely the Commonwealth of Australia. After commissioning in 1905, she served with the Atlantic Fleet until she was involved in a collision with HMS \"Albemarle\" in early 1907. While being repaired, she was transferred into what would become known as the Home Fleet. Following a reorganisation of the fleet in 1912, she, along with her \"King Edward VII\"-class sister ships formed the 3rd Battle Squadron, which served in the Mediterranean.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "HMS \"Commonwealth\", was a \"King Edward VII\"-class battleship of the British Royal Navy.",
+                      " Like all ships of the class (apart from  ) she was named after an important part of the British Empire, namely the Commonwealth of Australia.",
+                      " After commissioning in 1905, she served with the Atlantic Fleet until she was involved in a collision with HMS \"Albemarle\" in early 1907.",
+                      " While being repaired, she was transferred into what would become known as the Home Fleet.",
+                      " Following a reorganisation of the fleet in 1912, she, along with her \"King Edward VII\"-class sister ships formed the 3rd Battle Squadron, which served in the Mediterranean."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Statue of King Edward VII, Bootle",
+                  "text": "The Statue of Edward VII stands in Stanley Park, Bootle, Sefton, Merseyside, England. It was erected to commemorate the Coronation of King Edward VII and consists of a bronze statue of Edward VII on a granite pedestal. The sculptor was George Wade. The statue was given to the borough by the local Member of Parliament, and stands on land given to the borough by Lord Derby. It was unveiled by Lady Derby in 1904.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "The Statue of Edward VII stands in Stanley Park, Bootle, Sefton, Merseyside, England.",
+                      " It was erected to commemorate the Coronation of King Edward VII and consists of a bronze statue of Edward VII on a granite pedestal.",
+                      " The sculptor was George Wade.",
+                      " The statue was given to the borough by the local Member of Parliament, and stands on land given to the borough by Lord Derby.",
+                      " It was unveiled by Lady Derby in 1904."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Edwardian era",
+                  "text": "The Edwardian era or Edwardian period of British history covers the brief reign of King Edward VII, 1901 to 1910, and is sometimes extended in both directions to capture long-term trends from the 1890s to the First World War. The death of Queen Victoria in January 1901 marked the end of the Victorian era. The new king Edward VII was already the leader of a fashionable elite that set a style influenced by the art and fashions of continental Europe. Samuel Hynes described the Edwardian era as a \"leisurely time when women wore picture hats and did not vote, when the rich were not ashamed to live conspicuously, and the sun really never set on the British flag'\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "The Edwardian era or Edwardian period of British history covers the brief reign of King Edward VII, 1901 to 1910, and is sometimes extended in both directions to capture long-term trends from the 1890s to the First World War.",
+                      " The death of Queen Victoria in January 1901 marked the end of the Victorian era.",
+                      " The new king Edward VII was already the leader of a fashionable elite that set a style influenced by the art and fashions of continental Europe.",
+                      " Samuel Hynes described the Edwardian era as a \"leisurely time when women wore picture hats and did not vote, when the rich were not ashamed to live conspicuously, and the sun really never set on the British flag'\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "HMS Hibernia (1905)",
+                  "text": "HMS \"Hibernia\" was a \"King Edward VII\"-class pre-dreadnought battleship of Britain's Royal Navy. Like all ships of the class (apart from HMS \"King Edward VII\") she was named after an important part of the British Empire, namely Ireland. Commissioned in early 1907, she served as the flagship of the Rear Admirals of firstly the Atlantic Fleet and then the Channel Fleet. When the latter fleet was reorganised to the Home Fleet, she was based at the Nore.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "HMS \"Hibernia\" was a \"King Edward VII\"-class pre-dreadnought battleship of Britain's Royal Navy.",
+                      " Like all ships of the class (apart from HMS \"King Edward VII\") she was named after an important part of the British Empire, namely Ireland.",
+                      " Commissioned in early 1907, she served as the flagship of the Rear Admirals of firstly the Atlantic Fleet and then the Channel Fleet.",
+                      " When the latter fleet was reorganised to the Home Fleet, she was based at the Nore."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-8",
+                "title": "Edwardian era",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "The Edwardian era or Edwardian period of British history covers the brief reign of King Edward VII, 1901 to 1910."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-8",
+                  "title": "Edwardian era",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "The Edwardian era or Edwardian period of British history covers the brief reign of King Edward VII, 1901 to 1910."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Edwardian era",
+                    "sentence_index": 0
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:50:16.676700+00:00",
+            "finished_at": "2026-06-03T16:50:18.816911+00:00",
+            "duration_ms": 2140.2295009997943,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "LuxuryCarCompanies",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "List British engineering companies historically recognized for producing luxury motor cars, including each company's name and founding year.",
+            "rendered_prompt": "List British engineering companies that are historically recognized for producing luxury motor cars, and provide each company's name and the year it was founded.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: King Edward VII Land\n  (0) King Edward VII Land or King Edward VII Peninsula is a large, ice-covered peninsula which forms the northwestern extremity of Marie Byrd Land in Antarctica.\n  (1)  The peninsula projects into the Ross Sea between Sulzberger Bay and the northeast corner of the Ross Ice Shelf, and forms part of the Ross Dependency.\n  (2)  Edward VII Peninsula is defined by the Ross Ice Shelf on the southwest, Okuma Bay on the west, and to the east by Sulzberger Bay and the Saunders Coast, all essentially on the Ross Sea / Southern Ocean in Antarctica.\n  (3)  The northwest extremity of the peninsula is Cape Colbeck.\n  (4)  Edward VII Peninsula is located at .\n\nDocument ID: context-1\nTitle: D. Napier &amp; Son\n  (0) D. Napier & Son Limited was a British engineering company best known for its luxury motor cars in the Edwardian era and for its aero engines throughout the early to mid-20th century.\n\nDocument ID: context-2\nTitle: The Coronation of Edward VII\n  (0) The Coronation of Edward VII (French: Le Sacre d'Édouard VII ), also released as Reproduction, Coronation Ceremonies, King Edward VII and as Coronation of King Edward, is a 1902 short silent film directed by Georges Méliès and produced by Charles Urban.\n  (1)  The film is a staged simulation of the coronation of King Edward VII and Queen Alexandra, produced in advance of the actual coronation for release on the same day.\n\nDocument ID: context-3\nTitle: King Edward VII Science and Sport College\n  (0) King Edward VII Science and Sport College (formerly \"King Edward VII Community College\", and earlier \"King Edward VII Grammar School\") is a mixed upper school and sixth form located in Coalville in the English county of Leicestershire.\n\nDocument ID: context-4\nTitle: Tip Htila\n  (0) Sao Nang Tip Htila was a Shan Princess and sister of the 52nd Saopha (ruling prince) of the Shan state of Kengtung, and also of the 53rd Saopha, Kawng Kiao Intaleng.\n  (1)  Along with Kawng Kiao Intaleng she attended the Delhi Durbar in 1903, in celebration of the coronation of King Edward VII and Queen Alexandra.\n  (2)  She was a shrewd and powerful businesswoman, involved in sales of elephants and motor cars, and later in teak extraction and road-building.\n\nDocument ID: context-5\nTitle: Arthur Collins (courtier)\n  (0) Arthur Collins CB, MVO, Commander, Hohenzollern Order (26 June 1845 – 21 November 1911), was Equerry and Comptroller for Princess Louise, Queen Victoria's 4th daughter and Gentleman Usher in the households of Queen Victoria and King Edward VII.\n  (1)  He attended Princess Louise in her role as the wife of John Campbell, 9th Duke of Argyll (at that time Marquis of Lorne), who was Governor General and Vice Regent of Canada between 1878 and 1883.\n  (2)  Collins represented Princess Louise at the funerals of Lord Beaconsfield, Benjamin Disraeli, and William Ewart Gladstone, the two competing Prime Ministers during Queen Victoria's reign.\n  (3)  Collins attended as a Gentleman Usher the coronation of King Edward VII and probably Victoria's funeral.\n\nDocument ID: context-6\nTitle: HMS Commonwealth (1903)\n  (0) HMS \"Commonwealth\", was a \"King Edward VII\"-class battleship of the British Royal Navy.\n  (1)  Like all ships of the class (apart from  ) she was named after an important part of the British Empire, namely the Commonwealth of Australia.\n  (2)  After commissioning in 1905, she served with the Atlantic Fleet until she was involved in a collision with HMS \"Albemarle\" in early 1907.\n  (3)  While being repaired, she was transferred into what would become known as the Home Fleet.\n  (4)  Following a reorganisation of the fleet in 1912, she, along with her \"King Edward VII\"-class sister ships formed the 3rd Battle Squadron, which served in the Mediterranean.\n\nDocument ID: context-7\nTitle: Statue of King Edward VII, Bootle\n  (0) The Statue of Edward VII stands in Stanley Park, Bootle, Sefton, Merseyside, England.\n  (1)  It was erected to commemorate the Coronation of King Edward VII and consists of a bronze statue of Edward VII on a granite pedestal.\n  (2)  The sculptor was George Wade.\n  (3)  The statue was given to the borough by the local Member of Parliament, and stands on land given to the borough by Lord Derby.\n  (4)  It was unveiled by Lady Derby in 1904.\n\nDocument ID: context-8\nTitle: Edwardian era\n  (0) The Edwardian era or Edwardian period of British history covers the brief reign of King Edward VII, 1901 to 1910, and is sometimes extended in both directions to capture long-term trends from the 1890s to the First World War.\n  (1)  The death of Queen Victoria in January 1901 marked the end of the Victorian era.\n  (2)  The new king Edward VII was already the leader of a fashionable elite that set a style influenced by the art and fashions of continental Europe.\n  (3)  Samuel Hynes described the Edwardian era as a \"leisurely time when women wore picture hats and did not vote, when the rich were not ashamed to live conspicuously, and the sun really never set on the British flag'\".\n\nDocument ID: context-9\nTitle: HMS Hibernia (1905)\n  (0) HMS \"Hibernia\" was a \"King Edward VII\"-class pre-dreadnought battleship of Britain's Royal Navy.\n  (1)  Like all ships of the class (apart from HMS \"King Edward VII\") she was named after an important part of the British Empire, namely Ireland.\n  (2)  Commissioned in early 1907, she served as the flagship of the Rear Admirals of firstly the Atlantic Fleet and then the Channel Fleet.\n  (3)  When the latter fleet was reorganised to the Home Fleet, she was based at the Nore.\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"companies\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"companies\": {\n      \"type\": \"array\",\n      \"description\": \"Array of objects, each with fields 'name' (string) and 'founded_year' (integer).\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"companies\": [\n    {\n      \"name\": \"D. Napier & Son Limited\",\n      \"founded_year\": null\n    }\n  ],\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-1\",\n      \"title\": \"D. Napier &amp; Son\",\n      \"sentence_indices\": [0],\n      \"fact\": \"D. Napier & Son Limited was a British engineering company best known for its luxury motor cars in the Edwardian era\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "companies": [
+                {
+                  "name": "D. Napier & Son Limited",
+                  "founded_year": null
+                }
+              ],
+              "_evidence_citations": [
+                {
+                  "document_id": "context-1",
+                  "title": "D. Napier &amp; Son",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "D. Napier & Son Limited was a British engineering company best known for its luxury motor cars in the Edwardian era"
+                }
+              ]
+            },
+            "returned_value": {
+              "companies": [
+                {
+                  "name": "D. Napier & Son Limited",
+                  "founded_year": null
+                }
+              ]
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "King Edward VII Land",
+                  "text": "King Edward VII Land or King Edward VII Peninsula is a large, ice-covered peninsula which forms the northwestern extremity of Marie Byrd Land in Antarctica. The peninsula projects into the Ross Sea between Sulzberger Bay and the northeast corner of the Ross Ice Shelf, and forms part of the Ross Dependency. Edward VII Peninsula is defined by the Ross Ice Shelf on the southwest, Okuma Bay on the west, and to the east by Sulzberger Bay and the Saunders Coast, all essentially on the Ross Sea / Southern Ocean in Antarctica. The northwest extremity of the peninsula is Cape Colbeck. Edward VII Peninsula is located at .",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "King Edward VII Land or King Edward VII Peninsula is a large, ice-covered peninsula which forms the northwestern extremity of Marie Byrd Land in Antarctica.",
+                      " The peninsula projects into the Ross Sea between Sulzberger Bay and the northeast corner of the Ross Ice Shelf, and forms part of the Ross Dependency.",
+                      " Edward VII Peninsula is defined by the Ross Ice Shelf on the southwest, Okuma Bay on the west, and to the east by Sulzberger Bay and the Saunders Coast, all essentially on the Ross Sea / Southern Ocean in Antarctica.",
+                      " The northwest extremity of the peninsula is Cape Colbeck.",
+                      " Edward VII Peninsula is located at ."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "D. Napier &amp; Son",
+                  "text": "D. Napier & Son Limited was a British engineering company best known for its luxury motor cars in the Edwardian era and for its aero engines throughout the early to mid-20th century.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "D. Napier & Son Limited was a British engineering company best known for its luxury motor cars in the Edwardian era and for its aero engines throughout the early to mid-20th century."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "The Coronation of Edward VII",
+                  "text": "The Coronation of Edward VII (French: Le Sacre d'Édouard VII ), also released as Reproduction, Coronation Ceremonies, King Edward VII and as Coronation of King Edward, is a 1902 short silent film directed by Georges Méliès and produced by Charles Urban. The film is a staged simulation of the coronation of King Edward VII and Queen Alexandra, produced in advance of the actual coronation for release on the same day.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The Coronation of Edward VII (French: Le Sacre d'Édouard VII ), also released as Reproduction, Coronation Ceremonies, King Edward VII and as Coronation of King Edward, is a 1902 short silent film directed by Georges Méliès and produced by Charles Urban.",
+                      " The film is a staged simulation of the coronation of King Edward VII and Queen Alexandra, produced in advance of the actual coronation for release on the same day."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "King Edward VII Science and Sport College",
+                  "text": "King Edward VII Science and Sport College (formerly \"King Edward VII Community College\", and earlier \"King Edward VII Grammar School\") is a mixed upper school and sixth form located in Coalville in the English county of Leicestershire.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "King Edward VII Science and Sport College (formerly \"King Edward VII Community College\", and earlier \"King Edward VII Grammar School\") is a mixed upper school and sixth form located in Coalville in the English county of Leicestershire."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Tip Htila",
+                  "text": "Sao Nang Tip Htila was a Shan Princess and sister of the 52nd Saopha (ruling prince) of the Shan state of Kengtung, and also of the 53rd Saopha, Kawng Kiao Intaleng. Along with Kawng Kiao Intaleng she attended the Delhi Durbar in 1903, in celebration of the coronation of King Edward VII and Queen Alexandra. She was a shrewd and powerful businesswoman, involved in sales of elephants and motor cars, and later in teak extraction and road-building.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Sao Nang Tip Htila was a Shan Princess and sister of the 52nd Saopha (ruling prince) of the Shan state of Kengtung, and also of the 53rd Saopha, Kawng Kiao Intaleng.",
+                      " Along with Kawng Kiao Intaleng she attended the Delhi Durbar in 1903, in celebration of the coronation of King Edward VII and Queen Alexandra.",
+                      " She was a shrewd and powerful businesswoman, involved in sales of elephants and motor cars, and later in teak extraction and road-building."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Arthur Collins (courtier)",
+                  "text": "Arthur Collins CB, MVO, Commander, Hohenzollern Order (26 June 1845 – 21 November 1911), was Equerry and Comptroller for Princess Louise, Queen Victoria's 4th daughter and Gentleman Usher in the households of Queen Victoria and King Edward VII. He attended Princess Louise in her role as the wife of John Campbell, 9th Duke of Argyll (at that time Marquis of Lorne), who was Governor General and Vice Regent of Canada between 1878 and 1883. Collins represented Princess Louise at the funerals of Lord Beaconsfield, Benjamin Disraeli, and William Ewart Gladstone, the two competing Prime Ministers during Queen Victoria's reign. Collins attended as a Gentleman Usher the coronation of King Edward VII and probably Victoria's funeral.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Arthur Collins CB, MVO, Commander, Hohenzollern Order (26 June 1845 – 21 November 1911), was Equerry and Comptroller for Princess Louise, Queen Victoria's 4th daughter and Gentleman Usher in the households of Queen Victoria and King Edward VII.",
+                      " He attended Princess Louise in her role as the wife of John Campbell, 9th Duke of Argyll (at that time Marquis of Lorne), who was Governor General and Vice Regent of Canada between 1878 and 1883.",
+                      " Collins represented Princess Louise at the funerals of Lord Beaconsfield, Benjamin Disraeli, and William Ewart Gladstone, the two competing Prime Ministers during Queen Victoria's reign.",
+                      " Collins attended as a Gentleman Usher the coronation of King Edward VII and probably Victoria's funeral."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "HMS Commonwealth (1903)",
+                  "text": "HMS \"Commonwealth\", was a \"King Edward VII\"-class battleship of the British Royal Navy. Like all ships of the class (apart from  ) she was named after an important part of the British Empire, namely the Commonwealth of Australia. After commissioning in 1905, she served with the Atlantic Fleet until she was involved in a collision with HMS \"Albemarle\" in early 1907. While being repaired, she was transferred into what would become known as the Home Fleet. Following a reorganisation of the fleet in 1912, she, along with her \"King Edward VII\"-class sister ships formed the 3rd Battle Squadron, which served in the Mediterranean.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "HMS \"Commonwealth\", was a \"King Edward VII\"-class battleship of the British Royal Navy.",
+                      " Like all ships of the class (apart from  ) she was named after an important part of the British Empire, namely the Commonwealth of Australia.",
+                      " After commissioning in 1905, she served with the Atlantic Fleet until she was involved in a collision with HMS \"Albemarle\" in early 1907.",
+                      " While being repaired, she was transferred into what would become known as the Home Fleet.",
+                      " Following a reorganisation of the fleet in 1912, she, along with her \"King Edward VII\"-class sister ships formed the 3rd Battle Squadron, which served in the Mediterranean."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Statue of King Edward VII, Bootle",
+                  "text": "The Statue of Edward VII stands in Stanley Park, Bootle, Sefton, Merseyside, England. It was erected to commemorate the Coronation of King Edward VII and consists of a bronze statue of Edward VII on a granite pedestal. The sculptor was George Wade. The statue was given to the borough by the local Member of Parliament, and stands on land given to the borough by Lord Derby. It was unveiled by Lady Derby in 1904.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "The Statue of Edward VII stands in Stanley Park, Bootle, Sefton, Merseyside, England.",
+                      " It was erected to commemorate the Coronation of King Edward VII and consists of a bronze statue of Edward VII on a granite pedestal.",
+                      " The sculptor was George Wade.",
+                      " The statue was given to the borough by the local Member of Parliament, and stands on land given to the borough by Lord Derby.",
+                      " It was unveiled by Lady Derby in 1904."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Edwardian era",
+                  "text": "The Edwardian era or Edwardian period of British history covers the brief reign of King Edward VII, 1901 to 1910, and is sometimes extended in both directions to capture long-term trends from the 1890s to the First World War. The death of Queen Victoria in January 1901 marked the end of the Victorian era. The new king Edward VII was already the leader of a fashionable elite that set a style influenced by the art and fashions of continental Europe. Samuel Hynes described the Edwardian era as a \"leisurely time when women wore picture hats and did not vote, when the rich were not ashamed to live conspicuously, and the sun really never set on the British flag'\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "The Edwardian era or Edwardian period of British history covers the brief reign of King Edward VII, 1901 to 1910, and is sometimes extended in both directions to capture long-term trends from the 1890s to the First World War.",
+                      " The death of Queen Victoria in January 1901 marked the end of the Victorian era.",
+                      " The new king Edward VII was already the leader of a fashionable elite that set a style influenced by the art and fashions of continental Europe.",
+                      " Samuel Hynes described the Edwardian era as a \"leisurely time when women wore picture hats and did not vote, when the rich were not ashamed to live conspicuously, and the sun really never set on the British flag'\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "HMS Hibernia (1905)",
+                  "text": "HMS \"Hibernia\" was a \"King Edward VII\"-class pre-dreadnought battleship of Britain's Royal Navy. Like all ships of the class (apart from HMS \"King Edward VII\") she was named after an important part of the British Empire, namely Ireland. Commissioned in early 1907, she served as the flagship of the Rear Admirals of firstly the Atlantic Fleet and then the Channel Fleet. When the latter fleet was reorganised to the Home Fleet, she was based at the Nore.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "HMS \"Hibernia\" was a \"King Edward VII\"-class pre-dreadnought battleship of Britain's Royal Navy.",
+                      " Like all ships of the class (apart from HMS \"King Edward VII\") she was named after an important part of the British Empire, namely Ireland.",
+                      " Commissioned in early 1907, she served as the flagship of the Rear Admirals of firstly the Atlantic Fleet and then the Channel Fleet.",
+                      " When the latter fleet was reorganised to the Home Fleet, she was based at the Nore."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-1",
+                "title": "D. Napier &amp; Son",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "D. Napier & Son Limited was a British engineering company best known for its luxury motor cars in the Edwardian era"
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-1",
+                  "title": "D. Napier &amp; Son",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "D. Napier & Son Limited was a British engineering company best known for its luxury motor cars in the Edwardian era"
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "D. Napier &amp; Son",
+                    "sentence_index": 0
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:50:16.678019+00:00",
+            "finished_at": "2026-06-03T16:50:27.945098+00:00",
+            "duration_ms": 11267.312004999894,
+            "error": null
+          },
+          {
+            "node_id": "q3",
+            "label": "CandidateCompanies",
+            "task_type": "comparison",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {
+              "reign_start_year": 1901,
+              "reign_end_year": 1910,
+              "companies": [
+                {
+                  "name": "D. Napier & Son Limited",
+                  "founded_year": null
+                }
+              ]
+            },
+            "resolved_question": "Identify companies founded on or before the end of Edward VII's reign and that produced cars during his reign.",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"reign_start_year\": 1901,\n  \"reign_end_year\": 1910,\n  \"companies\": [\n    {\n      \"name\": \"D. Napier & Son Limited\",\n      \"founded_year\": null\n    }\n  ]\n}\n\nFrom the list of companies provided ([{'name': 'D. Napier & Son Limited', 'founded_year': None}]), identify those that were founded on or before 1910 and had active car production during the period 1901-1910. Return only their names as an array.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"candidate_companies\"\n  ],\n  \"properties\": {\n    \"candidate_companies\": {\n      \"type\": \"array\",\n      \"description\": \"Array of company names (strings) that meet the criteria.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"candidate_companies\": [\n    \"D. Napier & Son Limited\"\n  ]\n}",
+            "parsed_output": {
+              "candidate_companies": [
+                "D. Napier & Son Limited"
+              ]
+            },
+            "returned_value": {
+              "candidate_companies": [
+                "D. Napier & Son Limited"
+              ]
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": null,
+            "evidence_citations": [],
+            "evidence_citation_evaluations": [],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:50:27.945409+00:00",
+            "finished_at": "2026-06-03T16:50:30.256633+00:00",
+            "duration_ms": 2311.2547099999574,
+            "error": null
+          },
+          {
+            "node_id": "final",
+            "label": "BestKnownCompany",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {
+              "candidate_companies": [
+                "D. Napier & Son Limited"
+              ]
+            },
+            "resolved_question": "Which of the candidate companies is most famously associated with luxury motor cars in the Edwardian era?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"candidate_companies\": [\n    \"D. Napier & Son Limited\"\n  ]\n}\n\nGiven the candidate companies (['D. Napier & Son Limited']) that operated during King Edward VII's reign, identify which one is most famously associated with luxury motor cars of that era. Respond with the company name only.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the British engineering company best known for luxury motor cars in the Edwardian era.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"D. Napier & Son Limited\"\n}",
+            "parsed_output": {
+              "answer": "D. Napier & Son Limited"
+            },
+            "returned_value": {
+              "answer": "D. Napier & Son Limited"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": null,
+            "evidence_citations": [],
+            "evidence_citation_evaluations": [],
+            "repair_attempts": 0,
+            "started_at": "2026-06-03T16:50:30.256879+00:00",
+            "finished_at": "2026-06-03T16:50:31.053764+00:00",
+            "duration_ms": 796.8972919998123,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "D. Napier & Son Limited"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 14377.421756999865,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "openai/gpt-oss-120b",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: EdwardVIIReign\\nfact_lookup\\nsucceeded\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: LuxuryCarCompanies\\nfact_lookup\\nsucceeded\"]\n  click q2 dagqaSelectGraphNode\n  q3[\"q3: CandidateCompanies\\ncomparison\\nsucceeded\"]\n  click q3 dagqaSelectGraphNode\n  q1 --> q3\n  q2 --> q3\n  final[\"final: BestKnownCompany\\nsynthesis\\nsucceeded\"]\n  click final dagqaSelectGraphNode\n  q3 --> final"
+      },
+      "error": null
+    }
+  ],
+  "metrics": {
+    "example_count": 3.0,
+    "success_count": 3.0,
+    "failure_count": 0.0,
+    "error_count": 0.0,
+    "exact_match": 0.0,
+    "f1": 0.5079365079365079,
+    "cosine_sim": 0.6781944433848063,
+    "avg_latency_ms": 17050.319340999977,
+    "p50_latency_ms": 15346.629673999814,
+    "total_llm_call_count": 13.0,
+    "avg_llm_call_count": 4.333333333333333,
+    "avg_node_count": 3.3333333333333335,
+    "avg_graph_depth": 2.3333333333333335,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.0,
+    "total_evidence_citation_count": 8.0,
+    "correct_evidence_citation_count": 7.0,
+    "wrong_evidence_citation_count": 1.0,
+    "wrong_supporting_text_rate": 0.125,
+    "avg_gold_supporting_fact_recall": 0.8888888888888888,
+    "total_runtime_ms": 54337.319191999995
+  }
+}

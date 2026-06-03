@@ -5,14 +5,15 @@ import json
 import os
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 from uuid import uuid4
 
+import httpx
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from dagqa.client import DagQaClient
-from dagqa.config import AppConfig
+from dagqa.config import AppConfig, LLMConfig
 from dagqa.eval.benchmark import (
     BenchmarkRecord,
     BenchmarkResult,
@@ -22,6 +23,7 @@ from dagqa.eval.benchmark import (
     benchmark_hotpotqa,
 )
 from dagqa.eval.hotpot_loader import count_hotpot_examples, load_hotpot_examples
+from dagqa.eval.metrics import cosine_sim
 from dagqa.graph.render import render_mermaid
 from dagqa.graph.scheduler import Scheduler
 from dagqa.nodes.runner import NodeRunner
@@ -31,14 +33,21 @@ from dagqa.schemas import DagPlan, NodeStatus, NodeTrace, RunTrace, SchedulerWav
 
 router = APIRouter()
 RUNS: dict[str, RunTrace] = {}
-CLIENTS: dict[str, DagQaClient] = {}
 LIVE_RUNS: dict[str, dict[str, Any]] = {}
 LIVE_BENCHMARKS: dict[str, dict[str, Any]] = {}
+
+CLUSTER_API_BASE = "http://atknoll32.air.cit.tum.de:3000/inference"
+CLUSTER_MODELS_URL = "http://atknoll32.air.cit.tum.de:3000/models"
+
+
+class LLMSelection(BaseModel):
+    provider: Literal["azure_openai", "cluster"]
+    model: str
 
 
 class AskRequest(BaseModel):
     question: str
-    config_overrides: dict[str, Any] | None = None
+    llm: LLMSelection | None = None
 
 
 class ExecuteRequest(BaseModel):
@@ -50,6 +59,7 @@ class BenchmarkRequest(BaseModel):
     limit: int = 10
     seed: int | None = None
     data_path: str | None = None
+    llm: LLMSelection | None = None
 
 
 def load_config() -> AppConfig:
@@ -58,11 +68,97 @@ def load_config() -> AppConfig:
     return config
 
 
-def client() -> DagQaClient:
-    path = os.getenv("DAGQA_CONFIG", "configs/local.yaml")
-    if path not in CLIENTS:
-        CLIENTS[path] = DagQaClient(load_config())
-    return CLIENTS[path]
+def _resolved_model(config: LLMConfig) -> str:
+    return (os.getenv(config.model_env) if config.model_env else None) or config.model
+
+
+def _azure_llm_config() -> LLMConfig:
+    active = load_config().llm
+    if active.provider == "azure_openai":
+        return active
+    path = Path("configs/azure-openai.yaml")
+    if path.exists():
+        return AppConfig.from_file(path).llm
+    raise HTTPException(status_code=503, detail="Azure OpenAI config is not available.")
+
+
+def config_for_selection(selection: LLMSelection | None = None) -> AppConfig:
+    config = load_config()
+    if selection is None:
+        resolved = _resolved_model(config.llm)
+        return config.model_copy(
+            update={"llm": config.llm.model_copy(update={"model": resolved, "model_env": None})}
+        )
+
+    model = selection.model.strip()
+    if not model:
+        raise HTTPException(status_code=422, detail="A model must be selected.")
+    if selection.provider == "azure_openai":
+        azure = _azure_llm_config()
+        expected = _resolved_model(azure)
+        if model not in {expected, azure.model}:
+            raise HTTPException(status_code=422, detail="Unknown Azure OpenAI model.")
+        llm = azure.model_copy(update={"model": expected, "model_env": None})
+    else:
+        llm = LLMConfig(
+            provider="cluster",
+            model=model,
+            temperature=config.llm.temperature,
+            api_key_env="CLUSTER_API_KEY",
+            api_base=os.getenv("CLUSTER_API_BASE", CLUSTER_API_BASE),
+        )
+    return config.model_copy(update={"llm": llm})
+
+
+def client(selection: LLMSelection | None = None) -> DagQaClient:
+    return DagQaClient(config_for_selection(selection))
+
+
+async def _cluster_models() -> list[str]:
+    api_key = os.getenv("CLUSTER_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=503, detail="CLUSTER_API_KEY is not configured.")
+    url = os.getenv("CLUSTER_MODELS_URL", CLUSTER_MODELS_URL)
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            response = await http_client.get(url, headers={"Authorization": f"Bearer {api_key}"})
+            response.raise_for_status()
+    except httpx.HTTPError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Could not load cluster models: {exc}",
+        ) from exc
+    data = response.json().get("data", [])
+    models = [item if isinstance(item, str) else item.get("id") for item in data]
+    return sorted(model for model in models if isinstance(model, str) and model)
+
+
+@router.get("/llm/models")
+async def list_llm_models() -> dict[str, Any]:
+    azure = _azure_llm_config()
+    azure_model = _resolved_model(azure)
+    options = [
+        {
+            "provider": "azure_openai",
+            "model": azure_model,
+            "label": f"Azure · {azure_model.removeprefix('azure/')}",
+        }
+    ]
+    cluster_error = None
+    try:
+        cluster_models = await _cluster_models()
+    except HTTPException as exc:
+        cluster_models = []
+        cluster_error = exc.detail
+    options.extend(
+        {"provider": "cluster", "model": model, "label": f"Chair cluster · {model}"}
+        for model in cluster_models
+    )
+    return {
+        "models": options,
+        "default": {"provider": "azure_openai", "model": azure_model},
+        "cluster_error": cluster_error,
+    }
 
 
 @router.get("/config")
@@ -77,7 +173,7 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
 
 @router.post("/plan")
 async def plan(request: AskRequest) -> dict[str, Any]:
-    dag = await client().plan(request.question)
+    dag = await client(request.llm).plan(request.question)
     return dag.model_dump(mode="json")
 
 
@@ -93,7 +189,7 @@ async def execute(request: ExecuteRequest) -> dict[str, Any]:
 @router.post("/ask")
 async def ask(request: AskRequest) -> dict[str, Any]:
     try:
-        run = await client().ask(request.question)
+        run = await client(request.llm).ask(request.question)
     except PlannerError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     RUNS[run.run_id] = run
@@ -105,9 +201,13 @@ async def ask(request: AskRequest) -> dict[str, Any]:
 @router.post("/ask/live")
 async def ask_live(request: AskRequest) -> dict[str, Any]:
     run_id = str(uuid4())
+    cfg = config_for_selection(request.llm)
+    dag_client = DagQaClient(cfg)
     LIVE_RUNS[run_id] = {
         "run_id": run_id,
         "question": request.question,
+        "provider": cfg.llm.provider,
+        "model": cfg.llm.model,
         "phase": "planning",
         "status": "running",
         "nodes": [],
@@ -117,7 +217,7 @@ async def ask_live(request: AskRequest) -> dict[str, Any]:
         "error": None,
         "total_duration_ms": 0,
     }
-    asyncio.create_task(_run_live(run_id, request.question))
+    asyncio.create_task(_run_live(run_id, request.question, dag_client, cfg))
     return LIVE_RUNS[run_id]
 
 
@@ -128,10 +228,13 @@ def get_live_run(run_id: str) -> dict[str, Any]:
     return LIVE_RUNS[run_id]
 
 
-async def _run_live(run_id: str, question: str) -> None:
+async def _run_live(
+    run_id: str,
+    question: str,
+    dag_client: DagQaClient,
+    cfg: AppConfig,
+) -> None:
     started = time.perf_counter()
-    cfg = load_config()
-    dag_client = client()
     plan: DagPlan | None = None
     waves: list[SchedulerWave] = []
     traces: list[NodeTrace] = []
@@ -147,6 +250,8 @@ async def _run_live(run_id: str, question: str) -> None:
         LIVE_RUNS[run_id] = {
             "run_id": run_id,
             "question": question,
+            "provider": cfg.llm.provider,
+            "model": cfg.llm.model,
             "phase": phase,
             "status": status,
             "nodes": [trace.model_dump(mode="json") for trace in traces],
@@ -240,8 +345,9 @@ async def _run_live(run_id: str, question: str) -> None:
 
 @router.post("/benchmarks/hotpotqa", tags=["Benchmarks"], summary="Run HotpotQA benchmark")
 async def hotpotqa(request: BenchmarkRequest) -> BenchmarkResult:
+    dag_client = client(request.llm)
     result = await benchmark_hotpotqa(
-        client(),
+        dag_client,
         system=request.system,  # type: ignore[arg-type]
         limit=request.limit,
         seed=request.seed,
@@ -269,6 +375,8 @@ def hotpotqa_info(data_path: str | None = None) -> dict[str, Any]:
 )
 async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
     run_id = str(uuid4())
+    cfg = config_for_selection(request.llm)
+    dag_client = DagQaClient(cfg)
     seed = request.seed if request.seed is not None else int(time.time_ns() % 2_147_483_647)
     LIVE_BENCHMARKS[run_id] = {
         "run_id": run_id,
@@ -278,9 +386,10 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
         "limit": request.limit,
         "seed": seed,
         "dataset": "hotpotqa",
-        "split": load_config().benchmark.split,
+        "split": cfg.benchmark.split,
         "dataset_size": count_hotpot_examples(request.data_path),
-        "model": load_config().llm.model,
+        "provider": cfg.llm.provider,
+        "model": cfg.llm.model,
         "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "completed": 0,
         "total": request.limit,
@@ -291,7 +400,7 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
         "output_path": None,
         "error": None,
     }
-    asyncio.create_task(_run_live_benchmark(run_id, request, seed))
+    asyncio.create_task(_run_live_benchmark(run_id, request, seed, dag_client, cfg))
     return LIVE_BENCHMARKS[run_id]
 
 
@@ -306,11 +415,15 @@ def get_live_benchmark(run_id: str) -> dict[str, Any]:
     return LIVE_BENCHMARKS[run_id]
 
 
-async def _run_live_benchmark(run_id: str, request: BenchmarkRequest, seed: int) -> None:
+async def _run_live_benchmark(
+    run_id: str,
+    request: BenchmarkRequest,
+    seed: int,
+    dag_client: DagQaClient,
+    cfg: AppConfig,
+) -> None:
     started = time.perf_counter()
     records = []
-    dag_client = client()
-    cfg = load_config()
     created_at = LIVE_BENCHMARKS[run_id]["created_at"]
     total_examples = request.limit
     dataset_size = 0
@@ -336,6 +449,7 @@ async def _run_live_benchmark(run_id: str, request: BenchmarkRequest, seed: int)
             "dataset": "hotpotqa",
             "split": cfg.benchmark.split,
             "dataset_size": dataset_size or None,
+            "provider": dag_client.config.llm.provider,
             "model": dag_client.config.llm.model,
             "created_at": created_at,
             "completed": len(records),
@@ -372,6 +486,7 @@ async def _run_live_benchmark(run_id: str, request: BenchmarkRequest, seed: int)
             run_id=run_id,
             system=request.system,
             limit=request.limit,
+            provider=dag_client.config.llm.provider,
             model=dag_client.config.llm.model,
             dataset="hotpotqa",
             split=cfg.benchmark.split,
@@ -402,6 +517,7 @@ def hotpotqa_meta(data_path: str | None = None) -> dict[str, Any]:
         "split": cfg.benchmark.split,
         "total_examples": count_hotpot_examples(data_path),
         "default_limit": cfg.benchmark.default_limit,
+        "provider": cfg.llm.provider,
         "model": cfg.llm.model,
         "system": "dag_agent",
         "baselines": [
@@ -433,6 +549,7 @@ def list_benchmark_results() -> dict[str, Any]:
                 "dataset": normalized.get("dataset"),
                 "split": normalized.get("split"),
                 "system": normalized.get("system"),
+                "provider": normalized.get("provider"),
                 "model": normalized.get("model"),
                 "limit": normalized.get("limit"),
                 "seed": normalized.get("seed"),
@@ -473,8 +590,9 @@ def repair_benchmark_result(run_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail="Benchmark result not found.")
     path = matches[0]
     raw = json.loads(path.read_text())
-    repaired = _repair_benchmark_payload(raw, path)   # detects missing, calculates, writes to disk
-    return _normalize_benchmark_payload(repaired, path)  # normalizes the now-repaired data for response
+    repaired = _repair_benchmark_payload(raw, path)
+    return _normalize_benchmark_payload(repaired, path)
+
 
 def _benchmark_output_dir() -> Path:
     return Path(load_config().benchmark.output_dir)
@@ -504,6 +622,7 @@ def _normalize_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, 
         "split": data.get("split") or "validation",
         "dataset_size": dataset_size,
         "system": data.get("system") or "dag_agent",
+        "provider": data.get("provider"),
         "model": data.get("model") or "",
         "seed": data.get("seed") or 0,
         "limit": data.get("limit") or len(records),
@@ -521,8 +640,7 @@ def _repair_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, Any
     # Patch per-record cosine_sim if missing
     for record in data.get("records", []):
         if "cosine_sim" not in record:
-            from dagqa.eval.metrics import cosine_sim as _cosine_sim
-            record["cosine_sim"] = _cosine_sim(
+            record["cosine_sim"] = cosine_sim(
                 record.get("prediction", " "),
                 record.get("gold_answer", " "),
             )
@@ -540,6 +658,7 @@ def _repair_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, Any
         path.write_text(json.dumps(data, indent=2))
 
     return data
+
 
 def _normalize_benchmark_record(record: dict[str, Any]) -> dict[str, Any]:
     structure = record.get("structure") or {}

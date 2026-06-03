@@ -88,6 +88,23 @@ def test_normalize_saved_benchmark_payload_backfills_dataset_size(monkeypatch) -
     assert normalized["dataset_size"] == HOTPOTQA_DISTRACTOR_VALIDATION_SIZE
 
 
+def test_normalize_saved_benchmark_payload_preserves_provider_and_model(monkeypatch) -> None:
+    monkeypatch.setattr(api, "count_hotpot_examples", lambda data_path=None: 1)
+
+    normalized = api._normalize_benchmark_payload(
+        {
+            "run_id": "run-1",
+            "provider": "cluster",
+            "model": "google/gemma-4-31B-it",
+            "records": [],
+        },
+        Path("runs/benchmarks/run-1.json"),
+    )
+
+    assert normalized["provider"] == "cluster"
+    assert normalized["model"] == "google/gemma-4-31B-it"
+
+
 def test_list_benchmark_results_sorts_by_created_at_newest_first(monkeypatch, tmp_path) -> None:
     older = tmp_path / "newer-file-mtime.json"
     newer = tmp_path / "older-file-mtime.json"

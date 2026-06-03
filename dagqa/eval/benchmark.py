@@ -16,7 +16,7 @@ from dagqa.eval.hotpot_loader import (
     HotpotExample,
     load_hotpot_examples,
 )
-from dagqa.eval.metrics import answer_f1, exact_match
+from dagqa.eval.metrics import answer_f1, cosine_sim, exact_match
 from dagqa.graph.render import render_mermaid
 from dagqa.nodes.prompts import render_evidence_section
 from dagqa.schemas import (
@@ -34,7 +34,7 @@ class BenchmarkRecord(BaseModel):
     prediction: str
     exact_match: float
     f1: float
-    cosine_sim: float
+    cosine_sim: float = 0.0
     latency_ms: float
     llm_call_count: int | None = None
     node_count: int | None = None
@@ -56,6 +56,7 @@ class BenchmarkResult(BaseModel):
     run_id: str
     system: str
     limit: int
+    provider: str | None = None
     model: str
     dataset: str = "hotpotqa"
     split: str = "validation"
@@ -96,6 +97,7 @@ async def benchmark_hotpotqa(
         run_id=str(uuid4()),
         system=system,
         limit=limit,
+        provider=client.config.llm.provider,
         model=client.config.llm.model,
         dataset_size=dataset_size,
         seed=seed,
@@ -164,11 +166,9 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
             question=example.question,
             gold_answer=example.answer,
             prediction=prediction,
-            
             exact_match=exact_match(prediction, example.answer),
             f1=answer_f1(prediction, example.answer),
-            cosine_sim=cosine_sim(prediction,example.answer),
-
+            cosine_sim=cosine_sim(prediction, example.answer),
             latency_ms=(time.perf_counter() - started) * 1000,
             llm_call_count=llm_call_count,
             node_count=node_count,
@@ -188,7 +188,7 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
             prediction="",
             exact_match=0.0,
             f1=0.0,
-            cosine_sim=-1.5, 
+            cosine_sim=-1.5,
             latency_ms=(time.perf_counter() - started) * 1000,
             structural_failure=True,
             error=str(exc),

@@ -11,7 +11,7 @@ load_dotenv()
 
 
 class LLMConfig(BaseModel):
-    provider: Literal["gemini", "openrouter", "azure_openai", "dspy"] = "gemini"
+    provider: Literal["gemini", "openrouter", "azure_openai", "cluster", "dspy"] = "gemini"
     model: str = "gemini/gemini-2.0-flash"
     model_env: str | None = None
     temperature: float = 0.0

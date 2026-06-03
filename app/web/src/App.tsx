@@ -19,6 +19,7 @@ import { createRoot } from "react-dom/client";
 import {
   getBenchmarkResult,
   getHotpotBenchmarkMeta,
+  getLLMModels,
   getLiveBenchmark,
   getLiveAsk,
   listBenchmarkResults,
@@ -31,6 +32,8 @@ import {
   type HotpotBenchmarkResult,
   type LiveBenchmark,
   type LiveRun,
+  type LLMModelCatalog,
+  type LLMSelection,
   type NodeTrace,
   type RunTrace,
   type SavedBenchmarkSummary,
@@ -250,7 +253,7 @@ function GraphView({
           <div className="graph-loader">
             <Loader2 className="spin" size={26} />
             <strong>Building the reasoning graph</strong>
-            <span>Azure is creating a structured DAG plan. The graph will appear as soon as planning finishes.</span>
+            <span>The selected model is creating a DAG plan. The graph will appear as soon as planning finishes.</span>
             <div className="progress-rail">
               <span />
             </div>
@@ -523,7 +526,7 @@ function NodeInspector({
   );
 }
 
-function ChatView() {
+function ChatView({ llm }: { llm: LLMSelection }) {
   const [question, setQuestion] = useState(SAMPLE_QUESTIONS[0]);
   const [run, setRun] = useState<LiveRun | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>();
@@ -550,7 +553,7 @@ function ChatView() {
     setRun(null);
     setSelectedNodeId(undefined);
     try {
-      const started = await startLiveAsk(question.trim());
+      const started = await startLiveAsk(question.trim(), llm);
       setRun(started);
       setPhase(started.phase);
 
@@ -584,7 +587,7 @@ function ChatView() {
             <h1>Chat</h1>
             <p>Ask a multi-hop question and inspect how the DAG agent decomposes it.</p>
           </div>
-          <span className="model-pill">Azure GPT-4o</span>
+          <span className="model-pill">{run?.model ?? llm.model}</span>
         </div>
 
         <div className="sample-select">
@@ -744,7 +747,7 @@ function BenchmarkResultView({
           <label>Cosine Similarity</label>
           <strong>{formatNumber(metrics.cosine_sim, 3)}</strong>
         </div>
-        
+
         <div className="metric">
           <label>Avg Latency</label>
           <strong>{formatDuration(metrics.avg_latency_ms)}</strong>
@@ -767,6 +770,10 @@ function BenchmarkResultView({
         </div>
       </div>
       <div className="benchmark-context">
+        <div>
+          <label>Provider</label>
+          <strong>{result.provider ?? "Unknown"}</strong>
+        </div>
         <div>
           <label>Model</label>
           <strong>{result.model}</strong>
@@ -874,9 +881,11 @@ function BenchmarkResultView({
 function DatasetView({
   recordId,
   onSelectRecord,
+  llm,
 }: {
   recordId?: string;
   onSelectRecord: (recordId?: string) => void;
+  llm: LLMSelection;
 }) {
   const [limit, setLimit] = useState(5);
   const [system, setSystem] = useState("dag_agent");
@@ -915,7 +924,7 @@ function DatasetView({
       if (parsedSeed !== undefined && !Number.isInteger(parsedSeed)) {
         throw new Error("Seed must be an integer.");
       }
-      const started = await startLiveBenchmark(resolvedLimit, system, parsedSeed);
+      const started = await startLiveBenchmark(resolvedLimit, system, llm, parsedSeed);
       setLiveRun(started);
       setResult(started);
       setSeedInput(String(started.seed));
@@ -1256,7 +1265,7 @@ function ResultsView({
               </option>
               {items.map((item) => (
                 <option key={item.run_id} value={item.run_id}>
-                  {formatSavedDateTime(item.created_at)} · {item.system} · {item.limit} · seed {item.seed}
+                  {formatSavedDateTime(item.created_at)} · {item.model ?? "unknown model"} · {item.limit} · seed {item.seed}
                 </option>
               ))}
             </select>
@@ -1295,14 +1304,64 @@ function ResultsView({
   );
 }
 
+function ModelPicker({
+  catalog,
+  selected,
+  error,
+  onChange,
+}: {
+  catalog?: LLMModelCatalog;
+  selected?: LLMSelection;
+  error: string;
+  onChange: (selection: LLMSelection) => void;
+}) {
+  const selectedValue = selected ? JSON.stringify(selected) : "";
+
+  return (
+    <div className="model-picker">
+      <label htmlFor="llm-model">Execution model</label>
+      <select
+        id="llm-model"
+        value={selectedValue}
+        disabled={!catalog?.models.length}
+        onChange={(event) => onChange(JSON.parse(event.target.value) as LLMSelection)}
+      >
+        {!catalog?.models.length && <option value="">Loading models...</option>}
+        {catalog?.models.map((option) => (
+          <option
+            key={`${option.provider}:${option.model}`}
+            value={JSON.stringify({ provider: option.provider, model: option.model })}
+          >
+            {option.label}
+          </option>
+        ))}
+      </select>
+      {catalog?.cluster_error && <small>Cluster unavailable: {catalog.cluster_error}</small>}
+      {error && <small>{error}</small>}
+    </div>
+  );
+}
+
 function App() {
   const [route, setRoute] = useState<AppRoute>(() => parseRoute());
+  const [modelCatalog, setModelCatalog] = useState<LLMModelCatalog>();
+  const [selectedLLM, setSelectedLLM] = useState<LLMSelection>();
+  const [modelError, setModelError] = useState("");
 
   useEffect(() => {
     const handleHashChange = () => setRoute(parseRoute());
     window.addEventListener("hashchange", handleHashChange);
     if (!window.location.hash) navigate({ tab: "chat" }, true);
     return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  useEffect(() => {
+    getLLMModels()
+      .then((catalog) => {
+        setModelCatalog(catalog);
+        setSelectedLLM((current) => current ?? catalog.default);
+      })
+      .catch((err) => setModelError(err instanceof Error ? err.message : "Could not load models"));
   }, []);
 
   return (
@@ -1333,17 +1392,30 @@ function App() {
             API Docs
           </a>
         </nav>
-        <div className="sidebar-footer">
-          <Timer size={16} />
-          <span>Runs use the active backend config.</span>
+        <div className="sidebar-controls">
+          <ModelPicker
+            catalog={modelCatalog}
+            selected={selectedLLM}
+            error={modelError}
+            onChange={setSelectedLLM}
+          />
+          <div className="sidebar-footer">
+            <Timer size={16} />
+            <span>Each run keeps its selected model.</span>
+          </div>
         </div>
       </aside>
-      {route.tab === "chat" ? (
-        <ChatView />
+      {!selectedLLM ? (
+        <main className="dataset-workspace">
+          <div className="empty">Loading available LLM models.</div>
+        </main>
+      ) : route.tab === "chat" ? (
+        <ChatView llm={selectedLLM} />
       ) : route.tab === "dataset" ? (
         <DatasetView
           recordId={route.recordId}
           onSelectRecord={(recordId) => navigate({ tab: "dataset", recordId })}
+          llm={selectedLLM}
         />
       ) : (
         <ResultsView

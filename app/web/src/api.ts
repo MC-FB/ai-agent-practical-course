@@ -83,9 +83,26 @@ export type RunTrace = {
   waves: { index: number; node_ids: string[] }[];
 };
 
+export type LLMSelection = {
+  provider: "azure_openai" | "cluster";
+  model: string;
+};
+
+export type LLMModelOption = LLMSelection & {
+  label: string;
+};
+
+export type LLMModelCatalog = {
+  models: LLMModelOption[];
+  default: LLMSelection;
+  cluster_error?: string | null;
+};
+
 export type LiveRun = {
   run_id: string;
   question: string;
+  provider: string;
+  model: string;
   plan?: DagPlan | null;
   phase: "planning" | "executing" | "complete" | "error";
   status: string;
@@ -97,21 +114,27 @@ export type LiveRun = {
   error?: string | null;
 };
 
-export async function ask(question: string): Promise<RunTrace> {
+export async function ask(question: string, llm: LLMSelection): Promise<RunTrace> {
   const response = await fetch("/api/ask", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, llm }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
 }
 
-export async function startLiveAsk(question: string): Promise<LiveRun> {
+export async function getLLMModels(): Promise<LLMModelCatalog> {
+  const response = await fetch("/api/llm/models");
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
+export async function startLiveAsk(question: string, llm: LLMSelection): Promise<LiveRun> {
   const response = await fetch("/api/ask/live", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, llm }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
@@ -128,6 +151,7 @@ export type HotpotBenchmarkMeta = {
   split: string;
   total_examples: number;
   default_limit: number;
+  provider?: string | null;
   model: string;
   system: string;
   baselines: Array<Record<string, unknown>>;
@@ -162,6 +186,7 @@ export type HotpotBenchmarkResult = {
   run_id: string;
   system: string;
   limit: number;
+  provider?: string | null;
   model: string;
   dataset: string;
   split: string;
@@ -189,6 +214,7 @@ export type SavedBenchmarkSummary = {
   dataset?: string | null;
   split?: string | null;
   system?: string | null;
+  provider?: string | null;
   model?: string | null;
   limit?: number | null;
   seed?: number | null;
@@ -205,12 +231,13 @@ export async function getHotpotBenchmarkMeta(): Promise<HotpotBenchmarkMeta> {
 export async function benchmark(
   limit: number,
   system: string,
+  llm: LLMSelection,
   seed?: number,
 ): Promise<HotpotBenchmarkResult> {
   const response = await fetch("/api/benchmarks/hotpotqa", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, system, seed }),
+    body: JSON.stringify({ limit, system, seed, llm }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
@@ -219,12 +246,13 @@ export async function benchmark(
 export async function startLiveBenchmark(
   limit: number,
   system: string,
+  llm: LLMSelection,
   seed?: number,
 ): Promise<LiveBenchmark> {
   const response = await fetch("/api/benchmarks/hotpotqa/live", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, system, seed }),
+    body: JSON.stringify({ limit, system, seed, llm }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();

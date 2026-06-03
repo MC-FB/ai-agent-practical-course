@@ -5,7 +5,7 @@ import json
 import os
 from typing import Any
 
-from openai import AzureOpenAI
+from openai import AsyncOpenAI, AzureOpenAI
 
 from dagqa.config import LLMConfig, PlannerConfig
 from dagqa.llm.base import LanguageModel
@@ -34,6 +34,8 @@ class Planner:
     async def plan(self, question: str) -> DagPlan:
         if self.llm_config and self.llm_config.provider == "azure_openai":
             return await self._plan_structured_azure(question)
+        if self.llm_config and self.llm_config.provider == "cluster":
+            return await self._plan_structured_cluster(question)
 
         request = LLMRequest(
             system=PLANNER_SYSTEM,
@@ -113,6 +115,55 @@ class Planner:
                 plan = normalize_plan_dependencies(_structured_data_to_plan(data))
             except Exception as exc:
                 raise PlannerError(f"Structured Azure planner failed: {exc}") from exc
+
+            validation = validate_plan(plan, self.config)
+            if validation.valid:
+                return plan
+            validation_errors = validation.errors
+            if attempt >= self.config.repair_rounds:
+                break
+
+        raise PlannerError("Planner produced invalid DAG: " + "; ".join(validation_errors))
+
+    async def _plan_structured_cluster(self, question: str) -> DagPlan:
+        validation_errors: list[str] = []
+        api_base = _env_or_value(self.llm_config.api_base_env, self.llm_config.api_base)
+        api_key = os.getenv(self.llm_config.api_key_env or "")
+        model = _env_or_value(self.llm_config.model_env, self.llm_config.model)
+        if not api_base or not api_key or not model:
+            raise PlannerError("Cluster planner config is incomplete.")
+        client = AsyncOpenAI(api_key=api_key, base_url=api_base)
+
+        for attempt in range(self.config.repair_rounds + 1):
+            try:
+                response = await client.chat.completions.create(
+                    model=model,
+                    temperature=0.0,
+                    messages=[
+                        {"role": "system", "content": STRUCTURED_PLANNER_SYSTEM},
+                        {
+                            "role": "user",
+                            "content": structured_planner_prompt(
+                                question,
+                                self.config.max_nodes,
+                                self.config.max_depth,
+                                validation_errors,
+                            ),
+                        },
+                    ],
+                    response_format={
+                        "type": "json_schema",
+                        "json_schema": {
+                            "name": "dag_plan",
+                            "strict": True,
+                            "schema": STRUCTURED_PLAN_SCHEMA,
+                        },
+                    },
+                )
+                content = response.choices[0].message.content or "{}"
+                plan = normalize_plan_dependencies(_structured_data_to_plan(json.loads(content)))
+            except Exception as exc:
+                raise PlannerError(f"Structured cluster planner failed: {exc}") from exc
 
             validation = validate_plan(plan, self.config)
             if validation.valid:

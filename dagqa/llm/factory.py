@@ -5,6 +5,10 @@ from dagqa.llm.base import LanguageModel
 
 
 def build_llm(config: LLMConfig) -> LanguageModel:
+    if config.provider == "cluster":
+        from dagqa.llm.openai_compatible import OpenAICompatibleLanguageModel  # noqa: PLC0415
+
+        return OpenAICompatibleLanguageModel(config)
     if config.provider in {"gemini", "openrouter", "azure_openai", "dspy"}:
         from dagqa.llm.dspy_adapter import DspyLanguageModel  # noqa: PLC0415
 

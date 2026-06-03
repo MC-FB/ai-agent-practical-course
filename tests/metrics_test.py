@@ -19,13 +19,12 @@ import pytest
 
 from dagqa.eval.metrics import answer_f1, cosine_sim, exact_match
 
-
 # ---------------------------------------------------------------------------
 # exact_match
 # ---------------------------------------------------------------------------
 
-class TestExactMatch:
 
+class TestExactMatch:
     def test_identical_strings(self):
         """Identical input → perfect match."""
         assert exact_match("Paris", "Paris") == 1.0
@@ -63,8 +62,8 @@ class TestExactMatch:
 # answer_f1
 # ---------------------------------------------------------------------------
 
-class TestAnswerF1:
 
+class TestAnswerF1:
     def test_identical_sentences(self):
         """Perfect token overlap → F1 of 1.0."""
         assert answer_f1("cat sat mat", "cat sat mat") == 1.0
@@ -117,6 +116,7 @@ class TestAnswerF1:
 # ---------------------------------------------------------------------------
 # cosine_sim
 # ---------------------------------------------------------------------------
+
 
 class TestCosineSim:
     """
