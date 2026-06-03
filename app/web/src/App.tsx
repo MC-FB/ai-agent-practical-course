@@ -809,6 +809,7 @@ function BenchmarkResultView({
               <th>Gold</th>
               <th>Prediction</th>
               <th>EM</th>
+              <th>Cos Sim</th>
               <th>Status</th>
               <th>Graph</th>
               <th>Evidence</th>
@@ -839,6 +840,7 @@ function BenchmarkResultView({
                   <td>{record.gold_answer}</td>
                   <td>{record.prediction}</td>
                   <td>{formatPercent(record.exact_match)}</td>
+                  <td>{formatNumber(record.cosine_sim, 3)}</td>
                   <td>{record.error ? "error" : record.structural_failure ? "failed" : "ok"}</td>
                   <td>
                     {canInspect ? (
