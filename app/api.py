@@ -238,7 +238,7 @@ async def _run_live(run_id: str, question: str) -> None:
         update("error", status="failed", error=str(exc))
 
 
-@router.post("/benchmarks/hotpotqa")
+@router.post("/benchmarks/hotpotqa", tags=["Benchmarks"], summary="Run HotpotQA benchmark")
 async def hotpotqa(request: BenchmarkRequest) -> BenchmarkResult:
     result = await benchmark_hotpotqa(
         client(),
@@ -253,7 +253,20 @@ async def hotpotqa(request: BenchmarkRequest) -> BenchmarkResult:
     return result
 
 
-@router.post("/benchmarks/hotpotqa/live")
+@router.get(
+    "/benchmarks/hotpotqa",
+    tags=["Benchmarks"],
+    summary="Get HotpotQA benchmark metadata",
+)
+def hotpotqa_info(data_path: str | None = None) -> dict[str, Any]:
+    return hotpotqa_meta(data_path)
+
+
+@router.post(
+    "/benchmarks/hotpotqa/live",
+    tags=["Benchmarks"],
+    summary="Start live HotpotQA benchmark",
+)
 async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
     run_id = str(uuid4())
     seed = request.seed if request.seed is not None else int(time.time_ns() % 2_147_483_647)
@@ -266,6 +279,7 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
         "seed": seed,
         "dataset": "hotpotqa",
         "split": load_config().benchmark.split,
+        "dataset_size": count_hotpot_examples(request.data_path),
         "model": load_config().llm.model,
         "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "completed": 0,
@@ -281,7 +295,11 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
     return LIVE_BENCHMARKS[run_id]
 
 
-@router.get("/benchmarks/hotpotqa/live/{run_id}")
+@router.get(
+    "/benchmarks/hotpotqa/live/{run_id}",
+    tags=["Benchmarks"],
+    summary="Get live HotpotQA benchmark status",
+)
 def get_live_benchmark(run_id: str) -> dict[str, Any]:
     if run_id not in LIVE_BENCHMARKS:
         raise HTTPException(status_code=404, detail="Benchmark run not found.")
@@ -295,6 +313,7 @@ async def _run_live_benchmark(run_id: str, request: BenchmarkRequest, seed: int)
     cfg = load_config()
     created_at = LIVE_BENCHMARKS[run_id]["created_at"]
     total_examples = request.limit
+    dataset_size = 0
 
     def update(
         phase: str = "running",
@@ -316,6 +335,7 @@ async def _run_live_benchmark(run_id: str, request: BenchmarkRequest, seed: int)
             "seed": seed,
             "dataset": "hotpotqa",
             "split": cfg.benchmark.split,
+            "dataset_size": dataset_size or None,
             "model": dag_client.config.llm.model,
             "created_at": created_at,
             "completed": len(records),
@@ -329,8 +349,13 @@ async def _run_live_benchmark(run_id: str, request: BenchmarkRequest, seed: int)
         }
 
     try:
-        all_examples = await asyncio.to_thread(load_hotpot_examples, request.data_path)
-        examples = _sample_examples(all_examples, request.limit, seed)
+        if request.limit <= 0 and request.data_path is None:
+            dataset_size = count_hotpot_examples()
+            examples = []
+        else:
+            all_examples = await asyncio.to_thread(load_hotpot_examples, request.data_path)
+            dataset_size = len(all_examples)
+            examples = _sample_examples(all_examples, request.limit, seed)
         total_examples = len(examples)
         update(current_question=examples[0].question if examples else None)
         for example in examples:
@@ -350,6 +375,7 @@ async def _run_live_benchmark(run_id: str, request: BenchmarkRequest, seed: int)
             model=dag_client.config.llm.model,
             dataset="hotpotqa",
             split=cfg.benchmark.split,
+            dataset_size=dataset_size,
             seed=seed,
             created_at=created_at,
             total_runtime_ms=total_runtime_ms,
@@ -364,7 +390,11 @@ async def _run_live_benchmark(run_id: str, request: BenchmarkRequest, seed: int)
         update("error", status="failed", error=str(exc))
 
 
-@router.get("/benchmarks/hotpotqa/meta")
+@router.get(
+    "/benchmarks/hotpotqa/meta",
+    tags=["Benchmarks"],
+    summary="Get HotpotQA benchmark metadata",
+)
 def hotpotqa_meta(data_path: str | None = None) -> dict[str, Any]:
     cfg = load_config()
     return {
@@ -385,7 +415,7 @@ def hotpotqa_meta(data_path: str | None = None) -> dict[str, Any]:
     }
 
 
-@router.get("/benchmarks/results")
+@router.get("/benchmarks/results", tags=["Benchmarks"], summary="List benchmark results")
 def list_benchmark_results() -> dict[str, Any]:
     output_dir = _benchmark_output_dir()
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -418,7 +448,11 @@ def list_benchmark_results() -> dict[str, Any]:
     return {"results": items}
 
 
-@router.get("/benchmarks/results/{run_id}")
+@router.get(
+    "/benchmarks/results/{run_id}",
+    tags=["Benchmarks"],
+    summary="Get benchmark result",
+)
 def get_benchmark_result(run_id: str) -> dict[str, Any]:
     if "/" in run_id or "\\" in run_id or ".." in run_id:
         raise HTTPException(status_code=400, detail="Invalid run id.")
@@ -458,11 +492,18 @@ def _save_benchmark_result(result: BenchmarkResult) -> Path:
 def _normalize_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, Any]:
     metrics = data.get("metrics") or data.get("summary") or {}
     records = [_normalize_benchmark_record(record) for record in data.get("records", [])]
+    dataset_size = data.get("dataset_size") or data.get("total_examples")
+    if dataset_size is None:
+        try:
+            dataset_size = count_hotpot_examples()
+        except Exception:
+            dataset_size = len(records)
     return {
         **data,
         "run_id": data.get("run_id") or path.stem,
         "dataset": data.get("dataset") or "hotpotqa",
         "split": data.get("split") or "validation",
+        "dataset_size": dataset_size,
         "system": data.get("system") or "dag_agent",
         "model": data.get("model") or "",
         "seed": data.get("seed") or 0,
@@ -503,6 +544,7 @@ def _repair_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, Any
 
 def _normalize_benchmark_record(record: dict[str, Any]) -> dict[str, Any]:
     structure = record.get("structure") or {}
+    run_trace = _normalize_run_trace(record.get("run_trace"))
     return {
         "id": record.get("id") or str(record.get("index") or ""),
         "question": record.get("question") or "",
@@ -522,9 +564,23 @@ def _normalize_benchmark_record(record: dict[str, Any]) -> dict[str, Any]:
         if record.get("structural_valid") is not None
         else structure.get("valid"),
         "structural_issues": record.get("structural_issues") or structure.get("problems", []),
-        "run_trace": record.get("run_trace"),
+        "run_trace": run_trace,
         "error": record.get("error"),
     }
+
+
+def _normalize_run_trace(run_trace: Any) -> dict[str, Any] | None:
+    if not isinstance(run_trace, dict):
+        return None
+    normalized = dict(run_trace)
+    if not normalized.get("mermaid") and normalized.get("plan") and normalized.get("nodes"):
+        try:
+            plan = DagPlan.model_validate(normalized["plan"])
+            traces = [NodeTrace.model_validate(node) for node in normalized.get("nodes", [])]
+            normalized["mermaid"] = render_mermaid(plan, traces)
+        except Exception:
+            normalized["mermaid"] = None
+    return normalized
 
 
 @router.get("/runs/{run_id}")

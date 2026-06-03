@@ -80,7 +80,8 @@ button {
   gap: 8px;
 }
 
-.tab-list button {
+.tab-list button,
+.tab-list a {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -91,6 +92,8 @@ button {
   background: transparent;
   color: #314149;
   padding: 0 12px;
+  font: inherit;
+  text-decoration: none;
   text-align: left;
 }
 
@@ -783,6 +786,22 @@ button {
 
 .record-table .clickable-row:hover td {
   background: #eef8f5;
+}
+
+.record-action {
+  min-height: 28px;
+  border: 1px solid #9bc7bf;
+  border-radius: 6px;
+  background: #eaf6f3;
+  color: #123d38;
+  padding: 0 10px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.record-action:hover {
+  background: #d7eee9;
 }
 
 .results-browser {
