@@ -33,6 +33,10 @@ and the attribute being compared, then create a comparison node that consumes th
 Example: return {"composer": "...", "birth_year": 1678}, not only {"answer": "..."} if
 a later node needs the composer name and birth year separately.
 
+Prefer targeted lookup nodes that return only facts needed to answer the question. Do not create
+broad candidate-list or exhaustive enumeration nodes when a more specific lookup can identify the
+required entity or relationship directly.
+
 Use array fields for list-valued facts. The final node must always return an answer field
 with the concise final answer, even when it also returns supporting fields.
 """

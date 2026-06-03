@@ -1,0 +1,304 @@
+{
+  "run_id": "9649f0f7-9ef8-4c9e-be96-666218827725",
+  "system": "dag_agent",
+  "limit": 2,
+  "model": "azure/gpt-4o-mini",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "dataset_size": 7405,
+  "seed": 1075005983,
+  "created_at": "2026-06-02T10:34:27Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260602T103427Z-9649f0f7-9ef8-4c9e-be96-666218827725.json",
+  "total_runtime_ms": 36295.989500009455,
+  "records": [
+    {
+      "id": "5ae81b2755429952e35eaa1e",
+      "question": "What Cuban preisdent overthrew Mary Tarrero-Serrano?",
+      "gold_answer": "Fulgencio Batista y Zaldívar",
+      "prediction": "Fulgencio Batista",
+      "exact_match": 0.0,
+      "f1": 0.6666666666666666,
+      "latency_ms": 26751.71095796395,
+      "llm_call_count": 4,
+      "node_count": 3,
+      "graph_depth": 3,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "run_trace": {
+        "run_id": "81173d44-400e-4078-b17f-a45c30ed030f",
+        "question": "What Cuban president overthrew Mary Tarrero-Serrano?",
+        "plan": {
+          "question": "What Cuban president overthrew Mary Tarrero-Serrano?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Identify Mary Tarrero-Serrano's role",
+              "task_type": "fact_lookup",
+              "question": "What was Mary Tarrero-Serrano's role or position in Cuban history?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Identify the role or position of Mary Tarrero-Serrano in Cuban history."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "role"
+                ],
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "description": "The role or position of Mary Tarrero-Serrano in Cuban history."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Determine the Cuban president involved",
+              "task_type": "fact_lookup",
+              "question": "Which Cuban president overthrew Mary Tarrero-Serrano?",
+              "operation": "answer",
+              "depends_on": [
+                "q1"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Based on the role of Mary Tarrero-Serrano as {q1.role}, identify the Cuban president who overthrew her."
+              },
+              "input_map": {
+                "role": "q1.role"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "president"
+                ],
+                "properties": {
+                  "president": {
+                    "type": "string",
+                    "description": "The name of the Cuban president who overthrew Mary Tarrero-Serrano."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q3",
+              "label": "Provide the final answer",
+              "task_type": "synthesis",
+              "question": "What Cuban president overthrew Mary Tarrero-Serrano?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q2"
+              ],
+              "prompt": {
+                "system": "You are a knowledgeable assistant.",
+                "user_template": "Based on the information, the Cuban president who overthrew Mary Tarrero-Serrano is {q2.president}."
+              },
+              "input_map": {
+                "president": "q2.president"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The name of the Cuban president who overthrew Mary Tarrero-Serrano."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q3"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "q2"
+            ]
+          },
+          {
+            "index": 3,
+            "node_ids": [
+              "q3"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "Identify Mary Tarrero-Serrano's role",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "What was Mary Tarrero-Serrano's role or position in Cuban history?",
+            "rendered_prompt": "Identify the role or position of Mary Tarrero-Serrano in Cuban history.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"role\"\n  ],\n  \"properties\": {\n    \"role\": {\n      \"type\": \"string\",\n      \"description\": \"The role or position of Mary Tarrero-Serrano in Cuban history.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"role\": \"First Lady of Cuba from 1948 to 1952 as the wife of President Carlos Prío Socarrás.\"\n}",
+            "parsed_output": {
+              "role": "First Lady of Cuba from 1948 to 1952 as the wife of President Carlos Prío Socarrás."
+            },
+            "returned_value": {
+              "role": "First Lady of Cuba from 1948 to 1952 as the wife of President Carlos Prío Socarrás."
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-06-02T10:34:34.269367+00:00",
+            "finished_at": "2026-06-02T10:34:48.297840+00:00",
+            "duration_ms": 14028.431000071578,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Determine the Cuban president involved",
+            "task_type": "fact_lookup",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {
+              "role": "First Lady of Cuba from 1948 to 1952 as the wife of President Carlos Prío Socarrás."
+            },
+            "resolved_question": "Which Cuban president overthrew Mary Tarrero-Serrano?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"role\": \"First Lady of Cuba from 1948 to 1952 as the wife of President Carlos Prío Socarrás.\"\n}\n\nBased on the role of Mary Tarrero-Serrano as First Lady of Cuba from 1948 to 1952 as the wife of President Carlos Prío Socarrás., identify the Cuban president who overthrew her.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"president\"\n  ],\n  \"properties\": {\n    \"president\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the Cuban president who overthrew Mary Tarrero-Serrano.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"president\": \"Fulgencio Batista\"\n}",
+            "parsed_output": {
+              "president": "Fulgencio Batista"
+            },
+            "returned_value": {
+              "president": "Fulgencio Batista"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-06-02T10:34:48.297956+00:00",
+            "finished_at": "2026-06-02T10:34:51.676011+00:00",
+            "duration_ms": 3378.0589170055464,
+            "error": null
+          },
+          {
+            "node_id": "q3",
+            "label": "Provide the final answer",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "president": "Fulgencio Batista"
+            },
+            "resolved_question": "What Cuban president overthrew Mary Tarrero-Serrano?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"president\": \"Fulgencio Batista\"\n}\n\nBased on the information, the Cuban president who overthrew Mary Tarrero-Serrano is Fulgencio Batista.\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the Cuban president who overthrew Mary Tarrero-Serrano.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"answer\": \"Fulgencio Batista\"\n}",
+            "parsed_output": {
+              "answer": "Fulgencio Batista"
+            },
+            "returned_value": {
+              "answer": "Fulgencio Batista"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "repair_attempts": 0,
+            "started_at": "2026-06-02T10:34:51.676219+00:00",
+            "finished_at": "2026-06-02T10:34:56.605337+00:00",
+            "duration_ms": 4929.115833016112,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Fulgencio Batista"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 22336.341541958973,
+        "config": {
+          "llm": {
+            "provider": "azure_openai",
+            "model": "azure/gpt-4o-mini",
+            "model_env": "AZURE_OPENAI_MODEL",
+            "temperature": 0.0,
+            "api_key_env": "AZURE_OPENAI_API_KEY",
+            "api_base": null,
+            "api_base_env": "AZURE_OPENAI_ENDPOINT",
+            "api_version": null,
+            "api_version_env": "AZURE_OPENAI_API_VERSION"
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 45.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Identify Mary Tarrero-Serrano's role\\nfact_lookup\\nsucceeded\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: Determine the Cuban president involved\\nfact_lookup\\nsucceeded\"]\n  click q2 dagqaSelectGraphNode\n  q1 --> q2\n  q3[\"q3: Provide the final answer\\nsynthesis\\nsucceeded\"]\n  click q3 dagqaSelectGraphNode\n  q2 --> q3"
+      },
+      "error": null
+    },
+    {
+      "id": "5add10ca5542994ed6169c59",
+      "question": "Were Illinois Institute of Technology and Boise State University both bounded before 1950?",
+      "gold_answer": "yes",
+      "prediction": "",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "latency_ms": 7496.565749985166,
+      "llm_call_count": null,
+      "node_count": null,
+      "graph_depth": null,
+      "structural_valid": null,
+      "structural_issues": [],
+      "structural_failure": true,
+      "run_trace": null,
+      "error": "Structured Azure planner failed: Error code: 429 - {'error': {'message': 'Too Many Requests', 'type': 'too_many_requests', 'param': None, 'code': 'too_many_requests'}}"
+    }
+  ],
+  "metrics": {
+    "example_count": 2.0,
+    "success_count": 1.0,
+    "failure_count": 1.0,
+    "error_count": 1.0,
+    "exact_match": 0.0,
+    "f1": 0.3333333333333333,
+    "avg_latency_ms": 17124.13835397456,
+    "p50_latency_ms": 26751.71095796395,
+    "total_llm_call_count": 4.0,
+    "avg_llm_call_count": 4.0,
+    "avg_node_count": 3.0,
+    "avg_graph_depth": 3.0,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.5,
+    "total_runtime_ms": 36295.989500009455
+  }
+}

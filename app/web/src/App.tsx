@@ -54,6 +54,38 @@ const SAMPLE_QUESTIONS = [
 
 type Tab = "chat" | "dataset" | "results";
 type RunPhase = "idle" | "planning" | "executing" | "complete" | "error";
+type AppRoute = {
+  tab: Tab;
+  runId?: string;
+  recordId?: string;
+};
+
+function parseRoute(): AppRoute {
+  const parts = window.location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
+  const tab: Tab = parts[0] === "dataset" || parts[0] === "results" ? parts[0] : "chat";
+  return {
+    tab,
+    runId: tab === "results" ? parts[1] : undefined,
+    recordId: tab === "results" ? parts[2] : tab === "dataset" ? parts[1] : undefined,
+  };
+}
+
+function routeHash(route: AppRoute): string {
+  const parts: string[] = [route.tab];
+  if (route.tab === "results" && route.runId) parts.push(route.runId);
+  if (route.recordId) parts.push(route.recordId);
+  return `#/${parts.join("/")}`;
+}
+
+function navigate(route: AppRoute, replace = false) {
+  const hash = routeHash(route);
+  if (replace) {
+    window.history.replaceState(null, "", hash);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  } else {
+    window.location.hash = hash;
+  }
+}
 
 function formatRawResponse(raw?: string) {
   if (!raw) return "";
@@ -287,6 +319,7 @@ function NodeInspector({
 }) {
   const hasInputMap = planNode?.input_map && Object.keys(planNode.input_map).length > 0;
   const expectedInputs = expectedInputsForNode(planNode, planNodes);
+  const evidenceCitations = node?.evidence_citations ?? [];
 
   return (
     <section className="panel-section inspector-section">
@@ -366,6 +399,87 @@ function NodeInspector({
           <div>
             <label>Question</label>
             <pre>{node.resolved_question ?? ""}</pre>
+          </div>
+          <div className="contract-panel">
+            <div className="contract-heading">
+              <label>Supporting Evidence Given To Model</label>
+              <span>
+                {node.supporting_evidence
+                  ? `${node.supporting_evidence.documents.length} of ${node.supporting_evidence.total_available} documents · ${node.supporting_evidence.strategy}`
+                  : "No evidence supplied"}
+              </span>
+            </div>
+            {node.supporting_evidence?.documents.length ? (
+              <div className="evidence-list">
+                {node.supporting_evidence.documents.map((document, index) => (
+                  <details className="evidence-document" key={document.id}>
+                    <summary>
+                      <span>{index + 1}</span>
+                      <strong>{document.title || "Untitled document"}</strong>
+                      <code>{document.id}</code>
+                    </summary>
+                    <pre>{document.text}</pre>
+                    {Object.keys(document.metadata).length > 0 && (
+                      <div className="evidence-metadata">
+                        <label>Metadata</label>
+                        <pre>{formatJson(document.metadata)}</pre>
+                      </div>
+                    )}
+                  </details>
+                ))}
+              </div>
+            ) : (
+              <div className="empty compact-empty">This node did not receive supporting evidence.</div>
+            )}
+          </div>
+          <div className="contract-panel">
+            <div className="contract-heading">
+              <label>Evidence Facts Used By Model</label>
+              <span>
+                {evidenceCitations.length
+                  ? `${evidenceCitations.length} citations`
+                  : "No citations returned"}
+              </span>
+            </div>
+            {evidenceCitations.length ? (
+              <div className="citation-list">
+                {evidenceCitations.map((citation, index) => {
+                  const evaluation = node.evidence_citation_evaluations?.[index];
+                  return (
+                    <div className="citation-card" key={`${citation.document_id}-${index}`}>
+                      <div className="citation-heading">
+                        <strong>{citation.fact}</strong>
+                        {evaluation && (
+                          <span className={evaluation.matches_gold ? "citation-gold" : "citation-non-gold"}>
+                            {evaluation.matches_gold ? "Matches gold" : "Non-gold citation"}
+                          </span>
+                        )}
+                      </div>
+                      <div className="citation-source">
+                        <code>{citation.document_id}</code>
+                        <span>{citation.title}</span>
+                        <span>
+                          sentences{" "}
+                          {citation.sentence_indices.length
+                            ? citation.sentence_indices.join(", ")
+                            : "not specified"}
+                        </span>
+                      </div>
+                      {evaluation?.matched_gold_facts.length ? (
+                        <small>
+                          Gold match:{" "}
+                          {evaluation.matched_gold_facts
+                            .map((fact) => `${fact.title} (${fact.sentence_index})`)
+                            .join(", ")}
+                        </small>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="empty compact-empty">The model did not report evidence facts.</div>
+            )}
           </div>
           {planNode && (
             <div>
@@ -643,6 +757,14 @@ function BenchmarkResultView({
           <label>Avg Depth</label>
           <strong>{formatNumber(metrics.avg_graph_depth, 1)}</strong>
         </div>
+        <div className="metric">
+          <label>Non-Gold Citations</label>
+          <strong>{formatPercent(metrics.wrong_supporting_text_rate)}</strong>
+        </div>
+        <div className="metric">
+          <label>Gold Fact Recall</label>
+          <strong>{formatPercent(metrics.avg_gold_supporting_fact_recall)}</strong>
+        </div>
       </div>
       <div className="benchmark-context">
         <div>
@@ -682,6 +804,7 @@ function BenchmarkResultView({
               <th>EM</th>
               <th>Status</th>
               <th>Graph</th>
+              <th>Evidence</th>
             </tr>
           </thead>
           <tbody>
@@ -726,6 +849,12 @@ function BenchmarkResultView({
                       <span className="muted-value">No trace</span>
                     )}
                   </td>
+                  <td>
+                    {record.wrong_supporting_text_rate === null ||
+                    record.wrong_supporting_text_rate === undefined
+                      ? "-"
+                      : `${formatPercent(record.wrong_supporting_text_rate)} non-gold`}
+                  </td>
                 </tr>
               );
             })}
@@ -742,7 +871,13 @@ function BenchmarkResultView({
   );
 }
 
-function DatasetView() {
+function DatasetView({
+  recordId,
+  onSelectRecord,
+}: {
+  recordId?: string;
+  onSelectRecord: (recordId?: string) => void;
+}) {
   const [limit, setLimit] = useState(5);
   const [system, setSystem] = useState("dag_agent");
   const [seedInput, setSeedInput] = useState("");
@@ -750,7 +885,6 @@ function DatasetView() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<HotpotBenchmarkResult>();
   const [liveRun, setLiveRun] = useState<LiveBenchmark>();
-  const [detailRecord, setDetailRecord] = useState<HotpotBenchmarkRecord>();
   const [error, setError] = useState("");
   const maxExamples = meta?.total_examples && meta.total_examples > 1 ? meta.total_examples : 7405;
   const resolvedLimit = Math.min(limit, maxExamples);
@@ -775,7 +909,7 @@ function DatasetView() {
     setError("");
     setLiveRun(undefined);
     setResult(undefined);
-    setDetailRecord(undefined);
+    onSelectRecord(undefined);
     try {
       const parsedSeed = seedInput.trim() ? Number(seedInput) : undefined;
       if (parsedSeed !== undefined && !Number.isInteger(parsedSeed)) {
@@ -804,8 +938,9 @@ function DatasetView() {
     }
   }
 
+  const detailRecord = result?.records.find((record) => record.id === recordId);
   if (detailRecord) {
-    return <BenchmarkRecordDetail record={detailRecord} onBack={() => setDetailRecord(undefined)} />;
+    return <BenchmarkRecordDetail record={detailRecord} onBack={() => onSelectRecord(undefined)} />;
   }
 
   return (
@@ -908,7 +1043,7 @@ function DatasetView() {
             <BenchmarkResultView
               result={result}
               totalExamples={meta?.total_examples}
-              onSelectRecord={setDetailRecord}
+              onSelectRecord={(record) => onSelectRecord(record.id)}
             />
           </div>
         </section>
@@ -974,7 +1109,28 @@ function BenchmarkRecordDetail({
             <label>F1</label>
             <strong>{formatPercent(record.f1)}</strong>
           </div>
+          <div className="metric">
+            <label>Non-Gold Citations</label>
+            <strong>{formatPercent(record.wrong_supporting_text_rate ?? undefined)}</strong>
+          </div>
+          <div className="metric">
+            <label>Gold Fact Recall</label>
+            <strong>{formatPercent(record.gold_supporting_fact_recall ?? undefined)}</strong>
+          </div>
         </div>
+
+        <section className="answer-panel">
+          <div className="section-header">
+            <div>
+              <h2>Gold Supporting Facts</h2>
+              <span>{record.gold_supporting_facts?.length ?? 0} labeled sentences</span>
+            </div>
+            <BookOpen size={18} />
+          </div>
+          <div className="answer-body">
+            <pre>{formatJson(record.gold_supporting_facts ?? [])}</pre>
+          </div>
+        </section>
 
         {record.structural_issues && record.structural_issues.length > 0 && (
           <section className="answer-panel">
@@ -1030,33 +1186,32 @@ function BenchmarkRecordDetail({
   );
 }
 
-function ResultsView() {
+function ResultsView({
+  runId,
+  recordId,
+  onNavigate,
+}: {
+  runId?: string;
+  recordId?: string;
+  onNavigate: (runId?: string, recordId?: string) => void;
+}) {
   const [items, setItems] = useState<SavedBenchmarkSummary[]>([]);
-  const [selectedRunId, setSelectedRunId] = useState("");
+  const [selectedRunId, setSelectedRunId] = useState(runId ?? "");
   const [selectedResult, setSelectedResult] = useState<HotpotBenchmarkResult>();
-  const [detailRecord, setDetailRecord] = useState<HotpotBenchmarkRecord>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  async function loadResultWithRepair(runId: string) {
-    const result = await getBenchmarkResult(runId);
-    if (result.metrics.cosine_sim === undefined) {
-      await repairBenchmarkResult(runId);
-      return getBenchmarkResult(runId);
-    }
-    return result;
-  }
-
-  async function refreshResults() {
+  async function refreshResults(targetRunId = runId) {
     setBusy(true);
     setError("");
     try {
       const response = await listBenchmarkResults();
       setItems(response.results);
-      const nextRunId = selectedRunId || response.results[0]?.run_id || "";
-      setSelectedRunId(nextRunId);
-      if (nextRunId) {
-        setSelectedResult(await loadResultWithRepair(nextRunId));
+      setSelectedRunId(targetRunId ?? "");
+      if (targetRunId) {
+        setSelectedResult(await getBenchmarkResult(targetRunId));
+      } else {
+        setSelectedResult(undefined);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load benchmark results");
@@ -1067,24 +1222,15 @@ function ResultsView() {
 
   useEffect(() => {
     void refreshResults();
-  }, []);
+  }, [runId]);
 
-  async function selectResult(runId: string) {
-    setSelectedRunId(runId);
-    setDetailRecord(undefined);
-    setBusy(true);
-    setError("");
-    try {
-      setSelectedResult(await loadResultWithRepair(runId));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load benchmark result");
-    } finally {
-      setBusy(false);
-    }
+  function selectResult(runId: string) {
+    onNavigate(runId);
   }
 
+  const detailRecord = selectedResult?.records.find((record) => record.id === recordId);
   if (detailRecord) {
-    return <BenchmarkRecordDetail record={detailRecord} onBack={() => setDetailRecord(undefined)} />;
+    return <BenchmarkRecordDetail record={detailRecord} onBack={() => onNavigate(selectedRunId)} />;
   }
 
   return (
@@ -1138,7 +1284,10 @@ function ResultsView() {
             <BarChart3 size={18} />
           </div>
           <div className="answer-body benchmark-output">
-            <BenchmarkResultView result={selectedResult} onSelectRecord={setDetailRecord} />
+            <BenchmarkResultView
+              result={selectedResult}
+              onSelectRecord={(record) => onNavigate(selectedRunId, record.id)}
+            />
           </div>
         </section>
       </section>
@@ -1147,7 +1296,14 @@ function ResultsView() {
 }
 
 function App() {
-  const [tab, setTab] = useState<Tab>("chat");
+  const [route, setRoute] = useState<AppRoute>(() => parseRoute());
+
+  useEffect(() => {
+    const handleHashChange = () => setRoute(parseRoute());
+    window.addEventListener("hashchange", handleHashChange);
+    if (!window.location.hash) navigate({ tab: "chat" }, true);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
 
   return (
     <div className="app-shell">
@@ -1160,15 +1316,15 @@ function App() {
           </div>
         </div>
         <nav className="tab-list">
-          <button className={tab === "chat" ? "active" : ""} onClick={() => setTab("chat")}>
+          <button className={route.tab === "chat" ? "active" : ""} onClick={() => navigate({ tab: "chat" })}>
             <MessageSquare size={18} />
             Chat
           </button>
-          <button className={tab === "dataset" ? "active" : ""} onClick={() => setTab("dataset")}>
+          <button className={route.tab === "dataset" ? "active" : ""} onClick={() => navigate({ tab: "dataset" })}>
             <Database size={18} />
             Dataset
           </button>
-          <button className={tab === "results" ? "active" : ""} onClick={() => setTab("results")}>
+          <button className={route.tab === "results" ? "active" : ""} onClick={() => navigate({ tab: "results" })}>
             <History size={18} />
             Results
           </button>
@@ -1182,7 +1338,20 @@ function App() {
           <span>Runs use the active backend config.</span>
         </div>
       </aside>
-      {tab === "chat" ? <ChatView /> : tab === "dataset" ? <DatasetView /> : <ResultsView />}
+      {route.tab === "chat" ? (
+        <ChatView />
+      ) : route.tab === "dataset" ? (
+        <DatasetView
+          recordId={route.recordId}
+          onSelectRecord={(recordId) => navigate({ tab: "dataset", recordId })}
+        />
+      ) : (
+        <ResultsView
+          runId={route.runId}
+          recordId={route.recordId}
+          onNavigate={(runId, recordId) => navigate({ tab: "results", runId, recordId })}
+        />
+      )}
     </div>
   );
 }

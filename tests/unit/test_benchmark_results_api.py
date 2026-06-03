@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from app import api
@@ -85,3 +86,18 @@ def test_normalize_saved_benchmark_payload_backfills_dataset_size(monkeypatch) -
     )
 
     assert normalized["dataset_size"] == HOTPOTQA_DISTRACTOR_VALIDATION_SIZE
+
+
+def test_list_benchmark_results_sorts_by_created_at_newest_first(monkeypatch, tmp_path) -> None:
+    older = tmp_path / "newer-file-mtime.json"
+    newer = tmp_path / "older-file-mtime.json"
+    older.write_text(json.dumps({"run_id": "older", "created_at": "2026-01-01T00:00:00Z"}))
+    newer.write_text(json.dumps({"run_id": "newer", "created_at": "2026-02-01T00:00:00Z"}))
+    older.touch()
+
+    monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
+    monkeypatch.setattr(api, "count_hotpot_examples", lambda data_path=None: 2)
+
+    result = api.list_benchmark_results()
+
+    assert [item["run_id"] for item in result["results"]] == ["newer", "older"]
