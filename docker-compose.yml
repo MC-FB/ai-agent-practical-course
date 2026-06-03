@@ -2,7 +2,9 @@ services:
   dagqa:
     container_name: dagqa-app
     image: dagqa-app:latest
-    build: .
+    build:
+      context: .
+      target: backend
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -10,3 +12,20 @@ services:
       - .env
     volumes:
       - ./runs:/app/runs
+      - hf-model-cache:/app/hf_cache
+
+  test:
+    build:
+      context: .
+      target: test
+    env_file:
+      - .env
+    volumes:
+      - ./tests:/app/tests
+      - hf-model-cache:/app/hf_cache
+    profiles:
+      - test
+
+volumes:
+  dagqa-runs:
+  hf-model-cache:

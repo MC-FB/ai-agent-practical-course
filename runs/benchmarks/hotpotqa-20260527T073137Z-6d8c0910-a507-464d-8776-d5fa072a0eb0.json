@@ -22,6 +22,9 @@
       "node_count": null,
       "graph_depth": null,
       "structural_failure": false,
+      "structural_valid": null,
+      "structural_issues": [],
+      "run_trace": null,
       "error": null
     }
   ],
@@ -39,6 +42,7 @@
     "avg_node_count": 0.0,
     "avg_graph_depth": 0.0,
     "structural_failure_rate": 0.0,
-    "total_runtime_ms": 0.15912496019154787
+    "total_runtime_ms": 0.15912496019154787,
+    "structural_valid_rate": 1.0
   }
 }

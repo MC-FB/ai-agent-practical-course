@@ -22,6 +22,7 @@ import {
   getLiveBenchmark,
   getLiveAsk,
   listBenchmarkResults,
+  repairBenchmarkResult,
   startLiveBenchmark,
   startLiveAsk,
   type DagNode,
@@ -739,6 +740,11 @@ function BenchmarkResultView({
           <label>F1</label>
           <strong>{formatPercent(metrics.f1)}</strong>
         </div>
+        <div className="metric">
+          <label>Cosine Similarity</label>
+          <strong>{formatNumber(metrics.cosine_sim, 3)}</strong>
+        </div>
+        
         <div className="metric">
           <label>Avg Latency</label>
           <strong>{formatDuration(metrics.avg_latency_ms)}</strong>

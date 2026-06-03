@@ -34,6 +34,7 @@ class BenchmarkRecord(BaseModel):
     prediction: str
     exact_match: float
     f1: float
+    cosine_sim: float
     latency_ms: float
     llm_call_count: int | None = None
     node_count: int | None = None
@@ -163,8 +164,11 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
             question=example.question,
             gold_answer=example.answer,
             prediction=prediction,
+            
             exact_match=exact_match(prediction, example.answer),
             f1=answer_f1(prediction, example.answer),
+            cosine_sim=cosine_sim(prediction,example.answer),
+
             latency_ms=(time.perf_counter() - started) * 1000,
             llm_call_count=llm_call_count,
             node_count=node_count,
@@ -184,6 +188,7 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
             prediction="",
             exact_match=0.0,
             f1=0.0,
+            cosine_sim=-1.5, 
             latency_ms=(time.perf_counter() - started) * 1000,
             structural_failure=True,
             error=str(exc),
@@ -328,6 +333,11 @@ def _aggregate(records: list[BenchmarkRecord]) -> dict[str, float]:
     ]
     sorted_latencies = sorted(record.latency_ms for record in records)
     p50_latency_ms = sorted_latencies[len(sorted_latencies) // 2]
+    cosine_values = [
+        cosine_sim(record.prediction, record.gold_answer)
+        for record in records
+        if record.prediction or record.gold_answer
+    ]
     return {
         "example_count": float(len(records)),
         "success_count": float(success_count),
@@ -335,6 +345,7 @@ def _aggregate(records: list[BenchmarkRecord]) -> dict[str, float]:
         "error_count": float(error_count),
         "exact_match": sum(record.exact_match for record in records) / len(records),
         "f1": sum(record.f1 for record in records) / len(records),
+        "cosine_sim": sum(cosine_values) / len(cosine_values) if cosine_values else 0.0,
         "avg_latency_ms": sum(record.latency_ms for record in records) / len(records),
         "p50_latency_ms": p50_latency_ms,
         "total_llm_call_count": float(sum(llm_call_records)),

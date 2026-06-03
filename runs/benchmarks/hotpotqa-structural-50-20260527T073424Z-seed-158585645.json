@@ -8,157 +8,136 @@
   "model": "azure/gpt-4o-mini",
   "records": [
     {
-      "index": 1,
       "id": "5a84e9d35542994c784dda84",
       "question": "The Nike Mercurial Vapor is endorsed by a Stoke City football player who also plays for what national team?",
       "gold_answer": "the Switzerland national team",
-      "status": "error",
       "prediction": "",
-      "exact_match": 0.0,
-      "f1": 0.0,
+      "exact_match": 0,
+      "f1": 0,
       "latency_ms": 8306.553542031907,
       "llm_call_count": null,
       "node_count": null,
-      "wave_count": null,
-      "final_answer": null,
-      "structure": {
-        "valid": false,
-        "problems": [
-          "<function exact_match at 0x118b52840>"
-        ]
-      },
+      "graph_depth": null,
+      "structural_failure": true,
+      "structural_valid": false,
+      "structural_issues": [
+        "<function exact_match at 0x118b52840>"
+      ],
+      "run_trace": null,
       "error": "<function exact_match at 0x118b52840>"
     },
     {
-      "index": 2,
       "id": "5ac322c95542995ef918c117",
       "question": "Which magazine had more previous names, Watercolor Artist or The General?",
       "gold_answer": "The General",
-      "status": "error",
       "prediction": "",
-      "exact_match": 0.0,
-      "f1": 0.0,
+      "exact_match": 0,
+      "f1": 0,
       "latency_ms": 10383.440750010777,
       "llm_call_count": null,
       "node_count": null,
-      "wave_count": null,
-      "final_answer": null,
-      "structure": {
-        "valid": false,
-        "problems": [
-          "<function exact_match at 0x118b52840>"
-        ]
-      },
+      "graph_depth": null,
+      "structural_failure": true,
+      "structural_valid": false,
+      "structural_issues": [
+        "<function exact_match at 0x118b52840>"
+      ],
+      "run_trace": null,
       "error": "<function exact_match at 0x118b52840>"
     },
     {
-      "index": 3,
       "id": "5ac17c025542994d76dcce70",
       "question": "Reveille Park is the eighth album by which American rapper born on October 5, 1970?",
       "gold_answer": "South Park Mexican",
-      "status": "error",
       "prediction": "",
-      "exact_match": 0.0,
-      "f1": 0.0,
+      "exact_match": 0,
+      "f1": 0,
       "latency_ms": 8557.579459040426,
       "llm_call_count": null,
       "node_count": null,
-      "wave_count": null,
-      "final_answer": null,
-      "structure": {
-        "valid": false,
-        "problems": [
-          "<function exact_match at 0x118b52840>"
-        ]
-      },
+      "graph_depth": null,
+      "structural_failure": true,
+      "structural_valid": false,
+      "structural_issues": [
+        "<function exact_match at 0x118b52840>"
+      ],
+      "run_trace": null,
       "error": "<function exact_match at 0x118b52840>"
     },
     {
-      "index": 4,
       "id": "5a80de9b55429938b6142226",
       "question": " The Astor Bridge carries State Road 40 over a river that his how long?",
       "gold_answer": "310 mi long",
-      "status": "error",
       "prediction": "",
-      "exact_match": 0.0,
-      "f1": 0.0,
+      "exact_match": 0,
+      "f1": 0,
       "latency_ms": 10520.640791975893,
       "llm_call_count": null,
       "node_count": null,
-      "wave_count": null,
-      "final_answer": null,
-      "structure": {
-        "valid": false,
-        "problems": [
-          "<function exact_match at 0x118b52840>"
-        ]
-      },
+      "graph_depth": null,
+      "structural_failure": true,
+      "structural_valid": false,
+      "structural_issues": [
+        "<function exact_match at 0x118b52840>"
+      ],
+      "run_trace": null,
       "error": "<function exact_match at 0x118b52840>"
     },
     {
-      "index": 5,
       "id": "5ae64ffd5542992ae0d162ce",
       "question": "How many Golden Globe Awards did the artist who published the photo book \"In Mexico\" win?",
       "gold_answer": "five",
-      "status": "error",
       "prediction": "",
-      "exact_match": 0.0,
-      "f1": 0.0,
+      "exact_match": 0,
+      "f1": 0,
       "latency_ms": 7630.233415984549,
       "llm_call_count": null,
       "node_count": null,
-      "wave_count": null,
-      "final_answer": null,
-      "structure": {
-        "valid": false,
-        "problems": [
-          "<function exact_match at 0x118b52840>"
-        ]
-      },
+      "graph_depth": null,
+      "structural_failure": true,
+      "structural_valid": false,
+      "structural_issues": [
+        "<function exact_match at 0x118b52840>"
+      ],
+      "run_trace": null,
       "error": "<function exact_match at 0x118b52840>"
     },
     {
-      "index": 6,
       "id": "5a8a423255429930ff3c0d30",
       "question": "Dost Mohammad Khan was killed by a ruler who became the third king of what country?",
       "gold_answer": "Afghanistan",
-      "status": "error",
       "prediction": "",
-      "exact_match": 0.0,
-      "f1": 0.0,
+      "exact_match": 0,
+      "f1": 0,
       "latency_ms": 15536.802834016271,
       "llm_call_count": null,
       "node_count": null,
-      "wave_count": null,
-      "final_answer": null,
-      "structure": {
-        "valid": false,
-        "problems": [
-          "<function exact_match at 0x118b52840>"
-        ]
-      },
+      "graph_depth": null,
+      "structural_failure": true,
+      "structural_valid": false,
+      "structural_issues": [
+        "<function exact_match at 0x118b52840>"
+      ],
+      "run_trace": null,
       "error": "<function exact_match at 0x118b52840>"
     },
     {
-      "index": 7,
       "id": "5add67915542992200553af8",
       "question": "What was the nickname of the hitman hired by an Italian American Criminal Organization?",
       "gold_answer": "The Crowned Prince of the Philadelphia Mob",
-      "status": "error",
       "prediction": "",
-      "exact_match": 0.0,
-      "f1": 0.0,
+      "exact_match": 0,
+      "f1": 0,
       "latency_ms": 20682.396917021833,
       "llm_call_count": null,
       "node_count": null,
-      "wave_count": null,
-      "final_answer": null,
-      "structure": {
-        "valid": false,
-        "problems": [
-          "<function exact_match at 0x118b52840>"
-        ]
-      },
+      "graph_depth": null,
+      "structural_failure": true,
+      "structural_valid": false,
+      "structural_issues": [
+        "<function exact_match at 0x118b52840>"
+      ],
+      "run_trace": null,
       "error": "<function exact_match at 0x118b52840>"
     }
   ],
@@ -173,5 +152,29 @@
     "total_llm_call_count": 0,
     "avg_node_count": 0.0,
     "total_runtime_ms": 81624.67820796883
+  },
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "system": "dag_agent",
+  "output_path": "runs/benchmarks/hotpotqa-structural-50-20260527T073424Z-seed-158585645.json",
+  "total_runtime_ms": 81624.67820796883,
+  "metrics": {
+    "completed": 7,
+    "success_count": 0.0,
+    "error_count": 7.0,
+    "structurally_valid_count": 0,
+    "exact_match": 0.0,
+    "f1": 0.0,
+    "avg_latency_ms": 11659.663958583094,
+    "total_llm_call_count": 0.0,
+    "avg_node_count": 0.0,
+    "total_runtime_ms": 81624.67820796883,
+    "example_count": 7.0,
+    "failure_count": 7.0,
+    "p50_latency_ms": 10383.440750010777,
+    "avg_llm_call_count": 0.0,
+    "avg_graph_depth": 0.0,
+    "structural_valid_rate": 0.0,
+    "structural_failure_rate": 1.0
   }
 }

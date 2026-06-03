@@ -15,17 +15,18 @@
       "question": "what is one of the stars of  The Newcomers known for",
       "gold_answer": "superhero roles as the Marvel Comics",
       "prediction": "Kate Bosworth is known for her role in \"Blue Crush.\"",
-      "exact_match": 0.0,
-      "f1": 0.0,
+      "exact_match": 0,
+      "f1": 0,
       "latency_ms": 1276.6011250205338,
       "llm_call_count": 1,
       "node_count": null,
       "graph_depth": null,
+      "structural_failure": false,
       "structural_valid": null,
       "structural_issues": [],
-      "structural_failure": false,
       "run_trace": null,
-      "error": null
+      "error": null,
+      "cosine_sim": 0.260457843542099
     }
   ],
   "metrics": {
@@ -43,6 +44,7 @@
     "avg_graph_depth": 0.0,
     "structural_valid_rate": 1.0,
     "structural_failure_rate": 0.0,
-    "total_runtime_ms": 4776.329040993005
+    "total_runtime_ms": 4776.329040993005,
+    "cosine_sim": 0.260457843542099
   }
 }

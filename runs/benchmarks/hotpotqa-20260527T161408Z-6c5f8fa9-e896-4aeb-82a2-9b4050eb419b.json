@@ -25,7 +25,8 @@
       "structural_issues": [],
       "structural_failure": false,
       "run_trace": null,
-      "error": null
+      "error": null,
+      "cosine_sim": 0.260457843542099
     }
   ],
   "metrics": {
@@ -43,6 +44,7 @@
     "avg_graph_depth": 0.0,
     "structural_valid_rate": 1.0,
     "structural_failure_rate": 0.0,
-    "total_runtime_ms": 3128.3073750091717
+    "total_runtime_ms": 3128.3073750091717,
+    "cosine_sim": 0.260457843542099
   }
 }
