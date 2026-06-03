@@ -40,8 +40,7 @@ def _normalize_plan_data(data: object) -> object:
             node.setdefault("input_map", {})
             if isinstance(node["input_map"], dict):
                 node["input_map"] = {
-                    key: _normalize_reference(value)
-                    for key, value in node["input_map"].items()
+                    key: _normalize_reference(value) for key, value in node["input_map"].items()
                 }
             node.setdefault(
                 "prompt",

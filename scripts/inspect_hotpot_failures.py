@@ -5,7 +5,6 @@ import asyncio
 from dagqa.client import DagQaClient
 from dagqa.config import AppConfig
 
-
 QUESTIONS = [
     "Where has Kerwin Swint's work appeared that draws 20.5 million unique visitors a month?",
     (
