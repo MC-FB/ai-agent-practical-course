@@ -35,17 +35,18 @@ async def test_list_llm_models_combines_azure_and_live_cluster_catalog(monkeypat
     monkeypatch.setattr(api, "load_config", _azure_config)
 
     async def cluster_models() -> list[str]:
-        return ["Qwen/Qwen3.5-122B-A10B", "google/gemma-4-31B-it"]
+        return ["Qwen/Qwen3.5-122B-A10B", "google/gemma-4-31B-it", "openai/gpt-oss-120b"]
 
     monkeypatch.setattr(api, "_cluster_models", cluster_models)
 
     result = await api.list_llm_models()
 
-    assert result["default"] == {"provider": "azure_openai", "model": "azure/gpt-4o-mini"}
+    assert result["default"] == {"provider": "cluster", "model": "openai/gpt-oss-120b"}
     assert [item["model"] for item in result["models"]] == [
         "azure/gpt-4o-mini",
         "Qwen/Qwen3.5-122B-A10B",
         "google/gemma-4-31B-it",
+        "openai/gpt-oss-120b",
     ]
 
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 
 import dagqa.eval.benchmark as benchmark_module
+from dagqa.config import AppConfig
 from dagqa.eval.benchmark import (
     BenchmarkRecord,
     _aggregate,
@@ -21,6 +22,7 @@ from dagqa.schemas import (
     EvidenceDocument,
     EvidenceSelection,
     GoldSupportingFact,
+    LLMResponse,
     NodeStatus,
     NodeTrace,
     Operation,
@@ -119,6 +121,64 @@ async def test_benchmark_passes_hotpot_context_to_dag_agent() -> None:
 
     assert client.evidence_documents == documents
     assert record.error == "stop after recording"
+
+
+async def test_direct_baseline_sends_all_sources_and_stores_cited_trace() -> None:
+    source_count = 2
+    documents = [
+        EvidenceDocument(
+            id="context-0",
+            title="Ada Lovelace",
+            text="Ada was born in London.",
+            metadata={"sentences": ["Ada was born in London."]},
+        ),
+        EvidenceDocument(
+            id="context-1",
+            title="Distractor",
+            text="This is unrelated.",
+            metadata={"sentences": ["This is unrelated."]},
+        ),
+    ]
+
+    class RecordingLLM:
+        prompt = ""
+
+        async def complete(self, request):  # noqa: ANN001, ANN202
+            self.prompt = request.prompt
+            return LLMResponse(
+                text=(
+                    '{"answer":"London","_evidence_citations":[{"document_id":"context-0",'
+                    '"title":"Ada Lovelace","sentence_indices":[0],'
+                    '"fact":"Ada was born in London."}]}'
+                ),
+                model="test",
+            )
+
+    class RecordingClient:
+        config = AppConfig()
+        llm = RecordingLLM()
+
+    client = RecordingClient()
+    record = await _run_example(
+        client,  # type: ignore[arg-type]
+        HotpotExample(
+            id="example-1",
+            question="Where was Ada born?",
+            answer="London",
+            context=documents,
+            supporting_facts=[GoldSupportingFact(title="Ada Lovelace", sentence_index=0)],
+        ),
+        "direct_llm",
+    )
+
+    assert "Ada was born in London." in client.llm.prompt
+    assert "This is unrelated." in client.llm.prompt
+    assert record.prediction == "London"
+    assert record.evidence_citation_count == 1
+    assert record.gold_supporting_fact_recall == 1
+    assert record.node_count == 1
+    assert record.run_trace is not None
+    assert record.run_trace["nodes"][0]["supporting_evidence"]["total_available"] == source_count
 
 
 def test_evidence_citation_metrics_compare_against_gold_supporting_facts() -> None:

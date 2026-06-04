@@ -9,6 +9,8 @@ import {
   History,
   Loader2,
   MessageSquare,
+  PanelLeftClose,
+  PanelLeftOpen,
   Play,
   Send,
   Timer,
@@ -150,7 +152,7 @@ function formatNumber(value?: number, digits = 0) {
 
 function formatDuration(ms?: number) {
   if (ms === undefined) return "-";
-  if (ms < 1000) return `${Math.round(ms)} ms`;
+  if (Math.abs(ms) < 1000) return `${Math.round(ms)} ms`;
   return `${(ms / 1000).toFixed(1)} s`;
 }
 
@@ -880,6 +882,157 @@ function BenchmarkResultView({
   );
 }
 
+const COMPARISON_METRICS = [
+  ["exact_match", "Exact Match", "percent", "higher"],
+  ["f1", "F1", "percent", "higher"],
+  ["cosine_sim", "Cosine Similarity", "number", "higher"],
+  ["avg_latency_ms", "Avg Latency", "duration", "lower"],
+  ["avg_gold_supporting_fact_recall", "Gold Fact Recall", "percent", "higher"],
+  ["wrong_supporting_text_rate", "Non-Gold Citations", "percent", "lower"],
+] as const;
+
+function systemLabel(system: string) {
+  return system === "dag_agent" ? "DAG agent" : "Single prompt";
+}
+
+function runTypeLabel(system?: string | null) {
+  return system === "dag_agent" ? "Multi-node DAG" : "Single-node prompt";
+}
+
+function comparisonValue(value: number | undefined, format: string) {
+  if (format === "percent") return formatPercent(value);
+  if (format === "duration") return formatDuration(value);
+  return formatNumber(value, 3);
+}
+
+function deltaClass(value: number) {
+  if (Math.abs(value) < 0.000001) return "neutral";
+  return value > 0 ? "improved" : "degraded";
+}
+
+function BenchmarkComparisonView({
+  first,
+  second,
+  onSelectRecord,
+}: {
+  first: HotpotBenchmarkResult;
+  second: HotpotBenchmarkResult;
+  onSelectRecord?: (run: HotpotBenchmarkResult, record: HotpotBenchmarkRecord) => void;
+}) {
+  const mixedSystems = first.system !== second.system;
+  const focus = mixedSystems && second.system === "dag_agent" ? second : first;
+  const reference = focus === first ? second : first;
+  const focusLabel = mixedSystems ? "Multi-node DAG" : "Run A";
+  const referenceLabel = mixedSystems ? "Single-node prompt" : "Run B";
+  const deltaLabel = mixedSystems ? "Multi-node impact" : "Run A impact";
+  const sameSeed = focus.seed === reference.seed;
+  const referenceById = new Map(reference.records.map((record) => [record.id, record]));
+  const aligned = sameSeed
+    ? focus.records
+        .map((record) => [record, referenceById.get(record.id)] as const)
+        .filter((pair): pair is readonly [HotpotBenchmarkRecord, HotpotBenchmarkRecord] => Boolean(pair[1]))
+    : [];
+  const metricDeltas = COMPARISON_METRICS.map(([key, label, format, preference]) => {
+    const focusValue = focus.metrics[key];
+    const referenceValue = reference.metrics[key];
+    const rawDelta = focusValue - referenceValue;
+    const performanceDelta = preference === "higher" ? rawDelta : -rawDelta;
+    return { key, label, format, focusValue, referenceValue, rawDelta, performanceDelta };
+  });
+  const improvements = metricDeltas.filter((metric) => metric.performanceDelta > 0.000001).length;
+  const degradations = metricDeltas.filter((metric) => metric.performanceDelta < -0.000001).length;
+
+  return (
+    <div className="comparison-view">
+      <div className="comparison-heading">
+        <div>
+          <span className="comparison-eyebrow">Performance overview</span>
+          <strong>{mixedSystems ? "Multi-node DAG vs Single-node prompt" : `${systemLabel(first.system)} comparison`}</strong>
+          <span>
+            {sameSeed
+              ? `Aligned question comparison, seed ${focus.seed}`
+              : `Aggregate only: seeds differ (${focus.seed} vs ${reference.seed})`}
+          </span>
+        </div>
+        <div className="comparison-statuses">
+          <span className="comparison-score improved">{improvements} improvements</span>
+          <span className="comparison-score degraded">{degradations} degradations</span>
+          <span className={sameSeed ? "comparison-badge aligned" : "comparison-badge"}>
+            {sameSeed ? `${aligned.length} aligned` : "Different seeds"}
+          </span>
+        </div>
+      </div>
+      <div className="comparison-legend">
+        <span><i className="focus-dot" />{focusLabel}</span>
+        <span><i className="reference-dot" />{referenceLabel}</span>
+        <strong>{deltaLabel}</strong>
+      </div>
+      <div className="comparison-metrics">
+        {metricDeltas.map((metric) => {
+          const direction = deltaClass(metric.performanceDelta);
+          return (
+            <div className={`comparison-metric ${direction}`} key={metric.key}>
+              <div className="comparison-metric-header">
+                <label>{metric.label}</label>
+                <strong>
+                  {metric.rawDelta > 0 ? "+" : ""}
+                  {comparisonValue(metric.rawDelta, metric.format)}
+                </strong>
+              </div>
+              <div className="comparison-metric-values">
+                <span>
+                  <small>{focusLabel}</small>
+                  {comparisonValue(metric.focusValue, metric.format)}
+                </span>
+                <span>
+                  <small>{referenceLabel}</small>
+                  {comparisonValue(metric.referenceValue, metric.format)}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {sameSeed && (
+        <div className="record-table-wrap">
+          <table className="record-table comparison-table">
+            <thead>
+              <tr>
+                <th>Question</th>
+                <th>Gold</th>
+                <th>{focusLabel}</th>
+                <th>{referenceLabel}</th>
+                <th>{deltaLabel}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {aligned.map(([focusRecord, referenceRecord]) => {
+                const rowDelta = focusRecord.f1 - referenceRecord.f1;
+                return (
+                <tr key={focusRecord.id}>
+                  <td>{focusRecord.question}</td>
+                  <td>{focusRecord.gold_answer}</td>
+                  <td>
+                    <button className="comparison-answer" onClick={() => onSelectRecord?.(focus, focusRecord)}>
+                      {focusRecord.prediction || "-"} · {formatPercent(focusRecord.f1)}
+                    </button>
+                  </td>
+                  <td>
+                    <button className="comparison-answer" onClick={() => onSelectRecord?.(reference, referenceRecord)}>
+                      {referenceRecord.prediction || "-"} · {formatPercent(referenceRecord.f1)}
+                    </button>
+                  </td>
+                  <td><span className={`row-delta ${deltaClass(rowDelta)}`}>{rowDelta > 0 ? "+" : ""}{formatPercent(rowDelta)}</span></td>
+                </tr>
+              )})}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function DatasetView({
   recordId,
   onSelectRecord,
@@ -890,11 +1043,12 @@ function DatasetView({
   llm: LLMSelection;
 }) {
   const [limit, setLimit] = useState(5);
-  const [system, setSystem] = useState("dag_agent");
+  const [systems, setSystems] = useState<string[]>(["dag_agent", "direct_llm"]);
   const [seedInput, setSeedInput] = useState("");
   const [meta, setMeta] = useState<HotpotBenchmarkMeta>();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<HotpotBenchmarkResult>();
+  const [comparisonResults, setComparisonResults] = useState<HotpotBenchmarkResult[]>([]);
   const [liveRun, setLiveRun] = useState<LiveBenchmark>();
   const [error, setError] = useState("");
   const maxExamples = meta?.total_examples && meta.total_examples > 1 ? meta.total_examples : 7405;
@@ -920,13 +1074,17 @@ function DatasetView({
     setError("");
     setLiveRun(undefined);
     setResult(undefined);
+    setComparisonResults([]);
     onSelectRecord(undefined);
     try {
       const parsedSeed = seedInput.trim() ? Number(seedInput) : undefined;
       if (parsedSeed !== undefined && !Number.isInteger(parsedSeed)) {
         throw new Error("Seed must be an integer.");
       }
-      const started = await startLiveBenchmark(resolvedLimit, system, llm, parsedSeed);
+      if (!systems.length) {
+        throw new Error("Select at least one system.");
+      }
+      const started = await startLiveBenchmark(resolvedLimit, systems, llm, parsedSeed);
       setLiveRun(started);
       setResult(started);
       setSeedInput(String(started.seed));
@@ -936,11 +1094,15 @@ function DatasetView({
         await new Promise((resolve) => window.setTimeout(resolve, 1000));
         current = await getLiveBenchmark(started.run_id);
         setLiveRun(current);
-        setResult(current);
+        setComparisonResults(current.comparison_results ?? []);
+        setResult(current.comparison_results?.[0] ?? current);
       }
 
       if (current.phase === "error") {
         setError(current.error ?? "Benchmark failed");
+      } else {
+        setComparisonResults(current.comparison_results ?? []);
+        setResult(current.comparison_results?.[0] ?? current);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Benchmark failed");
@@ -960,19 +1122,34 @@ function DatasetView({
         <div className="chat-header">
           <div>
             <h1>Dataset</h1>
-            <p>Run a seeded HotpotQA validation sample against the active DAG agent.</p>
+            <p>Run a seeded HotpotQA validation sample against one or both systems.</p>
           </div>
           <Database size={22} />
         </div>
 
         <div className="benchmark-form">
-          <label>
-            System
-            <select value={system} onChange={(event) => setSystem(event.target.value)}>
-              <option value="dag_agent">DAG agent</option>
-              <option value="direct_llm">Direct LLM</option>
-            </select>
-          </label>
+          <fieldset className="system-checks">
+            <legend>Systems</legend>
+            {[
+              ["dag_agent", "DAG agent"],
+              ["direct_llm", "Single prompt"],
+            ].map(([value, label]) => (
+              <label key={value}>
+                <input
+                  checked={systems.includes(value)}
+                  type="checkbox"
+                  onChange={(event) =>
+                    setSystems((current) =>
+                      event.target.checked
+                        ? [...current, value]
+                        : current.filter((system) => system !== value),
+                    )
+                  }
+                />
+                {label}
+              </label>
+            ))}
+          </fieldset>
           <div className="benchmark-slider">
             <div className="slider-header">
               <label htmlFor="benchmark-limit">Examples</label>
@@ -1026,7 +1203,10 @@ function DatasetView({
                 <strong>
                   {formatNumber(liveRun.completed)} / {formatNumber(liveRun.total)} examples
                 </strong>
-                <span>{liveRun.current_question ?? "Finalizing benchmark run."}</span>
+                <span>
+                  {liveRun.current_system ? `${systemLabel(liveRun.current_system)}: ` : ""}
+                  {liveRun.current_question ?? "Finalizing benchmark run."}
+                </span>
               </div>
               <span>{progressPercent.toFixed(0)}%</span>
             </div>
@@ -1051,11 +1231,22 @@ function DatasetView({
             <BarChart3 size={18} />
           </div>
           <div className="answer-body benchmark-output">
-            <BenchmarkResultView
-              result={result}
-              totalExamples={meta?.total_examples}
-              onSelectRecord={(record) => onSelectRecord(record.id)}
-            />
+            {comparisonResults.length === 2 ? (
+              <BenchmarkComparisonView
+                first={comparisonResults[0]}
+                second={comparisonResults[1]}
+                onSelectRecord={(run, record) => {
+                  setResult(run);
+                  onSelectRecord(record.id);
+                }}
+              />
+            ) : (
+              <BenchmarkResultView
+                result={result}
+                totalExamples={meta?.total_examples}
+                onSelectRecord={(record) => onSelectRecord(record.id)}
+              />
+            )}
           </div>
         </section>
       </section>
@@ -1208,7 +1399,9 @@ function ResultsView({
 }) {
   const [items, setItems] = useState<SavedBenchmarkSummary[]>([]);
   const [selectedRunId, setSelectedRunId] = useState(runId ?? "");
+  const [comparisonRunId, setComparisonRunId] = useState("");
   const [selectedResult, setSelectedResult] = useState<HotpotBenchmarkResult>();
+  const [comparisonResult, setComparisonResult] = useState<HotpotBenchmarkResult>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -1220,9 +1413,24 @@ function ResultsView({
       setItems(response.results);
       setSelectedRunId(targetRunId ?? "");
       if (targetRunId) {
-        setSelectedResult(await getBenchmarkResult(targetRunId));
+        const loaded = await getBenchmarkResult(targetRunId);
+        setSelectedResult(loaded);
+        const paired = response.results.find(
+          (item) =>
+            item.run_id !== targetRunId &&
+            item.comparison_group_id &&
+            item.comparison_group_id === loaded.comparison_group_id,
+        );
+        if (paired) {
+          setComparisonRunId(paired.run_id);
+          setComparisonResult(await getBenchmarkResult(paired.run_id));
+        } else {
+          setComparisonRunId("");
+          setComparisonResult(undefined);
+        }
       } else {
         setSelectedResult(undefined);
+        setComparisonResult(undefined);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load benchmark results");
@@ -1237,6 +1445,11 @@ function ResultsView({
 
   function selectResult(runId: string) {
     onNavigate(runId);
+  }
+
+  async function selectComparison(runId: string) {
+    setComparisonRunId(runId);
+    setComparisonResult(runId ? await getBenchmarkResult(runId) : undefined);
   }
 
   const detailRecord = selectedResult?.records.find((record) => record.id === recordId);
@@ -1257,7 +1470,7 @@ function ResultsView({
 
         <div className="results-browser">
           <label>
-            Saved Run
+            Run A
             <select
               value={selectedRunId}
               onChange={(event) => void selectResult(event.target.value)}
@@ -1267,7 +1480,21 @@ function ResultsView({
               </option>
               {items.map((item) => (
                 <option key={item.run_id} value={item.run_id}>
-                  {formatSavedDateTime(item.created_at)} · {item.model ?? "unknown model"} · {item.limit} · seed {item.seed}
+                  {formatSavedDateTime(item.created_at)} · {runTypeLabel(item.system)} · {item.model ?? "unknown model"} · {item.limit} · seed {item.seed}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Run B
+            <select
+              value={comparisonRunId}
+              onChange={(event) => void selectComparison(event.target.value)}
+            >
+              <option value="">None</option>
+              {items.filter((item) => item.run_id !== selectedRunId).map((item) => (
+                <option key={item.run_id} value={item.run_id}>
+                  {formatSavedDateTime(item.created_at)} · {runTypeLabel(item.system)} · {item.model ?? "unknown model"} · {item.limit} · seed {item.seed}
                 </option>
               ))}
             </select>
@@ -1295,10 +1522,18 @@ function ResultsView({
             <BarChart3 size={18} />
           </div>
           <div className="answer-body benchmark-output">
-            <BenchmarkResultView
-              result={selectedResult}
-              onSelectRecord={(record) => onNavigate(selectedRunId, record.id)}
-            />
+            {selectedResult && comparisonResult ? (
+              <BenchmarkComparisonView
+                first={selectedResult}
+                second={comparisonResult}
+                onSelectRecord={(run, record) => onNavigate(run.run_id, record.id)}
+              />
+            ) : (
+              <BenchmarkResultView
+                result={selectedResult}
+                onSelectRecord={(record) => onNavigate(selectedRunId, record.id)}
+              />
+            )}
           </div>
         </section>
       </section>
@@ -1349,6 +1584,9 @@ function App() {
   const [modelCatalog, setModelCatalog] = useState<LLMModelCatalog>();
   const [selectedLLM, setSelectedLLM] = useState<LLMSelection>();
   const [modelError, setModelError] = useState("");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    () => window.localStorage.getItem("dagqa-sidebar-collapsed") === "true",
+  );
 
   useEffect(() => {
     const handleHashChange = () => setRoute(parseRoute());
@@ -1366,32 +1604,61 @@ function App() {
       .catch((err) => setModelError(err instanceof Error ? err.message : "Could not load models"));
   }, []);
 
+  function toggleSidebar() {
+    setSidebarCollapsed((current) => {
+      const next = !current;
+      window.localStorage.setItem("dagqa-sidebar-collapsed", String(next));
+      return next;
+    });
+  }
+
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
       <aside className="sidebar">
         <div className="sidebar-brand">
           <div className="brand-mark">DQ</div>
-          <div>
+          <div className="sidebar-brand-copy">
             <strong>DAG QA</strong>
             <span>Multi-hop evaluation</span>
           </div>
+          <button
+            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="sidebar-toggle"
+            onClick={toggleSidebar}
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            type="button"
+          >
+            {sidebarCollapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
+          </button>
         </div>
         <nav className="tab-list">
-          <button className={route.tab === "chat" ? "active" : ""} onClick={() => navigate({ tab: "chat" })}>
+          <button
+            className={route.tab === "chat" ? "active" : ""}
+            onClick={() => navigate({ tab: "chat" })}
+            title="Chat"
+          >
             <MessageSquare size={18} />
-            Chat
+            <span>Chat</span>
           </button>
-          <button className={route.tab === "dataset" ? "active" : ""} onClick={() => navigate({ tab: "dataset" })}>
+          <button
+            className={route.tab === "dataset" ? "active" : ""}
+            onClick={() => navigate({ tab: "dataset" })}
+            title="Dataset"
+          >
             <Database size={18} />
-            Dataset
+            <span>Dataset</span>
           </button>
-          <button className={route.tab === "results" ? "active" : ""} onClick={() => navigate({ tab: "results" })}>
+          <button
+            className={route.tab === "results" ? "active" : ""}
+            onClick={() => navigate({ tab: "results" })}
+            title="Results"
+          >
             <History size={18} />
-            Results
+            <span>Results</span>
           </button>
-          <a href="http://localhost:8000/docs" target="_blank" rel="noreferrer">
+          <a href="http://localhost:8000/docs" target="_blank" rel="noreferrer" title="API Docs">
             <BookOpen size={18} />
-            API Docs
+            <span>API Docs</span>
           </a>
         </nav>
         <div className="sidebar-controls">
