@@ -4,7 +4,9 @@ import json
 from pathlib import Path
 
 from app import api
-from dagqa.eval.hotpot_loader import HOTPOTQA_DISTRACTOR_VALIDATION_SIZE
+from dagqa.config import AppConfig
+from dagqa.eval.benchmark import BenchmarkRecord
+from dagqa.eval.hotpot_loader import HOTPOTQA_DISTRACTOR_VALIDATION_SIZE, HotpotExample
 from dagqa.schemas import (
     DagNode,
     DagPlan,
@@ -118,3 +120,64 @@ def test_list_benchmark_results_sorts_by_created_at_newest_first(monkeypatch, tm
     result = api.list_benchmark_results()
 
     assert [item["run_id"] for item in result["results"]] == ["newer", "older"]
+
+
+async def test_paired_live_benchmark_reuses_sample_and_saves_two_results(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    system_count = 2
+    total_completed = 6
+    examples = [
+        HotpotExample(id=str(index), question=f"q{index}", answer=f"a{index}") for index in range(6)
+    ]
+    seen: dict[str, list[str]] = {}
+
+    async def run_examples(client, sampled, system, max_parallel, on_complete):  # noqa: ANN001, ARG001
+        seen[system] = [example.id for example in sampled]
+        records = [
+            BenchmarkRecord(
+                id=example.id,
+                question=example.question,
+                gold_answer=example.answer,
+                prediction=example.answer,
+                exact_match=1,
+                f1=1,
+                latency_ms=1,
+            )
+            for example in sampled
+        ]
+        for record in records:
+            on_complete(record)
+        return records
+
+    monkeypatch.setattr(api, "load_hotpot_examples", lambda path=None: examples)
+    monkeypatch.setattr(api, "_run_examples", run_examples)
+    monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
+    cfg = AppConfig()
+    dag_client = type("Client", (), {"config": cfg})()
+    run_id = "coordinator"
+    group_id = "comparison-1"
+    api.LIVE_BENCHMARKS[run_id] = {"created_at": "2026-06-04T00:00:00Z"}
+
+    await api._run_live_benchmark(
+        run_id,
+        api.BenchmarkRequest(limit=3, seed=123, systems=["dag_agent", "direct_llm"]),
+        123,
+        dag_client,  # type: ignore[arg-type]
+        cfg,
+        ["dag_agent", "direct_llm"],
+        group_id,
+    )
+
+    live = api.LIVE_BENCHMARKS[run_id]
+    saved = [json.loads(path.read_text()) for path in tmp_path.glob("*.json")]
+
+    assert seen["dag_agent"] == seen["direct_llm"]
+    assert live["phase"] == "complete"
+    assert live["completed"] == total_completed
+    assert len(live["comparison_run_ids"]) == system_count
+    assert len(saved) == system_count
+    assert {result["system"] for result in saved} == {"dag_agent", "direct_llm"}
+    assert {result["seed"] for result in saved} == {123}
+    assert {result["comparison_group_id"] for result in saved} == {group_id}

@@ -38,6 +38,8 @@ LIVE_BENCHMARKS: dict[str, dict[str, Any]] = {}
 
 CLUSTER_API_BASE = "http://atknoll32.air.cit.tum.de:3000/inference"
 CLUSTER_MODELS_URL = "http://atknoll32.air.cit.tum.de:3000/models"
+DEFAULT_CLUSTER_MODEL = "openai/gpt-oss-120b"
+PAIRED_SYSTEM_COUNT = 2
 
 
 class LLMSelection(BaseModel):
@@ -55,7 +57,8 @@ class ExecuteRequest(BaseModel):
 
 
 class BenchmarkRequest(BaseModel):
-    system: str = "dag_agent"
+    system: Literal["dag_agent", "direct_llm"] = "dag_agent"
+    systems: list[Literal["dag_agent", "direct_llm"]] | None = None
     limit: int = 10
     seed: int | None = None
     data_path: str | None = None
@@ -154,9 +157,14 @@ async def list_llm_models() -> dict[str, Any]:
         {"provider": "cluster", "model": model, "label": f"Chair cluster · {model}"}
         for model in cluster_models
     )
+    default = (
+        {"provider": "cluster", "model": DEFAULT_CLUSTER_MODEL}
+        if DEFAULT_CLUSTER_MODEL in cluster_models
+        else {"provider": "azure_openai", "model": azure_model}
+    )
     return {
         "models": options,
-        "default": {"provider": "azure_openai", "model": azure_model},
+        "default": default,
         "cluster_error": cluster_error,
     }
 
@@ -345,10 +353,13 @@ async def _run_live(
 
 @router.post("/benchmarks/hotpotqa", tags=["Benchmarks"], summary="Run HotpotQA benchmark")
 async def hotpotqa(request: BenchmarkRequest) -> BenchmarkResult:
+    systems = _benchmark_systems(request)
+    if len(systems) != 1:
+        raise HTTPException(status_code=422, detail="Use the live endpoint for paired benchmarks.")
     dag_client = client(request.llm)
     result = await benchmark_hotpotqa(
         dag_client,
-        system=request.system,  # type: ignore[arg-type]
+        system=systems[0],
         limit=request.limit,
         seed=request.seed,
         path=request.data_path,
@@ -375,6 +386,8 @@ def hotpotqa_info(data_path: str | None = None) -> dict[str, Any]:
 )
 async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
     run_id = str(uuid4())
+    systems = _benchmark_systems(request)
+    comparison_group_id = str(uuid4()) if len(systems) == PAIRED_SYSTEM_COUNT else None
     cfg = config_for_selection(request.llm)
     dag_client = DagQaClient(cfg)
     seed = request.seed if request.seed is not None else int(time.time_ns() % 2_147_483_647)
@@ -382,7 +395,12 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
         "run_id": run_id,
         "phase": "running",
         "status": "running",
-        "system": request.system,
+        "system": systems[0],
+        "systems": systems,
+        "current_system": systems[0],
+        "comparison_group_id": comparison_group_id,
+        "comparison_run_ids": [],
+        "comparison_results": [],
         "limit": request.limit,
         "seed": seed,
         "max_parallel_examples": cfg.benchmark.max_parallel_examples,
@@ -393,7 +411,7 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
         "model": cfg.llm.model,
         "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "completed": 0,
-        "total": request.limit,
+        "total": request.limit * len(systems),
         "current_question": None,
         "total_runtime_ms": 0,
         "metrics": {},
@@ -401,7 +419,17 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
         "output_path": None,
         "error": None,
     }
-    asyncio.create_task(_run_live_benchmark(run_id, request, seed, dag_client, cfg))
+    asyncio.create_task(
+        _run_live_benchmark(
+            run_id,
+            request,
+            seed,
+            dag_client,
+            cfg,
+            systems,
+            comparison_group_id,
+        )
+    )
     return LIVE_BENCHMARKS[run_id]
 
 
@@ -422,11 +450,16 @@ async def _run_live_benchmark(
     seed: int,
     dag_client: DagQaClient,
     cfg: AppConfig,
+    systems: list[Literal["dag_agent", "direct_llm"]] | None = None,
+    comparison_group_id: str | None = None,
 ) -> None:
     started = time.perf_counter()
     records: list[BenchmarkRecord] = []
+    systems = systems or _benchmark_systems(request)
+    completed_results: list[BenchmarkResult] = []
+    current_system = systems[0]
     created_at = LIVE_BENCHMARKS[run_id]["created_at"]
-    total_examples = request.limit
+    total_examples = request.limit * len(systems)
     dataset_size = 0
 
     def update(
@@ -444,7 +477,12 @@ async def _run_live_benchmark(
             "run_id": run_id,
             "phase": phase,
             "status": status,
-            "system": request.system,
+            "system": current_system,
+            "systems": systems,
+            "current_system": current_system,
+            "comparison_group_id": comparison_group_id,
+            "comparison_run_ids": [result.run_id for result in completed_results],
+            "comparison_results": [result.model_dump(mode="json") for result in completed_results],
             "limit": request.limit,
             "seed": seed,
             "max_parallel_examples": cfg.benchmark.max_parallel_examples,
@@ -454,7 +492,7 @@ async def _run_live_benchmark(
             "provider": dag_client.config.llm.provider,
             "model": dag_client.config.llm.model,
             "created_at": created_at,
-            "completed": len(records),
+            "completed": sum(len(result.records) for result in completed_results) + len(records),
             "total": total_examples,
             "current_question": current_question,
             "total_runtime_ms": total_runtime_ms,
@@ -467,58 +505,86 @@ async def _run_live_benchmark(
     try:
         if request.limit <= 0 and request.data_path is None:
             dataset_size = count_hotpot_examples()
-            examples = []
+            all_examples = []
         else:
             all_examples = await asyncio.to_thread(load_hotpot_examples, request.data_path)
             dataset_size = len(all_examples)
-            examples = _sample_examples(all_examples, request.limit, seed)
-        total_examples = len(examples)
-        update(
-            current_question=(
-                f"Running up to {min(cfg.benchmark.max_parallel_examples, total_examples)} "
-                "examples in parallel."
-                if examples
-                else None
+        sampled_examples = _sample_examples(all_examples, request.limit, seed)
+        per_system_total = len(sampled_examples)
+        total_examples = per_system_total * len(systems)
+
+        for system_index, system in enumerate(systems):
+            system_started = time.perf_counter()
+            current_system = system
+            records = []
+            update(
+                current_question=(
+                    f"Running {system.replace('_', ' ')} with up to "
+                    f"{min(cfg.benchmark.max_parallel_examples, per_system_total)} examples "
+                    "in parallel."
+                    if sampled_examples
+                    else None
+                )
             )
-        )
 
-        def record_completed(record: BenchmarkRecord) -> None:
-            records.append(record)
-            remaining = total_examples - len(records)
-            update(current_question=f"{remaining} examples remaining." if remaining else None)
+            def record_completed(
+                record: BenchmarkRecord,
+                records_ref: list[BenchmarkRecord] = records,
+                system_name: str = system,
+            ) -> None:
+                records_ref.append(record)
+                remaining = per_system_total - len(records_ref)
+                update(
+                    current_question=(
+                        f"{remaining} {system_name.replace('_', ' ')} examples remaining."
+                        if remaining
+                        else None
+                    )
+                )
 
-        ordered_records = await _run_examples(
-            dag_client,
-            examples,
-            request.system,
-            cfg.benchmark.max_parallel_examples,
-            record_completed,
-        )
-        records = ordered_records
+            ordered_records = await _run_examples(
+                dag_client,
+                sampled_examples,
+                system,
+                cfg.benchmark.max_parallel_examples,
+                record_completed,
+            )
+            records = ordered_records
 
-        total_runtime_ms = (time.perf_counter() - started) * 1000
-        metrics = _aggregate(records)
-        metrics["total_runtime_ms"] = total_runtime_ms
-        result = BenchmarkResult(
-            run_id=run_id,
-            system=request.system,
-            limit=request.limit,
-            provider=dag_client.config.llm.provider,
-            model=dag_client.config.llm.model,
-            dataset="hotpotqa",
-            split=cfg.benchmark.split,
-            dataset_size=dataset_size,
-            seed=seed,
-            max_parallel_examples=cfg.benchmark.max_parallel_examples,
-            created_at=created_at,
-            total_runtime_ms=total_runtime_ms,
-            records=records,
-            metrics=metrics,
+            system_runtime_ms = (time.perf_counter() - system_started) * 1000
+            metrics = _aggregate(records)
+            metrics["total_runtime_ms"] = system_runtime_ms
+            result = BenchmarkResult(
+                run_id=run_id if len(systems) == 1 else str(uuid4()),
+                comparison_group_id=comparison_group_id,
+                system=system,
+                limit=request.limit,
+                provider=dag_client.config.llm.provider,
+                model=dag_client.config.llm.model,
+                dataset="hotpotqa",
+                split=cfg.benchmark.split,
+                dataset_size=dataset_size,
+                seed=seed,
+                max_parallel_examples=cfg.benchmark.max_parallel_examples,
+                created_at=created_at,
+                total_runtime_ms=system_runtime_ms,
+                records=records,
+                metrics=metrics,
+            )
+            output_path = _save_benchmark_result(result)
+            result.output_path = str(output_path)
+            output_path.write_text(result.model_dump_json(indent=2))
+            completed_results.append(result)
+            records = []
+            if system_index + 1 < len(systems):
+                current_system = systems[system_index + 1]
+                update(current_question=f"Starting {current_system.replace('_', ' ')}.")
+
+        update(
+            "complete",
+            status="succeeded",
+            output_path=completed_results[-1].output_path if completed_results else None,
         )
-        output_path = _save_benchmark_result(result)
-        result.output_path = str(output_path)
-        output_path.write_text(result.model_dump_json(indent=2))
-        update("complete", status="succeeded", output_path=str(output_path))
     except Exception as exc:
         update("error", status="failed", error=str(exc))
 
@@ -549,6 +615,16 @@ def hotpotqa_meta(data_path: str | None = None) -> dict[str, Any]:
     }
 
 
+def _benchmark_systems(
+    request: BenchmarkRequest,
+) -> list[Literal["dag_agent", "direct_llm"]]:
+    systems = request.systems or [request.system]
+    resolved = [system for system in ("dag_agent", "direct_llm") if system in systems]
+    if not resolved:
+        raise HTTPException(status_code=422, detail="Select at least one benchmark system.")
+    return resolved
+
+
 @router.get("/benchmarks/results", tags=["Benchmarks"], summary="List benchmark results")
 def list_benchmark_results() -> dict[str, Any]:
     output_dir = _benchmark_output_dir()
@@ -563,6 +639,7 @@ def list_benchmark_results() -> dict[str, Any]:
         items.append(
             {
                 "run_id": normalized.get("run_id") or path.stem,
+                "comparison_group_id": normalized.get("comparison_group_id"),
                 "created_at": normalized.get("created_at"),
                 "dataset": normalized.get("dataset"),
                 "split": normalized.get("split"),

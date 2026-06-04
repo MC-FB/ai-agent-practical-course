@@ -14,6 +14,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow: hidden;
   background: #f5f7f8;
 }
 
@@ -31,22 +32,39 @@ button {
 .app-shell {
   display: grid;
   grid-template-columns: 248px minmax(0, 1fr);
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  transition: grid-template-columns 180ms ease;
+}
+
+.app-shell.sidebar-collapsed {
+  grid-template-columns: 72px minmax(0, 1fr);
+}
+
+.app-shell > main {
+  min-height: 0;
+  overflow: auto;
 }
 
 .sidebar {
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: 22px;
+  height: 100vh;
+  min-height: 0;
+  overflow: visible;
   border-right: 1px solid #d9e0e4;
   background: #ffffff;
   padding: 20px 16px;
+  transition: padding 180ms ease;
 }
 
 .sidebar-brand {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 .brand-mark {
@@ -58,11 +76,40 @@ button {
   background: #163b45;
   color: #ffffff;
   font-weight: 800;
+  flex: 0 0 auto;
 }
 
 .sidebar-brand strong,
 .sidebar-brand span {
   display: block;
+}
+
+.sidebar-brand-copy {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.sidebar-toggle {
+  position: absolute;
+  top: 50%;
+  right: -29px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 30px;
+  transform: translateY(-50%);
+  border: 1px solid #d4dfe2;
+  border-left: 0;
+  border-radius: 0 7px 7px 0;
+  background: #ffffff;
+  color: #52656d;
+  box-shadow: 3px 0 7px rgb(31 51 58 / 7%);
+}
+
+.sidebar-toggle:hover {
+  background: #eef8f5;
+  color: #123d38;
 }
 
 .sidebar-brand span,
@@ -95,6 +142,11 @@ button {
   font: inherit;
   text-decoration: none;
   text-align: left;
+  white-space: nowrap;
+}
+
+.tab-list svg {
+  flex: 0 0 auto;
 }
 
 .tab-list button.active {
@@ -116,6 +168,7 @@ button {
 .sidebar-controls {
   display: grid;
   gap: 14px;
+  min-height: 0;
 }
 
 .model-picker {
@@ -144,6 +197,31 @@ button {
   color: #8f2f22;
   font-size: 11px;
   line-height: 1.35;
+}
+
+.sidebar-collapsed .sidebar {
+  padding-right: 14px;
+  padding-left: 14px;
+}
+
+.sidebar-collapsed .sidebar-brand-copy,
+.sidebar-collapsed .tab-list span,
+.sidebar-collapsed .sidebar-controls {
+  display: none;
+}
+
+.sidebar-collapsed .sidebar-brand {
+  justify-content: center;
+}
+
+.sidebar-collapsed .tab-list button,
+.sidebar-collapsed .tab-list a {
+  justify-content: center;
+  padding: 0;
+}
+
+.sidebar-collapsed .sidebar-toggle {
+  right: -27px;
 }
 
 .workspace {
@@ -636,6 +714,35 @@ button {
   font-weight: 700;
 }
 
+.system-checks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  border: 1px solid #cbd6da;
+  border-radius: 8px;
+  padding: 8px 10px 10px;
+}
+
+.system-checks legend {
+  color: #516169;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.system-checks label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #26343b;
+  font-size: 12px;
+}
+
+.system-checks input {
+  min-height: auto;
+}
+
 .benchmark-form input,
 .benchmark-form select,
 .results-browser select {
@@ -750,6 +857,220 @@ button {
 .benchmark-result-grid {
   display: grid;
   gap: 14px;
+}
+
+.comparison-view {
+  display: grid;
+  gap: 16px;
+}
+
+.comparison-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  border: 1px solid #dbe5e7;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fbfb 0%, #eef7f5 100%);
+  padding: 16px;
+}
+
+.comparison-heading > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.comparison-heading strong {
+  color: #17272d;
+  font-size: 18px;
+}
+
+.comparison-heading span {
+  color: #667680;
+  font-size: 12px;
+}
+
+.comparison-eyebrow {
+  color: #17655b !important;
+  font-size: 10px !important;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.comparison-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.comparison-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #fff0e8;
+  color: #a84b1f !important;
+  padding: 6px 10px;
+  font-weight: 800;
+}
+
+.comparison-badge.aligned {
+  background: #e7f5ed;
+  color: #26734d !important;
+}
+
+.comparison-score {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-weight: 800;
+}
+
+.comparison-score.improved {
+  border-color: #b9dfc7;
+  background: #edf9f1;
+  color: #207344;
+}
+
+.comparison-score.degraded {
+  border-color: #efc3bd;
+  background: #fff2f0;
+  color: #ac3f33;
+}
+
+.comparison-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.comparison-metric {
+  display: grid;
+  gap: 12px;
+  border: 1px solid #dce5e7;
+  border-top: 3px solid #96a7ad;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 12px;
+  box-shadow: 0 3px 10px rgb(31 51 58 / 5%);
+}
+
+.comparison-metric.improved {
+  border-top-color: #2d9a5f;
+  background: linear-gradient(180deg, #f4fbf6 0%, #ffffff 55%);
+}
+
+.comparison-metric.degraded {
+  border-top-color: #d45849;
+  background: linear-gradient(180deg, #fff6f4 0%, #ffffff 55%);
+}
+
+.comparison-metric-header,
+.comparison-metric-values {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.comparison-metric-header label {
+  margin: 0;
+  color: #44565e;
+  font-size: 12px;
+}
+
+.comparison-metric-header strong,
+.row-delta {
+  border-radius: 999px;
+  padding: 4px 7px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.comparison-metric.improved .comparison-metric-header strong,
+.row-delta.improved {
+  background: #dff3e6;
+  color: #17713e;
+}
+
+.comparison-metric.degraded .comparison-metric-header strong,
+.row-delta.degraded {
+  background: #fbe3df;
+  color: #a8382d;
+}
+
+.comparison-metric.neutral .comparison-metric-header strong,
+.row-delta.neutral {
+  background: #eef2f3;
+  color: #5b6c73;
+}
+
+.comparison-metric-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.comparison-metric-values span {
+  display: grid;
+  gap: 2px;
+  color: #1d2d33;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.comparison-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  color: #667680;
+  font-size: 11px;
+}
+
+.comparison-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.comparison-legend strong {
+  margin-left: auto;
+  color: #42545c;
+}
+
+.comparison-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.focus-dot {
+  background: #17655b;
+}
+
+.reference-dot {
+  background: #91a1a7;
+}
+
+.comparison-answer {
+  border: 0;
+  background: transparent;
+  color: #17655b;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.comparison-table {
+  min-width: 1000px;
+}
+
+.comparison-table th:last-child,
+.comparison-table td:last-child {
+  text-align: right;
 }
 
 .benchmark-metrics {
@@ -939,13 +1260,18 @@ button {
 
 .results-browser {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
   gap: 12px;
   align-items: end;
   border: 1px solid #d7e1e4;
   border-radius: 8px;
   background: #ffffff;
   padding: 14px 20px 18px;
+}
+
+.results-browser label,
+.results-browser select {
+  min-width: 0;
 }
 
 .empty {
@@ -1001,16 +1327,55 @@ button {
 }
 
 @media (max-width: 760px) {
+  body {
+    overflow: auto;
+  }
+
   .app-shell {
     grid-template-columns: 1fr;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
   }
 
   .sidebar {
     grid-template-rows: auto auto;
+    height: auto;
+    overflow: visible;
   }
 
   .sidebar-footer {
     display: none;
+  }
+
+  .sidebar-toggle {
+    display: none;
+  }
+
+  .sidebar-collapsed .sidebar {
+    padding: 20px 16px;
+  }
+
+  .sidebar-collapsed .sidebar-brand-copy {
+    display: block;
+  }
+
+  .sidebar-collapsed .tab-list span {
+    display: inline;
+  }
+
+  .sidebar-collapsed .sidebar-controls {
+    display: grid;
+  }
+
+  .sidebar-collapsed .sidebar-brand {
+    justify-content: flex-start;
+  }
+
+  .sidebar-collapsed .tab-list button,
+  .sidebar-collapsed .tab-list a {
+    justify-content: flex-start;
+    padding: 0 12px;
   }
 
   .tab-list {

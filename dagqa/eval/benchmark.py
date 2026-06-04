@@ -19,12 +19,23 @@ from dagqa.eval.hotpot_loader import (
 )
 from dagqa.eval.metrics import answer_f1, cosine_sim, exact_match
 from dagqa.graph.render import render_mermaid
+from dagqa.nodes.output_validation import parse_node_output
 from dagqa.nodes.prompts import render_evidence_section
 from dagqa.schemas import (
+    DagNode,
+    DagPlan,
+    EvidenceCitation,
     EvidenceCitationEvaluation,
     EvidenceSelection,
     GoldSupportingFact,
     LLMRequest,
+    NodeStatus,
+    NodeTrace,
+    Operation,
+    PromptSpec,
+    RunTrace,
+    SchedulerWave,
+    TaskType,
 )
 
 
@@ -55,6 +66,7 @@ class BenchmarkRecord(BaseModel):
 
 class BenchmarkResult(BaseModel):
     run_id: str
+    comparison_group_id: str | None = None
     system: str
     limit: int
     provider: str | None = None
@@ -79,6 +91,7 @@ async def benchmark_hotpotqa(
     path: str | Path | None = None,
     seed: int | None = None,
     max_parallel_examples: int | None = None,
+    comparison_group_id: str | None = None,
 ) -> BenchmarkResult:
     started = time.perf_counter()
     seed = seed if seed is not None else random.SystemRandom().randint(1, 2_147_483_647)
@@ -103,6 +116,7 @@ async def benchmark_hotpotqa(
     metrics["total_runtime_ms"] = total_runtime_ms
     return BenchmarkResult(
         run_id=str(uuid4()),
+        comparison_group_id=comparison_group_id,
         system=system,
         limit=limit,
         provider=client.config.llm.provider,
@@ -157,21 +171,91 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
                 total_available=len(example.context),
                 documents=example.context,
             )
+            prompt = (
+                f"Question: {example.question}"
+                f"{render_evidence_section(evidence)}"
+                "\nReturn JSON only with this exact shape:\n"
+                '{"answer": "concise answer", "_evidence_citations": ['
+                '{"document_id": "exact document ID", "title": "exact title", '
+                '"sentence_indices": [0], "fact": "directly supporting fact"}]}\n'
+                "The citations array must contain the sentence-level evidence directly used "
+                "to determine the answer."
+            )
             response = await client.llm.complete(
                 LLMRequest(
-                    system="Answer the question concisely.",
-                    prompt=(
-                        f"Question: {example.question}"
-                        f"{render_evidence_section(evidence, require_citations=False)}"
-                        "\nReturn only the answer."
-                    ),
+                    system="Answer the question concisely using only the supplied sources.",
+                    prompt=prompt,
                 )
             )
-            prediction = response.text.strip()
+            parsed = parse_node_output(response.text)
+            prediction = str(parsed.get("answer", "")).strip()
+            citations = [
+                EvidenceCitation.model_validate(citation)
+                for citation in parsed.get("_evidence_citations", [])
+            ]
+            if not prediction:
+                raise ValueError("Single-prompt response is missing a non-empty answer.")
+            if not citations:
+                raise ValueError("Single-prompt response is missing sentence-level citations.")
+            returned_value = {"answer": prediction}
+            plan = DagPlan(
+                question=example.question,
+                nodes=[
+                    DagNode(
+                        id="single_prompt",
+                        label="Single prompt",
+                        task_type=TaskType.synthesis,
+                        operation=Operation.answer,
+                        question=example.question,
+                        prompt=PromptSpec(
+                            system="Answer the question concisely using only the supplied sources.",
+                            user_template=prompt,
+                        ),
+                        output_schema={
+                            "type": "object",
+                            "required": ["answer"],
+                            "properties": {"answer": {"type": "string"}},
+                        },
+                    )
+                ],
+                final_node="single_prompt",
+            )
+            trace = NodeTrace(
+                node_id="single_prompt",
+                label="Single prompt",
+                task_type=TaskType.synthesis,
+                operation=Operation.answer,
+                status=NodeStatus.succeeded,
+                resolved_question=example.question,
+                rendered_prompt=prompt,
+                raw_response=response.text,
+                parsed_output=parsed,
+                returned_value=returned_value,
+                supporting_evidence=evidence,
+                evidence_citations=citations,
+                duration_ms=(time.perf_counter() - started) * 1000,
+            )
+            direct_run = RunTrace(
+                run_id=str(uuid4()),
+                question=example.question,
+                plan=plan,
+                waves=[SchedulerWave(index=0, node_ids=["single_prompt"])],
+                nodes=[trace],
+                final_answer=returned_value,
+                status=NodeStatus.succeeded,
+                total_duration_ms=(time.perf_counter() - started) * 1000,
+                config=client.config.model_dump(mode="json"),
+            )
+            evidence_metrics = _evaluate_evidence_citations(
+                direct_run,
+                example.supporting_facts,
+            )
+            run_trace = direct_run.model_dump(mode="json")
+            run_trace["mermaid"] = render_mermaid(direct_run.plan, direct_run.nodes)
             llm_call_count = 1
-            node_count = None
-            graph_depth = None
-            structural_valid = None
+            node_count = 1
+            graph_depth = 0
+            structural_valid = True
             structural_issues = []
             structural_failure = False
         else:
@@ -186,9 +270,6 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
             structural_issues = _structural_issues(run)
             structural_valid = not structural_issues
             structural_failure = run.status.value != "succeeded"
-        if system == "direct_llm":
-            run_trace = None
-            evidence_metrics = {}
         return BenchmarkRecord(
             id=example.id,
             question=example.question,

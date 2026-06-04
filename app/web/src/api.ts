@@ -184,6 +184,7 @@ export type HotpotBenchmarkRecord = {
 
 export type HotpotBenchmarkResult = {
   run_id: string;
+  comparison_group_id?: string | null;
   system: string;
   limit: number;
   provider?: string | null;
@@ -207,10 +208,15 @@ export type LiveBenchmark = HotpotBenchmarkResult & {
   total: number;
   current_question?: string | null;
   error?: string | null;
+  systems?: string[];
+  current_system?: string;
+  comparison_run_ids?: string[];
+  comparison_results?: HotpotBenchmarkResult[];
 };
 
 export type SavedBenchmarkSummary = {
   run_id: string;
+  comparison_group_id?: string | null;
   created_at?: string | null;
   dataset?: string | null;
   split?: string | null;
@@ -246,14 +252,14 @@ export async function benchmark(
 
 export async function startLiveBenchmark(
   limit: number,
-  system: string,
+  systems: string[],
   llm: LLMSelection,
   seed?: number,
 ): Promise<LiveBenchmark> {
   const response = await fetch("/api/benchmarks/hotpotqa/live", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, system, seed, llm }),
+    body: JSON.stringify({ limit, systems, seed, llm }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
