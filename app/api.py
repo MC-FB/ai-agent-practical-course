@@ -18,7 +18,7 @@ from dagqa.eval.benchmark import (
     BenchmarkRecord,
     BenchmarkResult,
     _aggregate,
-    _run_example,
+    _run_examples,
     _sample_examples,
     benchmark_hotpotqa,
 )
@@ -385,6 +385,7 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
         "system": request.system,
         "limit": request.limit,
         "seed": seed,
+        "max_parallel_examples": cfg.benchmark.max_parallel_examples,
         "dataset": "hotpotqa",
         "split": cfg.benchmark.split,
         "dataset_size": count_hotpot_examples(request.data_path),
@@ -423,7 +424,7 @@ async def _run_live_benchmark(
     cfg: AppConfig,
 ) -> None:
     started = time.perf_counter()
-    records = []
+    records: list[BenchmarkRecord] = []
     created_at = LIVE_BENCHMARKS[run_id]["created_at"]
     total_examples = request.limit
     dataset_size = 0
@@ -446,6 +447,7 @@ async def _run_live_benchmark(
             "system": request.system,
             "limit": request.limit,
             "seed": seed,
+            "max_parallel_examples": cfg.benchmark.max_parallel_examples,
             "dataset": "hotpotqa",
             "split": cfg.benchmark.split,
             "dataset_size": dataset_size or None,
@@ -471,13 +473,28 @@ async def _run_live_benchmark(
             dataset_size = len(all_examples)
             examples = _sample_examples(all_examples, request.limit, seed)
         total_examples = len(examples)
-        update(current_question=examples[0].question if examples else None)
-        for example in examples:
-            update(current_question=example.question)
-            records.append(await _run_example(dag_client, example, request.system))
-            next_index = len(records)
-            next_question = examples[next_index].question if next_index < len(examples) else None
-            update(current_question=next_question)
+        update(
+            current_question=(
+                f"Running up to {min(cfg.benchmark.max_parallel_examples, total_examples)} "
+                "examples in parallel."
+                if examples
+                else None
+            )
+        )
+
+        def record_completed(record: BenchmarkRecord) -> None:
+            records.append(record)
+            remaining = total_examples - len(records)
+            update(current_question=f"{remaining} examples remaining." if remaining else None)
+
+        ordered_records = await _run_examples(
+            dag_client,
+            examples,
+            request.system,
+            cfg.benchmark.max_parallel_examples,
+            record_completed,
+        )
+        records = ordered_records
 
         total_runtime_ms = (time.perf_counter() - started) * 1000
         metrics = _aggregate(records)
@@ -492,6 +509,7 @@ async def _run_live_benchmark(
             split=cfg.benchmark.split,
             dataset_size=dataset_size,
             seed=seed,
+            max_parallel_examples=cfg.benchmark.max_parallel_examples,
             created_at=created_at,
             total_runtime_ms=total_runtime_ms,
             records=records,
@@ -626,6 +644,7 @@ def _normalize_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, 
         "model": data.get("model") or "",
         "seed": data.get("seed") or 0,
         "limit": data.get("limit") or len(records),
+        "max_parallel_examples": data.get("max_parallel_examples") or 1,
         "created_at": data.get("created_at"),
         "output_path": data.get("output_path") or str(path),
         "total_runtime_ms": data.get("total_runtime_ms") or metrics.get("total_runtime_ms") or 0,

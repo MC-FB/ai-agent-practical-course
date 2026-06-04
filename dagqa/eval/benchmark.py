@@ -4,6 +4,7 @@ import asyncio
 import json
 import random
 import time
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
@@ -62,6 +63,7 @@ class BenchmarkResult(BaseModel):
     split: str = "validation"
     dataset_size: int | None = None
     seed: int
+    max_parallel_examples: int = 1
     created_at: str
     output_path: str | None = None
     total_runtime_ms: float
@@ -76,6 +78,7 @@ async def benchmark_hotpotqa(
     limit: int = 100,
     path: str | Path | None = None,
     seed: int | None = None,
+    max_parallel_examples: int | None = None,
 ) -> BenchmarkResult:
     started = time.perf_counter()
     seed = seed if seed is not None else random.SystemRandom().randint(1, 2_147_483_647)
@@ -87,9 +90,14 @@ async def benchmark_hotpotqa(
         all_examples = load_hotpot_examples(path)
         dataset_size = len(all_examples)
         examples = _sample_examples(all_examples, limit, seed)
-    records = []
-    for example in examples:
-        records.append(await _run_example(client, example, system))
+    parallel_examples = (
+        max_parallel_examples
+        if max_parallel_examples is not None
+        else client.config.benchmark.max_parallel_examples
+    )
+    if parallel_examples < 1:
+        raise ValueError("max_parallel_examples must be at least 1.")
+    records = await _run_examples(client, examples, system, parallel_examples)
     metrics = _aggregate(records)
     total_runtime_ms = (time.perf_counter() - started) * 1000
     metrics["total_runtime_ms"] = total_runtime_ms
@@ -101,11 +109,31 @@ async def benchmark_hotpotqa(
         model=client.config.llm.model,
         dataset_size=dataset_size,
         seed=seed,
+        max_parallel_examples=parallel_examples,
         created_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         total_runtime_ms=total_runtime_ms,
         records=records,
         metrics=metrics,
     )
+
+
+async def _run_examples(
+    client: DagQaClient,
+    examples: list[HotpotExample],
+    system: str,
+    max_parallel_examples: int,
+    on_complete: Callable[[BenchmarkRecord], None] | None = None,
+) -> list[BenchmarkRecord]:
+    semaphore = asyncio.Semaphore(max_parallel_examples)
+
+    async def run(example: HotpotExample) -> BenchmarkRecord:
+        async with semaphore:
+            record = await _run_example(client, example, system)
+        if on_complete is not None:
+            on_complete(record)
+        return record
+
+    return await asyncio.gather(*(run(example) for example in examples))
 
 
 def _sample_examples(

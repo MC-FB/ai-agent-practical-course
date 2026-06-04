@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import asyncio
+
+import dagqa.eval.benchmark as benchmark_module
 from dagqa.eval.benchmark import (
     BenchmarkRecord,
     _aggregate,
     _evaluate_evidence_citations,
     _extract_answer,
     _run_example,
+    _run_examples,
     _sample_examples,
 )
 from dagqa.eval.hotpot_loader import HotpotExample
@@ -44,6 +48,46 @@ def test_benchmark_sampling_is_seeded() -> None:
 
     assert [example.id for example in first] == [example.id for example in second]
     assert [example.id for example in first] != [example.id for example in different]
+
+
+async def test_run_examples_bounds_concurrency_and_preserves_order(monkeypatch) -> None:
+    parallel_examples = 2
+    active = 0
+    max_active = 0
+    completion_order = []
+    examples = [
+        HotpotExample(id=str(index), question=f"q{index}", answer=f"a{index}") for index in range(4)
+    ]
+
+    async def run_example(client, example, system):  # noqa: ANN001, ARG001
+        nonlocal active, max_active
+        active += 1
+        max_active = max(max_active, active)
+        await asyncio.sleep(0.01 if example.id == "0" else 0)
+        active -= 1
+        return BenchmarkRecord(
+            id=example.id,
+            question=example.question,
+            gold_answer=example.answer,
+            prediction=example.answer,
+            exact_match=1,
+            f1=1,
+            latency_ms=1,
+        )
+
+    monkeypatch.setattr(benchmark_module, "_run_example", run_example)
+
+    records = await _run_examples(
+        object(),  # type: ignore[arg-type]
+        examples,
+        "direct_llm",
+        max_parallel_examples=parallel_examples,
+        on_complete=lambda record: completion_order.append(record.id),
+    )
+
+    assert max_active == parallel_examples
+    assert completion_order != [example.id for example in examples]
+    assert [record.id for record in records] == [example.id for example in examples]
 
 
 def test_extract_answer_accepts_single_named_answer_field() -> None:

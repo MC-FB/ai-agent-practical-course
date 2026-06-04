@@ -19,4 +19,5 @@ benchmark:
   dataset: hotpotqa
   split: validation
   default_limit: 100
+  max_parallel_examples: 4
   output_dir: runs/benchmarks
