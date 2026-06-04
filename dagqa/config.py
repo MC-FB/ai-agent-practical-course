@@ -43,6 +43,7 @@ class BenchmarkConfig(BaseModel):
     dataset: str = "hotpotqa"
     split: str = "validation"
     default_limit: int = Field(default=100, ge=1)
+    max_parallel_examples: int = Field(default=4, ge=1)
     output_dir: str = "runs/benchmarks"
 
 

@@ -192,6 +192,7 @@ export type HotpotBenchmarkResult = {
   split: string;
   dataset_size?: number | null;
   seed: number;
+  max_parallel_examples: number;
   created_at: string;
   output_path?: string | null;
   total_runtime_ms: number;
