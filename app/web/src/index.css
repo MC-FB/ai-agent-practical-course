@@ -698,10 +698,19 @@ button {
 
 .benchmark-form {
   display: grid;
-  grid-template-columns: minmax(160px, 0.8fr) minmax(320px, 1.6fr) minmax(140px, 0.8fr);
-  gap: 12px;
-  align-items: end;
-  padding: 14px 20px 18px;
+  grid-template-columns: minmax(210px, 0.8fr) minmax(280px, 1fr) minmax(260px, 0.9fr);
+  grid-template-areas:
+    "name systems examples"
+    "seed systems action"
+    "controls controls controls";
+  gap: 14px 16px;
+  align-items: stretch;
+  margin: 8px 0 22px;
+  border: 1px solid #d8e2e5;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgb(20 39 48 / 4%);
 }
 
 .benchmark-form label,
@@ -714,18 +723,29 @@ button {
   font-weight: 700;
 }
 
+.benchmark-name-field {
+  grid-area: name;
+}
+
+.benchmark-seed-field {
+  grid-area: seed;
+}
+
 .system-checks {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+  grid-area: systems;
   min-width: 0;
   margin: 0;
   border: 1px solid #cbd6da;
   border-radius: 8px;
-  padding: 8px 10px 10px;
+  background: #fbfcfc;
+  padding: 12px 14px 14px;
 }
 
 .system-checks legend {
+  padding: 0 5px;
   color: #516169;
   font-size: 12px;
   font-weight: 700;
@@ -734,13 +754,19 @@ button {
 .system-checks label {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid #e1e9ec;
+  border-radius: 7px;
+  background: #ffffff;
   color: #26343b;
   font-size: 12px;
+  padding: 0 12px;
 }
 
 .system-checks input {
   min-height: auto;
+  accent-color: #006f61;
 }
 
 .benchmark-form input,
@@ -754,10 +780,23 @@ button {
   padding: 0 10px;
 }
 
+.benchmark-form input:focus,
+.benchmark-form select:focus,
+.results-browser select:focus {
+  border-color: #00806f;
+  box-shadow: 0 0 0 3px rgb(0 128 111 / 12%);
+  outline: none;
+}
+
 .benchmark-slider {
   display: grid;
-  gap: 8px;
+  grid-area: examples;
+  gap: 10px;
   min-width: 0;
+  border: 1px solid #e1e9ec;
+  border-radius: 8px;
+  background: #fbfcfc;
+  padding: 12px 14px;
 }
 
 .range-row {
@@ -807,17 +846,20 @@ button {
 
 .benchmark-slider input[type="range"] {
   width: 100%;
-  min-height: 40px;
+  min-height: 32px;
   padding: 0;
+  accent-color: #006f61;
 }
 
 .benchmark-run-button {
-  grid-column: 1 / -1;
+  grid-area: action;
+  align-self: end;
+  min-height: 44px;
 }
 
 .benchmark-actions {
   display: flex;
-  grid-column: 1 / -1;
+  grid-area: controls;
   gap: 8px;
 }
 
@@ -1349,6 +1391,13 @@ button {
 
   .benchmark-form {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "name"
+      "systems"
+      "examples"
+      "seed"
+      "action"
+      "controls";
   }
 }
 

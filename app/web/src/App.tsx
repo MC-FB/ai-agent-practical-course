@@ -1261,7 +1261,7 @@ function DatasetView({
         </div>
 
         <div className="benchmark-form">
-          <label>
+          <label className="benchmark-name-field">
             Benchmark name
             <input
               placeholder="Optional"
@@ -1320,7 +1320,7 @@ function DatasetView({
               <span>{formatNumber(maxExamples)}</span>
             </div>
           </div>
-          <label>
+          <label className="benchmark-seed-field">
             Seed
             <input
               inputMode="numeric"
