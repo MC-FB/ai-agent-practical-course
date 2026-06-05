@@ -12,22 +12,28 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Play,
+  RotateCcw,
   Send,
+  Square,
   Timer,
 } from "lucide-react";
 import mermaid from "mermaid";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
+  ApiError,
   getBenchmarkResult,
   getHotpotBenchmarkMeta,
   getLLMModels,
   getLiveBenchmark,
   getLiveAsk,
   listBenchmarkResults,
+  preflightBenchmark,
   repairBenchmarkResult,
+  resumeLiveBenchmark,
   startLiveBenchmark,
   startLiveAsk,
+  stopLiveBenchmark,
   type DagNode,
   type HotpotBenchmarkMeta,
   type HotpotBenchmarkRecord,
@@ -56,6 +62,9 @@ const SAMPLE_QUESTIONS = [
   "Which mountain is taller: the highest mountain in Japan or the highest mountain in Germany?",
   "Which company was founded earlier: the company that created the iPhone or the company that created Windows?",
 ];
+
+const ACTIVE_BENCHMARK_STORAGE_KEY = "dagqa.activeBenchmarkRunId";
+const LIVE_BENCHMARK_POLL_RETRY_LIMIT = 5;
 
 type Tab = "chat" | "dataset" | "results";
 type RunPhase = "idle" | "planning" | "executing" | "complete" | "error";
@@ -164,6 +173,10 @@ function formatSavedDateTime(value?: string | null) {
   return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ${pad(
     date.getHours(),
   )}:${pad(date.getMinutes())}`;
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
 function GraphView({
@@ -899,6 +912,18 @@ function runTypeLabel(system?: string | null) {
   return system === "dag_agent" ? "Multi-node DAG" : "Single-node prompt";
 }
 
+function benchmarkOptionLabel(item: SavedBenchmarkSummary | HotpotBenchmarkResult) {
+  const parts = [
+    item.name?.trim(),
+    formatSavedDateTime(item.created_at),
+    runTypeLabel(item.system),
+    item.model ?? "unknown model",
+    `${item.limit} examples`,
+    `seed ${item.seed}`,
+  ].filter(Boolean);
+  return parts.join(" · ");
+}
+
 function comparisonValue(value: number | undefined, format: string) {
   if (format === "percent") return formatPercent(value);
   if (format === "duration") return formatDuration(value);
@@ -1043,6 +1068,7 @@ function DatasetView({
   llm: LLMSelection;
 }) {
   const [limit, setLimit] = useState(5);
+  const [benchmarkName, setBenchmarkName] = useState("");
   const [systems, setSystems] = useState<string[]>(["dag_agent", "direct_llm"]);
   const [seedInput, setSeedInput] = useState("");
   const [meta, setMeta] = useState<HotpotBenchmarkMeta>();
@@ -1054,6 +1080,9 @@ function DatasetView({
   const maxExamples = meta?.total_examples && meta.total_examples > 1 ? meta.total_examples : 7405;
   const resolvedLimit = Math.min(limit, maxExamples);
   const progressPercent = liveRun?.total ? (liveRun.completed / liveRun.total) * 100 : 0;
+  const benchmarkRunning = liveRun?.phase === "running" || liveRun?.phase === "stopping";
+  const canStop = liveRun?.phase === "running" || liveRun?.phase === "stopping";
+  const canResume = liveRun?.phase === "stopped" || liveRun?.phase === "error";
 
   function updateLimit(value: number) {
     if (!Number.isFinite(value)) return;
@@ -1068,6 +1097,95 @@ function DatasetView({
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Could not load benchmark metadata"));
   }, []);
+
+  useEffect(() => {
+    const runId = window.localStorage.getItem(ACTIVE_BENCHMARK_STORAGE_KEY);
+    if (!runId) return;
+    const activeRunId = runId;
+    let cancelled = false;
+
+    async function restoreBenchmark() {
+      try {
+        setBusy(true);
+        let restored: LiveBenchmark | undefined;
+        for (let attempt = 1; attempt <= LIVE_BENCHMARK_POLL_RETRY_LIMIT; attempt += 1) {
+          try {
+            restored = await getLiveBenchmark(activeRunId);
+            break;
+          } catch (err) {
+            if (err instanceof ApiError && err.status === 404) {
+              window.localStorage.removeItem(ACTIVE_BENCHMARK_STORAGE_KEY);
+              return;
+            }
+            if (attempt === LIVE_BENCHMARK_POLL_RETRY_LIMIT) {
+              throw err;
+            }
+            if (!cancelled) {
+              setError("Reconnecting to the running benchmark...");
+            }
+            await sleep(1000);
+          }
+        }
+        if (cancelled) return;
+        if (!restored) return;
+        setError("");
+        await watchBenchmark(restored, () => cancelled);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Could not restore benchmark");
+        }
+      } finally {
+        if (!cancelled) setBusy(false);
+      }
+    }
+
+    restoreBenchmark();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function watchBenchmark(started: LiveBenchmark, isCancelled = () => false) {
+    setLiveRun(started);
+    setResult(started.comparison_results?.[0] ?? started);
+    setComparisonResults(started.comparison_results ?? []);
+    setSeedInput(String(started.seed));
+    setBenchmarkName(started.name ?? "");
+    window.localStorage.setItem(ACTIVE_BENCHMARK_STORAGE_KEY, started.run_id);
+
+    let current = started;
+    let pollFailures = 0;
+    while (!isCancelled() && (current.phase === "running" || current.phase === "stopping")) {
+      await sleep(1000);
+      try {
+        current = await getLiveBenchmark(started.run_id);
+        pollFailures = 0;
+        setError("");
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) {
+          window.localStorage.removeItem(ACTIVE_BENCHMARK_STORAGE_KEY);
+          throw err;
+        }
+        pollFailures += 1;
+        if (pollFailures >= LIVE_BENCHMARK_POLL_RETRY_LIMIT) {
+          throw err;
+        }
+        setError("Connection interrupted. Reconnecting to the running benchmark...");
+        continue;
+      }
+      setLiveRun(current);
+      setComparisonResults(current.comparison_results ?? []);
+      setResult(current.comparison_results?.[0] ?? current);
+    }
+
+    if (isCancelled()) return;
+    if (current.phase === "complete") {
+      window.localStorage.removeItem(ACTIVE_BENCHMARK_STORAGE_KEY);
+    }
+    if (current.phase === "error") {
+      setError(current.error ?? "Benchmark failed");
+    }
+  }
 
   async function runDatasetBenchmark() {
     setBusy(true);
@@ -1084,28 +1202,43 @@ function DatasetView({
       if (!systems.length) {
         throw new Error("Select at least one system.");
       }
-      const started = await startLiveBenchmark(resolvedLimit, systems, llm, parsedSeed);
-      setLiveRun(started);
-      setResult(started);
-      setSeedInput(String(started.seed));
-
-      let current = started;
-      while (current.phase === "running") {
-        await new Promise((resolve) => window.setTimeout(resolve, 1000));
-        current = await getLiveBenchmark(started.run_id);
-        setLiveRun(current);
-        setComparisonResults(current.comparison_results ?? []);
-        setResult(current.comparison_results?.[0] ?? current);
+      const name = benchmarkName.trim() || undefined;
+      const preflight = await preflightBenchmark(resolvedLimit, systems, llm, parsedSeed, name);
+      if (!preflight.ok) {
+        const failed = preflight.checks.filter((check) => !check.ok);
+        throw new Error(failed.map((check) => check.detail).join(" "));
       }
-
-      if (current.phase === "error") {
-        setError(current.error ?? "Benchmark failed");
-      } else {
-        setComparisonResults(current.comparison_results ?? []);
-        setResult(current.comparison_results?.[0] ?? current);
-      }
+      const started = await startLiveBenchmark(resolvedLimit, systems, llm, parsedSeed, name);
+      await watchBenchmark(started);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Benchmark failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function stopBenchmark() {
+    if (!liveRun) return;
+    setError("");
+    try {
+      const stopped = await stopLiveBenchmark(liveRun.run_id);
+      setLiveRun(stopped);
+      setComparisonResults(stopped.comparison_results ?? []);
+      setResult(stopped.comparison_results?.[0] ?? stopped);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not stop benchmark");
+    }
+  }
+
+  async function resumeBenchmark() {
+    if (!liveRun) return;
+    setBusy(true);
+    setError("");
+    try {
+      const resumed = await resumeLiveBenchmark(liveRun.run_id, llm);
+      await watchBenchmark(resumed);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not resume benchmark");
     } finally {
       setBusy(false);
     }
@@ -1128,6 +1261,15 @@ function DatasetView({
         </div>
 
         <div className="benchmark-form">
+          <label>
+            Benchmark name
+            <input
+              placeholder="Optional"
+              type="text"
+              value={benchmarkName}
+              onChange={(event) => setBenchmarkName(event.target.value)}
+            />
+          </label>
           <fieldset className="system-checks">
             <legend>Systems</legend>
             {[
@@ -1188,15 +1330,31 @@ function DatasetView({
               onChange={(event) => setSeedInput(event.target.value)}
             />
           </label>
-          <button className="primary-button benchmark-run-button" disabled={busy} onClick={runDatasetBenchmark}>
+          <button
+            className="primary-button benchmark-run-button"
+            disabled={busy || benchmarkRunning}
+            onClick={runDatasetBenchmark}
+          >
             {busy ? <Loader2 className="spin" size={18} /> : <Play size={18} />}
             {busy ? "Running" : "Start benchmark"}
           </button>
+          {liveRun && (
+            <div className="benchmark-actions">
+              <button disabled={!canStop} onClick={stopBenchmark}>
+                <Square size={16} />
+                Stop
+              </button>
+              <button disabled={!canResume || busy} onClick={resumeBenchmark}>
+                <RotateCcw size={16} />
+                Resume
+              </button>
+            </div>
+          )}
         </div>
 
         {error && <div className="error-box">{error}</div>}
 
-        {busy && liveRun && (
+        {liveRun && (benchmarkRunning || liveRun.phase === "stopped" || liveRun.phase === "error") && (
           <div className="benchmark-progress">
             <div className="progress-summary">
               <div>
@@ -1480,7 +1638,7 @@ function ResultsView({
               </option>
               {items.map((item) => (
                 <option key={item.run_id} value={item.run_id}>
-                  {formatSavedDateTime(item.created_at)} · {runTypeLabel(item.system)} · {item.model ?? "unknown model"} · {item.limit} · seed {item.seed}
+                  {benchmarkOptionLabel(item)}
                 </option>
               ))}
             </select>
@@ -1494,7 +1652,7 @@ function ResultsView({
               <option value="">None</option>
               {items.filter((item) => item.run_id !== selectedRunId).map((item) => (
                 <option key={item.run_id} value={item.run_id}>
-                  {formatSavedDateTime(item.created_at)} · {runTypeLabel(item.system)} · {item.model ?? "unknown model"} · {item.limit} · seed {item.seed}
+                  {benchmarkOptionLabel(item)}
                 </option>
               ))}
             </select>

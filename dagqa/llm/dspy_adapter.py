@@ -9,6 +9,7 @@ import dspy
 
 from dagqa.config import LLMConfig
 from dagqa.llm.base import LanguageModel
+from dagqa.llm.retry import retry_llm_call
 from dagqa.schemas import LLMRequest, LLMResponse
 
 
@@ -52,12 +53,13 @@ class DspyLanguageModel(LanguageModel):
             result = self.lm(prompt, temperature=request.temperature)
             return _extract_text(result)
 
-        text = await asyncio.to_thread(_call)
+        text, retry_count = await retry_llm_call(lambda: asyncio.to_thread(_call), self.config)
         return LLMResponse(
             text=text,
             model=(os.getenv(self.config.model_env) if self.config.model_env else None)
             or self.config.model,
             latency_ms=(time.perf_counter() - started) * 1000,
+            metadata={"retry_count": retry_count},
         )
 
 

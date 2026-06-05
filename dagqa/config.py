@@ -20,6 +20,10 @@ class LLMConfig(BaseModel):
     api_base_env: str | None = None
     api_version: str | None = None
     api_version_env: str | None = None
+    request_timeout_seconds: float = Field(default=120.0, gt=0)
+    max_retries: int = Field(default=2, ge=0)
+    retry_initial_delay_seconds: float = Field(default=0.5, gt=0)
+    retry_max_delay_seconds: float = Field(default=8.0, gt=0)
 
 
 class PlannerConfig(BaseModel):

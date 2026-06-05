@@ -815,6 +815,32 @@ button {
   grid-column: 1 / -1;
 }
 
+.benchmark-actions {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 8px;
+}
+
+.benchmark-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  border: 1px solid #cbd6da;
+  border-radius: 8px;
+  background: #fbfcfc;
+  color: #1f333a;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 0 12px;
+}
+
+.benchmark-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
 .benchmark-progress {
   display: grid;
   gap: 10px;

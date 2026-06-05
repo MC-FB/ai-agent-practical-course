@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import shutil
 import time
 from pathlib import Path
 from typing import Any, Literal
@@ -35,6 +36,8 @@ router = APIRouter()
 RUNS: dict[str, RunTrace] = {}
 LIVE_RUNS: dict[str, dict[str, Any]] = {}
 LIVE_BENCHMARKS: dict[str, dict[str, Any]] = {}
+LIVE_BENCHMARK_TASKS: dict[str, asyncio.Task[None]] = {}
+LIVE_BENCHMARK_STOPS: dict[str, asyncio.Event] = {}
 
 CLUSTER_API_BASE = "http://atknoll32.air.cit.tum.de:3000/inference"
 CLUSTER_MODELS_URL = "http://atknoll32.air.cit.tum.de:3000/models"
@@ -57,12 +60,28 @@ class ExecuteRequest(BaseModel):
 
 
 class BenchmarkRequest(BaseModel):
+    name: str | None = None
     system: Literal["dag_agent", "direct_llm"] = "dag_agent"
     systems: list[Literal["dag_agent", "direct_llm"]] | None = None
     limit: int = 10
     seed: int | None = None
     data_path: str | None = None
     llm: LLMSelection | None = None
+
+
+class BenchmarkResumeRequest(BaseModel):
+    llm: LLMSelection | None = None
+
+
+class BenchmarkPreflightCheck(BaseModel):
+    name: str
+    ok: bool
+    detail: str
+
+
+class BenchmarkPreflightResult(BaseModel):
+    ok: bool
+    checks: list[BenchmarkPreflightCheck]
 
 
 def load_config() -> AppConfig:
@@ -109,6 +128,10 @@ def config_for_selection(selection: LLMSelection | None = None) -> AppConfig:
             temperature=config.llm.temperature,
             api_key_env="CLUSTER_API_KEY",
             api_base=os.getenv("CLUSTER_API_BASE", CLUSTER_API_BASE),
+            request_timeout_seconds=config.llm.request_timeout_seconds,
+            max_retries=config.llm.max_retries,
+            retry_initial_delay_seconds=config.llm.retry_initial_delay_seconds,
+            retry_max_delay_seconds=config.llm.retry_max_delay_seconds,
         )
     return config.model_copy(update={"llm": llm})
 
@@ -363,10 +386,9 @@ async def hotpotqa(request: BenchmarkRequest) -> BenchmarkResult:
         limit=request.limit,
         seed=request.seed,
         path=request.data_path,
+        name=_benchmark_name(request),
     )
-    output_path = _save_benchmark_result(result)
-    result.output_path = str(output_path)
-    output_path.write_text(result.model_dump_json(indent=2))
+    result = _write_benchmark_result(result)
     return result
 
 
@@ -391,8 +413,9 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
     cfg = config_for_selection(request.llm)
     dag_client = DagQaClient(cfg)
     seed = request.seed if request.seed is not None else int(time.time_ns() % 2_147_483_647)
-    LIVE_BENCHMARKS[run_id] = {
+    state = {
         "run_id": run_id,
+        "name": _benchmark_name(request),
         "phase": "running",
         "status": "running",
         "system": systems[0],
@@ -418,8 +441,15 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
         "records": [],
         "output_path": None,
         "error": None,
+        "request": request.model_dump(mode="json"),
+        "completed_result_payloads": [],
+        "stop_requested": False,
+        "resumable": True,
     }
-    asyncio.create_task(
+    _store_live_benchmark(state)
+    stop_event = asyncio.Event()
+    LIVE_BENCHMARK_STOPS[run_id] = stop_event
+    LIVE_BENCHMARK_TASKS[run_id] = asyncio.create_task(
         _run_live_benchmark(
             run_id,
             request,
@@ -428,9 +458,99 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
             cfg,
             systems,
             comparison_group_id,
+            stop_event,
         )
     )
     return LIVE_BENCHMARKS[run_id]
+
+
+@router.post(
+    "/benchmarks/hotpotqa/preflight",
+    tags=["Benchmarks"],
+    summary="Validate HotpotQA benchmark prerequisites",
+)
+async def hotpotqa_preflight(request: BenchmarkRequest) -> BenchmarkPreflightResult:
+    checks: list[BenchmarkPreflightCheck] = []
+
+    def add(name: str, ok: bool, detail: str) -> None:
+        checks.append(BenchmarkPreflightCheck(name=name, ok=ok, detail=detail))
+
+    try:
+        systems = _benchmark_systems(request)
+        add("systems", True, f"Selected systems: {', '.join(systems)}.")
+    except Exception as exc:
+        add("systems", False, str(exc))
+
+    if request.limit > 0:
+        add("limit", True, f"Requested {request.limit} examples.")
+    else:
+        add("limit", False, "Benchmark limit must be greater than zero.")
+
+    try:
+        dataset_size = await asyncio.to_thread(count_hotpot_examples, request.data_path)
+        if request.limit > dataset_size:
+            add(
+                "dataset",
+                False,
+                f"Requested {request.limit} examples but dataset has {dataset_size}.",
+            )
+        else:
+            add("dataset", True, f"Dataset is readable with {dataset_size} examples.")
+    except Exception as exc:
+        add("dataset", False, f"Dataset could not be loaded: {exc}")
+
+    try:
+        cfg = config_for_selection(request.llm)
+        add(
+            "configuration",
+            True,
+            (
+                f"{cfg.llm.provider}/{cfg.llm.model}, timeout "
+                f"{cfg.llm.request_timeout_seconds:g}s, retries {cfg.llm.max_retries}."
+            ),
+        )
+    except Exception as exc:
+        cfg = None
+        add("configuration", False, str(exc))
+
+    output_dir = _benchmark_output_dir()
+    try:
+        output_dir.mkdir(parents=True, exist_ok=True)
+        probe = output_dir / f".preflight-{uuid4()}.tmp"
+        probe.write_text("ok")
+        probe.unlink()
+        free_gb = shutil.disk_usage(output_dir).free / (1024**3)
+        add("storage", free_gb >= 1.0, f"Output dir writable; {free_gb:.1f} GiB free.")
+    except Exception as exc:
+        add("storage", False, f"Output dir is not writable: {exc}")
+
+    if cfg is not None and request.llm is not None and request.llm.provider == "cluster":
+        try:
+            models = await _cluster_models()
+            add(
+                "model_catalog",
+                request.llm.model in models,
+                (
+                    "Selected cluster model is available."
+                    if request.llm.model in models
+                    else "Selected cluster model was not returned by the model catalog."
+                ),
+            )
+        except Exception as exc:
+            add("model_catalog", False, f"Cluster model catalog unavailable: {exc}")
+
+    active = [
+        run_id
+        for run_id, state in LIVE_BENCHMARKS.items()
+        if state.get("phase") in {"running", "stopping"}
+    ]
+    add(
+        "active_runs",
+        not active,
+        "No active benchmark is running." if not active else f"Active benchmark: {active[0]}.",
+    )
+
+    return BenchmarkPreflightResult(ok=all(check.ok for check in checks), checks=checks)
 
 
 @router.get(
@@ -440,11 +560,95 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
 )
 def get_live_benchmark(run_id: str) -> dict[str, Any]:
     if run_id not in LIVE_BENCHMARKS:
+        persisted = _load_live_benchmark(run_id)
+        if persisted is not None:
+            LIVE_BENCHMARKS[run_id] = persisted
+    if run_id not in LIVE_BENCHMARKS:
         raise HTTPException(status_code=404, detail="Benchmark run not found.")
+    state = LIVE_BENCHMARKS[run_id]
+    task = LIVE_BENCHMARK_TASKS.get(run_id)
+    if state.get("phase") in {"running", "stopping"} and (task is None or task.done()):
+        state = {
+            **state,
+            "phase": "stopped",
+            "status": "stopped",
+            "error": "Benchmark runner is not active. Resume to continue from the checkpoint.",
+            "stop_requested": False,
+            "resumable": True,
+        }
+        _store_live_benchmark(state)
     return LIVE_BENCHMARKS[run_id]
 
 
-async def _run_live_benchmark(
+@router.post(
+    "/benchmarks/hotpotqa/live/{run_id}/stop",
+    tags=["Benchmarks"],
+    summary="Stop a live HotpotQA benchmark after in-flight examples finish",
+)
+async def stop_live_benchmark(run_id: str) -> dict[str, Any]:
+    state = get_live_benchmark(run_id)
+    if state.get("phase") not in {"running", "stopping"}:
+        return state
+    stop_event = LIVE_BENCHMARK_STOPS.get(run_id)
+    if stop_event is not None:
+        stop_event.set()
+    state = {**state, "phase": "stopping", "status": "stopping", "stop_requested": True}
+    _store_live_benchmark(state)
+    return state
+
+
+@router.post(
+    "/benchmarks/hotpotqa/live/{run_id}/resume",
+    tags=["Benchmarks"],
+    summary="Resume a stopped or failed live HotpotQA benchmark",
+)
+async def resume_live_benchmark(
+    run_id: str,
+    request: BenchmarkResumeRequest | None = None,
+) -> dict[str, Any]:
+    state = get_live_benchmark(run_id)
+    task = LIVE_BENCHMARK_TASKS.get(run_id)
+    if task is not None and not task.done():
+        return state
+    if state.get("phase") == "complete":
+        return state
+
+    raw_request = state.get("request")
+    if not isinstance(raw_request, dict):
+        raise HTTPException(status_code=409, detail="Benchmark state is missing resume metadata.")
+    benchmark_request = BenchmarkRequest.model_validate(raw_request)
+    if request is not None and request.llm is not None:
+        benchmark_request.llm = request.llm
+    systems = _benchmark_systems(benchmark_request)
+    cfg = config_for_selection(benchmark_request.llm)
+    dag_client = DagQaClient(cfg)
+    stop_event = asyncio.Event()
+    LIVE_BENCHMARK_STOPS[run_id] = stop_event
+    state = {
+        **state,
+        "phase": "running",
+        "status": "running",
+        "error": None,
+        "stop_requested": False,
+        "resumable": True,
+    }
+    _store_live_benchmark(state)
+    LIVE_BENCHMARK_TASKS[run_id] = asyncio.create_task(
+        _run_live_benchmark(
+            run_id,
+            benchmark_request,
+            int(state.get("seed") or benchmark_request.seed or 0),
+            dag_client,
+            cfg,
+            systems,
+            state.get("comparison_group_id"),
+            stop_event,
+        )
+    )
+    return LIVE_BENCHMARKS[run_id]
+
+
+async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
     run_id: str,
     request: BenchmarkRequest,
     seed: int,
@@ -452,13 +656,21 @@ async def _run_live_benchmark(
     cfg: AppConfig,
     systems: list[Literal["dag_agent", "direct_llm"]] | None = None,
     comparison_group_id: str | None = None,
+    stop_event: asyncio.Event | None = None,
 ) -> None:
+    prior_state = LIVE_BENCHMARKS.get(run_id) or _load_live_benchmark(run_id) or {}
+    elapsed_before_ms = float(prior_state.get("total_runtime_ms") or 0)
     started = time.perf_counter()
     records: list[BenchmarkRecord] = []
     systems = systems or _benchmark_systems(request)
-    completed_results: list[BenchmarkResult] = []
+    completed_results: list[BenchmarkResult] = [
+        BenchmarkResult.model_validate(result)
+        for result in prior_state.get("completed_result_payloads", [])
+        if isinstance(result, dict)
+    ]
     current_system = systems[0]
-    created_at = LIVE_BENCHMARKS[run_id]["created_at"]
+    created_at = prior_state.get("created_at") or LIVE_BENCHMARKS[run_id]["created_at"]
+    benchmark_name = _benchmark_name(request)
     total_examples = request.limit * len(systems)
     dataset_size = 0
 
@@ -470,11 +682,12 @@ async def _run_live_benchmark(
         output_path: str | None = None,
     ) -> None:
         metrics = _aggregate(records)
-        total_runtime_ms = (time.perf_counter() - started) * 1000
+        total_runtime_ms = elapsed_before_ms + (time.perf_counter() - started) * 1000
         if records:
             metrics["total_runtime_ms"] = total_runtime_ms
-        LIVE_BENCHMARKS[run_id] = {
+        state = {
             "run_id": run_id,
+            "name": benchmark_name,
             "phase": phase,
             "status": status,
             "system": current_system,
@@ -500,7 +713,14 @@ async def _run_live_benchmark(
             "records": [record.model_dump(mode="json") for record in records],
             "output_path": output_path,
             "error": error,
+            "request": request.model_dump(mode="json"),
+            "completed_result_payloads": [
+                result.model_dump(mode="json") for result in completed_results
+            ],
+            "stop_requested": stop_event.is_set() if stop_event is not None else False,
+            "resumable": phase in {"running", "stopping", "stopped", "error"},
         }
+        _store_live_benchmark(state)
 
     try:
         if request.limit <= 0 and request.data_path is None:
@@ -514,15 +734,36 @@ async def _run_live_benchmark(
         total_examples = per_system_total * len(systems)
 
         for system_index, system in enumerate(systems):
+            if stop_event is not None and stop_event.is_set():
+                break
+            prior_result = next(
+                (result for result in completed_results if result.system == system),
+                None,
+            )
+            if prior_result is not None and len(prior_result.records) >= per_system_total:
+                continue
             system_started = time.perf_counter()
             current_system = system
-            records = []
+            if prior_result is not None:
+                records = list(prior_result.records)
+            elif prior_state.get("current_system") == system:
+                records = [
+                    BenchmarkRecord.model_validate(record)
+                    for record in prior_state.get("records", [])
+                    if isinstance(record, dict)
+                ]
+            else:
+                records = []
+            completed_ids = {record.id for record in records}
+            remaining_examples = [
+                example for example in sampled_examples if example.id not in completed_ids
+            ]
             update(
                 current_question=(
                     f"Running {system.replace('_', ' ')} with up to "
-                    f"{min(cfg.benchmark.max_parallel_examples, per_system_total)} examples "
+                    f"{min(cfg.benchmark.max_parallel_examples, len(remaining_examples))} examples "
                     "in parallel."
-                    if sampled_examples
+                    if remaining_examples
                     else None
                 )
             )
@@ -533,29 +774,50 @@ async def _run_live_benchmark(
                 system_name: str = system,
             ) -> None:
                 records_ref.append(record)
+                _append_live_record(run_id, system_name, record)
                 remaining = per_system_total - len(records_ref)
+                stopping = stop_event is not None and stop_event.is_set()
                 update(
+                    phase="stopping" if stopping else "running",
+                    status="stopping" if stopping else "running",
                     current_question=(
                         f"{remaining} {system_name.replace('_', ' ')} examples remaining."
                         if remaining
                         else None
-                    )
+                    ),
                 )
 
-            ordered_records = await _run_examples(
-                dag_client,
-                sampled_examples,
-                system,
-                cfg.benchmark.max_parallel_examples,
-                record_completed,
-            )
-            records = ordered_records
+            if stop_event is None:
+                new_records = await _run_examples(
+                    dag_client,
+                    remaining_examples,
+                    system,
+                    cfg.benchmark.max_parallel_examples,
+                    record_completed,
+                )
+            else:
+                new_records = await _run_examples(
+                    dag_client,
+                    remaining_examples,
+                    system,
+                    cfg.benchmark.max_parallel_examples,
+                    record_completed,
+                    stop_event.is_set,
+                )
+            records_by_id = {record.id: record for record in records}
+            records_by_id.update({record.id: record for record in new_records})
+            records = [
+                records_by_id[example.id]
+                for example in sampled_examples
+                if example.id in records_by_id
+            ]
 
             system_runtime_ms = (time.perf_counter() - system_started) * 1000
             metrics = _aggregate(records)
             metrics["total_runtime_ms"] = system_runtime_ms
             result = BenchmarkResult(
                 run_id=run_id if len(systems) == 1 else str(uuid4()),
+                name=benchmark_name,
                 comparison_group_id=comparison_group_id,
                 system=system,
                 limit=request.limit,
@@ -571,11 +833,20 @@ async def _run_live_benchmark(
                 records=records,
                 metrics=metrics,
             )
-            output_path = _save_benchmark_result(result)
-            result.output_path = str(output_path)
-            output_path.write_text(result.model_dump_json(indent=2))
+            result = _write_benchmark_result(result)
+            completed_results = [
+                existing for existing in completed_results if existing.system != system
+            ]
             completed_results.append(result)
             records = []
+            if len(result.records) < per_system_total:
+                update(
+                    "stopped",
+                    status="stopped",
+                    output_path=result.output_path,
+                    current_question="Benchmark stopped. Partial results were saved.",
+                )
+                return
             if system_index + 1 < len(systems):
                 current_system = systems[system_index + 1]
                 update(current_question=f"Starting {current_system.replace('_', ' ')}.")
@@ -585,8 +856,16 @@ async def _run_live_benchmark(
             status="succeeded",
             output_path=completed_results[-1].output_path if completed_results else None,
         )
+    except asyncio.CancelledError:
+        update("stopped", status="stopped", error="Benchmark task was cancelled.")
+        raise
     except Exception as exc:
         update("error", status="failed", error=str(exc))
+    finally:
+        LIVE_BENCHMARK_STOPS.pop(run_id, None)
+        task = LIVE_BENCHMARK_TASKS.get(run_id)
+        if task is not None and task.done():
+            LIVE_BENCHMARK_TASKS.pop(run_id, None)
 
 
 @router.get(
@@ -625,6 +904,11 @@ def _benchmark_systems(
     return resolved
 
 
+def _benchmark_name(request: BenchmarkRequest) -> str | None:
+    name = (request.name or "").strip()
+    return name or None
+
+
 @router.get("/benchmarks/results", tags=["Benchmarks"], summary="List benchmark results")
 def list_benchmark_results() -> dict[str, Any]:
     output_dir = _benchmark_output_dir()
@@ -639,6 +923,7 @@ def list_benchmark_results() -> dict[str, Any]:
         items.append(
             {
                 "run_id": normalized.get("run_id") or path.stem,
+                "name": normalized.get("name"),
                 "comparison_group_id": normalized.get("comparison_group_id"),
                 "created_at": normalized.get("created_at"),
                 "dataset": normalized.get("dataset"),
@@ -665,8 +950,7 @@ def list_benchmark_results() -> dict[str, Any]:
     summary="Get benchmark result",
 )
 def get_benchmark_result(run_id: str) -> dict[str, Any]:
-    if "/" in run_id or "\\" in run_id or ".." in run_id:
-        raise HTTPException(status_code=400, detail="Invalid run id.")
+    _validate_storage_id(run_id)
     output_dir = _benchmark_output_dir()
     matches = list(output_dir.glob(f"*{run_id}*.json"))
     if not matches:
@@ -677,8 +961,7 @@ def get_benchmark_result(run_id: str) -> dict[str, Any]:
 
 @router.post("/benchmarks/results/{run_id}/repair")
 def repair_benchmark_result(run_id: str) -> dict[str, Any]:
-    if "/" in run_id or "\\" in run_id or ".." in run_id:
-        raise HTTPException(status_code=400, detail="Invalid run id.")
+    _validate_storage_id(run_id)
     output_dir = _benchmark_output_dir()
     matches = list(output_dir.glob(f"*{run_id}*.json"))
     if not matches:
@@ -693,12 +976,147 @@ def _benchmark_output_dir() -> Path:
     return Path(load_config().benchmark.output_dir)
 
 
+def _live_benchmark_dir() -> Path:
+    return _benchmark_output_dir() / ".live"
+
+
 def _save_benchmark_result(result: BenchmarkResult) -> Path:
     output_dir = _benchmark_output_dir()
     output_dir.mkdir(parents=True, exist_ok=True)
     timestamp = result.created_at.replace(":", "").replace("-", "")
     filename = f"hotpotqa-{timestamp}-{result.run_id}.json"
     return output_dir / filename
+
+
+def _write_benchmark_result(result: BenchmarkResult) -> BenchmarkResult:
+    output_path = _save_benchmark_result(result)
+    result.output_path = str(output_path)
+    _atomic_write_json(output_path, result.model_dump(mode="json"))
+    return result
+
+
+def _live_benchmark_path(run_id: str) -> Path:
+    _validate_storage_id(run_id)
+    return _live_benchmark_dir() / f"{run_id}.json"
+
+
+def _load_live_benchmark(run_id: str) -> dict[str, Any] | None:
+    path = _live_benchmark_path(run_id)
+    if not path.exists():
+        return None
+    try:
+        state = json.loads(path.read_text())
+    except Exception:
+        return None
+    return _hydrate_live_benchmark_state(state)
+
+
+def _store_live_benchmark(state: dict[str, Any]) -> None:
+    run_id = str(state.get("run_id") or "")
+    if not run_id:
+        raise ValueError("Live benchmark state is missing run_id.")
+    _validate_storage_id(run_id)
+    LIVE_BENCHMARKS[run_id] = state
+    _atomic_write_json(_live_benchmark_path(run_id), _checkpoint_live_benchmark_state(state))
+
+
+def _checkpoint_live_benchmark_state(state: dict[str, Any]) -> dict[str, Any]:
+    checkpoint = dict(state)
+    records = checkpoint.get("records")
+    if isinstance(records, list) and records:
+        checkpoint["record_ids"] = [
+            record.get("id") for record in records if isinstance(record, dict)
+        ]
+        checkpoint["records_path"] = str(
+            _live_records_path(str(checkpoint["run_id"]), str(checkpoint["current_system"]))
+        )
+    checkpoint["records"] = []
+    checkpoint["comparison_results"] = []
+    checkpoint["completed_result_payloads"] = [
+        {
+            "run_id": result.get("run_id"),
+            "name": result.get("name"),
+            "system": result.get("system"),
+            "output_path": result.get("output_path"),
+        }
+        for result in checkpoint.get("completed_result_payloads", [])
+        if isinstance(result, dict)
+    ]
+    return checkpoint
+
+
+def _hydrate_live_benchmark_state(state: dict[str, Any]) -> dict[str, Any]:
+    hydrated = dict(state)
+    current_system = hydrated.get("current_system")
+    if isinstance(current_system, str):
+        hydrated["records"] = [
+            record.model_dump(mode="json")
+            for record in _read_live_records(str(hydrated["run_id"]), current_system)
+        ]
+    completed_results = []
+    for summary in hydrated.get("completed_result_payloads", []):
+        if not isinstance(summary, dict):
+            continue
+        output_path = summary.get("output_path")
+        if not isinstance(output_path, str):
+            continue
+        path = Path(output_path)
+        if not path.exists():
+            continue
+        try:
+            completed_results.append(BenchmarkResult.model_validate_json(path.read_text()))
+        except Exception:
+            continue
+    hydrated["completed_result_payloads"] = [
+        result.model_dump(mode="json") for result in completed_results
+    ]
+    hydrated["comparison_results"] = [
+        result.model_dump(mode="json") for result in completed_results
+    ]
+    hydrated["comparison_run_ids"] = [result.run_id for result in completed_results]
+    if completed_results and hydrated.get("phase") in {"stopped", "complete"}:
+        hydrated["output_path"] = completed_results[-1].output_path
+    return hydrated
+
+
+def _live_records_path(run_id: str, system: str) -> Path:
+    _validate_storage_id(run_id)
+    return _live_benchmark_dir() / f"{run_id}-{system}.records.jsonl"
+
+
+def _append_live_record(run_id: str, system: str, record: BenchmarkRecord) -> None:
+    path = _live_records_path(run_id, system)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a") as handle:
+        handle.write(record.model_dump_json() + "\n")
+
+
+def _read_live_records(run_id: str, system: str) -> list[BenchmarkRecord]:
+    path = _live_records_path(run_id, system)
+    if not path.exists():
+        return []
+    records_by_id = {}
+    for line in path.read_text().splitlines():
+        if not line.strip():
+            continue
+        try:
+            record = BenchmarkRecord.model_validate_json(line)
+        except Exception:
+            continue
+        records_by_id[record.id] = record
+    return list(records_by_id.values())
+
+
+def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_name(f".{path.name}.{uuid4()}.tmp")
+    tmp_path.write_text(json.dumps(payload, indent=2))
+    tmp_path.replace(path)
+
+
+def _validate_storage_id(value: str) -> None:
+    if "/" in value or "\\" in value or ".." in value or not value:
+        raise HTTPException(status_code=400, detail="Invalid run id.")
 
 
 def _normalize_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, Any]:
@@ -751,7 +1169,7 @@ def _repair_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, Any
         needs_save = True
 
     if needs_save:
-        path.write_text(json.dumps(data, indent=2))
+        _atomic_write_json(path, data)
 
     return data
 
@@ -769,6 +1187,7 @@ def _normalize_benchmark_record(record: dict[str, Any]) -> dict[str, Any]:
         "cosine_sim": record.get("cosine_sim") if record.get("cosine_sim") is not None else 0,
         "latency_ms": record.get("latency_ms") or 0,
         "llm_call_count": record.get("llm_call_count"),
+        "llm_retry_count": record.get("llm_retry_count"),
         "node_count": record.get("node_count"),
         "graph_depth": record.get("graph_depth") or record.get("wave_count"),
         "structural_failure": record.get("structural_failure")

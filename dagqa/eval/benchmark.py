@@ -49,6 +49,7 @@ class BenchmarkRecord(BaseModel):
     cosine_sim: float = 0.0
     latency_ms: float
     llm_call_count: int | None = None
+    llm_retry_count: int | None = None
     node_count: int | None = None
     graph_depth: int | None = None
     structural_valid: bool | None = None
@@ -66,6 +67,7 @@ class BenchmarkRecord(BaseModel):
 
 class BenchmarkResult(BaseModel):
     run_id: str
+    name: str | None = None
     comparison_group_id: str | None = None
     system: str
     limit: int
@@ -92,6 +94,7 @@ async def benchmark_hotpotqa(
     seed: int | None = None,
     max_parallel_examples: int | None = None,
     comparison_group_id: str | None = None,
+    name: str | None = None,
 ) -> BenchmarkResult:
     started = time.perf_counter()
     seed = seed if seed is not None else random.SystemRandom().randint(1, 2_147_483_647)
@@ -116,6 +119,7 @@ async def benchmark_hotpotqa(
     metrics["total_runtime_ms"] = total_runtime_ms
     return BenchmarkResult(
         run_id=str(uuid4()),
+        name=name,
         comparison_group_id=comparison_group_id,
         system=system,
         limit=limit,
@@ -137,17 +141,36 @@ async def _run_examples(
     system: str,
     max_parallel_examples: int,
     on_complete: Callable[[BenchmarkRecord], None] | None = None,
+    should_stop: Callable[[], bool] | None = None,
 ) -> list[BenchmarkRecord]:
-    semaphore = asyncio.Semaphore(max_parallel_examples)
+    if not examples:
+        return []
 
-    async def run(example: HotpotExample) -> BenchmarkRecord:
-        async with semaphore:
-            record = await _run_example(client, example, system)
-        if on_complete is not None:
-            on_complete(record)
-        return record
+    queue: asyncio.Queue[tuple[int, HotpotExample]] = asyncio.Queue()
+    for index, example in enumerate(examples):
+        queue.put_nowait((index, example))
 
-    return await asyncio.gather(*(run(example) for example in examples))
+    records_by_index: dict[int, BenchmarkRecord] = {}
+    worker_count = min(max_parallel_examples, len(examples))
+
+    async def worker() -> None:
+        while not queue.empty():
+            if should_stop is not None and should_stop():
+                return
+            try:
+                index, example = queue.get_nowait()
+            except asyncio.QueueEmpty:
+                return
+            try:
+                record = await _run_example(client, example, system)
+            finally:
+                queue.task_done()
+            records_by_index[index] = record
+            if on_complete is not None:
+                on_complete(record)
+
+    await asyncio.gather(*(worker() for _ in range(worker_count)))
+    return [records_by_index[index] for index in sorted(records_by_index)]
 
 
 def _sample_examples(
@@ -253,6 +276,7 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
             run_trace = direct_run.model_dump(mode="json")
             run_trace["mermaid"] = render_mermaid(direct_run.plan, direct_run.nodes)
             llm_call_count = 1
+            llm_retry_count = int(response.metadata.get("retry_count", 0))
             node_count = 1
             graph_depth = 0
             structural_valid = True
@@ -265,6 +289,7 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
             run_trace["mermaid"] = render_mermaid(run.plan, run.nodes)
             prediction = _extract_answer(run.final_answer)
             llm_call_count = len(run.nodes) + 1
+            llm_retry_count = sum(trace.llm_retry_count for trace in run.nodes)
             node_count = len(run.plan.nodes)
             graph_depth = max((wave.index for wave in run.waves), default=0)
             structural_issues = _structural_issues(run)
@@ -280,6 +305,7 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
             cosine_sim=cosine_sim(prediction, example.answer),
             latency_ms=(time.perf_counter() - started) * 1000,
             llm_call_count=llm_call_count,
+            llm_retry_count=llm_retry_count,
             node_count=node_count,
             graph_depth=graph_depth,
             structural_valid=structural_valid,
@@ -417,6 +443,9 @@ def _aggregate(records: list[BenchmarkRecord]) -> dict[str, float]:
         record.llm_call_count for record in records if record.llm_call_count is not None
     ]
     node_count_records = [record.node_count for record in records if record.node_count is not None]
+    retry_count_records = [
+        record.llm_retry_count for record in records if record.llm_retry_count is not None
+    ]
     graph_depth_records = [
         record.graph_depth for record in records if record.graph_depth is not None
     ]
@@ -458,6 +487,10 @@ def _aggregate(records: list[BenchmarkRecord]) -> dict[str, float]:
         "avg_latency_ms": sum(record.latency_ms for record in records) / len(records),
         "p50_latency_ms": p50_latency_ms,
         "total_llm_call_count": float(sum(llm_call_records)),
+        "total_llm_retry_count": float(sum(retry_count_records)),
+        "avg_llm_retry_count": (
+            sum(retry_count_records) / len(retry_count_records) if retry_count_records else 0.0
+        ),
         "avg_llm_call_count": (
             sum(llm_call_records) / len(llm_call_records) if llm_call_records else 0.0
         ),

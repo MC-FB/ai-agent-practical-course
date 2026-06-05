@@ -7,6 +7,7 @@ from openai import AsyncOpenAI
 
 from dagqa.config import LLMConfig
 from dagqa.llm.base import LanguageModel
+from dagqa.llm.retry import retry_llm_call
 from dagqa.schemas import LLMRequest, LLMResponse
 
 
@@ -20,17 +21,25 @@ class OpenAICompatibleLanguageModel(LanguageModel):
         if not api_key or not api_base:
             raise ValueError("OpenAI-compatible LLM config requires an API key and base URL.")
         self.model = (os.getenv(config.model_env) if config.model_env else None) or config.model
-        self.client = AsyncOpenAI(api_key=api_key, base_url=api_base)
+        self.client = AsyncOpenAI(
+            api_key=api_key,
+            base_url=api_base,
+            timeout=config.request_timeout_seconds,
+            max_retries=0,
+        )
 
     async def complete(self, request: LLMRequest) -> LLMResponse:
         started = time.perf_counter()
-        response = await self.client.chat.completions.create(
-            model=self.model,
-            temperature=request.temperature,
-            messages=[
-                {"role": "system", "content": request.system},
-                {"role": "user", "content": request.prompt},
-            ],
+        response, retry_count = await retry_llm_call(
+            lambda: self.client.chat.completions.create(
+                model=self.model,
+                temperature=request.temperature,
+                messages=[
+                    {"role": "system", "content": request.system},
+                    {"role": "user", "content": request.prompt},
+                ],
+            ),
+            self.config,
         )
         message = response.choices[0].message
         usage = response.usage
@@ -40,4 +49,5 @@ class OpenAICompatibleLanguageModel(LanguageModel):
             prompt_tokens=usage.prompt_tokens if usage else None,
             completion_tokens=usage.completion_tokens if usage else None,
             latency_ms=(time.perf_counter() - started) * 1000,
+            metadata={"retry_count": retry_count},
         )

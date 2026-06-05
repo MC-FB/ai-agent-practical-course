@@ -38,7 +38,12 @@ async def test_openai_compatible_llm_uses_selected_model_and_messages(monkeypatc
         LLMRequest(system="System instruction", prompt="Question", temperature=0.2)
     )
 
-    assert captured["client"] == {"api_key": "secret", "base_url": "http://cluster/inference"}
+    assert captured["client"] == {
+        "api_key": "secret",
+        "base_url": "http://cluster/inference",
+        "timeout": 120.0,
+        "max_retries": 0,
+    }
     assert captured["model"] == "google/gemma-4-31B-it"
     assert captured["messages"] == [
         {"role": "system", "content": "System instruction"},
@@ -46,3 +51,46 @@ async def test_openai_compatible_llm_uses_selected_model_and_messages(monkeypatc
     ]
     assert response.text == "ready"
     assert response.model == "google/gemma-4-31B-it"
+    assert response.metadata["retry_count"] == 0
+
+
+async def test_openai_compatible_llm_retries_retryable_errors(monkeypatch) -> None:
+    expected_attempts = 2
+    attempts = 0
+
+    class RetryableError(Exception):
+        status_code = 429
+
+    class Completions:
+        async def create(self, **kwargs):  # noqa: ANN001, ARG002
+            nonlocal attempts
+            attempts += 1
+            if attempts == 1:
+                raise RetryableError("rate limited")
+            return SimpleNamespace(
+                choices=[SimpleNamespace(message=SimpleNamespace(content="ready"))],
+                usage=None,
+            )
+
+    class Client:
+        def __init__(self, **kwargs):  # noqa: ANN001, ARG002
+            self.chat = SimpleNamespace(completions=Completions())
+
+    monkeypatch.setenv("CLUSTER_API_KEY", "secret")
+    monkeypatch.setattr(openai_compatible, "AsyncOpenAI", Client)
+    llm = openai_compatible.OpenAICompatibleLanguageModel(
+        LLMConfig(
+            provider="cluster",
+            model="model",
+            api_key_env="CLUSTER_API_KEY",
+            api_base="http://cluster/inference",
+            max_retries=1,
+            retry_initial_delay_seconds=0.001,
+        )
+    )
+
+    response = await llm.complete(LLMRequest(system="System", prompt="Question"))
+
+    assert response.text == "ready"
+    assert response.metadata["retry_count"] == 1
+    assert attempts == expected_attempts
