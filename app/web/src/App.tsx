@@ -1352,23 +1352,24 @@ function DatasetView({
           <Database size={22} />
         </div>
 
-        <Card className="my-4">
-          <CardHeader className="flex-row items-start justify-between gap-4 border-b border-slate-100">
-            <div>
-              <CardTitle>Benchmark Setup</CardTitle>
-              <div className="mt-1 text-xs text-slate-500">
-                {formatNumber(resolvedLimit * systems.length)} total examples across {systems.length} system
-                {systems.length === 1 ? "" : "s"}
+        <Card className="my-4 overflow-hidden">
+          <CardContent className="grid gap-4 p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-3">
+              <div>
+                <CardTitle>Benchmark Setup</CardTitle>
+                <div className="mt-1 text-xs font-medium text-slate-500">
+                  {formatNumber(resolvedLimit * systems.length)} total examples · {llm.model}
+                </div>
               </div>
+              <Badge className="bg-emerald-50 text-emerald-800">{benchmarkEstimate.confidence} ETA</Badge>
             </div>
-            <Badge>{benchmarkEstimate.confidence} ETA</Badge>
-          </CardHeader>
-          <CardContent className="grid gap-4 pt-4">
-            <div className="grid gap-4 lg:grid-cols-[minmax(220px,0.8fr)_minmax(260px,1fr)_minmax(260px,0.9fr)]">
-              <div className="grid gap-3">
+
+            <div className="grid gap-4 xl:grid-cols-[minmax(260px,0.9fr)_minmax(320px,1fr)_minmax(300px,0.9fr)]">
+              <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
                 <div className="grid gap-2">
                   <Label htmlFor="benchmark-name">Benchmark name</Label>
                   <Input
+                    className="h-9 bg-white"
                     id="benchmark-name"
                     placeholder="Optional"
                     value={benchmarkName}
@@ -1378,6 +1379,7 @@ function DatasetView({
                 <div className="grid gap-2">
                   <Label htmlFor="benchmark-seed">Seed</Label>
                   <Input
+                    className="h-9 bg-white"
                     id="benchmark-seed"
                     inputMode="numeric"
                     placeholder="Random"
@@ -1388,15 +1390,18 @@ function DatasetView({
                 </div>
               </div>
 
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                <Label>Systems</Label>
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <Label>Systems</Label>
+                  <span className="text-xs font-semibold text-slate-500">{systems.length} selected</span>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
                   {[
-                    ["dag_agent", "DAG agent"],
-                    ["direct_llm", "Single prompt"],
-                  ].map(([value, label]) => (
+                    ["dag_agent", "DAG agent", "Multi-step graph"],
+                    ["direct_llm", "Single prompt", "One model call"],
+                  ].map(([value, label, description]) => (
                     <label
-                      className="flex min-h-11 items-center gap-3 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 shadow-sm"
+                      className="flex min-h-16 items-start gap-3 rounded-md border border-slate-200 bg-white p-3 shadow-sm transition-colors hover:border-emerald-200 hover:bg-emerald-50/40"
                       key={value}
                     >
                       <Checkbox
@@ -1409,19 +1414,24 @@ function DatasetView({
                           )
                         }
                       />
-                      {label}
+                      <span>
+                        <span className="block text-sm font-semibold text-slate-900">{label}</span>
+                        <span className="mt-1 block text-xs font-medium text-slate-500">
+                          {description}
+                        </span>
+                      </span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
                 <div className="flex items-center justify-between gap-3">
                   <Label htmlFor="benchmark-limit">Examples</Label>
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
                     <Input
                       aria-label="Benchmark example count"
-                      className="h-9 w-24 text-right"
+                      className="h-9 w-24 bg-white text-right"
                       min={1}
                       max={maxExamples}
                       type="number"
@@ -1431,10 +1441,10 @@ function DatasetView({
                     / {formatNumber(maxExamples)}
                   </div>
                 </div>
-                <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 text-xs text-slate-500">
+                <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 text-xs font-medium text-slate-500">
                   <span>1</span>
                   <input
-                    className="h-8 w-full accent-emerald-800"
+                    className="h-7 w-full accent-emerald-800"
                     id="benchmark-limit"
                     min={1}
                     max={maxExamples}
@@ -1444,29 +1454,32 @@ function DatasetView({
                   />
                   <span>{formatNumber(maxExamples)}</span>
                 </div>
+                <div className="grid grid-cols-3 gap-2 rounded-md bg-white p-2">
+                  <div>
+                    <div className="text-[11px] font-semibold text-slate-500">Total</div>
+                    <div className="text-sm font-bold text-slate-950">
+                      {formatDuration(benchmarkEstimate.totalMs)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-semibold text-slate-500">Remaining</div>
+                    <div className="text-sm font-bold text-slate-950">
+                      {formatDuration(benchmarkEstimate.remainingMs)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-semibold text-slate-500">Finish</div>
+                    <div className="text-sm font-bold text-slate-950">
+                      {benchmarkEstimate.finishAt ?? "-"}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="grid gap-3 rounded-lg border border-emerald-100 bg-emerald-50/70 p-4 lg:grid-cols-[1fr_auto] lg:items-center">
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div>
-                  <div className="text-xs font-semibold text-emerald-800">Estimated total</div>
-                  <div className="mt-1 text-lg font-bold text-slate-950">
-                    {formatDuration(benchmarkEstimate.totalMs)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs font-semibold text-emerald-800">Remaining</div>
-                  <div className="mt-1 text-lg font-bold text-slate-950">
-                    {formatDuration(benchmarkEstimate.remainingMs)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs font-semibold text-emerald-800">Finish around</div>
-                  <div className="mt-1 text-lg font-bold text-slate-950">
-                    {benchmarkEstimate.finishAt ?? "Not started"}
-                  </div>
-                </div>
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-100 bg-emerald-50/70 p-3">
+              <div className="text-sm font-semibold text-emerald-950">
+                Estimated full run: {formatDuration(benchmarkEstimate.totalMs)}
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button disabled={busy || benchmarkRunning} onClick={runDatasetBenchmark} size="lg">

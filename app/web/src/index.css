@@ -1,5 +1,3 @@
-@tailwind utilities;
-
 :root {
   color-scheme: light;
   font-family:
@@ -7,6 +5,8 @@
   background: #f5f7f8;
   color: #182026;
 }
+
+@tailwind utilities;
 
 * {
   box-sizing: border-box;
