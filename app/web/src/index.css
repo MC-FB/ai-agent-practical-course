@@ -1,3 +1,5 @@
+@tailwind utilities;
+
 :root {
   color-scheme: light;
   font-family:
@@ -696,25 +698,6 @@ button {
   min-height: 48px;
 }
 
-.benchmark-form {
-  display: grid;
-  grid-template-columns: minmax(210px, 0.8fr) minmax(280px, 1fr) minmax(260px, 0.9fr);
-  grid-template-areas:
-    "name systems examples"
-    "seed systems action"
-    "controls controls controls";
-  gap: 14px 16px;
-  align-items: stretch;
-  margin: 8px 0 22px;
-  border: 1px solid #d8e2e5;
-  border-radius: 8px;
-  background: #ffffff;
-  padding: 16px;
-  box-shadow: 0 1px 2px rgb(20 39 48 / 4%);
-}
-
-.benchmark-form label,
-.benchmark-slider label,
 .results-browser label {
   display: grid;
   gap: 6px;
@@ -723,54 +706,6 @@ button {
   font-weight: 700;
 }
 
-.benchmark-name-field {
-  grid-area: name;
-}
-
-.benchmark-seed-field {
-  grid-area: seed;
-}
-
-.system-checks {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  grid-area: systems;
-  min-width: 0;
-  margin: 0;
-  border: 1px solid #cbd6da;
-  border-radius: 8px;
-  background: #fbfcfc;
-  padding: 12px 14px 14px;
-}
-
-.system-checks legend {
-  padding: 0 5px;
-  color: #516169;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.system-checks label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 42px;
-  border: 1px solid #e1e9ec;
-  border-radius: 7px;
-  background: #ffffff;
-  color: #26343b;
-  font-size: 12px;
-  padding: 0 12px;
-}
-
-.system-checks input {
-  min-height: auto;
-  accent-color: #006f61;
-}
-
-.benchmark-form input,
-.benchmark-form select,
 .results-browser select {
   min-height: 40px;
   border: 1px solid #cbd6da;
@@ -780,146 +715,10 @@ button {
   padding: 0 10px;
 }
 
-.benchmark-form input:focus,
-.benchmark-form select:focus,
 .results-browser select:focus {
   border-color: #00806f;
   box-shadow: 0 0 0 3px rgb(0 128 111 / 12%);
   outline: none;
-}
-
-.benchmark-slider {
-  display: grid;
-  grid-area: examples;
-  gap: 10px;
-  min-width: 0;
-  border: 1px solid #e1e9ec;
-  border-radius: 8px;
-  background: #fbfcfc;
-  padding: 12px 14px;
-}
-
-.range-row {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-}
-
-.range-row span {
-  color: #667680;
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-.slider-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.slider-header strong,
-.limit-input-wrap {
-  color: #1f333a;
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.limit-input-wrap {
-  display: inline-grid;
-  grid-template-columns: 88px auto;
-  align-items: center;
-  gap: 6px;
-}
-
-.limit-input-wrap input {
-  width: 88px;
-  min-height: 34px;
-  text-align: right;
-}
-
-.limit-input-wrap span {
-  color: #667680;
-  font-weight: 700;
-}
-
-.benchmark-slider input[type="range"] {
-  width: 100%;
-  min-height: 32px;
-  padding: 0;
-  accent-color: #006f61;
-}
-
-.benchmark-run-button {
-  grid-area: action;
-  align-self: end;
-  min-height: 44px;
-}
-
-.benchmark-actions {
-  display: flex;
-  grid-area: controls;
-  gap: 8px;
-}
-
-.benchmark-actions button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  min-height: 36px;
-  border: 1px solid #cbd6da;
-  border-radius: 8px;
-  background: #fbfcfc;
-  color: #1f333a;
-  font-size: 12px;
-  font-weight: 800;
-  padding: 0 12px;
-}
-
-.benchmark-actions button:disabled {
-  cursor: not-allowed;
-  opacity: 0.48;
-}
-
-.benchmark-progress {
-  display: grid;
-  gap: 10px;
-  border: 1px solid #b8d7d2;
-  border-radius: 8px;
-  background: #eef8f5;
-  padding: 12px;
-}
-
-.progress-summary {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  color: #123d38;
-}
-
-.progress-summary strong,
-.progress-summary span {
-  display: block;
-}
-
-.progress-summary div span {
-  margin-top: 3px;
-  color: #516b67;
-  font-size: 13px;
-}
-
-.progress-summary > span {
-  flex: 0 0 auto;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.static-progress span {
-  left: 0;
-  animation: none;
 }
 
 .benchmark-result-grid {
@@ -1388,17 +1187,6 @@ button {
   .workspace {
     grid-template-columns: 1fr;
   }
-
-  .benchmark-form {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "name"
-      "systems"
-      "examples"
-      "seed"
-      "action"
-      "controls";
-  }
 }
 
 @media (max-width: 760px) {
@@ -1463,7 +1251,6 @@ button {
   }
 
   .metric-grid,
-  .benchmark-form,
   .benchmark-metrics,
   .benchmark-context,
   .results-browser {
