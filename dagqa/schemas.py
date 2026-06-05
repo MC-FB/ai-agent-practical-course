@@ -125,6 +125,7 @@ class NodeTrace(BaseModel):
     evidence_citations: list[EvidenceCitation] = Field(default_factory=list)
     evidence_citation_evaluations: list[EvidenceCitationEvaluation] = Field(default_factory=list)
     repair_attempts: int = 0
+    llm_retry_count: int = 0
     started_at: str | None = None
     finished_at: str | None = None
     duration_ms: float | None = None

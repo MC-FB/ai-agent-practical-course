@@ -14,6 +14,7 @@ export type NodeTrace = {
   evidence_citations?: EvidenceCitation[];
   evidence_citation_evaluations?: EvidenceCitationEvaluation[];
   validation: { valid: boolean; errors: string[] };
+  llm_retry_count?: number;
   duration_ms?: number;
   error?: string;
 };
@@ -87,6 +88,20 @@ export type LLMSelection = {
   provider: "azure_openai" | "cluster";
   model: string;
 };
+
+export class ApiError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
+async function throwApiError(response: Response): Promise<never> {
+  throw new ApiError(response.status, await response.text());
+}
 
 export type LLMModelOption = LLMSelection & {
   label: string;
@@ -167,6 +182,7 @@ export type HotpotBenchmarkRecord = {
   cosine_sim: number;
   latency_ms: number;
   llm_call_count?: number | null;
+  llm_retry_count?: number | null;
   node_count?: number | null;
   graph_depth?: number | null;
   structural_valid?: boolean | null;
@@ -184,6 +200,7 @@ export type HotpotBenchmarkRecord = {
 
 export type HotpotBenchmarkResult = {
   run_id: string;
+  name?: string | null;
   comparison_group_id?: string | null;
   system: string;
   limit: number;
@@ -202,7 +219,7 @@ export type HotpotBenchmarkResult = {
 };
 
 export type LiveBenchmark = HotpotBenchmarkResult & {
-  phase: "running" | "complete" | "error";
+  phase: "running" | "stopping" | "stopped" | "complete" | "error";
   status: string;
   completed: number;
   total: number;
@@ -214,8 +231,14 @@ export type LiveBenchmark = HotpotBenchmarkResult & {
   comparison_results?: HotpotBenchmarkResult[];
 };
 
+export type BenchmarkPreflightResult = {
+  ok: boolean;
+  checks: { name: string; ok: boolean; detail: string }[];
+};
+
 export type SavedBenchmarkSummary = {
   run_id: string;
+  name?: string | null;
   comparison_group_id?: string | null;
   created_at?: string | null;
   dataset?: string | null;
@@ -240,11 +263,12 @@ export async function benchmark(
   system: string,
   llm: LLMSelection,
   seed?: number,
+  name?: string,
 ): Promise<HotpotBenchmarkResult> {
   const response = await fetch("/api/benchmarks/hotpotqa", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, system, seed, llm }),
+    body: JSON.stringify({ limit, system, seed, name, llm }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
@@ -255,11 +279,28 @@ export async function startLiveBenchmark(
   systems: string[],
   llm: LLMSelection,
   seed?: number,
+  name?: string,
 ): Promise<LiveBenchmark> {
   const response = await fetch("/api/benchmarks/hotpotqa/live", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, systems, seed, llm }),
+    body: JSON.stringify({ limit, systems, seed, name, llm }),
+  });
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
+export async function preflightBenchmark(
+  limit: number,
+  systems: string[],
+  llm: LLMSelection,
+  seed?: number,
+  name?: string,
+): Promise<BenchmarkPreflightResult> {
+  const response = await fetch("/api/benchmarks/hotpotqa/preflight", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ limit, systems, seed, name, llm }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
@@ -267,6 +308,24 @@ export async function startLiveBenchmark(
 
 export async function getLiveBenchmark(runId: string): Promise<LiveBenchmark> {
   const response = await fetch(`/api/benchmarks/hotpotqa/live/${runId}`);
+  if (!response.ok) await throwApiError(response);
+  return response.json();
+}
+
+export async function stopLiveBenchmark(runId: string): Promise<LiveBenchmark> {
+  const response = await fetch(`/api/benchmarks/hotpotqa/live/${runId}/stop`, {
+    method: "POST",
+  });
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
+export async function resumeLiveBenchmark(runId: string, llm: LLMSelection): Promise<LiveBenchmark> {
+  const response = await fetch(`/api/benchmarks/hotpotqa/live/${runId}/resume`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ llm }),
+  });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
 }

@@ -1,0 +1,18 @@
+services:
+  web-dev:
+    image: node:20-slim
+    container_name: dagqa-web-dev
+    working_dir: /app
+    command: sh -c "test -x node_modules/.bin/vite || npm ci; npm run dev -- --host 0.0.0.0"
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_DEV_SERVER_HOST: 0.0.0.0
+    volumes:
+      - ./app/web:/app
+      - web-node-modules:/app/node_modules
+    depends_on:
+      - dagqa
+
+volumes:
+  web-node-modules:

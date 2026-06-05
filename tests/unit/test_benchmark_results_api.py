@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 
@@ -122,6 +123,52 @@ def test_list_benchmark_results_sorts_by_created_at_newest_first(monkeypatch, tm
     assert [item["run_id"] for item in result["results"]] == ["newer", "older"]
 
 
+def test_list_benchmark_results_includes_benchmark_name(monkeypatch, tmp_path) -> None:
+    result_file = tmp_path / "named.json"
+    result_file.write_text(
+        json.dumps(
+            {
+                "run_id": "named-run",
+                "name": "First big benchmark",
+                "created_at": "2026-06-05T08:00:00Z",
+                "system": "dag_agent",
+            }
+        )
+    )
+
+    monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
+    monkeypatch.setattr(api, "count_hotpot_examples", lambda data_path=None: 2)
+
+    result = api.list_benchmark_results()
+
+    assert result["results"][0]["name"] == "First big benchmark"
+
+
+def test_get_live_benchmark_marks_orphaned_running_state_stopped(monkeypatch, tmp_path) -> None:
+    run_id = "orphaned-run"
+    monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
+    api.LIVE_BENCHMARKS.pop(run_id, None)
+    api.LIVE_BENCHMARK_TASKS.pop(run_id, None)
+    live_dir = tmp_path / ".live"
+    live_dir.mkdir()
+    (live_dir / f"{run_id}.json").write_text(
+        json.dumps(
+            {
+                "run_id": run_id,
+                "phase": "running",
+                "status": "running",
+                "records": [],
+                "metrics": {},
+            }
+        )
+    )
+
+    state = api.get_live_benchmark(run_id)
+
+    assert state["phase"] == "stopped"
+    assert state["resumable"] is True
+
+
 async def test_paired_live_benchmark_reuses_sample_and_saves_two_results(
     monkeypatch,
     tmp_path,
@@ -162,7 +209,12 @@ async def test_paired_live_benchmark_reuses_sample_and_saves_two_results(
 
     await api._run_live_benchmark(
         run_id,
-        api.BenchmarkRequest(limit=3, seed=123, systems=["dag_agent", "direct_llm"]),
+        api.BenchmarkRequest(
+            name="paired smoke",
+            limit=3,
+            seed=123,
+            systems=["dag_agent", "direct_llm"],
+        ),
         123,
         dag_client,  # type: ignore[arg-type]
         cfg,
@@ -178,6 +230,160 @@ async def test_paired_live_benchmark_reuses_sample_and_saves_two_results(
     assert live["completed"] == total_completed
     assert len(live["comparison_run_ids"]) == system_count
     assert len(saved) == system_count
+    assert live["name"] == "paired smoke"
+    assert {result["name"] for result in saved} == {"paired smoke"}
     assert {result["system"] for result in saved} == {"dag_agent", "direct_llm"}
     assert {result["seed"] for result in saved} == {123}
     assert {result["comparison_group_id"] for result in saved} == {group_id}
+
+
+async def test_hotpotqa_preflight_checks_dataset_storage_and_model(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    data_path = tmp_path / "hotpot.json"
+    data_path.write_text(
+        json.dumps(
+            [
+                {
+                    "_id": "example-1",
+                    "question": "Who?",
+                    "answer": "Ada",
+                    "context": [["Doc", ["Ada is named."]]],
+                    "supporting_facts": [["Doc", 0]],
+                }
+            ]
+        )
+    )
+
+    monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path / "runs")
+    api.LIVE_BENCHMARKS.clear()
+
+    async def cluster_models() -> list[str]:
+        return ["model-a"]
+
+    monkeypatch.setattr(api, "_cluster_models", cluster_models)
+
+    result = await api.hotpotqa_preflight(
+        api.BenchmarkRequest(
+            limit=1,
+            systems=["direct_llm"],
+            data_path=str(data_path),
+            llm=api.LLMSelection(provider="cluster", model="model-a"),
+        )
+    )
+
+    assert result.ok is True
+    assert {check.name for check in result.checks} >= {
+        "dataset",
+        "storage",
+        "model_catalog",
+    }
+
+
+async def test_live_benchmark_stop_saves_partial_result(monkeypatch, tmp_path) -> None:
+    examples = [
+        HotpotExample(id=str(index), question=f"q{index}", answer=f"a{index}") for index in range(4)
+    ]
+    stop_event = asyncio.Event()
+
+    async def run_examples(client, sampled, system, max_parallel, on_complete, should_stop):  # noqa: ANN001, ARG001
+        record = BenchmarkRecord(
+            id=sampled[0].id,
+            question=sampled[0].question,
+            gold_answer=sampled[0].answer,
+            prediction=sampled[0].answer,
+            exact_match=1,
+            f1=1,
+            latency_ms=1,
+        )
+        on_complete(record)
+        stop_event.set()
+        return [record]
+
+    monkeypatch.setattr(api, "load_hotpot_examples", lambda path=None: examples)
+    monkeypatch.setattr(api, "_run_examples", run_examples)
+    monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
+    cfg = AppConfig()
+    dag_client = type("Client", (), {"config": cfg})()
+    run_id = "partial-stop"
+    api.LIVE_BENCHMARKS[run_id] = {"created_at": "2026-06-04T00:00:00Z"}
+
+    await api._run_live_benchmark(
+        run_id,
+        api.BenchmarkRequest(limit=4, seed=123, systems=["dag_agent"]),
+        123,
+        dag_client,  # type: ignore[arg-type]
+        cfg,
+        ["dag_agent"],
+        None,
+        stop_event,
+    )
+
+    live = api.LIVE_BENCHMARKS[run_id]
+    saved = [json.loads(path.read_text()) for path in tmp_path.glob("*.json")]
+
+    assert live["phase"] == "stopped"
+    assert live["completed"] == 1
+    assert saved[0]["records"][0]["id"] == "0"
+
+
+async def test_live_benchmark_resume_skips_completed_records(monkeypatch, tmp_path) -> None:
+    expected_completed = 3
+    examples = [
+        HotpotExample(id=str(index), question=f"q{index}", answer=f"a{index}") for index in range(3)
+    ]
+    seen: list[str] = []
+
+    async def run_examples(client, sampled, system, max_parallel, on_complete):  # noqa: ANN001, ARG001
+        seen.extend(example.id for example in sampled)
+        records = [
+            BenchmarkRecord(
+                id=example.id,
+                question=example.question,
+                gold_answer=example.answer,
+                prediction=example.answer,
+                exact_match=1,
+                f1=1,
+                latency_ms=1,
+            )
+            for example in sampled
+        ]
+        for record in records:
+            on_complete(record)
+        return records
+
+    monkeypatch.setattr(api, "load_hotpot_examples", lambda path=None: examples)
+    monkeypatch.setattr(api, "_run_examples", run_examples)
+    monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
+    cfg = AppConfig()
+    dag_client = type("Client", (), {"config": cfg})()
+    run_id = "resume-run"
+    api.LIVE_BENCHMARKS[run_id] = {
+        "created_at": "2026-06-04T00:00:00Z",
+        "current_system": "dag_agent",
+        "records": [
+            BenchmarkRecord(
+                id="0",
+                question="q0",
+                gold_answer="a0",
+                prediction="a0",
+                exact_match=1,
+                f1=1,
+                latency_ms=1,
+            ).model_dump(mode="json")
+        ],
+    }
+
+    await api._run_live_benchmark(
+        run_id,
+        api.BenchmarkRequest(limit=3, seed=123, systems=["dag_agent"]),
+        123,
+        dag_client,  # type: ignore[arg-type]
+        cfg,
+        ["dag_agent"],
+    )
+
+    assert seen == ["1", "2"]
+    assert api.LIVE_BENCHMARKS[run_id]["phase"] == "complete"
+    assert api.LIVE_BENCHMARKS[run_id]["completed"] == expected_completed

@@ -12,22 +12,35 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Play,
+  RotateCcw,
   Send,
+  Square,
   Timer,
 } from "lucide-react";
 import mermaid from "mermaid";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { Badge } from "./components/ui/badge";
+import { Button } from "./components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
+import { Checkbox } from "./components/ui/checkbox";
+import { Input } from "./components/ui/input";
+import { Label } from "./components/ui/label";
+import { Progress } from "./components/ui/progress";
 import {
+  ApiError,
   getBenchmarkResult,
   getHotpotBenchmarkMeta,
   getLLMModels,
   getLiveBenchmark,
   getLiveAsk,
   listBenchmarkResults,
+  preflightBenchmark,
   repairBenchmarkResult,
+  resumeLiveBenchmark,
   startLiveBenchmark,
   startLiveAsk,
+  stopLiveBenchmark,
   type DagNode,
   type HotpotBenchmarkMeta,
   type HotpotBenchmarkRecord,
@@ -56,6 +69,9 @@ const SAMPLE_QUESTIONS = [
   "Which mountain is taller: the highest mountain in Japan or the highest mountain in Germany?",
   "Which company was founded earlier: the company that created the iPhone or the company that created Windows?",
 ];
+
+const ACTIVE_BENCHMARK_STORAGE_KEY = "dagqa.activeBenchmarkRunId";
+const LIVE_BENCHMARK_POLL_RETRY_LIMIT = 5;
 
 type Tab = "chat" | "dataset" | "results";
 type RunPhase = "idle" | "planning" | "executing" | "complete" | "error";
@@ -153,7 +169,11 @@ function formatNumber(value?: number, digits = 0) {
 function formatDuration(ms?: number) {
   if (ms === undefined) return "-";
   if (Math.abs(ms) < 1000) return `${Math.round(ms)} ms`;
-  return `${(ms / 1000).toFixed(1)} s`;
+  if (Math.abs(ms) < 60_000) return `${(ms / 1000).toFixed(1)} s`;
+  if (Math.abs(ms) < 3_600_000) return `${Math.round(ms / 60_000)} min`;
+  const hours = Math.floor(ms / 3_600_000);
+  const minutes = Math.round((ms % 3_600_000) / 60_000);
+  return `${hours} h ${minutes} min`;
 }
 
 function formatSavedDateTime(value?: string | null) {
@@ -164,6 +184,17 @@ function formatSavedDateTime(value?: string | null) {
   return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ${pad(
     date.getHours(),
   )}:${pad(date.getMinutes())}`;
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function median(values: number[]) {
+  if (!values.length) return undefined;
+  const sorted = [...values].sort((left, right) => left - right);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
 }
 
 function GraphView({
@@ -899,6 +930,18 @@ function runTypeLabel(system?: string | null) {
   return system === "dag_agent" ? "Multi-node DAG" : "Single-node prompt";
 }
 
+function benchmarkOptionLabel(item: SavedBenchmarkSummary | HotpotBenchmarkResult) {
+  const parts = [
+    item.name?.trim(),
+    formatSavedDateTime(item.created_at),
+    runTypeLabel(item.system),
+    item.model ?? "unknown model",
+    `${item.limit} examples`,
+    `seed ${item.seed}`,
+  ].filter(Boolean);
+  return parts.join(" · ");
+}
+
 function comparisonValue(value: number | undefined, format: string) {
   if (format === "percent") return formatPercent(value);
   if (format === "duration") return formatDuration(value);
@@ -1043,17 +1086,89 @@ function DatasetView({
   llm: LLMSelection;
 }) {
   const [limit, setLimit] = useState(5);
+  const [benchmarkName, setBenchmarkName] = useState("");
   const [systems, setSystems] = useState<string[]>(["dag_agent", "direct_llm"]);
   const [seedInput, setSeedInput] = useState("");
   const [meta, setMeta] = useState<HotpotBenchmarkMeta>();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<HotpotBenchmarkResult>();
   const [comparisonResults, setComparisonResults] = useState<HotpotBenchmarkResult[]>([]);
+  const [savedBenchmarkSummaries, setSavedBenchmarkSummaries] = useState<SavedBenchmarkSummary[]>([]);
   const [liveRun, setLiveRun] = useState<LiveBenchmark>();
   const [error, setError] = useState("");
   const maxExamples = meta?.total_examples && meta.total_examples > 1 ? meta.total_examples : 7405;
   const resolvedLimit = Math.min(limit, maxExamples);
   const progressPercent = liveRun?.total ? (liveRun.completed / liveRun.total) * 100 : 0;
+  const benchmarkRunning = liveRun?.phase === "running" || liveRun?.phase === "stopping";
+  const canStop = liveRun?.phase === "running" || liveRun?.phase === "stopping";
+  const canResume = liveRun?.phase === "stopped" || liveRun?.phase === "error";
+
+  const historicalMsBySystem = useMemo(() => {
+    const estimates = new Map<string, number>();
+    for (const system of ["dag_agent", "direct_llm"]) {
+      const samples = savedBenchmarkSummaries
+        .filter(
+          (item) =>
+            item.system === system &&
+            (!item.model || item.model === llm.model) &&
+            (item.metrics.total_runtime_ms || item.metrics.avg_latency_ms),
+        )
+        .slice(0, 8)
+        .map((item) => {
+          const examples =
+            item.metrics.example_count || item.metrics.completed || item.limit || resolvedLimit;
+          if (item.metrics.total_runtime_ms && examples) {
+            return item.metrics.total_runtime_ms / examples;
+          }
+          return item.metrics.avg_latency_ms;
+        })
+        .filter((value): value is number => value !== undefined && Number.isFinite(value));
+      estimates.set(system, median(samples) ?? (system === "dag_agent" ? 45_000 : 5_000));
+    }
+    return estimates;
+  }, [llm.model, resolvedLimit, savedBenchmarkSummaries]);
+
+  const plannedTotalMs = useMemo(
+    () =>
+      systems.reduce(
+        (total, system) => total + resolvedLimit * (historicalMsBySystem.get(system) ?? 0),
+        0,
+      ),
+    [historicalMsBySystem, resolvedLimit, systems],
+  );
+
+  const benchmarkEstimate = useMemo(() => {
+    const total = liveRun?.total ?? resolvedLimit * systems.length;
+    const completed = liveRun?.completed ?? 0;
+    const elapsedMs = liveRun?.total_runtime_ms ?? 0;
+    const historicalMsPerExample = total > 0 ? plannedTotalMs / total : 0;
+    const observedMsPerExample = completed > 0 ? elapsedMs / completed : undefined;
+    const observedWeight = observedMsPerExample ? Math.min(0.9, completed / 8) : 0;
+    const blendedMsPerExample =
+      observedMsPerExample === undefined
+        ? historicalMsPerExample
+        : observedMsPerExample * observedWeight + historicalMsPerExample * (1 - observedWeight);
+    const remaining = Math.max(total - completed, 0);
+    const remainingMs = remaining * blendedMsPerExample;
+    const totalMs = elapsedMs + remainingMs;
+    const finishAt =
+      remainingMs > 0 ? new Date(Date.now() + remainingMs).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }) : undefined;
+
+    return {
+      total,
+      completed,
+      remaining,
+      elapsedMs,
+      remainingMs,
+      totalMs,
+      finishAt,
+      confidence:
+        completed >= 8 ? "High" : completed > 0 ? "Calibrating" : savedBenchmarkSummaries.length ? "Historical" : "Fallback",
+    };
+  }, [liveRun, plannedTotalMs, resolvedLimit, savedBenchmarkSummaries.length, systems.length]);
 
   function updateLimit(value: number) {
     if (!Number.isFinite(value)) return;
@@ -1068,6 +1183,101 @@ function DatasetView({
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Could not load benchmark metadata"));
   }, []);
+
+  useEffect(() => {
+    listBenchmarkResults()
+      .then((response) => setSavedBenchmarkSummaries(response.results))
+      .catch(() => setSavedBenchmarkSummaries([]));
+  }, []);
+
+  useEffect(() => {
+    const runId = window.localStorage.getItem(ACTIVE_BENCHMARK_STORAGE_KEY);
+    if (!runId) return;
+    const activeRunId = runId;
+    let cancelled = false;
+
+    async function restoreBenchmark() {
+      try {
+        setBusy(true);
+        let restored: LiveBenchmark | undefined;
+        for (let attempt = 1; attempt <= LIVE_BENCHMARK_POLL_RETRY_LIMIT; attempt += 1) {
+          try {
+            restored = await getLiveBenchmark(activeRunId);
+            break;
+          } catch (err) {
+            if (err instanceof ApiError && err.status === 404) {
+              window.localStorage.removeItem(ACTIVE_BENCHMARK_STORAGE_KEY);
+              return;
+            }
+            if (attempt === LIVE_BENCHMARK_POLL_RETRY_LIMIT) {
+              throw err;
+            }
+            if (!cancelled) {
+              setError("Reconnecting to the running benchmark...");
+            }
+            await sleep(1000);
+          }
+        }
+        if (cancelled) return;
+        if (!restored) return;
+        setError("");
+        await watchBenchmark(restored, () => cancelled);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Could not restore benchmark");
+        }
+      } finally {
+        if (!cancelled) setBusy(false);
+      }
+    }
+
+    restoreBenchmark();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function watchBenchmark(started: LiveBenchmark, isCancelled = () => false) {
+    setLiveRun(started);
+    setResult(started.comparison_results?.[0] ?? started);
+    setComparisonResults(started.comparison_results ?? []);
+    setSeedInput(String(started.seed));
+    setBenchmarkName(started.name ?? "");
+    window.localStorage.setItem(ACTIVE_BENCHMARK_STORAGE_KEY, started.run_id);
+
+    let current = started;
+    let pollFailures = 0;
+    while (!isCancelled() && (current.phase === "running" || current.phase === "stopping")) {
+      await sleep(1000);
+      try {
+        current = await getLiveBenchmark(started.run_id);
+        pollFailures = 0;
+        setError("");
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) {
+          window.localStorage.removeItem(ACTIVE_BENCHMARK_STORAGE_KEY);
+          throw err;
+        }
+        pollFailures += 1;
+        if (pollFailures >= LIVE_BENCHMARK_POLL_RETRY_LIMIT) {
+          throw err;
+        }
+        setError("Connection interrupted. Reconnecting to the running benchmark...");
+        continue;
+      }
+      setLiveRun(current);
+      setComparisonResults(current.comparison_results ?? []);
+      setResult(current.comparison_results?.[0] ?? current);
+    }
+
+    if (isCancelled()) return;
+    if (current.phase === "complete") {
+      window.localStorage.removeItem(ACTIVE_BENCHMARK_STORAGE_KEY);
+    }
+    if (current.phase === "error") {
+      setError(current.error ?? "Benchmark failed");
+    }
+  }
 
   async function runDatasetBenchmark() {
     setBusy(true);
@@ -1084,28 +1294,43 @@ function DatasetView({
       if (!systems.length) {
         throw new Error("Select at least one system.");
       }
-      const started = await startLiveBenchmark(resolvedLimit, systems, llm, parsedSeed);
-      setLiveRun(started);
-      setResult(started);
-      setSeedInput(String(started.seed));
-
-      let current = started;
-      while (current.phase === "running") {
-        await new Promise((resolve) => window.setTimeout(resolve, 1000));
-        current = await getLiveBenchmark(started.run_id);
-        setLiveRun(current);
-        setComparisonResults(current.comparison_results ?? []);
-        setResult(current.comparison_results?.[0] ?? current);
+      const name = benchmarkName.trim() || undefined;
+      const preflight = await preflightBenchmark(resolvedLimit, systems, llm, parsedSeed, name);
+      if (!preflight.ok) {
+        const failed = preflight.checks.filter((check) => !check.ok);
+        throw new Error(failed.map((check) => check.detail).join(" "));
       }
-
-      if (current.phase === "error") {
-        setError(current.error ?? "Benchmark failed");
-      } else {
-        setComparisonResults(current.comparison_results ?? []);
-        setResult(current.comparison_results?.[0] ?? current);
-      }
+      const started = await startLiveBenchmark(resolvedLimit, systems, llm, parsedSeed, name);
+      await watchBenchmark(started);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Benchmark failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function stopBenchmark() {
+    if (!liveRun) return;
+    setError("");
+    try {
+      const stopped = await stopLiveBenchmark(liveRun.run_id);
+      setLiveRun(stopped);
+      setComparisonResults(stopped.comparison_results ?? []);
+      setResult(stopped.comparison_results?.[0] ?? stopped);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not stop benchmark");
+    }
+  }
+
+  async function resumeBenchmark() {
+    if (!liveRun) return;
+    setBusy(true);
+    setError("");
+    try {
+      const resumed = await resumeLiveBenchmark(liveRun.run_id, llm);
+      await watchBenchmark(resumed);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not resume benchmark");
     } finally {
       setBusy(false);
     }
@@ -1127,93 +1352,182 @@ function DatasetView({
           <Database size={22} />
         </div>
 
-        <div className="benchmark-form">
-          <fieldset className="system-checks">
-            <legend>Systems</legend>
-            {[
-              ["dag_agent", "DAG agent"],
-              ["direct_llm", "Single prompt"],
-            ].map(([value, label]) => (
-              <label key={value}>
-                <input
-                  checked={systems.includes(value)}
-                  type="checkbox"
-                  onChange={(event) =>
-                    setSystems((current) =>
-                      event.target.checked
-                        ? [...current, value]
-                        : current.filter((system) => system !== value),
-                    )
-                  }
-                />
-                {label}
-              </label>
-            ))}
-          </fieldset>
-          <div className="benchmark-slider">
-            <div className="slider-header">
-              <label htmlFor="benchmark-limit">Examples</label>
-              <div className="limit-input-wrap">
-                <input
-                  aria-label="Benchmark example count"
-                  min={1}
-                  max={maxExamples}
-                  type="number"
-                  value={resolvedLimit}
-                  onChange={(event) => updateLimit(Number(event.target.value))}
-                />
-                <span>/ {formatNumber(maxExamples)}</span>
+        <Card className="my-4 overflow-hidden">
+          <CardContent className="grid gap-4 p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-3">
+              <div>
+                <CardTitle>Benchmark Setup</CardTitle>
+                <div className="mt-1 text-xs font-medium text-slate-500">
+                  {formatNumber(resolvedLimit * systems.length)} total examples · {llm.model}
+                </div>
+              </div>
+              <Badge className="bg-emerald-50 text-emerald-800">{benchmarkEstimate.confidence} ETA</Badge>
+            </div>
+
+            <div className="grid gap-4 xl:grid-cols-[minmax(260px,0.9fr)_minmax(320px,1fr)_minmax(300px,0.9fr)]">
+              <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
+                <div className="grid gap-2">
+                  <Label htmlFor="benchmark-name">Benchmark name</Label>
+                  <Input
+                    className="h-9 bg-white"
+                    id="benchmark-name"
+                    placeholder="Optional"
+                    value={benchmarkName}
+                    onChange={(event) => setBenchmarkName(event.target.value)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="benchmark-seed">Seed</Label>
+                  <Input
+                    className="h-9 bg-white"
+                    id="benchmark-seed"
+                    inputMode="numeric"
+                    placeholder="Random"
+                    type="number"
+                    value={seedInput}
+                    onChange={(event) => setSeedInput(event.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <Label>Systems</Label>
+                  <span className="text-xs font-semibold text-slate-500">{systems.length} selected</span>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {[
+                    ["dag_agent", "DAG agent", "Multi-step graph"],
+                    ["direct_llm", "Single prompt", "One model call"],
+                  ].map(([value, label, description]) => (
+                    <label
+                      className="flex min-h-16 items-start gap-3 rounded-md border border-slate-200 bg-white p-3 shadow-sm transition-colors hover:border-emerald-200 hover:bg-emerald-50/40"
+                      key={value}
+                    >
+                      <Checkbox
+                        checked={systems.includes(value)}
+                        onCheckedChange={(checked) =>
+                          setSystems((current) =>
+                            checked
+                              ? [...current, value]
+                              : current.filter((system) => system !== value),
+                          )
+                        }
+                      />
+                      <span>
+                        <span className="block text-sm font-semibold text-slate-900">{label}</span>
+                        <span className="mt-1 block text-xs font-medium text-slate-500">
+                          {description}
+                        </span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="benchmark-limit">Examples</Label>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+                    <Input
+                      aria-label="Benchmark example count"
+                      className="h-9 w-24 bg-white text-right"
+                      min={1}
+                      max={maxExamples}
+                      type="number"
+                      value={resolvedLimit}
+                      onChange={(event) => updateLimit(Number(event.target.value))}
+                    />
+                    / {formatNumber(maxExamples)}
+                  </div>
+                </div>
+                <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 text-xs font-medium text-slate-500">
+                  <span>1</span>
+                  <input
+                    className="h-7 w-full accent-emerald-800"
+                    id="benchmark-limit"
+                    min={1}
+                    max={maxExamples}
+                    type="range"
+                    value={resolvedLimit}
+                    onChange={(event) => updateLimit(Number(event.target.value))}
+                  />
+                  <span>{formatNumber(maxExamples)}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 rounded-md bg-white p-2">
+                  <div>
+                    <div className="text-[11px] font-semibold text-slate-500">Total</div>
+                    <div className="text-sm font-bold text-slate-950">
+                      {formatDuration(benchmarkEstimate.totalMs)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-semibold text-slate-500">Remaining</div>
+                    <div className="text-sm font-bold text-slate-950">
+                      {formatDuration(benchmarkEstimate.remainingMs)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-semibold text-slate-500">Finish</div>
+                    <div className="text-sm font-bold text-slate-950">
+                      {benchmarkEstimate.finishAt ?? "-"}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="range-row">
-              <span>1</span>
-              <input
-                id="benchmark-limit"
-                min={1}
-                max={maxExamples}
-                type="range"
-                value={resolvedLimit}
-                onChange={(event) => updateLimit(Number(event.target.value))}
-              />
-              <span>{formatNumber(maxExamples)}</span>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-100 bg-emerald-50/70 p-3">
+              <div className="text-sm font-semibold text-emerald-950">
+                Estimated full run: {formatDuration(benchmarkEstimate.totalMs)}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button disabled={busy || benchmarkRunning} onClick={runDatasetBenchmark} size="lg">
+                  {busy ? <Loader2 className="spin" size={18} /> : <Play size={18} />}
+                  {busy ? "Running" : "Start benchmark"}
+                </Button>
+                {liveRun && (
+                  <>
+                    <Button disabled={!canStop} onClick={stopBenchmark} variant="outline">
+                      <Square size={16} />
+                      Stop
+                    </Button>
+                    <Button disabled={!canResume || busy} onClick={resumeBenchmark} variant="outline">
+                      <RotateCcw size={16} />
+                      Resume
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-          <label>
-            Seed
-            <input
-              inputMode="numeric"
-              placeholder="Random"
-              type="number"
-              value={seedInput}
-              onChange={(event) => setSeedInput(event.target.value)}
-            />
-          </label>
-          <button className="primary-button benchmark-run-button" disabled={busy} onClick={runDatasetBenchmark}>
-            {busy ? <Loader2 className="spin" size={18} /> : <Play size={18} />}
-            {busy ? "Running" : "Start benchmark"}
-          </button>
-        </div>
+          </CardContent>
+        </Card>
 
         {error && <div className="error-box">{error}</div>}
 
-        {busy && liveRun && (
-          <div className="benchmark-progress">
-            <div className="progress-summary">
+        {liveRun && (benchmarkRunning || liveRun.phase === "stopped" || liveRun.phase === "error") && (
+          <Card className="mb-4 border-emerald-200 bg-emerald-50/60">
+            <CardContent className="grid gap-3 pt-4">
+              <div className="flex items-start justify-between gap-4">
               <div>
-                <strong>
+                <strong className="block text-sm text-emerald-950">
                   {formatNumber(liveRun.completed)} / {formatNumber(liveRun.total)} examples
                 </strong>
-                <span>
+                <span className="mt-1 block text-sm text-emerald-800">
                   {liveRun.current_system ? `${systemLabel(liveRun.current_system)}: ` : ""}
                   {liveRun.current_question ?? "Finalizing benchmark run."}
                 </span>
               </div>
-              <span>{progressPercent.toFixed(0)}%</span>
+                <Badge>{progressPercent.toFixed(0)}%</Badge>
             </div>
-            <div className="progress-rail static-progress">
-              <span style={{ width: `${progressPercent}%` }} />
+              <Progress value={progressPercent} />
+              <div className="grid gap-2 text-xs font-semibold text-slate-600 sm:grid-cols-3">
+                <span>Elapsed {formatDuration(benchmarkEstimate.elapsedMs)}</span>
+                <span>Remaining {formatDuration(benchmarkEstimate.remainingMs)}</span>
+                <span>Estimated total {formatDuration(benchmarkEstimate.totalMs)}</span>
             </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
 
         <section className="answer-panel">
@@ -1480,7 +1794,7 @@ function ResultsView({
               </option>
               {items.map((item) => (
                 <option key={item.run_id} value={item.run_id}>
-                  {formatSavedDateTime(item.created_at)} · {runTypeLabel(item.system)} · {item.model ?? "unknown model"} · {item.limit} · seed {item.seed}
+                  {benchmarkOptionLabel(item)}
                 </option>
               ))}
             </select>
@@ -1494,7 +1808,7 @@ function ResultsView({
               <option value="">None</option>
               {items.filter((item) => item.run_id !== selectedRunId).map((item) => (
                 <option key={item.run_id} value={item.run_id}>
-                  {formatSavedDateTime(item.created_at)} · {runTypeLabel(item.system)} · {item.model ?? "unknown model"} · {item.limit} · seed {item.seed}
+                  {benchmarkOptionLabel(item)}
                 </option>
               ))}
             </select>

@@ -1,5 +1,16 @@
 # ai-agent-practical-course
 
+## Development
+
+Run the backend container and the Vite frontend dev server with hot reload:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up dagqa web-dev
+```
+
+Open the app at `http://localhost:5173/`. The frontend container bind-mounts
+`app/web`, so React changes hot reload without rebuilding the backend image.
+The API is served by `dagqa` on `http://localhost:8000/`.
 
 ## Getting started
 

@@ -10,6 +10,9 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      HF_HOME: /app/hf_cache
+      SENTENCE_TRANSFORMERS_HOME: /app/hf_cache/sentence-transformers
     volumes:
       - ./runs:/app/runs
       - hf-model-cache:/app/hf_cache
@@ -20,6 +23,9 @@ services:
       target: test
     env_file:
       - .env
+    environment:
+      HF_HOME: /app/hf_cache
+      SENTENCE_TRANSFORMERS_HOME: /app/hf_cache/sentence-transformers
     volumes:
       - ./tests:/app/tests
       - hf-model-cache:/app/hf_cache

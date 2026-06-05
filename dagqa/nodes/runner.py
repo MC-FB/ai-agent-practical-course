@@ -68,12 +68,14 @@ class NodeRunner:
             trace.resolved_question = resolved_question
             trace.supporting_evidence = supporting_evidence
             trace.rendered_prompt = prompt
-            raw_response = await self._call_llm(node.prompt.system, prompt)
+            raw_response, retry_count = await self._call_llm(node.prompt.system, prompt)
             trace.raw_response = raw_response
+            trace.llm_retry_count += retry_count
             parsed, validation = await self._parse_validate_repair(
                 node,
                 raw_response,
                 supporting_evidence,
+                trace,
             )
             trace.parsed_output = parsed
             if parsed is not None:
@@ -101,6 +103,7 @@ class NodeRunner:
         node: DagNode,
         raw_response: str,
         supporting_evidence: EvidenceSelection | None,
+        trace: NodeTrace,
     ) -> tuple[dict[str, Any] | None, ValidationResult]:
         current_raw = raw_response
         last_output: dict[str, Any] | None = None
@@ -118,15 +121,17 @@ class NodeRunner:
                     return last_output, last_validation
 
             if attempt < self.execution.node_repair_rounds:
-                current_raw = await self._call_llm(
+                current_raw, retry_count = await self._call_llm(
                     "Repair malformed node output.",
                     render_repair_prompt(current_raw, schema, last_validation.errors),
                 )
+                trace.llm_retry_count += retry_count
 
         return last_output, last_validation
 
-    async def _call_llm(self, system: str, prompt: str) -> str:
+    async def _call_llm(self, system: str, prompt: str) -> tuple[str, int]:
         response = await self.llm.complete(
             LLMRequest(system=system, prompt=prompt, temperature=self.llm_config.temperature)
         )
-        return response.text
+        retry_count = response.metadata.get("retry_count", 0)
+        return response.text, int(retry_count) if isinstance(retry_count, int) else 0
