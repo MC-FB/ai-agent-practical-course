@@ -464,6 +464,34 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
     return LIVE_BENCHMARKS[run_id]
 
 
+@router.get(
+    "/benchmarks/hotpotqa/live",
+    tags=["Benchmarks"],
+    summary="List unfinished live HotpotQA benchmarks",
+)
+def list_live_benchmarks() -> dict[str, Any]:
+    live_dir = _live_benchmark_dir()
+    live_dir.mkdir(parents=True, exist_ok=True)
+    run_ids = {path.stem for path in live_dir.glob("*.json") if path.is_file()}
+    run_ids.update(LIVE_BENCHMARKS.keys())
+
+    runs = []
+    for run_id in run_ids:
+        try:
+            state = get_live_benchmark(run_id)
+        except Exception:
+            continue
+        if state.get("phase") == "complete":
+            continue
+        runs.append(_live_benchmark_summary(state))
+
+    runs.sort(
+        key=lambda item: (item.get("created_at") or "", item.get("run_id") or ""),
+        reverse=True,
+    )
+    return {"runs": runs}
+
+
 @router.post(
     "/benchmarks/hotpotqa/preflight",
     tags=["Benchmarks"],
@@ -913,35 +941,68 @@ def _benchmark_name(request: BenchmarkRequest) -> str | None:
 def list_benchmark_results() -> dict[str, Any]:
     output_dir = _benchmark_output_dir()
     output_dir.mkdir(parents=True, exist_ok=True)
-    items = []
+    candidates = []
     for path in output_dir.glob("*.json"):
         try:
             data = json.loads(path.read_text())
         except Exception:
             continue
         normalized = _normalize_benchmark_payload(data, path)
-        items.append(
-            {
-                "run_id": normalized.get("run_id") or path.stem,
-                "name": normalized.get("name"),
-                "comparison_group_id": normalized.get("comparison_group_id"),
-                "created_at": normalized.get("created_at"),
-                "dataset": normalized.get("dataset"),
-                "split": normalized.get("split"),
-                "system": normalized.get("system"),
-                "provider": normalized.get("provider"),
-                "model": normalized.get("model"),
-                "limit": normalized.get("limit"),
-                "seed": normalized.get("seed"),
-                "metrics": normalized.get("metrics", {}),
-                "path": str(path),
-            }
+        completed = normalized.get("metrics", {}).get("example_count") or len(
+            normalized.get("records", [])
         )
+        limit = normalized.get("limit")
+        item = {
+            "run_id": normalized.get("run_id") or path.stem,
+            "name": normalized.get("name"),
+            "comparison_group_id": normalized.get("comparison_group_id"),
+            "created_at": normalized.get("created_at"),
+            "dataset": normalized.get("dataset"),
+            "split": normalized.get("split"),
+            "system": normalized.get("system"),
+            "provider": normalized.get("provider"),
+            "model": normalized.get("model"),
+            "limit": limit,
+            "completed": completed,
+            "partial": bool(limit and completed < limit),
+            "seed": normalized.get("seed"),
+            "metrics": normalized.get("metrics", {}),
+            "path": str(path),
+        }
+        candidates.append(item)
+
+    complete_keys = {
+        _result_completion_key(item)
+        for item in candidates
+        if not item.get("partial") and _result_completion_key(item) is not None
+    }
+    items = [
+        item
+        for item in candidates
+        if not (
+            item.get("partial")
+            and (key := _result_completion_key(item)) is not None
+            and key in complete_keys
+        )
+    ]
     items.sort(
         key=lambda item: (item.get("created_at") or "", item.get("run_id") or ""),
         reverse=True,
     )
     return {"results": items}
+
+
+def _result_completion_key(item: dict[str, Any]) -> tuple[Any, ...] | None:
+    comparison_group_id = item.get("comparison_group_id")
+    if not comparison_group_id:
+        return None
+    return (
+        comparison_group_id,
+        item.get("system"),
+        item.get("seed"),
+        item.get("model"),
+        item.get("limit"),
+    )
 
 
 @router.get(
@@ -992,7 +1053,60 @@ def _write_benchmark_result(result: BenchmarkResult) -> BenchmarkResult:
     output_path = _save_benchmark_result(result)
     result.output_path = str(output_path)
     _atomic_write_json(output_path, result.model_dump(mode="json"))
+    _cleanup_partial_benchmark_results(result, output_path)
     return result
+
+
+def _cleanup_partial_benchmark_results(result: BenchmarkResult, output_path: Path) -> None:
+    if len(result.records) < result.limit:
+        return
+
+    output_dir = _benchmark_output_dir()
+    for path in output_dir.glob("*.json"):
+        if path == output_path:
+            continue
+        try:
+            data = json.loads(path.read_text())
+        except Exception:
+            continue
+        if data.get("system") != result.system:
+            continue
+        if data.get("comparison_group_id") != result.comparison_group_id:
+            continue
+        if data.get("seed") != result.seed:
+            continue
+        if data.get("model") != result.model:
+            continue
+        if data.get("limit") != result.limit:
+            continue
+        if len(data.get("records", [])) >= result.limit:
+            continue
+        try:
+            path.unlink()
+        except OSError:
+            continue
+
+
+def _live_benchmark_summary(state: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "run_id": state.get("run_id"),
+        "name": state.get("name"),
+        "phase": state.get("phase"),
+        "status": state.get("status"),
+        "systems": state.get("systems") or [],
+        "current_system": state.get("current_system"),
+        "completed": state.get("completed") or 0,
+        "total": state.get("total") or 0,
+        "current_question": state.get("current_question"),
+        "limit": state.get("limit"),
+        "seed": state.get("seed"),
+        "provider": state.get("provider"),
+        "model": state.get("model"),
+        "created_at": state.get("created_at"),
+        "total_runtime_ms": state.get("total_runtime_ms") or 0,
+        "error": state.get("error"),
+        "resumable": state.get("phase") in {"stopped", "error"},
+    }
 
 
 def _live_benchmark_path(run_id: str) -> Path:

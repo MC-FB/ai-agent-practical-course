@@ -231,6 +231,26 @@ export type LiveBenchmark = HotpotBenchmarkResult & {
   comparison_results?: HotpotBenchmarkResult[];
 };
 
+export type LiveBenchmarkSummary = {
+  run_id: string;
+  name?: string | null;
+  phase: "running" | "stopping" | "stopped" | "complete" | "error";
+  status: string;
+  systems: string[];
+  current_system?: string | null;
+  completed: number;
+  total: number;
+  current_question?: string | null;
+  limit?: number | null;
+  seed?: number | null;
+  provider?: string | null;
+  model?: string | null;
+  created_at?: string | null;
+  total_runtime_ms: number;
+  error?: string | null;
+  resumable?: boolean;
+};
+
 export type BenchmarkPreflightResult = {
   ok: boolean;
   checks: { name: string; ok: boolean; detail: string }[];
@@ -247,6 +267,8 @@ export type SavedBenchmarkSummary = {
   provider?: string | null;
   model?: string | null;
   limit?: number | null;
+  completed?: number | null;
+  partial?: boolean;
   seed?: number | null;
   metrics: Record<string, number>;
   path: string;
@@ -309,6 +331,12 @@ export async function preflightBenchmark(
 export async function getLiveBenchmark(runId: string): Promise<LiveBenchmark> {
   const response = await fetch(`/api/benchmarks/hotpotqa/live/${runId}`);
   if (!response.ok) await throwApiError(response);
+  return response.json();
+}
+
+export async function listLiveBenchmarks(): Promise<{ runs: LiveBenchmarkSummary[] }> {
+  const response = await fetch("/api/benchmarks/hotpotqa/live");
+  if (!response.ok) throw new Error(await response.text());
   return response.json();
 }
 
