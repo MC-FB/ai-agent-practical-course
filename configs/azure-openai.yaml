@@ -6,6 +6,10 @@ llm:
   api_key_env: AZURE_OPENAI_API_KEY
   api_base_env: AZURE_OPENAI_ENDPOINT
   api_version_env: AZURE_OPENAI_API_VERSION
+  request_timeout_seconds: 180
+  max_retries: 8
+  retry_initial_delay_seconds: 2
+  retry_max_delay_seconds: 120
 planner:
   max_nodes: 10
   max_depth: 3
@@ -22,4 +26,5 @@ benchmark:
   split: validation
   default_limit: 100
   max_parallel_examples: 4
+  empty_prediction_retries: 1
   output_dir: runs/benchmarks

@@ -5,6 +5,7 @@ import json
 import os
 import shutil
 import time
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
@@ -41,7 +42,15 @@ LIVE_BENCHMARK_STOPS: dict[str, asyncio.Event] = {}
 
 CLUSTER_API_BASE = "http://atknoll32.air.cit.tum.de:3000/inference"
 CLUSTER_MODELS_URL = "http://atknoll32.air.cit.tum.de:3000/models"
-DEFAULT_CLUSTER_MODEL = "openai/gpt-oss-120b"
+PREFERRED_CLUSTER_MODELS = (
+    "Qwen/Qwen3.5-122B-A10B",
+    "mistralai/Mistral-Medium-3.5-128B",
+    "google/gemma-4-31B-it",
+)
+DEFAULT_CLUSTER_MODEL = PREFERRED_CLUSTER_MODELS[0]
+CLUSTER_MODEL_MAX_PARALLEL_EXAMPLES = {
+    "google/gemma-4-31B-it": 2,
+}
 PAIRED_SYSTEM_COUNT = 2
 
 
@@ -104,13 +113,25 @@ def _azure_llm_config() -> LLMConfig:
     raise HTTPException(status_code=503, detail="Azure OpenAI config is not available.")
 
 
+def _with_model_parallelism(config: AppConfig, model: str) -> AppConfig:
+    max_parallel = CLUSTER_MODEL_MAX_PARALLEL_EXAMPLES.get(model)
+    if max_parallel is None:
+        return config
+    return config.model_copy(
+        update={
+            "benchmark": config.benchmark.model_copy(update={"max_parallel_examples": max_parallel})
+        }
+    )
+
+
 def config_for_selection(selection: LLMSelection | None = None) -> AppConfig:
     config = load_config()
     if selection is None:
         resolved = _resolved_model(config.llm)
-        return config.model_copy(
+        selected = config.model_copy(
             update={"llm": config.llm.model_copy(update={"model": resolved, "model_env": None})}
         )
+        return _with_model_parallelism(selected, resolved)
 
     model = selection.model.strip()
     if not model:
@@ -133,11 +154,50 @@ def config_for_selection(selection: LLMSelection | None = None) -> AppConfig:
             retry_initial_delay_seconds=config.llm.retry_initial_delay_seconds,
             retry_max_delay_seconds=config.llm.retry_max_delay_seconds,
         )
-    return config.model_copy(update={"llm": llm})
+    return _with_model_parallelism(config.model_copy(update={"llm": llm}), llm.model)
 
 
 def client(selection: LLMSelection | None = None) -> DagQaClient:
     return DagQaClient(config_for_selection(selection))
+
+
+async def validated_config_for_selection(selection: LLMSelection | None = None) -> AppConfig:
+    config = load_config()
+    if selection is None:
+        resolved = _resolved_model(config.llm)
+        if config.llm.provider != "cluster":
+            return config.model_copy(
+                update={"llm": config.llm.model_copy(update={"model": resolved, "model_env": None})}
+            )
+        cluster_models = await _cluster_models()
+        selected_model = (
+            resolved if resolved in cluster_models else _preferred_cluster_model(cluster_models)
+        )
+        selected = config.model_copy(
+            update={
+                "llm": config.llm.model_copy(update={"model": selected_model, "model_env": None})
+            }
+        )
+        return _with_model_parallelism(selected, selected_model)
+
+    if selection.provider != "cluster":
+        return config_for_selection(selection)
+
+    model = selection.model.strip()
+    if not model:
+        raise HTTPException(status_code=422, detail="A model must be selected.")
+    cluster_models = await _cluster_models()
+    if model not in cluster_models:
+        available = ", ".join(cluster_models) if cluster_models else "none"
+        raise HTTPException(
+            status_code=422,
+            detail=f"Selected cluster model is not available. Current cluster models: {available}.",
+        )
+    return config_for_selection(selection)
+
+
+async def validated_client(selection: LLMSelection | None = None) -> DagQaClient:
+    return DagQaClient(await validated_config_for_selection(selection))
 
 
 async def _cluster_models() -> list[str]:
@@ -157,6 +217,16 @@ async def _cluster_models() -> list[str]:
     data = response.json().get("data", [])
     models = [item if isinstance(item, str) else item.get("id") for item in data]
     return sorted(model for model in models if isinstance(model, str) and model)
+
+
+def _preferred_cluster_model(cluster_models: list[str]) -> str:
+    if not cluster_models:
+        raise HTTPException(status_code=503, detail="Cluster model catalog is empty.")
+    available = set(cluster_models)
+    for model in PREFERRED_CLUSTER_MODELS:
+        if model in available:
+            return model
+    return cluster_models[0]
 
 
 @router.get("/llm/models")
@@ -181,8 +251,8 @@ async def list_llm_models() -> dict[str, Any]:
         for model in cluster_models
     )
     default = (
-        {"provider": "cluster", "model": DEFAULT_CLUSTER_MODEL}
-        if DEFAULT_CLUSTER_MODEL in cluster_models
+        {"provider": "cluster", "model": _preferred_cluster_model(cluster_models)}
+        if cluster_models
         else {"provider": "azure_openai", "model": azure_model}
     )
     return {
@@ -204,13 +274,13 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
 
 @router.post("/plan")
 async def plan(request: AskRequest) -> dict[str, Any]:
-    dag = await client(request.llm).plan(request.question)
+    dag = await (await validated_client(request.llm)).plan(request.question)
     return dag.model_dump(mode="json")
 
 
 @router.post("/execute")
 async def execute(request: ExecuteRequest) -> dict[str, Any]:
-    run = await client().execute(parse_plan(request.plan_yaml))
+    run = await (await validated_client()).execute(parse_plan(request.plan_yaml))
     RUNS[run.run_id] = run
     payload = run.model_dump(mode="json")
     payload["mermaid"] = render_mermaid(run.plan, run.nodes)
@@ -220,7 +290,7 @@ async def execute(request: ExecuteRequest) -> dict[str, Any]:
 @router.post("/ask")
 async def ask(request: AskRequest) -> dict[str, Any]:
     try:
-        run = await client(request.llm).ask(request.question)
+        run = await (await validated_client(request.llm)).ask(request.question)
     except PlannerError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     RUNS[run.run_id] = run
@@ -232,7 +302,7 @@ async def ask(request: AskRequest) -> dict[str, Any]:
 @router.post("/ask/live")
 async def ask_live(request: AskRequest) -> dict[str, Any]:
     run_id = str(uuid4())
-    cfg = config_for_selection(request.llm)
+    cfg = await validated_config_for_selection(request.llm)
     dag_client = DagQaClient(cfg)
     LIVE_RUNS[run_id] = {
         "run_id": run_id,
@@ -379,7 +449,7 @@ async def hotpotqa(request: BenchmarkRequest) -> BenchmarkResult:
     systems = _benchmark_systems(request)
     if len(systems) != 1:
         raise HTTPException(status_code=422, detail="Use the live endpoint for paired benchmarks.")
-    dag_client = client(request.llm)
+    dag_client = await validated_client(request.llm)
     result = await benchmark_hotpotqa(
         dag_client,
         system=systems[0],
@@ -410,7 +480,7 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
     run_id = str(uuid4())
     systems = _benchmark_systems(request)
     comparison_group_id = str(uuid4()) if len(systems) == PAIRED_SYSTEM_COUNT else None
-    cfg = config_for_selection(request.llm)
+    cfg = await validated_config_for_selection(request.llm)
     dag_client = DagQaClient(cfg)
     seed = request.seed if request.seed is not None else int(time.time_ns() % 2_147_483_647)
     state = {
@@ -528,7 +598,7 @@ async def hotpotqa_preflight(request: BenchmarkRequest) -> BenchmarkPreflightRes
         add("dataset", False, f"Dataset could not be loaded: {exc}")
 
     try:
-        cfg = config_for_selection(request.llm)
+        cfg = await validated_config_for_selection(request.llm)
         add(
             "configuration",
             True,
@@ -611,7 +681,7 @@ def get_live_benchmark(run_id: str) -> dict[str, Any]:
 @router.post(
     "/benchmarks/hotpotqa/live/{run_id}/stop",
     tags=["Benchmarks"],
-    summary="Stop a live HotpotQA benchmark after in-flight examples finish",
+    summary="Stop a live HotpotQA benchmark",
 )
 async def stop_live_benchmark(run_id: str) -> dict[str, Any]:
     state = get_live_benchmark(run_id)
@@ -622,6 +692,9 @@ async def stop_live_benchmark(run_id: str) -> dict[str, Any]:
         stop_event.set()
     state = {**state, "phase": "stopping", "status": "stopping", "stop_requested": True}
     _store_live_benchmark(state)
+    task = LIVE_BENCHMARK_TASKS.get(run_id)
+    if task is not None and not task.done():
+        task.cancel()
     return state
 
 
@@ -648,7 +721,7 @@ async def resume_live_benchmark(
     if request is not None and request.llm is not None:
         benchmark_request.llm = request.llm
     systems = _benchmark_systems(benchmark_request)
-    cfg = config_for_selection(benchmark_request.llm)
+    cfg = await validated_config_for_selection(benchmark_request.llm)
     dag_client = DagQaClient(cfg)
     stop_event = asyncio.Event()
     LIVE_BENCHMARK_STOPS[run_id] = stop_event
@@ -701,6 +774,7 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
     benchmark_name = _benchmark_name(request)
     total_examples = request.limit * len(systems)
     dataset_size = 0
+    last_record_completed_at = prior_state.get("last_record_completed_at")
 
     def update(
         phase: str = "running",
@@ -713,6 +787,18 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
         total_runtime_ms = elapsed_before_ms + (time.perf_counter() - started) * 1000
         if records:
             metrics["total_runtime_ms"] = total_runtime_ms
+        prior_metrics = prior_state.get("metrics") if isinstance(prior_state, dict) else None
+        completed_count = sum(len(result.records) for result in completed_results) + len(records)
+        estimate = _live_benchmark_estimate(
+            systems=systems,
+            current_system=current_system,
+            per_system_total=request.limit,
+            current_records=records,
+            completed_results=completed_results,
+            elapsed_ms=total_runtime_ms,
+            max_parallel_examples=cfg.benchmark.max_parallel_examples,
+            historical_metrics=prior_metrics,
+        )
         state = {
             "run_id": run_id,
             "name": benchmark_name,
@@ -733,14 +819,16 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
             "provider": dag_client.config.llm.provider,
             "model": dag_client.config.llm.model,
             "created_at": created_at,
-            "completed": sum(len(result.records) for result in completed_results) + len(records),
+            "completed": completed_count,
             "total": total_examples,
             "current_question": current_question,
             "total_runtime_ms": total_runtime_ms,
+            "estimate": estimate,
             "metrics": metrics,
             "records": [record.model_dump(mode="json") for record in records],
             "output_path": output_path,
             "error": error,
+            "last_record_completed_at": last_record_completed_at,
             "request": request.model_dump(mode="json"),
             "completed_result_payloads": [
                 result.model_dump(mode="json") for result in completed_results
@@ -801,7 +889,9 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
                 records_ref: list[BenchmarkRecord] = records,
                 system_name: str = system,
             ) -> None:
+                nonlocal last_record_completed_at
                 records_ref.append(record)
+                last_record_completed_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
                 _append_live_record(run_id, system_name, record)
                 remaining = per_system_total - len(records_ref)
                 stopping = stop_event is not None and stop_event.is_set()
@@ -919,6 +1009,88 @@ def hotpotqa_meta(data_path: str | None = None) -> dict[str, Any]:
                 "source": "Hugging Face hotpotqa/hotpot_qa dataset card",
             }
         ],
+    }
+
+
+def _live_benchmark_estimate(
+    *,
+    systems: list[Literal["dag_agent", "direct_llm"]],
+    current_system: Literal["dag_agent", "direct_llm"],
+    per_system_total: int,
+    current_records: list[BenchmarkRecord],
+    completed_results: list[BenchmarkResult],
+    elapsed_ms: float,
+    max_parallel_examples: int,
+    historical_metrics: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    records_by_system: dict[str, list[BenchmarkRecord]] = {
+        result.system: list(result.records) for result in completed_results
+    }
+    records_by_system[current_system] = current_records
+    all_records = [
+        record for system_records in records_by_system.values() for record in system_records
+    ]
+    records_with_calls = [
+        record
+        for record in all_records
+        if record.llm_call_count is not None and record.llm_call_count > 0
+    ]
+    total_call_count = sum(record.llm_call_count or 0 for record in records_with_calls)
+    observed_call_ms = (
+        sum(record.latency_ms for record in records_with_calls) / total_call_count
+        if total_call_count
+        else None
+    )
+    if observed_call_ms is None and historical_metrics:
+        historical_avg_latency = historical_metrics.get("avg_latency_ms")
+        historical_avg_calls = historical_metrics.get("avg_llm_call_count")
+        if (
+            isinstance(historical_avg_latency, int | float)
+            and isinstance(historical_avg_calls, int | float)
+            and historical_avg_latency > 0
+            and historical_avg_calls > 0
+        ):
+            observed_call_ms = historical_avg_latency / historical_avg_calls
+    llm_call_ms = observed_call_ms or 15_000.0
+
+    dag_node_counts = [
+        record.node_count
+        for record in records_by_system.get("dag_agent", [])
+        if record.node_count is not None and record.node_count > 0
+    ]
+    avg_dag_node_count = sum(dag_node_counts) / len(dag_node_counts) if dag_node_counts else 3.0
+    system_index = systems.index(current_system) if current_system in systems else 0
+    parallelism = max(max_parallel_examples, 1)
+    remaining_by_system: dict[str, dict[str, float]] = {}
+    total_remaining_call_work = 0.0
+
+    for index, system in enumerate(systems):
+        if index < system_index:
+            completed = per_system_total
+        else:
+            completed = min(len(records_by_system.get(system, [])), per_system_total)
+        remaining_examples = max(per_system_total - completed, 0)
+        calls_per_example = 1.0 if system == "direct_llm" else avg_dag_node_count + 1.0
+        call_work = remaining_examples * calls_per_example
+        total_remaining_call_work += call_work
+        remaining_by_system[system] = {
+            "completed": float(completed),
+            "remaining_examples": float(remaining_examples),
+            "calls_per_example": calls_per_example,
+            "remaining_call_work": call_work,
+            "remaining_ms": (call_work * llm_call_ms) / parallelism,
+        }
+
+    remaining_ms = (total_remaining_call_work * llm_call_ms) / parallelism
+    return {
+        "elapsed_ms": elapsed_ms,
+        "remaining_ms": remaining_ms,
+        "total_ms": elapsed_ms + remaining_ms,
+        "avg_llm_call_ms": llm_call_ms,
+        "observed_llm_call_count": float(total_call_count),
+        "avg_dag_node_count": avg_dag_node_count,
+        "parallelism": float(parallelism),
+        "remaining_by_system": remaining_by_system,
     }
 
 
@@ -1104,6 +1276,8 @@ def _live_benchmark_summary(state: dict[str, Any]) -> dict[str, Any]:
         "model": state.get("model"),
         "created_at": state.get("created_at"),
         "total_runtime_ms": state.get("total_runtime_ms") or 0,
+        "estimate": state.get("estimate"),
+        "last_record_completed_at": state.get("last_record_completed_at"),
         "error": state.get("error"),
         "resumable": state.get("phase") in {"stopped", "error"},
     }

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import os
 from typing import Any
 
@@ -9,11 +10,14 @@ from openai import AsyncOpenAI, AzureOpenAI
 
 from dagqa.config import LLMConfig, PlannerConfig
 from dagqa.llm.base import LanguageModel
+from dagqa.llm.retry import retry_llm_call
 from dagqa.planning.normalizer import normalize_plan_dependencies
 from dagqa.planning.parser import PlanParseError, parse_plan
 from dagqa.planning.prompts import PLANNER_SYSTEM, plan_repair_prompt, planner_user_prompt
 from dagqa.planning.validator import validate_plan
 from dagqa.schemas import DagNode, DagPlan, LLMRequest, Operation, PromptSpec, TaskType
+
+logger = logging.getLogger(__name__)
 
 
 class PlannerError(RuntimeError):
@@ -41,6 +45,8 @@ class Planner:
             system=PLANNER_SYSTEM,
             prompt=planner_user_prompt(question, self.config.max_nodes, self.config.max_depth),
         )
+
+        logger.debug("Starting planner request")
         response = await self.llm.complete(request)
         raw = response.text
         last_errors: list[str] = []
@@ -81,6 +87,7 @@ class Planner:
                 api_version=api_version,
                 azure_endpoint=endpoint,
                 api_key=api_key,
+                max_retries=0,
             )
             response = client.chat.completions.create(
                 model=model.removeprefix("azure/"),
@@ -111,7 +118,11 @@ class Planner:
 
         for attempt in range(self.config.repair_rounds + 1):
             try:
-                data = await asyncio.to_thread(_call, validation_errors)
+                current_errors = list(validation_errors)
+                data, _retry_count = await retry_llm_call(
+                    lambda errors=current_errors: asyncio.to_thread(_call, errors),
+                    self.llm_config,
+                )
                 plan = normalize_plan_dependencies(_structured_data_to_plan(data))
             except Exception as exc:
                 raise PlannerError(f"Structured Azure planner failed: {exc}") from exc
@@ -132,33 +143,42 @@ class Planner:
         model = _env_or_value(self.llm_config.model_env, self.llm_config.model)
         if not api_base or not api_key or not model:
             raise PlannerError("Cluster planner config is incomplete.")
-        client = AsyncOpenAI(api_key=api_key, base_url=api_base)
+        client = AsyncOpenAI(
+            api_key=api_key,
+            base_url=api_base,
+            timeout=self.llm_config.request_timeout_seconds,
+            max_retries=0,
+        )
 
         for attempt in range(self.config.repair_rounds + 1):
             try:
-                response = await client.chat.completions.create(
-                    model=model,
-                    temperature=0.0,
-                    messages=[
-                        {"role": "system", "content": STRUCTURED_PLANNER_SYSTEM},
-                        {
-                            "role": "user",
-                            "content": structured_planner_prompt(
-                                question,
-                                self.config.max_nodes,
-                                self.config.max_depth,
-                                validation_errors,
-                            ),
+                current_errors = list(validation_errors)
+                response, _retry_count = await retry_llm_call(
+                    lambda errors=current_errors: client.chat.completions.create(
+                        model=model,
+                        temperature=0.0,
+                        messages=[
+                            {"role": "system", "content": STRUCTURED_PLANNER_SYSTEM},
+                            {
+                                "role": "user",
+                                "content": structured_planner_prompt(
+                                    question,
+                                    self.config.max_nodes,
+                                    self.config.max_depth,
+                                    errors,
+                                ),
+                            },
+                        ],
+                        response_format={
+                            "type": "json_schema",
+                            "json_schema": {
+                                "name": "dag_plan",
+                                "strict": True,
+                                "schema": STRUCTURED_PLAN_SCHEMA,
+                            },
                         },
-                    ],
-                    response_format={
-                        "type": "json_schema",
-                        "json_schema": {
-                            "name": "dag_plan",
-                            "strict": True,
-                            "schema": STRUCTURED_PLAN_SCHEMA,
-                        },
-                    },
+                    ),
+                    self.llm_config,
                 )
                 content = response.choices[0].message.content or "{}"
                 plan = normalize_plan_dependencies(_structured_data_to_plan(json.loads(content)))
@@ -192,6 +212,13 @@ child values by using {dependencies}, placeholders from input_map such as
 {left_value}, or direct child placeholders such as {q1.answer}.
 Never make a final comparison/synthesis node ask the original user question
 without child outputs in the prompt.
+Prefer targeted lookup nodes that return only the facts needed to answer the
+question. Do not create broad candidate-list or exhaustive enumeration nodes
+when a more specific lookup can identify the required entity or relationship
+directly.
+For bridge questions, ask lookup nodes to find the bridge-specific entity or
+attribute from the supplied evidence rather than enumerating all possible
+candidates from world knowledge.
 """
 
 
@@ -227,6 +254,11 @@ Constraints:
   names as well as the comparable attributes.
 - Lookup nodes that feed comparisons should use explicit output field names, for example
   composer and birth_year, mountain and elevation_meters, city and latitude.
+- Prefer targeted lookup nodes over broad candidate-list nodes. For example, ask which cast
+  member of a given film played James Bond; do not ask for all James Bond actors unless the
+  user's question requires that list.
+- Evidence-backed lookup nodes should return only facts directly needed by downstream nodes,
+  not every related fact visible in the context.
 - Use array fields for list-valued outputs and object fields for structured outputs.
 - The final_node must always include an output field named answer. It may include additional
   fields, but answer must contain the concise final response to the user's question.

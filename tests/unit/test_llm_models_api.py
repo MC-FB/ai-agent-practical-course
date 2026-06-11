@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from http import HTTPStatus
+
 from app import api
 from dagqa.config import AppConfig
 
@@ -41,13 +43,63 @@ async def test_list_llm_models_combines_azure_and_live_cluster_catalog(monkeypat
 
     result = await api.list_llm_models()
 
-    assert result["default"] == {"provider": "cluster", "model": "openai/gpt-oss-120b"}
+    assert result["default"] == {"provider": "cluster", "model": "Qwen/Qwen3.5-122B-A10B"}
     assert [item["model"] for item in result["models"]] == [
         "azure/gpt-4o-mini",
         "Qwen/Qwen3.5-122B-A10B",
         "google/gemma-4-31B-it",
         "openai/gpt-oss-120b",
     ]
+
+
+async def test_list_llm_models_uses_first_available_cluster_model_when_preferred_missing(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(api, "load_config", _azure_config)
+
+    async def cluster_models() -> list[str]:
+        return ["custom/current-model"]
+
+    monkeypatch.setattr(api, "_cluster_models", cluster_models)
+
+    result = await api.list_llm_models()
+
+    assert result["default"] == {"provider": "cluster", "model": "custom/current-model"}
+
+
+async def test_validated_config_rejects_unavailable_cluster_model(monkeypatch) -> None:
+    monkeypatch.setattr(api, "load_config", _azure_config)
+
+    async def cluster_models() -> list[str]:
+        return ["Qwen/Qwen3.5-122B-A10B"]
+
+    monkeypatch.setattr(api, "_cluster_models", cluster_models)
+
+    try:
+        await api.validated_config_for_selection(
+            api.LLMSelection(provider="cluster", model="openai/gpt-oss-120b")
+        )
+    except api.HTTPException as exc:
+        assert exc.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+        assert "Qwen/Qwen3.5-122B-A10B" in exc.detail
+    else:
+        raise AssertionError("Expected unavailable cluster model to be rejected.")
+
+
+async def test_validated_config_accepts_current_cluster_model(monkeypatch) -> None:
+    monkeypatch.setattr(api, "load_config", _azure_config)
+
+    async def cluster_models() -> list[str]:
+        return ["Qwen/Qwen3.5-122B-A10B"]
+
+    monkeypatch.setattr(api, "_cluster_models", cluster_models)
+
+    config = await api.validated_config_for_selection(
+        api.LLMSelection(provider="cluster", model="Qwen/Qwen3.5-122B-A10B")
+    )
+
+    assert config.llm.provider == "cluster"
+    assert config.llm.model == "Qwen/Qwen3.5-122B-A10B"
 
 
 async def test_list_llm_models_keeps_azure_available_when_cluster_fails(monkeypatch) -> None:

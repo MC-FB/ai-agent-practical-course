@@ -224,6 +224,26 @@ export type LiveBenchmark = HotpotBenchmarkResult & {
   completed: number;
   total: number;
   current_question?: string | null;
+  estimate?: {
+    elapsed_ms: number;
+    remaining_ms: number;
+    total_ms: number;
+    avg_llm_call_ms?: number | null;
+    observed_llm_call_count?: number | null;
+    avg_dag_node_count?: number | null;
+    parallelism?: number | null;
+    remaining_by_system?: Record<
+      string,
+      {
+        completed: number;
+        remaining_examples: number;
+        calls_per_example: number;
+        remaining_call_work: number;
+        remaining_ms: number;
+      }
+    >;
+  } | null;
+  last_record_completed_at?: string | null;
   error?: string | null;
   systems?: string[];
   current_system?: string;
@@ -247,6 +267,8 @@ export type LiveBenchmarkSummary = {
   model?: string | null;
   created_at?: string | null;
   total_runtime_ms: number;
+  estimate?: LiveBenchmark["estimate"];
+  last_record_completed_at?: string | null;
   error?: string | null;
   resumable?: boolean;
 };

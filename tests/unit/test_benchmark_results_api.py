@@ -276,6 +276,36 @@ def test_get_live_benchmark_marks_orphaned_running_state_stopped(monkeypatch, tm
     assert state["resumable"] is True
 
 
+async def test_stop_live_benchmark_cancels_active_task() -> None:
+    run_id = "cancel-active"
+    api.LIVE_BENCHMARKS[run_id] = {
+        "run_id": run_id,
+        "phase": "running",
+        "status": "running",
+        "records": [],
+        "metrics": {},
+    }
+    api.LIVE_BENCHMARK_STOPS[run_id] = asyncio.Event()
+
+    async def wait_forever() -> None:
+        await asyncio.Event().wait()
+
+    task = asyncio.create_task(wait_forever())
+    api.LIVE_BENCHMARK_TASKS[run_id] = task
+    try:
+        state = await api.stop_live_benchmark(run_id)
+
+        assert state["phase"] == "stopping"
+        assert state["stop_requested"] is True
+        assert api.LIVE_BENCHMARK_STOPS[run_id].is_set()
+        assert task.cancelled() or task.cancelling()
+    finally:
+        task.cancel()
+        api.LIVE_BENCHMARKS.pop(run_id, None)
+        api.LIVE_BENCHMARK_STOPS.pop(run_id, None)
+        api.LIVE_BENCHMARK_TASKS.pop(run_id, None)
+
+
 def test_list_live_benchmarks_returns_unfinished_summaries(monkeypatch, tmp_path) -> None:
     completed_count = 1337
     total_count = 2000

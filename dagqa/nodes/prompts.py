@@ -24,6 +24,11 @@ def render_evidence_section(
             " In _evidence_citations, return only facts that directly determine the values in your "
             "output. Do not cite documents or candidate facts that you merely read, inspected, "
             "considered, or rejected. Do not cite an exhaustive list when only one item is needed. "
+            "Every returned field value must be directly supported by one or more citations, "
+            "including each item in an array. Do not fill broad lists from partial evidence; "
+            "if the evidence supports only one relevant entity or fact, return only that entity "
+            "or fact. Preserve the answer type requested by the question and schema: do not "
+            'return "yes" or "no" unless the question asks yes/no. '
             "Cite each directly used fact with the exact document ID, title, and zero-based "
             "sentence indices shown below."
         )

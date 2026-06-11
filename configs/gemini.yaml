@@ -19,4 +19,5 @@ benchmark:
   split: validation
   default_limit: 100
   max_parallel_examples: 4
+  empty_prediction_retries: 1
   output_dir: runs/benchmarks

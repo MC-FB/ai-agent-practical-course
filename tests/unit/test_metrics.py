@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 
 import dagqa.eval.benchmark as benchmark_module
-from dagqa.config import AppConfig
+from dagqa.config import AppConfig, BenchmarkConfig
 from dagqa.eval.benchmark import (
     BenchmarkRecord,
     _aggregate,
@@ -30,6 +30,8 @@ from dagqa.schemas import (
     RunTrace,
     TaskType,
 )
+
+EXPECTED_EMPTY_RETRY_CALLS = 2
 
 
 def test_hotpot_style_answer_metrics() -> None:
@@ -90,6 +92,45 @@ async def test_run_examples_bounds_concurrency_and_preserves_order(monkeypatch) 
     assert max_active == parallel_examples
     assert completion_order != [example.id for example in examples]
     assert [record.id for record in records] == [example.id for example in examples]
+
+
+async def test_run_examples_retries_empty_predictions(monkeypatch) -> None:
+    calls = 0
+    completed: list[BenchmarkRecord] = []
+    example = HotpotExample(id="example-1", question="q1", answer="answer")
+
+    async def run_example(client, current_example, system):  # noqa: ANN001, ARG001
+        nonlocal calls
+        calls += 1
+        prediction = "" if calls == 1 else "answer"
+        return BenchmarkRecord(
+            id=current_example.id,
+            question=current_example.question,
+            gold_answer=current_example.answer,
+            prediction=prediction,
+            exact_match=1.0 if prediction else 0.0,
+            f1=1.0 if prediction else 0.0,
+            latency_ms=1,
+            llm_retry_count=0,
+            error="empty" if not prediction else None,
+        )
+
+    class Client:
+        config = AppConfig(benchmark=BenchmarkConfig(empty_prediction_retries=1))
+
+    monkeypatch.setattr(benchmark_module, "_run_example", run_example)
+
+    records = await _run_examples(
+        Client(),  # type: ignore[arg-type]
+        [example],
+        "direct_llm",
+        max_parallel_examples=1,
+        on_complete=completed.append,
+    )
+
+    assert calls == EXPECTED_EMPTY_RETRY_CALLS
+    assert records[0].prediction == "answer"
+    assert completed == records
 
 
 def test_extract_answer_accepts_single_named_answer_field() -> None:
@@ -179,6 +220,47 @@ async def test_direct_baseline_sends_all_sources_and_stores_cited_trace() -> Non
     assert record.node_count == 1
     assert record.run_trace is not None
     assert record.run_trace["nodes"][0]["supporting_evidence"]["total_available"] == source_count
+
+
+async def test_direct_baseline_failure_stores_prompt_and_raw_response_trace() -> None:
+    class FailingLLM:
+        async def complete(self, request):  # noqa: ANN001, ANN202
+            return LLMResponse(text='{"answer": ""}', model="test")
+
+    class RecordingClient:
+        config = AppConfig()
+        llm = FailingLLM()
+
+    record = await _run_example(
+        RecordingClient(),  # type: ignore[arg-type]
+        HotpotExample(
+            id="example-1",
+            question="Where was Ada born?",
+            answer="London",
+            context=[
+                EvidenceDocument(
+                    id="context-0",
+                    title="Ada Lovelace",
+                    text="Ada was born in London.",
+                )
+            ],
+        ),
+        "direct_llm",
+    )
+
+    assert record.prediction == ""
+    assert record.error == "Single-prompt response is missing a non-empty answer."
+    assert record.run_trace is not None
+    assert record.run_trace["status"] == "failed"
+    system_prompt = record.run_trace["plan"]["nodes"][0]["prompt"]["system"]
+    assert system_prompt.startswith("Answer the question")
+    trace = record.run_trace["nodes"][0]
+    assert trace["status"] == "failed"
+    assert "Question: Where was Ada born?" in trace["rendered_prompt"]
+    assert trace["raw_response"] == '{"answer": ""}'
+    assert trace["validation"]["errors"] == [
+        "Single-prompt response is missing a non-empty answer."
+    ]
 
 
 def test_evidence_citation_metrics_compare_against_gold_supporting_facts() -> None:

@@ -1,9 +1,13 @@
 llm:
-  provider: openrouter
-  model: openrouter/qwen/qwen3.7-max
+  provider: cluster
+  model: Qwen/Qwen3.5-122B-A10B
   temperature: 0.0
-  api_key_env: OPENROUTER_API_KEY
-  api_base: https://openrouter.ai/api/v1
+  api_key_env: CLUSTER_API_KEY
+  api_base: http://atknoll32.air.cit.tum.de:3000/inference
+  request_timeout_seconds: 180
+  max_retries: 6
+  retry_initial_delay_seconds: 1
+  retry_max_delay_seconds: 60
 planner:
   max_nodes: 10
   max_depth: 3

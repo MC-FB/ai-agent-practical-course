@@ -13,7 +13,29 @@ services:
     environment:
       HF_HOME: /app/hf_cache
       SENTENCE_TRANSFORMERS_HOME: /app/hf_cache/sentence-transformers
+      WATCHFILES_FORCE_POLLING: "true"
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --reload
+      - --reload-dir
+      - app
+      - --reload-dir
+      - dagqa
+      - --reload-dir
+      - configs
+      - --reload-include
+      - '*.yaml'
+      - --reload-include
+      - '*.yml'
     volumes:
+      - ./app:/app/app
+      - ./dagqa:/app/dagqa
+      - ./configs:/app/configs
       - ./runs:/app/runs
       - hf-model-cache:/app/hf_cache
 

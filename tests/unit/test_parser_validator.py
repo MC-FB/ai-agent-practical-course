@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dagqa.planning.normalizer import normalize_plan_dependencies
 from dagqa.planning.parser import parse_plan
+from dagqa.planning.planner import STRUCTURED_PLANNER_SYSTEM, structured_planner_prompt
 from dagqa.planning.prompts import PLANNER_SYSTEM
 from dagqa.planning.validator import graph_depth, scheduler_waves, validate_plan
 from dagqa.schemas import DagNode, DagPlan, Operation, PromptSpec, TaskType
@@ -20,6 +21,18 @@ def test_parse_and_validate_parallel_plan(app_config) -> None:
 
 def test_planner_prompt_discourages_broad_candidate_enumeration() -> None:
     assert "broad candidate-list or exhaustive enumeration nodes" in PLANNER_SYSTEM
+
+
+def test_structured_planner_prompt_discourages_broad_candidate_enumeration() -> None:
+    prompt = structured_planner_prompt(
+        "Hotel Splendide is a British film from 2000 that features which James Bond actor?",
+        max_nodes=5,
+        max_depth=3,
+    )
+
+    assert "broad candidate-list or exhaustive enumeration nodes" in STRUCTURED_PLANNER_SYSTEM
+    assert "Prefer targeted lookup nodes over broad candidate-list nodes" in prompt
+    assert "do not ask for all James Bond actors" in prompt
 
 
 def test_parse_accepts_bare_node_list() -> None:

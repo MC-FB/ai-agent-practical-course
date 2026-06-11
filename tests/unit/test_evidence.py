@@ -54,6 +54,9 @@ def test_render_prompt_includes_all_evidence_and_distractor_instruction() -> Non
     assert "Only some of these documents may be relevant" in rendered
     assert "Do not cite documents or candidate facts that you merely read" in rendered
     assert "Do not cite an exhaustive list when only one item is needed" in rendered
+    assert "Every returned field value must be directly supported" in rendered
+    assert "Do not fill broad lists from partial evidence" in rendered
+    assert 'do not return "yes" or "no" unless the question asks yes/no' in rendered
     assert "Document ID: context-0" in rendered
     assert "Title: Ada" in rendered
     assert "Ada was born in London." in rendered

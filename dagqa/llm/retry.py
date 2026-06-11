@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import random
 from collections.abc import Awaitable, Callable
 from typing import TypeVar
 
 from dagqa.config import LLMConfig
+
+logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
@@ -25,10 +28,18 @@ async def retry_llm_call(
     attempt = 0
     while True:
         try:
+            logger.debug("Calling %s attempt %s/%s", config.model, attempt, config.max_retries)
             return await asyncio.wait_for(call(), timeout=config.request_timeout_seconds), attempt
         except Exception as exc:
             if attempt >= config.max_retries or not is_retryable_llm_error(exc):
+                logger.debug("LLM call failed without retry", exc_info=exc)
                 raise
+            logger.debug(
+                "LLM call failed; retrying %s/%s",
+                attempt + 1,
+                config.max_retries,
+                exc_info=exc,
+            )
             delay = min(
                 config.retry_initial_delay_seconds * (2**attempt),
                 config.retry_max_delay_seconds,

@@ -1311,6 +1311,36 @@ function DatasetView({
     const total = liveRun?.total ?? resolvedLimit * systems.length;
     const completed = liveRun?.completed ?? 0;
     const elapsedMs = liveRun?.total_runtime_ms ?? 0;
+    const serverEstimate = liveRun?.estimate;
+    if (serverEstimate) {
+      const remainingMs = Math.max(serverEstimate.remaining_ms ?? 0, 0);
+      const totalMs = Math.max(serverEstimate.total_ms ?? elapsedMs + remainingMs, elapsedMs);
+      const finishAt =
+        remainingMs > 0 ? new Date(Date.now() + remainingMs).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }) : undefined;
+      return {
+        total,
+        completed,
+        remaining: Math.max(total - completed, 0),
+        elapsedMs,
+        remainingMs,
+        totalMs,
+        finishAt,
+        avgLlmCallMs: serverEstimate.avg_llm_call_ms ?? undefined,
+        avgDagNodeCount: serverEstimate.avg_dag_node_count ?? undefined,
+        lastRecordAgeMs: liveRun?.last_record_completed_at
+          ? Math.max(Date.now() - new Date(liveRun.last_record_completed_at).getTime(), 0)
+          : undefined,
+        confidence:
+          (serverEstimate.observed_llm_call_count ?? 0) >= 8
+            ? "High"
+            : completed > 0
+              ? "Calibrating"
+              : "Fallback",
+      };
+    }
     const historicalMsPerExample = total > 0 ? plannedTotalMs / total : 0;
     const observedMsPerExample = completed > 0 ? elapsedMs / completed : undefined;
     const observedWeight = observedMsPerExample ? Math.min(0.9, completed / 8) : 0;
@@ -1335,6 +1365,11 @@ function DatasetView({
       remainingMs,
       totalMs,
       finishAt,
+      avgLlmCallMs: undefined,
+      avgDagNodeCount: undefined,
+      lastRecordAgeMs: liveRun?.last_record_completed_at
+        ? Math.max(Date.now() - new Date(liveRun.last_record_completed_at).getTime(), 0)
+        : undefined,
       confidence:
         completed >= 8 ? "High" : completed > 0 ? "Calibrating" : savedBenchmarkSummaries.length ? "Historical" : "Fallback",
     };
@@ -1810,11 +1845,27 @@ function DatasetView({
                 <Badge>{progressPercent.toFixed(0)}%</Badge>
             </div>
               <Progress value={progressPercent} />
-              <div className="grid gap-2 text-xs font-semibold text-slate-600 sm:grid-cols-3">
+              <div className="grid gap-2 text-xs font-semibold text-slate-600 sm:grid-cols-4">
                 <span>Elapsed {formatDuration(benchmarkEstimate.elapsedMs)}</span>
                 <span>Remaining {formatDuration(benchmarkEstimate.remainingMs)}</span>
                 <span>Estimated total {formatDuration(benchmarkEstimate.totalMs)}</span>
+                <span>
+                  Last item{" "}
+                  {benchmarkEstimate.lastRecordAgeMs === undefined
+                    ? "not yet"
+                    : `${formatDuration(benchmarkEstimate.lastRecordAgeMs)} ago`}
+                </span>
             </div>
+              {(benchmarkEstimate.avgLlmCallMs || benchmarkEstimate.avgDagNodeCount) && (
+                <div className="flex flex-wrap gap-3 text-[11px] font-semibold text-emerald-900">
+                  {benchmarkEstimate.avgLlmCallMs && (
+                    <span>LLM call avg {formatDuration(benchmarkEstimate.avgLlmCallMs)}</span>
+                  )}
+                  {benchmarkEstimate.avgDagNodeCount && (
+                    <span>DAG nodes avg {formatNumber(benchmarkEstimate.avgDagNodeCount, 1)}</span>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
