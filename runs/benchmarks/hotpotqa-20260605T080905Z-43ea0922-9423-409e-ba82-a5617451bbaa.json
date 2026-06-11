@@ -1,0 +1,986 @@
+{
+  "run_id": "43ea0922-9423-409e-ba82-a5617451bbaa",
+  "comparison_group_id": "2f779562-165d-4531-bf37-3035d56a0eb3",
+  "system": "direct_llm",
+  "limit": 10,
+  "provider": "cluster",
+  "model": "openai/gpt-oss-120b",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "dataset_size": 7405,
+  "seed": 751042532,
+  "max_parallel_examples": 4,
+  "created_at": "2026-06-05T08:09:05Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260605T080905Z-43ea0922-9423-409e-ba82-a5617451bbaa.json",
+  "total_runtime_ms": 4894.442044000016,
+  "records": [
+    {
+      "id": "5a75fbe855429976ec32bcde",
+      "question": "Which documentary is newer, War/Dance or The Sorrow and the Pity?",
+      "gold_answer": "War/Dance",
+      "prediction": "War/Dance is newer.",
+      "exact_match": 0.0,
+      "f1": 0.5,
+      "cosine_sim": 0.7082040905952454,
+      "latency_ms": 1805.9607919999507,
+      "llm_call_count": 1,
+      "llm_retry_count": 0,
+      "node_count": 1,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "War/Dance",
+          "sentence_index": 0
+        },
+        {
+          "title": "The Sorrow and the Pity",
+          "sentence_index": 0
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 1.0,
+      "run_trace": {
+        "run_id": "301b3e72-ca3d-4fa0-94e4-af7d5ea5c9a0",
+        "question": "Which documentary is newer, War/Dance or The Sorrow and the Pity?",
+        "plan": {
+          "question": "Which documentary is newer, War/Dance or The Sorrow and the Pity?",
+          "nodes": [
+            {
+              "id": "single_prompt",
+              "label": "Single prompt",
+              "task_type": "synthesis",
+              "question": "Which documentary is newer, War/Dance or The Sorrow and the Pity?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "Answer the question concisely using only the supplied sources.",
+                "user_template": "Question: Which documentary is newer, War/Dance or The Sorrow and the Pity?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: The Great War for Civilisation\n  (0) The Great War for Civilisation: The Conquest of the Middle East is a book published in 2005 by the award-winning English journalist Robert Fisk.\n  (1)  The book is a compilation of many of the articles Fisk wrote when he was serving as a correspondent in the Middle East for \"The Times\" and \"The Independent\".\n  (2)  The book revolves around several key themes regarding the history of the modern Middle East: the Arab-Israeli conflict, the Soviet invasion of Afghanistan, the Persian Gulf War as well as the 2003 Iraq War (United States invasion of Iraq) as well as other regional conflicts such as the Armenian Genocide and the Algerian Civil War.\n  (3)  The \"Great War for Civilisation\" is the second book Fisk has written about the Middle East with the first one, \"Pity the Nation\", (Nation Books, 2002) being about the Lebanese Civil War.\n\nDocument ID: context-1\nTitle: Botres\n  (0) In Greek mythology, Botres was a Theban son of Eumelus and grandson of Eugnotus.\n  (1)  His father venerated the god Apollo devotedly and honored him with generous offerings.\n  (2)  One day, when Eumelus was sacrificing a ram to the god, Botres, who was helping around, tasted the victim's brain before the ritual was completed.\n  (3)  Eumelus, enraged, hit Botres on the head with a brand and inflicted a fatal injury on him.\n  (4)  As it became evident that Botres was dying, Eumelus, his wife and the servants were overcome with sorrow.\n  (5)  Being that Eumelus was a devotee, Apollo took pity on them and changed Botres into a bird called \"Aeropus\" (bee-eater).\n\nDocument ID: context-2\nTitle: War/Dance\n  (0) War/Dance is a 2007 American documentary film written and directed by Sean Fine and Andrea Nix Fine and produced by Shine Global's Susan MacLaury, a professor at Kean University, and Albie Hecht.\n  (1)  It was nominated for the 2008 Academy Award for Best Documentary Feature and received the Emmy Award for Best Documentary and Best Cinematography in 2010.\n\nDocument ID: context-3\nTitle: Sduduzo Ka-Mbili\n  (0) As a performer in S.A., Sduduzo worked in Mbongeni Ngema\u2019s Sarafina (The Movie), starring Whoopi Goldberg, Poison Musical by David Kramer and Taliep Peterson, Soweto Dance Theatre, directed by late Jackie Semela, Free Flight Dance Company, under the direction of Adele Blank and Christopher Kindo.In 1997, Sduduzo was one of the three recipients for a full scholarship to train at the Alvin Ailey American Dance School in New York City.\n  (1)  During his training in NYC, he was given an opportunity to create a piece (Izinhlungu Zami, My Sorrow) for the Alvin Ailey Repertory Dance Ensemble, which he later performed for the company.\n  (2)  In 1999, he toured the US with Donald Byrd\u2019s Harlem Nutcracker before establishing a song and dance JUXTAPOWER production, representative of the South African culture.\n  (3)  Juxtapower eventually developed into a touring production that travelled extensively throughout the USA.\n\nDocument ID: context-4\nTitle: Christian de la Mazi\u00e8re\n  (0) Christian de la Mazi\u00e8re (August 22, 1922 in Tunis \u2013 February 15, 2006) was a journalist and member of the Charlemagne Division of the Waffen SS.\n  (1)  He is known for discussing his role in the documentary \"The Sorrow and the Pity\" and also wrote a book titled \"The Captive Dreamer\".\n  (2)  At the start of the war, he served in the French Army and was later retained in the military of Vichy France until 1942.\n  (3)  After being discharged, he worked for the fascist newspaper \"Le Pays Libre\", joining the Charlemagne Division just before the Liberation of Paris in 1944.\n  (4)  He was taken prisoner in Pomerania by Polish forces in the Red Army.\n\nDocument ID: context-5\nTitle: Clogging\n  (0) Clogging is a type of folk dance in which the dancer's footwear is used percussively by striking the heel, the toe, or both against a floor or each other to create audible rhythms, usually to the downbeat with the heel keeping the rhythm.\n  (1)  The dance style has recently fused with others including African-American rhythms, and the Peruvian dance \"zapateo\" (which may in itself be derived from early European clog dances), resulting in the birth of newer street dances, such as tap, locking, jump, hakken, stomping, Gangsta Walking, and the Candy Walk dance.\n  (2)  The use of wooden-soled clogs is rarer in the more modern dances since clog shoes are not commonly worn in urban society, and other types of footwear have replaced them in their evolved dance forms.\n  (3)  Clogging is often considered the first form of street dance because it evolved in urban environments during the industrial revolution.\n\nDocument ID: context-6\nTitle: The Sorrow and the Pity\n  (0) The Sorrow and the Pity (French: Le Chagrin et la Piti\u00e9 ) is a two-part 1969 documentary film by Marcel Oph\u00fcls about the collaboration between the Vichy government and Nazi Germany during World War II.\n  (1)  The film uses interviews with a German officer, collaborators, and resistance fighters from Clermont-Ferrand.\n  (2)  They comment on the nature of and reasons for collaboration.\n  (3)  The reasons include antisemitism, anglophobia, fear of Bolsheviks and Soviet invasion, the desire for power, and simple caution.\n\nDocument ID: context-7\nTitle: Chandan Ka Palna\n  (0) Chandan Ka Palna is a 1967 Bollywood film starring Dharmendra and Meena Kumari.\n  (1)  No joy in the world can equal the happiness a man derives from watching his own child at play.\n  (2)  Not all the riches in the world can compensate for the vacuum, the emptiness, created by the want of a child in a home.\n  (3)  With a woman this yearning is a hundred times stronger and the outcome of her torment impossible beyond measure.\n  (4)  Radha belonged to a rich family.\n  (5)  Her sole aim in life after becoming a widow, was to see her sone Ajit happy and fulfil the promise she had given to her husband that the family name and tradition would be perpetuated.\n  (6)  Finding Ajit deeply in love with Shobha, the Raisaheb's daughter who too loved him no less, Radha got them married, hoping that Shobha would prove an ideal wife and daughter-in-law and their home would soon resound with merry laughter of a child, if not children.\n  (7)  Three years went by and Radha was still waiting for the new arrival in the family.\n  (8)  Her patience was running out.\n  (9)  Desperate, she took Shobha to a doctor who, after prolonged examination and treatment, told her that God alone could help her fulfill her yearning for a grandchild.\n  (10)  Radha's sorrow knows no bounds.\n  (11)  She could not think of the family chain breaking off.\n  (12)  She had to have a grandchild and fulfil her promise to her late husband.\n  (13)  As a last resort, she took Shobha to Gurudev, the spiritual soul revered by the family.\n  (14)  Gurudev had pity on Radha's plight.\n  (15)  Taking her into confidence, he told her: \"\"Look, I am no miracle worker.\n  (16)  And, as far as my knowledge goes, I am certain that your daughter-in-law is destined to remain barren.\"\n  (17) \"When Shobha heard this, she was in a daze.\n  (18)  She knew her mother-in-law's craving for a grandchild and she knew also that woman would leave no stone unturned to accomplish her objective.Life seemed to Shobha without a ray of hope for her to live.\n  (19)  She decided to put an end to it.\n  (20)  It was better that way, she thought, than to suffer the humiliation of being branded for ever barren.\n  (21)  She knew how deeply her husband loved her and she could very well imagine his dilemma when forced to marry again for the sake of a child.She started walking in the direction of the fatal plunge to end all problems, to end herself.\n  (22)  But what mere mortal can meet his or her end according to his or her own design?\n  (23)  Destiny had other things written down for Shobha.\n  (24)  But let that be unfolded on the screen in \"\"Chandan Ka Palna\"\" lest further knowledge of the proceedings spoil full enjoyment of the drama.\n\nDocument ID: context-8\nTitle: Marcel Oph\u00fcls\n  (0) Marcel Ophuls (] ; born 1 November 1927) is a documentary film maker and former actor, best known for his films \"The Sorrow and the Pity\" and \"\".\n\nDocument ID: context-9\nTitle: Pity\n  (0) Pity means feeling for others, particularly feelings of sadness or sorrow, and is used in a comparable sense to the more modern words \"sympathy\" and \"empathy\".\n  (1)  Through insincere usage, it can also have a more unsympathetic connotation of feelings of superiority or condescension.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "single_prompt"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "single_prompt"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "single_prompt",
+            "label": "Single prompt",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Which documentary is newer, War/Dance or The Sorrow and the Pity?",
+            "rendered_prompt": "Question: Which documentary is newer, War/Dance or The Sorrow and the Pity?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: The Great War for Civilisation\n  (0) The Great War for Civilisation: The Conquest of the Middle East is a book published in 2005 by the award-winning English journalist Robert Fisk.\n  (1)  The book is a compilation of many of the articles Fisk wrote when he was serving as a correspondent in the Middle East for \"The Times\" and \"The Independent\".\n  (2)  The book revolves around several key themes regarding the history of the modern Middle East: the Arab-Israeli conflict, the Soviet invasion of Afghanistan, the Persian Gulf War as well as the 2003 Iraq War (United States invasion of Iraq) as well as other regional conflicts such as the Armenian Genocide and the Algerian Civil War.\n  (3)  The \"Great War for Civilisation\" is the second book Fisk has written about the Middle East with the first one, \"Pity the Nation\", (Nation Books, 2002) being about the Lebanese Civil War.\n\nDocument ID: context-1\nTitle: Botres\n  (0) In Greek mythology, Botres was a Theban son of Eumelus and grandson of Eugnotus.\n  (1)  His father venerated the god Apollo devotedly and honored him with generous offerings.\n  (2)  One day, when Eumelus was sacrificing a ram to the god, Botres, who was helping around, tasted the victim's brain before the ritual was completed.\n  (3)  Eumelus, enraged, hit Botres on the head with a brand and inflicted a fatal injury on him.\n  (4)  As it became evident that Botres was dying, Eumelus, his wife and the servants were overcome with sorrow.\n  (5)  Being that Eumelus was a devotee, Apollo took pity on them and changed Botres into a bird called \"Aeropus\" (bee-eater).\n\nDocument ID: context-2\nTitle: War/Dance\n  (0) War/Dance is a 2007 American documentary film written and directed by Sean Fine and Andrea Nix Fine and produced by Shine Global's Susan MacLaury, a professor at Kean University, and Albie Hecht.\n  (1)  It was nominated for the 2008 Academy Award for Best Documentary Feature and received the Emmy Award for Best Documentary and Best Cinematography in 2010.\n\nDocument ID: context-3\nTitle: Sduduzo Ka-Mbili\n  (0) As a performer in S.A., Sduduzo worked in Mbongeni Ngema\u2019s Sarafina (The Movie), starring Whoopi Goldberg, Poison Musical by David Kramer and Taliep Peterson, Soweto Dance Theatre, directed by late Jackie Semela, Free Flight Dance Company, under the direction of Adele Blank and Christopher Kindo.In 1997, Sduduzo was one of the three recipients for a full scholarship to train at the Alvin Ailey American Dance School in New York City.\n  (1)  During his training in NYC, he was given an opportunity to create a piece (Izinhlungu Zami, My Sorrow) for the Alvin Ailey Repertory Dance Ensemble, which he later performed for the company.\n  (2)  In 1999, he toured the US with Donald Byrd\u2019s Harlem Nutcracker before establishing a song and dance JUXTAPOWER production, representative of the South African culture.\n  (3)  Juxtapower eventually developed into a touring production that travelled extensively throughout the USA.\n\nDocument ID: context-4\nTitle: Christian de la Mazi\u00e8re\n  (0) Christian de la Mazi\u00e8re (August 22, 1922 in Tunis \u2013 February 15, 2006) was a journalist and member of the Charlemagne Division of the Waffen SS.\n  (1)  He is known for discussing his role in the documentary \"The Sorrow and the Pity\" and also wrote a book titled \"The Captive Dreamer\".\n  (2)  At the start of the war, he served in the French Army and was later retained in the military of Vichy France until 1942.\n  (3)  After being discharged, he worked for the fascist newspaper \"Le Pays Libre\", joining the Charlemagne Division just before the Liberation of Paris in 1944.\n  (4)  He was taken prisoner in Pomerania by Polish forces in the Red Army.\n\nDocument ID: context-5\nTitle: Clogging\n  (0) Clogging is a type of folk dance in which the dancer's footwear is used percussively by striking the heel, the toe, or both against a floor or each other to create audible rhythms, usually to the downbeat with the heel keeping the rhythm.\n  (1)  The dance style has recently fused with others including African-American rhythms, and the Peruvian dance \"zapateo\" (which may in itself be derived from early European clog dances), resulting in the birth of newer street dances, such as tap, locking, jump, hakken, stomping, Gangsta Walking, and the Candy Walk dance.\n  (2)  The use of wooden-soled clogs is rarer in the more modern dances since clog shoes are not commonly worn in urban society, and other types of footwear have replaced them in their evolved dance forms.\n  (3)  Clogging is often considered the first form of street dance because it evolved in urban environments during the industrial revolution.\n\nDocument ID: context-6\nTitle: The Sorrow and the Pity\n  (0) The Sorrow and the Pity (French: Le Chagrin et la Piti\u00e9 ) is a two-part 1969 documentary film by Marcel Oph\u00fcls about the collaboration between the Vichy government and Nazi Germany during World War II.\n  (1)  The film uses interviews with a German officer, collaborators, and resistance fighters from Clermont-Ferrand.\n  (2)  They comment on the nature of and reasons for collaboration.\n  (3)  The reasons include antisemitism, anglophobia, fear of Bolsheviks and Soviet invasion, the desire for power, and simple caution.\n\nDocument ID: context-7\nTitle: Chandan Ka Palna\n  (0) Chandan Ka Palna is a 1967 Bollywood film starring Dharmendra and Meena Kumari.\n  (1)  No joy in the world can equal the happiness a man derives from watching his own child at play.\n  (2)  Not all the riches in the world can compensate for the vacuum, the emptiness, created by the want of a child in a home.\n  (3)  With a woman this yearning is a hundred times stronger and the outcome of her torment impossible beyond measure.\n  (4)  Radha belonged to a rich family.\n  (5)  Her sole aim in life after becoming a widow, was to see her sone Ajit happy and fulfil the promise she had given to her husband that the family name and tradition would be perpetuated.\n  (6)  Finding Ajit deeply in love with Shobha, the Raisaheb's daughter who too loved him no less, Radha got them married, hoping that Shobha would prove an ideal wife and daughter-in-law and their home would soon resound with merry laughter of a child, if not children.\n  (7)  Three years went by and Radha was still waiting for the new arrival in the family.\n  (8)  Her patience was running out.\n  (9)  Desperate, she took Shobha to a doctor who, after prolonged examination and treatment, told her that God alone could help her fulfill her yearning for a grandchild.\n  (10)  Radha's sorrow knows no bounds.\n  (11)  She could not think of the family chain breaking off.\n  (12)  She had to have a grandchild and fulfil her promise to her late husband.\n  (13)  As a last resort, she took Shobha to Gurudev, the spiritual soul revered by the family.\n  (14)  Gurudev had pity on Radha's plight.\n  (15)  Taking her into confidence, he told her: \"\"Look, I am no miracle worker.\n  (16)  And, as far as my knowledge goes, I am certain that your daughter-in-law is destined to remain barren.\"\n  (17) \"When Shobha heard this, she was in a daze.\n  (18)  She knew her mother-in-law's craving for a grandchild and she knew also that woman would leave no stone unturned to accomplish her objective.Life seemed to Shobha without a ray of hope for her to live.\n  (19)  She decided to put an end to it.\n  (20)  It was better that way, she thought, than to suffer the humiliation of being branded for ever barren.\n  (21)  She knew how deeply her husband loved her and she could very well imagine his dilemma when forced to marry again for the sake of a child.She started walking in the direction of the fatal plunge to end all problems, to end herself.\n  (22)  But what mere mortal can meet his or her end according to his or her own design?\n  (23)  Destiny had other things written down for Shobha.\n  (24)  But let that be unfolded on the screen in \"\"Chandan Ka Palna\"\" lest further knowledge of the proceedings spoil full enjoyment of the drama.\n\nDocument ID: context-8\nTitle: Marcel Oph\u00fcls\n  (0) Marcel Ophuls (] ; born 1 November 1927) is a documentary film maker and former actor, best known for his films \"The Sorrow and the Pity\" and \"\".\n\nDocument ID: context-9\nTitle: Pity\n  (0) Pity means feeling for others, particularly feelings of sadness or sorrow, and is used in a comparable sense to the more modern words \"sympathy\" and \"empathy\".\n  (1)  Through insincere usage, it can also have a more unsympathetic connotation of feelings of superiority or condescension.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer.",
+            "raw_response": "{\n  \"answer\": \"War/Dance is newer.\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-2\",\n      \"title\": \"War/Dance\",\n      \"sentence_indices\": [0],\n      \"fact\": \"War/Dance is a 2007 American documentary film...\"\n    },\n    {\n      \"document_id\": \"context-6\",\n      \"title\": \"The Sorrow and the Pity\",\n      \"sentence_indices\": [0],\n      \"fact\": \"The Sorrow and the Pity ... is a two-part 1969 documentary film...\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "answer": "War/Dance is newer.",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-2",
+                  "title": "War/Dance",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "War/Dance is a 2007 American documentary film..."
+                },
+                {
+                  "document_id": "context-6",
+                  "title": "The Sorrow and the Pity",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "The Sorrow and the Pity ... is a two-part 1969 documentary film..."
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "War/Dance is newer."
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "The Great War for Civilisation",
+                  "text": "The Great War for Civilisation: The Conquest of the Middle East is a book published in 2005 by the award-winning English journalist Robert Fisk. The book is a compilation of many of the articles Fisk wrote when he was serving as a correspondent in the Middle East for \"The Times\" and \"The Independent\". The book revolves around several key themes regarding the history of the modern Middle East: the Arab-Israeli conflict, the Soviet invasion of Afghanistan, the Persian Gulf War as well as the 2003 Iraq War (United States invasion of Iraq) as well as other regional conflicts such as the Armenian Genocide and the Algerian Civil War. The \"Great War for Civilisation\" is the second book Fisk has written about the Middle East with the first one, \"Pity the Nation\", (Nation Books, 2002) being about the Lebanese Civil War.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "The Great War for Civilisation: The Conquest of the Middle East is a book published in 2005 by the award-winning English journalist Robert Fisk.",
+                      " The book is a compilation of many of the articles Fisk wrote when he was serving as a correspondent in the Middle East for \"The Times\" and \"The Independent\".",
+                      " The book revolves around several key themes regarding the history of the modern Middle East: the Arab-Israeli conflict, the Soviet invasion of Afghanistan, the Persian Gulf War as well as the 2003 Iraq War (United States invasion of Iraq) as well as other regional conflicts such as the Armenian Genocide and the Algerian Civil War.",
+                      " The \"Great War for Civilisation\" is the second book Fisk has written about the Middle East with the first one, \"Pity the Nation\", (Nation Books, 2002) being about the Lebanese Civil War."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Botres",
+                  "text": "In Greek mythology, Botres was a Theban son of Eumelus and grandson of Eugnotus. His father venerated the god Apollo devotedly and honored him with generous offerings. One day, when Eumelus was sacrificing a ram to the god, Botres, who was helping around, tasted the victim's brain before the ritual was completed. Eumelus, enraged, hit Botres on the head with a brand and inflicted a fatal injury on him. As it became evident that Botres was dying, Eumelus, his wife and the servants were overcome with sorrow. Being that Eumelus was a devotee, Apollo took pity on them and changed Botres into a bird called \"Aeropus\" (bee-eater).",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "In Greek mythology, Botres was a Theban son of Eumelus and grandson of Eugnotus.",
+                      " His father venerated the god Apollo devotedly and honored him with generous offerings.",
+                      " One day, when Eumelus was sacrificing a ram to the god, Botres, who was helping around, tasted the victim's brain before the ritual was completed.",
+                      " Eumelus, enraged, hit Botres on the head with a brand and inflicted a fatal injury on him.",
+                      " As it became evident that Botres was dying, Eumelus, his wife and the servants were overcome with sorrow.",
+                      " Being that Eumelus was a devotee, Apollo took pity on them and changed Botres into a bird called \"Aeropus\" (bee-eater)."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "War/Dance",
+                  "text": "War/Dance is a 2007 American documentary film written and directed by Sean Fine and Andrea Nix Fine and produced by Shine Global's Susan MacLaury, a professor at Kean University, and Albie Hecht. It was nominated for the 2008 Academy Award for Best Documentary Feature and received the Emmy Award for Best Documentary and Best Cinematography in 2010.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "War/Dance is a 2007 American documentary film written and directed by Sean Fine and Andrea Nix Fine and produced by Shine Global's Susan MacLaury, a professor at Kean University, and Albie Hecht.",
+                      " It was nominated for the 2008 Academy Award for Best Documentary Feature and received the Emmy Award for Best Documentary and Best Cinematography in 2010."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Sduduzo Ka-Mbili",
+                  "text": "As a performer in S.A., Sduduzo worked in Mbongeni Ngema\u2019s Sarafina (The Movie), starring Whoopi Goldberg, Poison Musical by David Kramer and Taliep Peterson, Soweto Dance Theatre, directed by late Jackie Semela, Free Flight Dance Company, under the direction of Adele Blank and Christopher Kindo.In 1997, Sduduzo was one of the three recipients for a full scholarship to train at the Alvin Ailey American Dance School in New York City. During his training in NYC, he was given an opportunity to create a piece (Izinhlungu Zami, My Sorrow) for the Alvin Ailey Repertory Dance Ensemble, which he later performed for the company. In 1999, he toured the US with Donald Byrd\u2019s Harlem Nutcracker before establishing a song and dance JUXTAPOWER production, representative of the South African culture. Juxtapower eventually developed into a touring production that travelled extensively throughout the USA.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "As a performer in S.A., Sduduzo worked in Mbongeni Ngema\u2019s Sarafina (The Movie), starring Whoopi Goldberg, Poison Musical by David Kramer and Taliep Peterson, Soweto Dance Theatre, directed by late Jackie Semela, Free Flight Dance Company, under the direction of Adele Blank and Christopher Kindo.In 1997, Sduduzo was one of the three recipients for a full scholarship to train at the Alvin Ailey American Dance School in New York City.",
+                      " During his training in NYC, he was given an opportunity to create a piece (Izinhlungu Zami, My Sorrow) for the Alvin Ailey Repertory Dance Ensemble, which he later performed for the company.",
+                      " In 1999, he toured the US with Donald Byrd\u2019s Harlem Nutcracker before establishing a song and dance JUXTAPOWER production, representative of the South African culture.",
+                      " Juxtapower eventually developed into a touring production that travelled extensively throughout the USA."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Christian de la Mazi\u00e8re",
+                  "text": "Christian de la Mazi\u00e8re (August 22, 1922 in Tunis \u2013 February 15, 2006) was a journalist and member of the Charlemagne Division of the Waffen SS. He is known for discussing his role in the documentary \"The Sorrow and the Pity\" and also wrote a book titled \"The Captive Dreamer\". At the start of the war, he served in the French Army and was later retained in the military of Vichy France until 1942. After being discharged, he worked for the fascist newspaper \"Le Pays Libre\", joining the Charlemagne Division just before the Liberation of Paris in 1944. He was taken prisoner in Pomerania by Polish forces in the Red Army.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Christian de la Mazi\u00e8re (August 22, 1922 in Tunis \u2013 February 15, 2006) was a journalist and member of the Charlemagne Division of the Waffen SS.",
+                      " He is known for discussing his role in the documentary \"The Sorrow and the Pity\" and also wrote a book titled \"The Captive Dreamer\".",
+                      " At the start of the war, he served in the French Army and was later retained in the military of Vichy France until 1942.",
+                      " After being discharged, he worked for the fascist newspaper \"Le Pays Libre\", joining the Charlemagne Division just before the Liberation of Paris in 1944.",
+                      " He was taken prisoner in Pomerania by Polish forces in the Red Army."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Clogging",
+                  "text": "Clogging is a type of folk dance in which the dancer's footwear is used percussively by striking the heel, the toe, or both against a floor or each other to create audible rhythms, usually to the downbeat with the heel keeping the rhythm. The dance style has recently fused with others including African-American rhythms, and the Peruvian dance \"zapateo\" (which may in itself be derived from early European clog dances), resulting in the birth of newer street dances, such as tap, locking, jump, hakken, stomping, Gangsta Walking, and the Candy Walk dance. The use of wooden-soled clogs is rarer in the more modern dances since clog shoes are not commonly worn in urban society, and other types of footwear have replaced them in their evolved dance forms. Clogging is often considered the first form of street dance because it evolved in urban environments during the industrial revolution.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Clogging is a type of folk dance in which the dancer's footwear is used percussively by striking the heel, the toe, or both against a floor or each other to create audible rhythms, usually to the downbeat with the heel keeping the rhythm.",
+                      " The dance style has recently fused with others including African-American rhythms, and the Peruvian dance \"zapateo\" (which may in itself be derived from early European clog dances), resulting in the birth of newer street dances, such as tap, locking, jump, hakken, stomping, Gangsta Walking, and the Candy Walk dance.",
+                      " The use of wooden-soled clogs is rarer in the more modern dances since clog shoes are not commonly worn in urban society, and other types of footwear have replaced them in their evolved dance forms.",
+                      " Clogging is often considered the first form of street dance because it evolved in urban environments during the industrial revolution."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "The Sorrow and the Pity",
+                  "text": "The Sorrow and the Pity (French: Le Chagrin et la Piti\u00e9 ) is a two-part 1969 documentary film by Marcel Oph\u00fcls about the collaboration between the Vichy government and Nazi Germany during World War II. The film uses interviews with a German officer, collaborators, and resistance fighters from Clermont-Ferrand. They comment on the nature of and reasons for collaboration. The reasons include antisemitism, anglophobia, fear of Bolsheviks and Soviet invasion, the desire for power, and simple caution.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "The Sorrow and the Pity (French: Le Chagrin et la Piti\u00e9 ) is a two-part 1969 documentary film by Marcel Oph\u00fcls about the collaboration between the Vichy government and Nazi Germany during World War II.",
+                      " The film uses interviews with a German officer, collaborators, and resistance fighters from Clermont-Ferrand.",
+                      " They comment on the nature of and reasons for collaboration.",
+                      " The reasons include antisemitism, anglophobia, fear of Bolsheviks and Soviet invasion, the desire for power, and simple caution."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Chandan Ka Palna",
+                  "text": "Chandan Ka Palna is a 1967 Bollywood film starring Dharmendra and Meena Kumari. No joy in the world can equal the happiness a man derives from watching his own child at play. Not all the riches in the world can compensate for the vacuum, the emptiness, created by the want of a child in a home. With a woman this yearning is a hundred times stronger and the outcome of her torment impossible beyond measure. Radha belonged to a rich family. Her sole aim in life after becoming a widow, was to see her sone Ajit happy and fulfil the promise she had given to her husband that the family name and tradition would be perpetuated. Finding Ajit deeply in love with Shobha, the Raisaheb's daughter who too loved him no less, Radha got them married, hoping that Shobha would prove an ideal wife and daughter-in-law and their home would soon resound with merry laughter of a child, if not children. Three years went by and Radha was still waiting for the new arrival in the family. Her patience was running out. Desperate, she took Shobha to a doctor who, after prolonged examination and treatment, told her that God alone could help her fulfill her yearning for a grandchild. Radha's sorrow knows no bounds. She could not think of the family chain breaking off. She had to have a grandchild and fulfil her promise to her late husband. As a last resort, she took Shobha to Gurudev, the spiritual soul revered by the family. Gurudev had pity on Radha's plight. Taking her into confidence, he told her: \"\"Look, I am no miracle worker. And, as far as my knowledge goes, I am certain that your daughter-in-law is destined to remain barren.\"\"When Shobha heard this, she was in a daze. She knew her mother-in-law's craving for a grandchild and she knew also that woman would leave no stone unturned to accomplish her objective.Life seemed to Shobha without a ray of hope for her to live. She decided to put an end to it. It was better that way, she thought, than to suffer the humiliation of being branded for ever barren. She knew how deeply her husband loved her and she could very well imagine his dilemma when forced to marry again for the sake of a child.She started walking in the direction of the fatal plunge to end all problems, to end herself. But what mere mortal can meet his or her end according to his or her own design? Destiny had other things written down for Shobha. But let that be unfolded on the screen in \"\"Chandan Ka Palna\"\" lest further knowledge of the proceedings spoil full enjoyment of the drama.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Chandan Ka Palna is a 1967 Bollywood film starring Dharmendra and Meena Kumari.",
+                      " No joy in the world can equal the happiness a man derives from watching his own child at play.",
+                      " Not all the riches in the world can compensate for the vacuum, the emptiness, created by the want of a child in a home.",
+                      " With a woman this yearning is a hundred times stronger and the outcome of her torment impossible beyond measure.",
+                      " Radha belonged to a rich family.",
+                      " Her sole aim in life after becoming a widow, was to see her sone Ajit happy and fulfil the promise she had given to her husband that the family name and tradition would be perpetuated.",
+                      " Finding Ajit deeply in love with Shobha, the Raisaheb's daughter who too loved him no less, Radha got them married, hoping that Shobha would prove an ideal wife and daughter-in-law and their home would soon resound with merry laughter of a child, if not children.",
+                      " Three years went by and Radha was still waiting for the new arrival in the family.",
+                      " Her patience was running out.",
+                      " Desperate, she took Shobha to a doctor who, after prolonged examination and treatment, told her that God alone could help her fulfill her yearning for a grandchild.",
+                      " Radha's sorrow knows no bounds.",
+                      " She could not think of the family chain breaking off.",
+                      " She had to have a grandchild and fulfil her promise to her late husband.",
+                      " As a last resort, she took Shobha to Gurudev, the spiritual soul revered by the family.",
+                      " Gurudev had pity on Radha's plight.",
+                      " Taking her into confidence, he told her: \"\"Look, I am no miracle worker.",
+                      " And, as far as my knowledge goes, I am certain that your daughter-in-law is destined to remain barren.\"",
+                      "\"When Shobha heard this, she was in a daze.",
+                      " She knew her mother-in-law's craving for a grandchild and she knew also that woman would leave no stone unturned to accomplish her objective.Life seemed to Shobha without a ray of hope for her to live.",
+                      " She decided to put an end to it.",
+                      " It was better that way, she thought, than to suffer the humiliation of being branded for ever barren.",
+                      " She knew how deeply her husband loved her and she could very well imagine his dilemma when forced to marry again for the sake of a child.She started walking in the direction of the fatal plunge to end all problems, to end herself.",
+                      " But what mere mortal can meet his or her end according to his or her own design?",
+                      " Destiny had other things written down for Shobha.",
+                      " But let that be unfolded on the screen in \"\"Chandan Ka Palna\"\" lest further knowledge of the proceedings spoil full enjoyment of the drama."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Marcel Oph\u00fcls",
+                  "text": "Marcel Ophuls (] ; born 1 November 1927) is a documentary film maker and former actor, best known for his films \"The Sorrow and the Pity\" and \"\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Marcel Ophuls (] ; born 1 November 1927) is a documentary film maker and former actor, best known for his films \"The Sorrow and the Pity\" and \"\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Pity",
+                  "text": "Pity means feeling for others, particularly feelings of sadness or sorrow, and is used in a comparable sense to the more modern words \"sympathy\" and \"empathy\". Through insincere usage, it can also have a more unsympathetic connotation of feelings of superiority or condescension.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Pity means feeling for others, particularly feelings of sadness or sorrow, and is used in a comparable sense to the more modern words \"sympathy\" and \"empathy\".",
+                      " Through insincere usage, it can also have a more unsympathetic connotation of feelings of superiority or condescension."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-2",
+                "title": "War/Dance",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "War/Dance is a 2007 American documentary film..."
+              },
+              {
+                "document_id": "context-6",
+                "title": "The Sorrow and the Pity",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "The Sorrow and the Pity ... is a two-part 1969 documentary film..."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-2",
+                  "title": "War/Dance",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "War/Dance is a 2007 American documentary film..."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "War/Dance",
+                    "sentence_index": 0
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-6",
+                  "title": "The Sorrow and the Pity",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "The Sorrow and the Pity ... is a two-part 1969 documentary film..."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "The Sorrow and the Pity",
+                    "sentence_index": 0
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": 1738.336750000144,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "War/Dance is newer."
+        },
+        "status": "succeeded",
+        "total_duration_ms": 1738.483209000151,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "openai/gpt-oss-120b",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 120.0,
+            "max_retries": 2,
+            "retry_initial_delay_seconds": 0.5,
+            "retry_max_delay_seconds": 8.0
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  single_prompt[\"single_prompt: Single prompt\\nsynthesis\\nsucceeded\"]\n  click single_prompt dagqaSelectGraphNode"
+      },
+      "error": null
+    },
+    {
+      "id": "5ab30f9a554299233954fef2",
+      "question": "What Harry Potter actor strred in My Boy Jack?",
+      "gold_answer": "Daniel Radcliffe",
+      "prediction": "Daniel Radcliffe",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0,
+      "latency_ms": 1582.1306249999907,
+      "llm_call_count": 1,
+      "llm_retry_count": 0,
+      "node_count": 1,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Brian Kirk",
+          "sentence_index": 1
+        },
+        {
+          "title": "Daniel Radcliffe",
+          "sentence_index": 0
+        },
+        {
+          "title": "Daniel Radcliffe",
+          "sentence_index": 1
+        }
+      ],
+      "evidence_citation_count": 1,
+      "correct_evidence_citation_count": 1,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 0.3333333333333333,
+      "run_trace": {
+        "run_id": "768b16e6-3483-4971-abc6-423094492ee9",
+        "question": "What Harry Potter actor strred in My Boy Jack?",
+        "plan": {
+          "question": "What Harry Potter actor strred in My Boy Jack?",
+          "nodes": [
+            {
+              "id": "single_prompt",
+              "label": "Single prompt",
+              "task_type": "synthesis",
+              "question": "What Harry Potter actor strred in My Boy Jack?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "Answer the question concisely using only the supplied sources.",
+                "user_template": "Question: What Harry Potter actor strred in My Boy Jack?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Lego Harry Potter\n  (0) Lego \"Harry Potter\" is a Lego theme based on the films of the \"Harry Potter\" series.\n  (1)  Lego models of important scenes, vehicles and characters were made for the first six films and all the books released.\n  (2)  The first sets appeared in 2001, to coincide with the release of the first film \"Harry Potter and the Philosopher's Stone\" (Harry Potter and the Sorcerer's Stone in the United States).\n  (3)  Subsequent sets were released alongside the new films, until Harry Potter and the Order of the Phoenix.\n  (4)  The line then went dormant for three years.\n  (5)  It is unknown if the theme will again be revived to coincide with future installations in the Harry Potter franchise, such as the film Fantastic Beasts and Where to Find Them.\n\nDocument ID: context-1\nTitle: Harry Potter and the Deathly Hallows\n  (0) Harry Potter and the Deathly Hallows is the seventh and final novel of the \"Harry Potter\" series, written by British author J. K. Rowling.\n  (1)  The book was released on 21 July 2007, ten years after publication of \"Harry Potter and the Philosopher's Stone\" (1997), by Bloomsbury Publishing in the United Kingdom, in the United States by Scholastic, and in Canada by Raincoast Books, ending the series that began in 1997 with the publication of \"Harry Potter and the Philosopher's Stone\".\n  (2)  The novel chronicles the events directly following \"Harry Potter and the Half-Blood Prince\" (2005), and the final confrontation between the wizards Harry Potter and Lord Voldemort, as well as revealing the previously concealed back story of several main characters.\n  (3)  The title of the book refers to three mythical objects featured in the story, collectively known as the \"Deathly Hallows\"\u2014an unbeatable wand, a stone to bring the dead to life, and a cloak of invisibility.\n\nDocument ID: context-2\nTitle: A Very Potter Musical\n  (0) A Very Potter Musical (originally titled Harry Potter: The Musical and often shortened to AVPM) is a musical with music and lyrics by Darren Criss and A. J. Holmes and a book by Matt Lang, Nick Lang and Brian Holden.\n  (1)  The story is a parody, based on several of the \"Harry Potter\" novels (particularly \"Harry Potter and the Philosopher's Stone\", \"Harry Potter and the Goblet of Fire\" and \"Harry Potter and the Deathly Hallows\") by J. K. Rowling, as well as their film counterparts.\n\nDocument ID: context-3\nTitle: Fantastic Beasts and Where to Find Them\n  (0) Fantastic Beasts and Where to Find Them is a 2001 book written by British author J. K. Rowling (under the pen name of the fictitious author Newt Scamander) about the magical creatures in the \"Harry Potter\" universe.\n  (1)  The original version purports to be Harry Potter's copy of the textbook of the same name mentioned in \"Harry Potter and the Philosopher's Stone\" (or \"Harry Potter and the Sorcerer's Stone\" in the US), the first novel of the \"Harry Potter\" series.\n  (2)  It includes several notes inside it supposedly handwritten by Harry, Ron Weasley, and Hermione Granger, detailing their own experiences with some of the beasts described, and including in-jokes relating to the original series.\n\nDocument ID: context-4\nTitle: Daniel Radcliffe\n  (0) Daniel Jacob Radcliffe (born 23 July 1989) is an English actor best known for his role as Harry Potter in the film series of the same name.\n  (1)  He made his acting debut at 10 years of age in BBC One's 1999 television film \"David Copperfield\", followed by his cinematic debut in 2001's \"The Tailor of Panama\".\n  (2)  At age 11, he was cast as Harry Potter in the first \"Harry Potter\" film, and starred in the series for 10 years until the release of the eighth and final film in 2011.\n\nDocument ID: context-5\nTitle: Brian Kirk\n  (0) Brian Kirk (born 1968) is an Irish film and television director who has most recently directed episodes of \"Game of Thrones\", FX's \"The Riches\" and Showtime's \"Brotherhood\" and \"The Tudors\".\n  (1)  He also directed the television film \"My Boy Jack\" starring David Haig and Daniel Radcliffe and based on the play of the same name.\n\nDocument ID: context-6\nTitle: Lego Harry Potter: Years 5\u20137\n  (0) Lego Harry Potter: Years 5\u20137 is a Lego-themed action-adventure video game developed by Traveller's Tales and published by Warner Bros.\n  (1)  Interactive Entertainment.\n  (2)  Released on 11 November 2011 in North America and 18 November in Europe, the game is based on the Lego Harry Potter line and is based on the final three books and four films in the \"Harry Potter\" series: \"Harry Potter and the Order of the Phoenix\", \"Harry Potter and the Half-Blood Prince\", \"Harry Potter and the Deathly Hallows \u2013 Part 1\", and \"Harry Potter and the Deathly Hallows \u2013 Part 2\".\n  (3)  The game was released for the PlayStation 3, Xbox 360, PlayStation Portable, PlayStation Vita, Wii, Nintendo DS, Nintendo 3DS, Microsoft Windows, iOS and Android.\n  (4)  The first trailer of three trailers was released 6 October 2011, and the demo was released on 1 November.\n  (5)  The game was released on Steam on 5 January 2012.\n  (6)  The OS X version of the game was released by Feral Interactive on 7 March 2012.\n  (7)  The game was released for the PlayStation 4 on October 21, 2016, as part of the \"Lego Harry Potter Collection\", which bundles the game with its predecessor, \"\".\n\nDocument ID: context-7\nTitle: Harry Potter and the Forbidden Journey\n  (0) Harry Potter and the Forbidden Journey is a motion-based dark ride located in The Wizarding World of Harry Potter themed areas of Islands of Adventure in Orlando, Florida, Universal Studios Hollywood in Universal City, California, and Universal Studios Japan in Osaka, Japan.\n  (1)  The ride takes guests through scenes and environments in and around Hogwarts Castle from the Harry Potter series of books and films.\n  (2)  Mark Woodbury, president of Universal Creative, described the ride as an in-depth look at the world of Harry Potter, which utilizes never-before-seen technology which transforms \"the theme park experience as you know it\".\n  (3)  The ride first opened at Islands of Adventure with \"The Wizarding World of Harry Potter\" on June 18, 2010, at Universal Studios Japan on July 15, 2014, and at Universal Studios Hollywood on April 7, 2016.\n\nDocument ID: context-8\nTitle: Danielle Elizabeth Tumminio\n  (0) Danielle Elizabeth Tumminio is an Episcopal priest, theologian, a certified life coach and spinning instructor, and the author of \"God and Harry Potter at Yale: Teaching Faith and Fantasy Fiction in an Ivy League Classroom\".\n  (1)  She was the instructor of the \"Christian Theology and Harry Potter\" seminar at Yale University in the spring of 2008; in 2011, she repeated the course at Tufts University.\n  (2)  Tumminio has also presented material on the intersection between theology and the Harry Potter series at the Infinitus Symposium in Orlando, Florida in 2010, the Portus Symposium in Dallas, Texas, in the summer of 2008, and she chaired the panel on Harry Potter and Religion at the 2008 American Academy of Religion conference.\n  (3)  Her teaching has been praised by Harry Potter commentator John Granger on his Hogwarts Professor website.\n\nDocument ID: context-9\nTitle: Lego Harry Potter: Years 1\u20134\n  (0) Lego Harry Potter: Years 1\u20134 is a Lego-themed action-adventure video game developed by Traveller's Tales and published by Warner Bros.\n  (1)  The game is based on the Lego Harry Potter line and its storyline covers the first four films in the \"Harry Potter\" series: \"Harry Potter and the Sorcerer's Stone\", \"Harry Potter and the Chamber of Secrets\", \"Harry Potter and the Prisoner of Azkaban\", and \"Harry Potter and the Goblet of Fire\".\n  (2)  The game is available on the Wii, Xbox 360, PlayStation 3, Nintendo DS, PlayStation Portable, Microsoft Windows, OS X, iOS and Android.\n  (3)  The OS X version of the game was released on 22 February 2011 by Feral Interactive.\n  (4)  The game was released for the PlayStation 4 on October 21, 2016, as part of the \"Lego Harry Potter Collection\", which bundles the game with its sequel, \"\".\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "single_prompt"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "single_prompt"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "single_prompt",
+            "label": "Single prompt",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "What Harry Potter actor strred in My Boy Jack?",
+            "rendered_prompt": "Question: What Harry Potter actor strred in My Boy Jack?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Lego Harry Potter\n  (0) Lego \"Harry Potter\" is a Lego theme based on the films of the \"Harry Potter\" series.\n  (1)  Lego models of important scenes, vehicles and characters were made for the first six films and all the books released.\n  (2)  The first sets appeared in 2001, to coincide with the release of the first film \"Harry Potter and the Philosopher's Stone\" (Harry Potter and the Sorcerer's Stone in the United States).\n  (3)  Subsequent sets were released alongside the new films, until Harry Potter and the Order of the Phoenix.\n  (4)  The line then went dormant for three years.\n  (5)  It is unknown if the theme will again be revived to coincide with future installations in the Harry Potter franchise, such as the film Fantastic Beasts and Where to Find Them.\n\nDocument ID: context-1\nTitle: Harry Potter and the Deathly Hallows\n  (0) Harry Potter and the Deathly Hallows is the seventh and final novel of the \"Harry Potter\" series, written by British author J. K. Rowling.\n  (1)  The book was released on 21 July 2007, ten years after publication of \"Harry Potter and the Philosopher's Stone\" (1997), by Bloomsbury Publishing in the United Kingdom, in the United States by Scholastic, and in Canada by Raincoast Books, ending the series that began in 1997 with the publication of \"Harry Potter and the Philosopher's Stone\".\n  (2)  The novel chronicles the events directly following \"Harry Potter and the Half-Blood Prince\" (2005), and the final confrontation between the wizards Harry Potter and Lord Voldemort, as well as revealing the previously concealed back story of several main characters.\n  (3)  The title of the book refers to three mythical objects featured in the story, collectively known as the \"Deathly Hallows\"\u2014an unbeatable wand, a stone to bring the dead to life, and a cloak of invisibility.\n\nDocument ID: context-2\nTitle: A Very Potter Musical\n  (0) A Very Potter Musical (originally titled Harry Potter: The Musical and often shortened to AVPM) is a musical with music and lyrics by Darren Criss and A. J. Holmes and a book by Matt Lang, Nick Lang and Brian Holden.\n  (1)  The story is a parody, based on several of the \"Harry Potter\" novels (particularly \"Harry Potter and the Philosopher's Stone\", \"Harry Potter and the Goblet of Fire\" and \"Harry Potter and the Deathly Hallows\") by J. K. Rowling, as well as their film counterparts.\n\nDocument ID: context-3\nTitle: Fantastic Beasts and Where to Find Them\n  (0) Fantastic Beasts and Where to Find Them is a 2001 book written by British author J. K. Rowling (under the pen name of the fictitious author Newt Scamander) about the magical creatures in the \"Harry Potter\" universe.\n  (1)  The original version purports to be Harry Potter's copy of the textbook of the same name mentioned in \"Harry Potter and the Philosopher's Stone\" (or \"Harry Potter and the Sorcerer's Stone\" in the US), the first novel of the \"Harry Potter\" series.\n  (2)  It includes several notes inside it supposedly handwritten by Harry, Ron Weasley, and Hermione Granger, detailing their own experiences with some of the beasts described, and including in-jokes relating to the original series.\n\nDocument ID: context-4\nTitle: Daniel Radcliffe\n  (0) Daniel Jacob Radcliffe (born 23 July 1989) is an English actor best known for his role as Harry Potter in the film series of the same name.\n  (1)  He made his acting debut at 10 years of age in BBC One's 1999 television film \"David Copperfield\", followed by his cinematic debut in 2001's \"The Tailor of Panama\".\n  (2)  At age 11, he was cast as Harry Potter in the first \"Harry Potter\" film, and starred in the series for 10 years until the release of the eighth and final film in 2011.\n\nDocument ID: context-5\nTitle: Brian Kirk\n  (0) Brian Kirk (born 1968) is an Irish film and television director who has most recently directed episodes of \"Game of Thrones\", FX's \"The Riches\" and Showtime's \"Brotherhood\" and \"The Tudors\".\n  (1)  He also directed the television film \"My Boy Jack\" starring David Haig and Daniel Radcliffe and based on the play of the same name.\n\nDocument ID: context-6\nTitle: Lego Harry Potter: Years 5\u20137\n  (0) Lego Harry Potter: Years 5\u20137 is a Lego-themed action-adventure video game developed by Traveller's Tales and published by Warner Bros.\n  (1)  Interactive Entertainment.\n  (2)  Released on 11 November 2011 in North America and 18 November in Europe, the game is based on the Lego Harry Potter line and is based on the final three books and four films in the \"Harry Potter\" series: \"Harry Potter and the Order of the Phoenix\", \"Harry Potter and the Half-Blood Prince\", \"Harry Potter and the Deathly Hallows \u2013 Part 1\", and \"Harry Potter and the Deathly Hallows \u2013 Part 2\".\n  (3)  The game was released for the PlayStation 3, Xbox 360, PlayStation Portable, PlayStation Vita, Wii, Nintendo DS, Nintendo 3DS, Microsoft Windows, iOS and Android.\n  (4)  The first trailer of three trailers was released 6 October 2011, and the demo was released on 1 November.\n  (5)  The game was released on Steam on 5 January 2012.\n  (6)  The OS X version of the game was released by Feral Interactive on 7 March 2012.\n  (7)  The game was released for the PlayStation 4 on October 21, 2016, as part of the \"Lego Harry Potter Collection\", which bundles the game with its predecessor, \"\".\n\nDocument ID: context-7\nTitle: Harry Potter and the Forbidden Journey\n  (0) Harry Potter and the Forbidden Journey is a motion-based dark ride located in The Wizarding World of Harry Potter themed areas of Islands of Adventure in Orlando, Florida, Universal Studios Hollywood in Universal City, California, and Universal Studios Japan in Osaka, Japan.\n  (1)  The ride takes guests through scenes and environments in and around Hogwarts Castle from the Harry Potter series of books and films.\n  (2)  Mark Woodbury, president of Universal Creative, described the ride as an in-depth look at the world of Harry Potter, which utilizes never-before-seen technology which transforms \"the theme park experience as you know it\".\n  (3)  The ride first opened at Islands of Adventure with \"The Wizarding World of Harry Potter\" on June 18, 2010, at Universal Studios Japan on July 15, 2014, and at Universal Studios Hollywood on April 7, 2016.\n\nDocument ID: context-8\nTitle: Danielle Elizabeth Tumminio\n  (0) Danielle Elizabeth Tumminio is an Episcopal priest, theologian, a certified life coach and spinning instructor, and the author of \"God and Harry Potter at Yale: Teaching Faith and Fantasy Fiction in an Ivy League Classroom\".\n  (1)  She was the instructor of the \"Christian Theology and Harry Potter\" seminar at Yale University in the spring of 2008; in 2011, she repeated the course at Tufts University.\n  (2)  Tumminio has also presented material on the intersection between theology and the Harry Potter series at the Infinitus Symposium in Orlando, Florida in 2010, the Portus Symposium in Dallas, Texas, in the summer of 2008, and she chaired the panel on Harry Potter and Religion at the 2008 American Academy of Religion conference.\n  (3)  Her teaching has been praised by Harry Potter commentator John Granger on his Hogwarts Professor website.\n\nDocument ID: context-9\nTitle: Lego Harry Potter: Years 1\u20134\n  (0) Lego Harry Potter: Years 1\u20134 is a Lego-themed action-adventure video game developed by Traveller's Tales and published by Warner Bros.\n  (1)  The game is based on the Lego Harry Potter line and its storyline covers the first four films in the \"Harry Potter\" series: \"Harry Potter and the Sorcerer's Stone\", \"Harry Potter and the Chamber of Secrets\", \"Harry Potter and the Prisoner of Azkaban\", and \"Harry Potter and the Goblet of Fire\".\n  (2)  The game is available on the Wii, Xbox 360, PlayStation 3, Nintendo DS, PlayStation Portable, Microsoft Windows, OS X, iOS and Android.\n  (3)  The OS X version of the game was released on 22 February 2011 by Feral Interactive.\n  (4)  The game was released for the PlayStation 4 on October 21, 2016, as part of the \"Lego Harry Potter Collection\", which bundles the game with its sequel, \"\".\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer.",
+            "raw_response": "{\n  \"answer\": \"Daniel Radcliffe\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-5\",\n      \"title\": \"Brian Kirk\",\n      \"sentence_indices\": [1],\n      \"fact\": \"He also directed the television film \\\"My Boy Jack\\\" starring David Haig and Daniel Radcliffe and based on the play of the same name.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "answer": "Daniel Radcliffe",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-5",
+                  "title": "Brian Kirk",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "He also directed the television film \"My Boy Jack\" starring David Haig and Daniel Radcliffe and based on the play of the same name."
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "Daniel Radcliffe"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Lego Harry Potter",
+                  "text": "Lego \"Harry Potter\" is a Lego theme based on the films of the \"Harry Potter\" series. Lego models of important scenes, vehicles and characters were made for the first six films and all the books released. The first sets appeared in 2001, to coincide with the release of the first film \"Harry Potter and the Philosopher's Stone\" (Harry Potter and the Sorcerer's Stone in the United States). Subsequent sets were released alongside the new films, until Harry Potter and the Order of the Phoenix. The line then went dormant for three years. It is unknown if the theme will again be revived to coincide with future installations in the Harry Potter franchise, such as the film Fantastic Beasts and Where to Find Them.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Lego \"Harry Potter\" is a Lego theme based on the films of the \"Harry Potter\" series.",
+                      " Lego models of important scenes, vehicles and characters were made for the first six films and all the books released.",
+                      " The first sets appeared in 2001, to coincide with the release of the first film \"Harry Potter and the Philosopher's Stone\" (Harry Potter and the Sorcerer's Stone in the United States).",
+                      " Subsequent sets were released alongside the new films, until Harry Potter and the Order of the Phoenix.",
+                      " The line then went dormant for three years.",
+                      " It is unknown if the theme will again be revived to coincide with future installations in the Harry Potter franchise, such as the film Fantastic Beasts and Where to Find Them."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Harry Potter and the Deathly Hallows",
+                  "text": "Harry Potter and the Deathly Hallows is the seventh and final novel of the \"Harry Potter\" series, written by British author J. K. Rowling. The book was released on 21 July 2007, ten years after publication of \"Harry Potter and the Philosopher's Stone\" (1997), by Bloomsbury Publishing in the United Kingdom, in the United States by Scholastic, and in Canada by Raincoast Books, ending the series that began in 1997 with the publication of \"Harry Potter and the Philosopher's Stone\". The novel chronicles the events directly following \"Harry Potter and the Half-Blood Prince\" (2005), and the final confrontation between the wizards Harry Potter and Lord Voldemort, as well as revealing the previously concealed back story of several main characters. The title of the book refers to three mythical objects featured in the story, collectively known as the \"Deathly Hallows\"\u2014an unbeatable wand, a stone to bring the dead to life, and a cloak of invisibility.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Harry Potter and the Deathly Hallows is the seventh and final novel of the \"Harry Potter\" series, written by British author J. K. Rowling.",
+                      " The book was released on 21 July 2007, ten years after publication of \"Harry Potter and the Philosopher's Stone\" (1997), by Bloomsbury Publishing in the United Kingdom, in the United States by Scholastic, and in Canada by Raincoast Books, ending the series that began in 1997 with the publication of \"Harry Potter and the Philosopher's Stone\".",
+                      " The novel chronicles the events directly following \"Harry Potter and the Half-Blood Prince\" (2005), and the final confrontation between the wizards Harry Potter and Lord Voldemort, as well as revealing the previously concealed back story of several main characters.",
+                      " The title of the book refers to three mythical objects featured in the story, collectively known as the \"Deathly Hallows\"\u2014an unbeatable wand, a stone to bring the dead to life, and a cloak of invisibility."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "A Very Potter Musical",
+                  "text": "A Very Potter Musical (originally titled Harry Potter: The Musical and often shortened to AVPM) is a musical with music and lyrics by Darren Criss and A. J. Holmes and a book by Matt Lang, Nick Lang and Brian Holden. The story is a parody, based on several of the \"Harry Potter\" novels (particularly \"Harry Potter and the Philosopher's Stone\", \"Harry Potter and the Goblet of Fire\" and \"Harry Potter and the Deathly Hallows\") by J. K. Rowling, as well as their film counterparts.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "A Very Potter Musical (originally titled Harry Potter: The Musical and often shortened to AVPM) is a musical with music and lyrics by Darren Criss and A. J. Holmes and a book by Matt Lang, Nick Lang and Brian Holden.",
+                      " The story is a parody, based on several of the \"Harry Potter\" novels (particularly \"Harry Potter and the Philosopher's Stone\", \"Harry Potter and the Goblet of Fire\" and \"Harry Potter and the Deathly Hallows\") by J. K. Rowling, as well as their film counterparts."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Fantastic Beasts and Where to Find Them",
+                  "text": "Fantastic Beasts and Where to Find Them is a 2001 book written by British author J. K. Rowling (under the pen name of the fictitious author Newt Scamander) about the magical creatures in the \"Harry Potter\" universe. The original version purports to be Harry Potter's copy of the textbook of the same name mentioned in \"Harry Potter and the Philosopher's Stone\" (or \"Harry Potter and the Sorcerer's Stone\" in the US), the first novel of the \"Harry Potter\" series. It includes several notes inside it supposedly handwritten by Harry, Ron Weasley, and Hermione Granger, detailing their own experiences with some of the beasts described, and including in-jokes relating to the original series.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Fantastic Beasts and Where to Find Them is a 2001 book written by British author J. K. Rowling (under the pen name of the fictitious author Newt Scamander) about the magical creatures in the \"Harry Potter\" universe.",
+                      " The original version purports to be Harry Potter's copy of the textbook of the same name mentioned in \"Harry Potter and the Philosopher's Stone\" (or \"Harry Potter and the Sorcerer's Stone\" in the US), the first novel of the \"Harry Potter\" series.",
+                      " It includes several notes inside it supposedly handwritten by Harry, Ron Weasley, and Hermione Granger, detailing their own experiences with some of the beasts described, and including in-jokes relating to the original series."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Daniel Radcliffe",
+                  "text": "Daniel Jacob Radcliffe (born 23 July 1989) is an English actor best known for his role as Harry Potter in the film series of the same name. He made his acting debut at 10 years of age in BBC One's 1999 television film \"David Copperfield\", followed by his cinematic debut in 2001's \"The Tailor of Panama\". At age 11, he was cast as Harry Potter in the first \"Harry Potter\" film, and starred in the series for 10 years until the release of the eighth and final film in 2011.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Daniel Jacob Radcliffe (born 23 July 1989) is an English actor best known for his role as Harry Potter in the film series of the same name.",
+                      " He made his acting debut at 10 years of age in BBC One's 1999 television film \"David Copperfield\", followed by his cinematic debut in 2001's \"The Tailor of Panama\".",
+                      " At age 11, he was cast as Harry Potter in the first \"Harry Potter\" film, and starred in the series for 10 years until the release of the eighth and final film in 2011."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Brian Kirk",
+                  "text": "Brian Kirk (born 1968) is an Irish film and television director who has most recently directed episodes of \"Game of Thrones\", FX's \"The Riches\" and Showtime's \"Brotherhood\" and \"The Tudors\". He also directed the television film \"My Boy Jack\" starring David Haig and Daniel Radcliffe and based on the play of the same name.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Brian Kirk (born 1968) is an Irish film and television director who has most recently directed episodes of \"Game of Thrones\", FX's \"The Riches\" and Showtime's \"Brotherhood\" and \"The Tudors\".",
+                      " He also directed the television film \"My Boy Jack\" starring David Haig and Daniel Radcliffe and based on the play of the same name."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Lego Harry Potter: Years 5\u20137",
+                  "text": "Lego Harry Potter: Years 5\u20137 is a Lego-themed action-adventure video game developed by Traveller's Tales and published by Warner Bros. Interactive Entertainment. Released on 11 November 2011 in North America and 18 November in Europe, the game is based on the Lego Harry Potter line and is based on the final three books and four films in the \"Harry Potter\" series: \"Harry Potter and the Order of the Phoenix\", \"Harry Potter and the Half-Blood Prince\", \"Harry Potter and the Deathly Hallows \u2013 Part 1\", and \"Harry Potter and the Deathly Hallows \u2013 Part 2\". The game was released for the PlayStation 3, Xbox 360, PlayStation Portable, PlayStation Vita, Wii, Nintendo DS, Nintendo 3DS, Microsoft Windows, iOS and Android. The first trailer of three trailers was released 6 October 2011, and the demo was released on 1 November. The game was released on Steam on 5 January 2012. The OS X version of the game was released by Feral Interactive on 7 March 2012. The game was released for the PlayStation 4 on October 21, 2016, as part of the \"Lego Harry Potter Collection\", which bundles the game with its predecessor, \"\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Lego Harry Potter: Years 5\u20137 is a Lego-themed action-adventure video game developed by Traveller's Tales and published by Warner Bros.",
+                      " Interactive Entertainment.",
+                      " Released on 11 November 2011 in North America and 18 November in Europe, the game is based on the Lego Harry Potter line and is based on the final three books and four films in the \"Harry Potter\" series: \"Harry Potter and the Order of the Phoenix\", \"Harry Potter and the Half-Blood Prince\", \"Harry Potter and the Deathly Hallows \u2013 Part 1\", and \"Harry Potter and the Deathly Hallows \u2013 Part 2\".",
+                      " The game was released for the PlayStation 3, Xbox 360, PlayStation Portable, PlayStation Vita, Wii, Nintendo DS, Nintendo 3DS, Microsoft Windows, iOS and Android.",
+                      " The first trailer of three trailers was released 6 October 2011, and the demo was released on 1 November.",
+                      " The game was released on Steam on 5 January 2012.",
+                      " The OS X version of the game was released by Feral Interactive on 7 March 2012.",
+                      " The game was released for the PlayStation 4 on October 21, 2016, as part of the \"Lego Harry Potter Collection\", which bundles the game with its predecessor, \"\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Harry Potter and the Forbidden Journey",
+                  "text": "Harry Potter and the Forbidden Journey is a motion-based dark ride located in The Wizarding World of Harry Potter themed areas of Islands of Adventure in Orlando, Florida, Universal Studios Hollywood in Universal City, California, and Universal Studios Japan in Osaka, Japan. The ride takes guests through scenes and environments in and around Hogwarts Castle from the Harry Potter series of books and films. Mark Woodbury, president of Universal Creative, described the ride as an in-depth look at the world of Harry Potter, which utilizes never-before-seen technology which transforms \"the theme park experience as you know it\". The ride first opened at Islands of Adventure with \"The Wizarding World of Harry Potter\" on June 18, 2010, at Universal Studios Japan on July 15, 2014, and at Universal Studios Hollywood on April 7, 2016.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Harry Potter and the Forbidden Journey is a motion-based dark ride located in The Wizarding World of Harry Potter themed areas of Islands of Adventure in Orlando, Florida, Universal Studios Hollywood in Universal City, California, and Universal Studios Japan in Osaka, Japan.",
+                      " The ride takes guests through scenes and environments in and around Hogwarts Castle from the Harry Potter series of books and films.",
+                      " Mark Woodbury, president of Universal Creative, described the ride as an in-depth look at the world of Harry Potter, which utilizes never-before-seen technology which transforms \"the theme park experience as you know it\".",
+                      " The ride first opened at Islands of Adventure with \"The Wizarding World of Harry Potter\" on June 18, 2010, at Universal Studios Japan on July 15, 2014, and at Universal Studios Hollywood on April 7, 2016."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Danielle Elizabeth Tumminio",
+                  "text": "Danielle Elizabeth Tumminio is an Episcopal priest, theologian, a certified life coach and spinning instructor, and the author of \"God and Harry Potter at Yale: Teaching Faith and Fantasy Fiction in an Ivy League Classroom\". She was the instructor of the \"Christian Theology and Harry Potter\" seminar at Yale University in the spring of 2008; in 2011, she repeated the course at Tufts University. Tumminio has also presented material on the intersection between theology and the Harry Potter series at the Infinitus Symposium in Orlando, Florida in 2010, the Portus Symposium in Dallas, Texas, in the summer of 2008, and she chaired the panel on Harry Potter and Religion at the 2008 American Academy of Religion conference. Her teaching has been praised by Harry Potter commentator John Granger on his Hogwarts Professor website.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Danielle Elizabeth Tumminio is an Episcopal priest, theologian, a certified life coach and spinning instructor, and the author of \"God and Harry Potter at Yale: Teaching Faith and Fantasy Fiction in an Ivy League Classroom\".",
+                      " She was the instructor of the \"Christian Theology and Harry Potter\" seminar at Yale University in the spring of 2008; in 2011, she repeated the course at Tufts University.",
+                      " Tumminio has also presented material on the intersection between theology and the Harry Potter series at the Infinitus Symposium in Orlando, Florida in 2010, the Portus Symposium in Dallas, Texas, in the summer of 2008, and she chaired the panel on Harry Potter and Religion at the 2008 American Academy of Religion conference.",
+                      " Her teaching has been praised by Harry Potter commentator John Granger on his Hogwarts Professor website."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Lego Harry Potter: Years 1\u20134",
+                  "text": "Lego Harry Potter: Years 1\u20134 is a Lego-themed action-adventure video game developed by Traveller's Tales and published by Warner Bros. The game is based on the Lego Harry Potter line and its storyline covers the first four films in the \"Harry Potter\" series: \"Harry Potter and the Sorcerer's Stone\", \"Harry Potter and the Chamber of Secrets\", \"Harry Potter and the Prisoner of Azkaban\", and \"Harry Potter and the Goblet of Fire\". The game is available on the Wii, Xbox 360, PlayStation 3, Nintendo DS, PlayStation Portable, Microsoft Windows, OS X, iOS and Android. The OS X version of the game was released on 22 February 2011 by Feral Interactive. The game was released for the PlayStation 4 on October 21, 2016, as part of the \"Lego Harry Potter Collection\", which bundles the game with its sequel, \"\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Lego Harry Potter: Years 1\u20134 is a Lego-themed action-adventure video game developed by Traveller's Tales and published by Warner Bros.",
+                      " The game is based on the Lego Harry Potter line and its storyline covers the first four films in the \"Harry Potter\" series: \"Harry Potter and the Sorcerer's Stone\", \"Harry Potter and the Chamber of Secrets\", \"Harry Potter and the Prisoner of Azkaban\", and \"Harry Potter and the Goblet of Fire\".",
+                      " The game is available on the Wii, Xbox 360, PlayStation 3, Nintendo DS, PlayStation Portable, Microsoft Windows, OS X, iOS and Android.",
+                      " The OS X version of the game was released on 22 February 2011 by Feral Interactive.",
+                      " The game was released for the PlayStation 4 on October 21, 2016, as part of the \"Lego Harry Potter Collection\", which bundles the game with its sequel, \"\"."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-5",
+                "title": "Brian Kirk",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "He also directed the television film \"My Boy Jack\" starring David Haig and Daniel Radcliffe and based on the play of the same name."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-5",
+                  "title": "Brian Kirk",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "He also directed the television film \"My Boy Jack\" starring David Haig and Daniel Radcliffe and based on the play of the same name."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Brian Kirk",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": 1581.6280839999308,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Daniel Radcliffe"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 1581.7113339999196,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "openai/gpt-oss-120b",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 120.0,
+            "max_retries": 2,
+            "retry_initial_delay_seconds": 0.5,
+            "retry_max_delay_seconds": 8.0
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  single_prompt[\"single_prompt: Single prompt\\nsynthesis\\nsucceeded\"]\n  click single_prompt dagqaSelectGraphNode"
+      },
+      "error": null
+    },
+    {
+      "id": "5a8c743e5542996e8ac88ab3",
+      "question": "What mixed martial arts promotion that was purchased by the Ultimate Fighting Championship in 2001 used to feature Nate Diaz as a competitor?",
+      "gold_answer": "World Extreme Cagefighting",
+      "prediction": "",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "cosine_sim": -1.5,
+      "latency_ms": 1606.6430010000659,
+      "llm_call_count": null,
+      "llm_retry_count": null,
+      "node_count": null,
+      "graph_depth": null,
+      "structural_valid": null,
+      "structural_issues": [],
+      "structural_failure": true,
+      "gold_supporting_facts": [],
+      "evidence_citation_count": null,
+      "correct_evidence_citation_count": null,
+      "wrong_evidence_citation_count": null,
+      "wrong_supporting_text_rate": null,
+      "gold_supporting_fact_recall": null,
+      "run_trace": null,
+      "error": "Too many requests, please try again later."
+    },
+    {
+      "id": "5ac2381355429951e9e684a9",
+      "question": "Which conference is the team for which Justin Bannan played college football currently a member of?",
+      "gold_answer": "Pac-12 Conference",
+      "prediction": "",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "cosine_sim": -1.5,
+      "latency_ms": 1910.671543000035,
+      "llm_call_count": null,
+      "llm_retry_count": null,
+      "node_count": null,
+      "graph_depth": null,
+      "structural_valid": null,
+      "structural_issues": [],
+      "structural_failure": true,
+      "gold_supporting_facts": [],
+      "evidence_citation_count": null,
+      "correct_evidence_citation_count": null,
+      "wrong_evidence_citation_count": null,
+      "wrong_supporting_text_rate": null,
+      "gold_supporting_fact_recall": null,
+      "run_trace": null,
+      "error": "Too many requests, please try again later."
+    },
+    {
+      "id": "5a74e93e55429974ef308c92",
+      "question": "Pedro Duque and Mark Shuttleworth both went where in their life times?",
+      "gold_answer": "space",
+      "prediction": "",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "cosine_sim": -1.5,
+      "latency_ms": 1527.2530839999945,
+      "llm_call_count": null,
+      "llm_retry_count": null,
+      "node_count": null,
+      "graph_depth": null,
+      "structural_valid": null,
+      "structural_issues": [],
+      "structural_failure": true,
+      "gold_supporting_facts": [],
+      "evidence_citation_count": null,
+      "correct_evidence_citation_count": null,
+      "wrong_evidence_citation_count": null,
+      "wrong_supporting_text_rate": null,
+      "gold_supporting_fact_recall": null,
+      "run_trace": null,
+      "error": "Too many requests, please try again later."
+    },
+    {
+      "id": "5a8481ba5542997175ce1ed4",
+      "question": "Den Tagayasu lived in the town that was bombed on which dates?",
+      "gold_answer": "9\u201310 March 1945",
+      "prediction": "",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "cosine_sim": -1.5,
+      "latency_ms": 1676.8652089999705,
+      "llm_call_count": null,
+      "llm_retry_count": null,
+      "node_count": null,
+      "graph_depth": null,
+      "structural_valid": null,
+      "structural_issues": [],
+      "structural_failure": true,
+      "gold_supporting_facts": [],
+      "evidence_citation_count": null,
+      "correct_evidence_citation_count": null,
+      "wrong_evidence_citation_count": null,
+      "wrong_supporting_text_rate": null,
+      "gold_supporting_fact_recall": null,
+      "run_trace": null,
+      "error": "Too many requests, please try again later."
+    },
+    {
+      "id": "5a85018d5542997b5ce3ff98",
+      "question": "Which host of Straight to the Heart is an American actress and producer?",
+      "gold_answer": "Barbara Niven",
+      "prediction": "",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "cosine_sim": -1.5,
+      "latency_ms": 1674.5944589999908,
+      "llm_call_count": null,
+      "llm_retry_count": null,
+      "node_count": null,
+      "graph_depth": null,
+      "structural_valid": null,
+      "structural_issues": [],
+      "structural_failure": true,
+      "gold_supporting_facts": [],
+      "evidence_citation_count": null,
+      "correct_evidence_citation_count": null,
+      "wrong_evidence_citation_count": null,
+      "wrong_supporting_text_rate": null,
+      "gold_supporting_fact_recall": null,
+      "run_trace": null,
+      "error": "Too many requests, please try again later."
+    },
+    {
+      "id": "5a8545ba5542997b5ce3ffdd",
+      "question": "How does this series represent a function, which is also used in the Homotopy analysis method?",
+      "gold_answer": "infinite sum of terms",
+      "prediction": "",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "cosine_sim": -1.5,
+      "latency_ms": 1780.3942509999615,
+      "llm_call_count": null,
+      "llm_retry_count": null,
+      "node_count": null,
+      "graph_depth": null,
+      "structural_valid": null,
+      "structural_issues": [],
+      "structural_failure": true,
+      "gold_supporting_facts": [],
+      "evidence_citation_count": null,
+      "correct_evidence_citation_count": null,
+      "wrong_evidence_citation_count": null,
+      "wrong_supporting_text_rate": null,
+      "gold_supporting_fact_recall": null,
+      "run_trace": null,
+      "error": "Too many requests, please try again later."
+    },
+    {
+      "id": "5ae61dce5542992663a4f262",
+      "question": "What role did Julianne Moore play in the 2002 Oscar winning movie?",
+      "gold_answer": "emotionally troubled women",
+      "prediction": "",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "cosine_sim": -1.5,
+      "latency_ms": 1531.5932510000039,
+      "llm_call_count": null,
+      "llm_retry_count": null,
+      "node_count": null,
+      "graph_depth": null,
+      "structural_valid": null,
+      "structural_issues": [],
+      "structural_failure": true,
+      "gold_supporting_facts": [],
+      "evidence_citation_count": null,
+      "correct_evidence_citation_count": null,
+      "wrong_evidence_citation_count": null,
+      "wrong_supporting_text_rate": null,
+      "gold_supporting_fact_recall": null,
+      "run_trace": null,
+      "error": "Too many requests, please try again later."
+    },
+    {
+      "id": "5a74c2bd5542996c70cfadda",
+      "question": "Was Pennsylvania State University or University of California, San Francisco founded first?",
+      "gold_answer": "Pennsylvania State University",
+      "prediction": "",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "cosine_sim": -1.5,
+      "latency_ms": 1472.5355840000702,
+      "llm_call_count": null,
+      "llm_retry_count": null,
+      "node_count": null,
+      "graph_depth": null,
+      "structural_valid": null,
+      "structural_issues": [],
+      "structural_failure": true,
+      "gold_supporting_facts": [],
+      "evidence_citation_count": null,
+      "correct_evidence_citation_count": null,
+      "wrong_evidence_citation_count": null,
+      "wrong_supporting_text_rate": null,
+      "gold_supporting_fact_recall": null,
+      "run_trace": null,
+      "error": "Too many requests, please try again later."
+    }
+  ],
+  "metrics": {
+    "example_count": 10.0,
+    "success_count": 2.0,
+    "failure_count": 8.0,
+    "error_count": 8.0,
+    "exact_match": 0.1,
+    "f1": 0.15,
+    "cosine_sim": 0.17082040905952453,
+    "avg_latency_ms": 1656.8641799000034,
+    "p50_latency_ms": 1674.5944589999908,
+    "total_llm_call_count": 2.0,
+    "total_llm_retry_count": 0.0,
+    "avg_llm_retry_count": 0.0,
+    "avg_llm_call_count": 1.0,
+    "avg_node_count": 1.0,
+    "avg_graph_depth": 0.0,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.8,
+    "total_evidence_citation_count": 3.0,
+    "correct_evidence_citation_count": 3.0,
+    "wrong_evidence_citation_count": 0.0,
+    "wrong_supporting_text_rate": 0.0,
+    "avg_gold_supporting_fact_recall": 0.6666666666666666,
+    "total_runtime_ms": 4894.442044000016
+  }
+}

@@ -1,0 +1,28 @@
+llm:
+  provider: cluster
+  model: Qwen/Qwen3.5-122B-A10B
+  temperature: 0.0
+  api_key_env: CLUSTER_API_KEY
+  api_base: http://atknoll32.air.cit.tum.de:3000/inference
+  request_timeout_seconds: 180
+  max_retries: 6
+  retry_initial_delay_seconds: 1
+  retry_max_delay_seconds: 60
+planner:
+  max_nodes: 10
+  max_depth: 3
+  repair_rounds: 1
+execution:
+  max_parallel_nodes: 4
+  node_timeout_seconds: 120
+  node_repair_rounds: 1
+  fail_fast: false
+validation:
+  structural_only: true
+benchmark:
+  dataset: hotpotqa
+  split: validation
+  default_limit: 100
+  max_parallel_examples: 4
+  empty_prediction_retries: 1
+  output_dir: runs/benchmarks

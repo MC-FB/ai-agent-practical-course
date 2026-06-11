@@ -144,6 +144,113 @@ def test_list_benchmark_results_includes_benchmark_name(monkeypatch, tmp_path) -
     assert result["results"][0]["name"] == "First big benchmark"
 
 
+def test_list_benchmark_results_marks_partial_runs(monkeypatch, tmp_path) -> None:
+    result_file = tmp_path / "partial.json"
+    result_file.write_text(
+        json.dumps(
+            {
+                "run_id": "partial-run",
+                "limit": 10,
+                "records": [{"id": "one"}],
+                "metrics": {"example_count": 1},
+            }
+        )
+    )
+
+    monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
+    monkeypatch.setattr(api, "count_hotpot_examples", lambda data_path=None: 10)
+
+    result = api.list_benchmark_results()
+
+    assert result["results"][0]["completed"] == 1
+    assert result["results"][0]["partial"] is True
+
+
+def test_list_benchmark_results_hides_superseded_partial_runs(monkeypatch, tmp_path) -> None:
+    shared = {
+        "comparison_group_id": "group-1",
+        "system": "direct_llm",
+        "limit": 10,
+        "seed": 123,
+        "model": "model-a",
+        "created_at": "2026-06-05T00:00:00Z",
+    }
+    (tmp_path / "partial.json").write_text(
+        json.dumps(
+            {
+                **shared,
+                "run_id": "partial-run",
+                "records": [{"id": "one"}],
+                "metrics": {"example_count": 1},
+            }
+        )
+    )
+    (tmp_path / "complete.json").write_text(
+        json.dumps(
+            {
+                **shared,
+                "run_id": "complete-run",
+                "records": [{"id": str(index)} for index in range(10)],
+                "metrics": {"example_count": 10},
+            }
+        )
+    )
+
+    monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
+    monkeypatch.setattr(api, "count_hotpot_examples", lambda data_path=None: 10)
+
+    result = api.list_benchmark_results()
+
+    assert [item["run_id"] for item in result["results"]] == ["complete-run"]
+    assert result["results"][0]["partial"] is False
+
+
+def test_write_benchmark_result_removes_matching_partial_result(monkeypatch, tmp_path) -> None:
+    partial = tmp_path / "partial.json"
+    partial.write_text(
+        json.dumps(
+            {
+                "run_id": "partial-run",
+                "comparison_group_id": "group-1",
+                "system": "direct_llm",
+                "limit": 2,
+                "seed": 123,
+                "model": "model-a",
+                "records": [{"id": "one"}],
+            }
+        )
+    )
+    monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
+    result = api.BenchmarkResult(
+        run_id="complete-run",
+        comparison_group_id="group-1",
+        system="direct_llm",
+        limit=2,
+        model="model-a",
+        seed=123,
+        created_at="2026-06-05T00:00:00Z",
+        total_runtime_ms=1,
+        records=[
+            BenchmarkRecord(
+                id=str(index),
+                question=f"q{index}",
+                gold_answer=f"a{index}",
+                prediction=f"a{index}",
+                exact_match=1,
+                f1=1,
+                latency_ms=1,
+            )
+            for index in range(2)
+        ],
+        metrics={"example_count": 2},
+    )
+
+    api._write_benchmark_result(result)
+
+    assert not partial.exists()
+    assert len(list(tmp_path.glob("*.json"))) == 1
+
+
 def test_get_live_benchmark_marks_orphaned_running_state_stopped(monkeypatch, tmp_path) -> None:
     run_id = "orphaned-run"
     monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
@@ -167,6 +274,87 @@ def test_get_live_benchmark_marks_orphaned_running_state_stopped(monkeypatch, tm
 
     assert state["phase"] == "stopped"
     assert state["resumable"] is True
+
+
+async def test_stop_live_benchmark_cancels_active_task() -> None:
+    run_id = "cancel-active"
+    api.LIVE_BENCHMARKS[run_id] = {
+        "run_id": run_id,
+        "phase": "running",
+        "status": "running",
+        "records": [],
+        "metrics": {},
+    }
+    api.LIVE_BENCHMARK_STOPS[run_id] = asyncio.Event()
+
+    async def wait_forever() -> None:
+        await asyncio.Event().wait()
+
+    task = asyncio.create_task(wait_forever())
+    api.LIVE_BENCHMARK_TASKS[run_id] = task
+    try:
+        state = await api.stop_live_benchmark(run_id)
+
+        assert state["phase"] == "stopping"
+        assert state["stop_requested"] is True
+        assert api.LIVE_BENCHMARK_STOPS[run_id].is_set()
+        assert task.cancelled() or task.cancelling()
+    finally:
+        task.cancel()
+        api.LIVE_BENCHMARKS.pop(run_id, None)
+        api.LIVE_BENCHMARK_STOPS.pop(run_id, None)
+        api.LIVE_BENCHMARK_TASKS.pop(run_id, None)
+
+
+def test_list_live_benchmarks_returns_unfinished_summaries(monkeypatch, tmp_path) -> None:
+    completed_count = 1337
+    total_count = 2000
+    monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
+    api.LIVE_BENCHMARKS.clear()
+    api.LIVE_BENCHMARK_TASKS.clear()
+    live_dir = tmp_path / ".live"
+    live_dir.mkdir()
+    (live_dir / "unfinished-run.json").write_text(
+        json.dumps(
+            {
+                "run_id": "unfinished-run",
+                "name": "overnight",
+                "phase": "running",
+                "status": "running",
+                "systems": ["dag_agent", "direct_llm"],
+                "current_system": "direct_llm",
+                "completed": completed_count,
+                "total": total_count,
+                "model": "openai/gpt-oss-120b",
+                "created_at": "2026-06-05T13:55:13Z",
+                "records": [],
+                "metrics": {},
+            }
+        )
+    )
+    (live_dir / "complete-run.json").write_text(
+        json.dumps(
+            {
+                "run_id": "complete-run",
+                "phase": "complete",
+                "status": "succeeded",
+                "completed": 10,
+                "total": 10,
+                "records": [],
+                "metrics": {},
+            }
+        )
+    )
+
+    result = api.list_live_benchmarks()
+
+    assert [item["run_id"] for item in result["runs"]] == ["unfinished-run"]
+    summary = result["runs"][0]
+    assert summary["phase"] == "stopped"
+    assert summary["completed"] == completed_count
+    assert summary["total"] == total_count
+    assert summary["model"] == "openai/gpt-oss-120b"
+    assert "records" not in summary
 
 
 async def test_paired_live_benchmark_reuses_sample_and_saves_two_results(

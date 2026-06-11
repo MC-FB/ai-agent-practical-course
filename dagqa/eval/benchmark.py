@@ -36,6 +36,7 @@ from dagqa.schemas import (
     RunTrace,
     SchedulerWave,
     TaskType,
+    ValidationResult,
 )
 
 
@@ -95,6 +96,8 @@ async def benchmark_hotpotqa(
     max_parallel_examples: int | None = None,
     comparison_group_id: str | None = None,
     name: str | None = None,
+    on_complete: Callable[[BenchmarkRecord], None] | None = None,
+    delay_between_examples_seconds: float = 0.0,
 ) -> BenchmarkResult:
     started = time.perf_counter()
     seed = seed if seed is not None else random.SystemRandom().randint(1, 2_147_483_647)
@@ -113,7 +116,14 @@ async def benchmark_hotpotqa(
     )
     if parallel_examples < 1:
         raise ValueError("max_parallel_examples must be at least 1.")
-    records = await _run_examples(client, examples, system, parallel_examples)
+    records = await _run_examples(
+        client,
+        examples,
+        system,
+        parallel_examples,
+        on_complete=on_complete,
+        delay_between_examples_seconds=delay_between_examples_seconds,
+    )
     metrics = _aggregate(records)
     total_runtime_ms = (time.perf_counter() - started) * 1000
     metrics["total_runtime_ms"] = total_runtime_ms
@@ -142,6 +152,7 @@ async def _run_examples(
     max_parallel_examples: int,
     on_complete: Callable[[BenchmarkRecord], None] | None = None,
     should_stop: Callable[[], bool] | None = None,
+    delay_between_examples_seconds: float = 0.0,
 ) -> list[BenchmarkRecord]:
     if not examples:
         return []
@@ -162,15 +173,43 @@ async def _run_examples(
             except asyncio.QueueEmpty:
                 return
             try:
-                record = await _run_example(client, example, system)
+                record = await _run_example_with_empty_prediction_retries(client, example, system)
             finally:
                 queue.task_done()
             records_by_index[index] = record
             if on_complete is not None:
                 on_complete(record)
+            if delay_between_examples_seconds > 0:
+                await asyncio.sleep(delay_between_examples_seconds)
 
     await asyncio.gather(*(worker() for _ in range(worker_count)))
     return [records_by_index[index] for index in sorted(records_by_index)]
+
+
+async def _run_example_with_empty_prediction_retries(
+    client: DagQaClient,
+    example: HotpotExample,
+    system: str,
+) -> BenchmarkRecord:
+    retries = _empty_prediction_retries(client)
+    record = await _run_example(client, example, system)
+    for _attempt in range(1, retries + 1):
+        if record.prediction.strip():
+            return record
+        retry_record = await _run_example(client, example, system)
+        retry_record.llm_retry_count = (retry_record.llm_retry_count or 0) + (
+            record.llm_retry_count or 0
+        )
+        if not retry_record.prediction.strip() and record.error and not retry_record.error:
+            retry_record.error = record.error
+        record = retry_record
+    return record
+
+
+def _empty_prediction_retries(client: DagQaClient) -> int:
+    config = getattr(client, "config", None)
+    benchmark = getattr(config, "benchmark", None)
+    return int(getattr(benchmark, "empty_prediction_retries", 0))
 
 
 def _sample_examples(
@@ -204,22 +243,38 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
                 "The citations array must contain the sentence-level evidence directly used "
                 "to determine the answer."
             )
-            response = await client.llm.complete(
-                LLMRequest(
-                    system="Answer the question concisely using only the supplied sources.",
-                    prompt=prompt,
+            system_prompt = "Answer the question concisely using only the supplied sources."
+            response_text: str | None = None
+            parsed: dict[str, Any] | None = None
+            try:
+                response = await client.llm.complete(
+                    LLMRequest(
+                        system=system_prompt,
+                        prompt=prompt,
+                    )
                 )
-            )
-            parsed = parse_node_output(response.text)
-            prediction = str(parsed.get("answer", "")).strip()
-            citations = [
-                EvidenceCitation.model_validate(citation)
-                for citation in parsed.get("_evidence_citations", [])
-            ]
-            if not prediction:
-                raise ValueError("Single-prompt response is missing a non-empty answer.")
-            if not citations:
-                raise ValueError("Single-prompt response is missing sentence-level citations.")
+                response_text = response.text
+                parsed = parse_node_output(response.text)
+                prediction = str(parsed.get("answer", "")).strip()
+                citations = [
+                    EvidenceCitation.model_validate(citation)
+                    for citation in parsed.get("_evidence_citations", [])
+                ]
+                if not prediction:
+                    raise ValueError("Single-prompt response is missing a non-empty answer.")
+                if not citations:
+                    raise ValueError("Single-prompt response is missing sentence-level citations.")
+            except Exception as exc:
+                return _failed_direct_record(
+                    example,
+                    started,
+                    system_prompt,
+                    prompt,
+                    response_text,
+                    parsed,
+                    exc,
+                    client.config.model_dump(mode="json"),
+                )
             returned_value = {"answer": prediction}
             plan = DagPlan(
                 question=example.question,
@@ -231,7 +286,7 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
                         operation=Operation.answer,
                         question=example.question,
                         prompt=PromptSpec(
-                            system="Answer the question concisely using only the supplied sources.",
+                            system=system_prompt,
                             user_template=prompt,
                         ),
                         output_schema={
@@ -328,6 +383,88 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
             structural_failure=True,
             error=str(exc),
         )
+
+
+def _failed_direct_record(
+    example: HotpotExample,
+    started: float,
+    system_prompt: str,
+    prompt: str,
+    response_text: str | None,
+    parsed_output: dict[str, Any] | None,
+    exc: Exception,
+    config: dict[str, Any],
+) -> BenchmarkRecord:
+    duration_ms = (time.perf_counter() - started) * 1000
+    error = str(exc) or exc.__class__.__name__
+    plan = DagPlan(
+        question=example.question,
+        nodes=[
+            DagNode(
+                id="single_prompt",
+                label="Single prompt",
+                task_type=TaskType.synthesis,
+                operation=Operation.answer,
+                question=example.question,
+                prompt=PromptSpec(system=system_prompt, user_template=prompt),
+                output_schema={
+                    "type": "object",
+                    "required": ["answer"],
+                    "properties": {"answer": {"type": "string"}},
+                },
+            )
+        ],
+        final_node="single_prompt",
+    )
+    trace = NodeTrace(
+        node_id="single_prompt",
+        label="Single prompt",
+        task_type=TaskType.synthesis,
+        operation=Operation.answer,
+        status=NodeStatus.failed,
+        resolved_question=example.question,
+        rendered_prompt=prompt,
+        raw_response=response_text,
+        parsed_output=parsed_output,
+        validation=ValidationResult(valid=False, errors=[error]),
+        supporting_evidence=EvidenceSelection(
+            strategy="all_documents",
+            total_available=len(example.context),
+            documents=example.context,
+        ),
+        duration_ms=duration_ms,
+        error=error,
+    )
+    run_trace = RunTrace(
+        run_id=str(uuid4()),
+        question=example.question,
+        plan=plan,
+        waves=[SchedulerWave(index=0, node_ids=["single_prompt"])],
+        nodes=[trace],
+        final_answer=None,
+        status=NodeStatus.failed,
+        total_duration_ms=duration_ms,
+        config=config,
+    ).model_dump(mode="json")
+    run_trace["mermaid"] = render_mermaid(plan, [trace])
+    return BenchmarkRecord(
+        id=example.id,
+        question=example.question,
+        gold_answer=example.answer,
+        prediction="",
+        exact_match=0.0,
+        f1=0.0,
+        cosine_sim=-1.5,
+        latency_ms=duration_ms,
+        llm_call_count=1,
+        node_count=1,
+        graph_depth=0,
+        structural_valid=False,
+        structural_failure=True,
+        gold_supporting_facts=example.supporting_facts,
+        run_trace=run_trace,
+        error=error,
+    )
 
 
 def _extract_answer(final_answer: dict[str, Any] | None) -> str:

@@ -8,9 +8,11 @@ Run the backend container and the Vite frontend dev server with hot reload:
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up dagqa web-dev
 ```
 
-Open the app at `http://localhost:5173/`. The frontend container bind-mounts
-`app/web`, so React changes hot reload without rebuilding the backend image.
-The API is served by `dagqa` on `http://localhost:8000/`.
+Open the app at `http://localhost:5173/`. The backend container bind-mounts
+`app`, `dagqa`, and `configs`, and runs uvicorn with `--reload`, so Python and
+configuration changes are picked up without rebuilding the backend image. The
+frontend container bind-mounts `app/web`, so React changes hot reload too. The
+API is served by `dagqa` on `http://localhost:8000/`.
 
 ## Getting started
 

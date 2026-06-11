@@ -9,6 +9,8 @@ from dagqa.planning.parser import parse_plan
 from tests.conftest import StubLLM
 from tests.fixtures import PARALLEL_PLAN
 
+EXPECTED_RETRY_CALL_COUNT = 2
+
 
 async def test_cluster_planner_uses_structured_json_schema(monkeypatch) -> None:
     captured: dict = {}
@@ -71,5 +73,81 @@ async def test_cluster_planner_uses_structured_json_schema(monkeypatch) -> None:
     )
 
     assert result.final_node == "q3"
-    assert captured["client"] == {"api_key": "secret", "base_url": "http://cluster/inference"}
+    assert captured["client"] == {
+        "api_key": "secret",
+        "base_url": "http://cluster/inference",
+        "timeout": 120.0,
+        "max_retries": 0,
+    }
     assert captured["response_format"]["type"] == "json_schema"
+
+
+async def test_cluster_planner_retries_structured_request(monkeypatch) -> None:
+    calls = 0
+    plan = parse_plan(PARALLEL_PLAN)
+    plan_json = json.dumps(
+        {
+            "question": plan.question,
+            "final_node": plan.final_node,
+            "nodes": [
+                {
+                    "id": node.id,
+                    "label": node.label,
+                    "task_type": node.task_type,
+                    "operation": node.operation,
+                    "question": node.question,
+                    "depends_on": node.depends_on,
+                    "prompt": node.prompt.model_dump(mode="json"),
+                    "input_map": [
+                        {"name": name, "reference": reference}
+                        for name, reference in node.input_map.items()
+                    ],
+                    "child_output_policy": node.child_output_policy,
+                    "output_fields": [
+                        {
+                            "name": name,
+                            "type": field["type"],
+                            "description": field.get("description", name),
+                        }
+                        for name, field in node.output_schema["properties"].items()
+                    ],
+                }
+                for node in plan.nodes
+            ],
+        }
+    )
+
+    class RetryableClusterError(Exception):
+        status_code = 500
+
+    class Completions:
+        async def create(self, **_kwargs):
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise RetryableClusterError("temporary cluster failure")
+            return SimpleNamespace(
+                choices=[SimpleNamespace(message=SimpleNamespace(content=plan_json))]
+            )
+
+    class Client:
+        def __init__(self, **_kwargs):
+            self.chat = SimpleNamespace(completions=Completions())
+
+    llm_config = LLMConfig(
+        provider="cluster",
+        model="google/gemma-4-31B-it",
+        api_key_env="CLUSTER_API_KEY",
+        api_base="http://cluster/inference",
+        max_retries=1,
+        retry_initial_delay_seconds=0.001,
+    )
+    monkeypatch.setenv("CLUSTER_API_KEY", "secret")
+    monkeypatch.setattr(planner, "AsyncOpenAI", Client)
+
+    result = await planner.Planner(StubLLM([]), PlannerConfig(), llm_config).plan(
+        "Which person was born earlier?"
+    )
+
+    assert result.final_node == "q3"
+    assert calls == EXPECTED_RETRY_CALL_COUNT

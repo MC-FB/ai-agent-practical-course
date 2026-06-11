@@ -35,6 +35,7 @@ import {
   getLiveBenchmark,
   getLiveAsk,
   listBenchmarkResults,
+  listLiveBenchmarks,
   preflightBenchmark,
   repairBenchmarkResult,
   resumeLiveBenchmark,
@@ -46,6 +47,7 @@ import {
   type HotpotBenchmarkRecord,
   type HotpotBenchmarkResult,
   type LiveBenchmark,
+  type LiveBenchmarkSummary,
   type LiveRun,
   type LLMModelCatalog,
   type LLMSelection,
@@ -72,6 +74,8 @@ const SAMPLE_QUESTIONS = [
 
 const ACTIVE_BENCHMARK_STORAGE_KEY = "dagqa.activeBenchmarkRunId";
 const LIVE_BENCHMARK_POLL_RETRY_LIMIT = 5;
+const RECORD_TABLE_INITIAL_ROWS = 80;
+const RECORD_TABLE_LOAD_ROWS = 120;
 
 type Tab = "chat" | "dataset" | "results";
 type RunPhase = "idle" | "planning" | "executing" | "complete" | "error";
@@ -195,6 +199,35 @@ function median(values: number[]) {
   const sorted = [...values].sort((left, right) => left - right);
   const middle = Math.floor(sorted.length / 2);
   return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+}
+
+function useIncrementalRows(total: number, key: string) {
+  const [visibleRows, setVisibleRows] = useState(RECORD_TABLE_INITIAL_ROWS);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setVisibleRows(Math.min(RECORD_TABLE_INITIAL_ROWS, total));
+  }, [key, total]);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || visibleRows >= total) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleRows((current) => Math.min(current + RECORD_TABLE_LOAD_ROWS, total));
+        }
+      },
+      { rootMargin: "240px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [total, visibleRows]);
+
+  return {
+    visibleRows: Math.min(visibleRows, total),
+    sentinelRef,
+  };
 }
 
 function GraphView({
@@ -348,10 +381,12 @@ function NodeInspector({
   node,
   planNode,
   planNodes,
+  goldAnswer,
 }: {
   node?: NodeTrace;
   planNode?: DagNode;
   planNodes: DagNode[];
+  goldAnswer?: string;
 }) {
   const hasInputMap = planNode?.input_map && Object.keys(planNode.input_map).length > 0;
   const expectedInputs = expectedInputsForNode(planNode, planNodes);
@@ -436,6 +471,12 @@ function NodeInspector({
             <label>Question</label>
             <pre>{node.resolved_question ?? ""}</pre>
           </div>
+          {goldAnswer !== undefined && (
+            <div>
+              <label>Gold Answer</label>
+              <pre>{goldAnswer || "-"}</pre>
+            </div>
+          )}
           <div className="contract-panel">
             <div className="contract-heading">
               <label>Supporting Evidence Given To Model</label>
@@ -517,6 +558,12 @@ function NodeInspector({
               <div className="empty compact-empty">The model did not report evidence facts.</div>
             )}
           </div>
+          {planNode && (
+            <div>
+              <label>System Prompt</label>
+              <pre>{planNode.prompt.system}</pre>
+            </div>
+          )}
           {planNode && (
             <div>
               <label>User Template</label>
@@ -740,6 +787,8 @@ function BenchmarkResultView({
   const metrics = result?.metrics;
   const errorRecords = result?.records.filter((record) => record.error) ?? [];
   const sampleTotal = result?.dataset_size ?? totalExamples;
+  const tableKey = result ? `${result.run_id}:${result.records.length}` : "empty";
+  const { visibleRows, sentinelRef } = useIncrementalRows(result?.records.length ?? 0, tableKey);
 
   if (!result || !metrics) {
     return <div className="empty">Metrics will appear here.</div>;
@@ -849,7 +898,7 @@ function BenchmarkResultView({
             </tr>
           </thead>
           <tbody>
-            {result.records.map((record) => {
+            {result.records.slice(0, visibleRows).map((record) => {
               const canInspect = Boolean(onSelectRecord && record.run_trace);
               return (
                 <tr
@@ -902,6 +951,11 @@ function BenchmarkResultView({
             })}
           </tbody>
         </table>
+        {visibleRows < result.records.length && (
+          <div className="table-load-sentinel" ref={sentinelRef}>
+            Showing {formatNumber(visibleRows)} of {formatNumber(result.records.length)}
+          </div>
+        )}
       </div>
       {errorRecords.length > 0 && (
         <div>
@@ -933,10 +987,13 @@ function runTypeLabel(system?: string | null) {
 function benchmarkOptionLabel(item: SavedBenchmarkSummary | HotpotBenchmarkResult) {
   const parts = [
     item.name?.trim(),
+    "partial" in item && item.partial ? "partial" : undefined,
     formatSavedDateTime(item.created_at),
     runTypeLabel(item.system),
     item.model ?? "unknown model",
-    `${item.limit} examples`,
+    "completed" in item && item.completed !== undefined && item.limit
+      ? `${formatNumber(item.completed ?? undefined)} / ${formatNumber(item.limit)} examples`
+      : `${item.limit} examples`,
     `seed ${item.seed}`,
   ].filter(Boolean);
   return parts.join(" · ");
@@ -951,6 +1008,44 @@ function comparisonValue(value: number | undefined, format: string) {
 function deltaClass(value: number) {
   if (Math.abs(value) < 0.000001) return "neutral";
   return value > 0 ? "improved" : "degraded";
+}
+
+function comparisonAnswerText(record: HotpotBenchmarkRecord) {
+  if (record.prediction) return record.prediction;
+  if (record.error) return "error";
+  if (record.structural_failure) return "failed";
+  return "-";
+}
+
+function hasEmptyBenchmarkAnswer(record: HotpotBenchmarkRecord) {
+  return !record.prediction.trim();
+}
+
+function average(values: number[]) {
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+}
+
+function aggregateBenchmarkRecords(records: HotpotBenchmarkRecord[]): Record<string, number> {
+  const citationCount = records.reduce(
+    (sum, record) => sum + (record.evidence_citation_count ?? 0),
+    0,
+  );
+  const wrongCitationCount = records.reduce(
+    (sum, record) => sum + (record.wrong_evidence_citation_count ?? 0),
+    0,
+  );
+  return {
+    exact_match: average(records.map((record) => record.exact_match)),
+    f1: average(records.map((record) => record.f1)),
+    cosine_sim: average(records.map((record) => record.cosine_sim)),
+    avg_latency_ms: average(records.map((record) => record.latency_ms)),
+    avg_gold_supporting_fact_recall: average(
+      records
+        .map((record) => record.gold_supporting_fact_recall)
+        .filter((value): value is number => value !== null && value !== undefined),
+    ),
+    wrong_supporting_text_rate: citationCount ? wrongCitationCount / citationCount : 0,
+  };
 }
 
 function BenchmarkComparisonView({
@@ -970,14 +1065,41 @@ function BenchmarkComparisonView({
   const deltaLabel = mixedSystems ? "Multi-node impact" : "Run A impact";
   const sameSeed = focus.seed === reference.seed;
   const referenceById = new Map(reference.records.map((record) => [record.id, record]));
+  const [hideEmptyResponses, setHideEmptyResponses] = useState(false);
   const aligned = sameSeed
     ? focus.records
         .map((record) => [record, referenceById.get(record.id)] as const)
         .filter((pair): pair is readonly [HotpotBenchmarkRecord, HotpotBenchmarkRecord] => Boolean(pair[1]))
     : [];
+  const emptyStats = aligned.reduce(
+    (stats, [focusRecord, referenceRecord]) => {
+      const focusEmpty = hasEmptyBenchmarkAnswer(focusRecord);
+      const referenceEmpty = hasEmptyBenchmarkAnswer(referenceRecord);
+      return {
+        focusEmpty: stats.focusEmpty + (focusEmpty ? 1 : 0),
+        referenceEmpty: stats.referenceEmpty + (referenceEmpty ? 1 : 0),
+        eitherEmpty: stats.eitherEmpty + (focusEmpty || referenceEmpty ? 1 : 0),
+      };
+    },
+    { focusEmpty: 0, referenceEmpty: 0, eitherEmpty: 0 },
+  );
+  const filteredAligned = hideEmptyResponses
+    ? aligned.filter(
+        ([focusRecord, referenceRecord]) =>
+          !hasEmptyBenchmarkAnswer(focusRecord) && !hasEmptyBenchmarkAnswer(referenceRecord),
+      )
+    : aligned;
+  const focusMetrics = hideEmptyResponses
+    ? aggregateBenchmarkRecords(filteredAligned.map(([record]) => record))
+    : focus.metrics;
+  const referenceMetrics = hideEmptyResponses
+    ? aggregateBenchmarkRecords(filteredAligned.map(([, record]) => record))
+    : reference.metrics;
+  const comparisonTableKey = `${focus.run_id}:${reference.run_id}:${filteredAligned.length}:${hideEmptyResponses}`;
+  const { visibleRows, sentinelRef } = useIncrementalRows(filteredAligned.length, comparisonTableKey);
   const metricDeltas = COMPARISON_METRICS.map(([key, label, format, preference]) => {
-    const focusValue = focus.metrics[key];
-    const referenceValue = reference.metrics[key];
+    const focusValue = focusMetrics[key] ?? 0;
+    const referenceValue = referenceMetrics[key] ?? 0;
     const rawDelta = focusValue - referenceValue;
     const performanceDelta = preference === "higher" ? rawDelta : -rawDelta;
     return { key, label, format, focusValue, referenceValue, rawDelta, performanceDelta };
@@ -1001,7 +1123,11 @@ function BenchmarkComparisonView({
           <span className="comparison-score improved">{improvements} improvements</span>
           <span className="comparison-score degraded">{degradations} degradations</span>
           <span className={sameSeed ? "comparison-badge aligned" : "comparison-badge"}>
-            {sameSeed ? `${aligned.length} aligned` : "Different seeds"}
+            {sameSeed
+              ? hideEmptyResponses
+                ? `${filteredAligned.length} shown / ${aligned.length} aligned`
+                : `${aligned.length} aligned`
+              : "Different seeds"}
           </span>
         </div>
       </div>
@@ -1010,6 +1136,28 @@ function BenchmarkComparisonView({
         <span><i className="reference-dot" />{referenceLabel}</span>
         <strong>{deltaLabel}</strong>
       </div>
+      {sameSeed && (
+        <div className="comparison-filter-bar">
+          <label>
+            <Checkbox
+              id="hide-empty-benchmark-answers"
+              checked={hideEmptyResponses}
+              onCheckedChange={(checked) => setHideEmptyResponses(checked === true)}
+            />
+            <span>Hide rows with an empty answer</span>
+          </label>
+          <div>
+            <strong>
+              {formatNumber(hideEmptyResponses ? emptyStats.eitherEmpty : 0)} of{" "}
+              {formatNumber(aligned.length)} filtered
+            </strong>
+            <span>
+              {focusLabel}: {formatNumber(emptyStats.focusEmpty)} empty · {referenceLabel}:{" "}
+              {formatNumber(emptyStats.referenceEmpty)} empty
+            </span>
+          </div>
+        </div>
+      )}
       <div className="comparison-metrics">
         {metricDeltas.map((metric) => {
           const direction = deltaClass(metric.performanceDelta);
@@ -1049,20 +1197,28 @@ function BenchmarkComparisonView({
               </tr>
             </thead>
             <tbody>
-              {aligned.map(([focusRecord, referenceRecord]) => {
+              {filteredAligned.slice(0, visibleRows).map(([focusRecord, referenceRecord]) => {
                 const rowDelta = focusRecord.f1 - referenceRecord.f1;
                 return (
                 <tr key={focusRecord.id}>
                   <td>{focusRecord.question}</td>
                   <td>{focusRecord.gold_answer}</td>
                   <td>
-                    <button className="comparison-answer" onClick={() => onSelectRecord?.(focus, focusRecord)}>
-                      {focusRecord.prediction || "-"} · {formatPercent(focusRecord.f1)}
+                    <button
+                      className={`comparison-answer ${focusRecord.error ? "failed" : ""}`}
+                      onClick={() => onSelectRecord?.(focus, focusRecord)}
+                      title={focusRecord.error || "Open benchmark detail"}
+                    >
+                      {comparisonAnswerText(focusRecord)} · {formatPercent(focusRecord.f1)}
                     </button>
                   </td>
                   <td>
-                    <button className="comparison-answer" onClick={() => onSelectRecord?.(reference, referenceRecord)}>
-                      {referenceRecord.prediction || "-"} · {formatPercent(referenceRecord.f1)}
+                    <button
+                      className={`comparison-answer ${referenceRecord.error ? "failed" : ""}`}
+                      onClick={() => onSelectRecord?.(reference, referenceRecord)}
+                      title={referenceRecord.error || "Open benchmark detail"}
+                    >
+                      {comparisonAnswerText(referenceRecord)} · {formatPercent(referenceRecord.f1)}
                     </button>
                   </td>
                   <td><span className={`row-delta ${deltaClass(rowDelta)}`}>{rowDelta > 0 ? "+" : ""}{formatPercent(rowDelta)}</span></td>
@@ -1070,6 +1226,14 @@ function BenchmarkComparisonView({
               )})}
             </tbody>
           </table>
+          {filteredAligned.length === 0 && (
+            <div className="empty compact-empty">No comparable rows after filtering.</div>
+          )}
+          {visibleRows < filteredAligned.length && (
+            <div className="table-load-sentinel" ref={sentinelRef}>
+              Showing {formatNumber(visibleRows)} of {formatNumber(filteredAligned.length)} aligned rows
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -1094,6 +1258,8 @@ function DatasetView({
   const [result, setResult] = useState<HotpotBenchmarkResult>();
   const [comparisonResults, setComparisonResults] = useState<HotpotBenchmarkResult[]>([]);
   const [savedBenchmarkSummaries, setSavedBenchmarkSummaries] = useState<SavedBenchmarkSummary[]>([]);
+  const [unfinishedLiveRuns, setUnfinishedLiveRuns] = useState<LiveBenchmarkSummary[]>([]);
+  const [selectedLiveRunId, setSelectedLiveRunId] = useState("");
   const [liveRun, setLiveRun] = useState<LiveBenchmark>();
   const [error, setError] = useState("");
   const maxExamples = meta?.total_examples && meta.total_examples > 1 ? meta.total_examples : 7405;
@@ -1102,6 +1268,10 @@ function DatasetView({
   const benchmarkRunning = liveRun?.phase === "running" || liveRun?.phase === "stopping";
   const canStop = liveRun?.phase === "running" || liveRun?.phase === "stopping";
   const canResume = liveRun?.phase === "stopped" || liveRun?.phase === "error";
+  const selectedLiveRun = unfinishedLiveRuns.find((run) => run.run_id === selectedLiveRunId);
+  const selectedLiveRunProgress = selectedLiveRun?.total
+    ? (selectedLiveRun.completed / selectedLiveRun.total) * 100
+    : 0;
 
   const historicalMsBySystem = useMemo(() => {
     const estimates = new Map<string, number>();
@@ -1141,6 +1311,36 @@ function DatasetView({
     const total = liveRun?.total ?? resolvedLimit * systems.length;
     const completed = liveRun?.completed ?? 0;
     const elapsedMs = liveRun?.total_runtime_ms ?? 0;
+    const serverEstimate = liveRun?.estimate;
+    if (serverEstimate) {
+      const remainingMs = Math.max(serverEstimate.remaining_ms ?? 0, 0);
+      const totalMs = Math.max(serverEstimate.total_ms ?? elapsedMs + remainingMs, elapsedMs);
+      const finishAt =
+        remainingMs > 0 ? new Date(Date.now() + remainingMs).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }) : undefined;
+      return {
+        total,
+        completed,
+        remaining: Math.max(total - completed, 0),
+        elapsedMs,
+        remainingMs,
+        totalMs,
+        finishAt,
+        avgLlmCallMs: serverEstimate.avg_llm_call_ms ?? undefined,
+        avgDagNodeCount: serverEstimate.avg_dag_node_count ?? undefined,
+        lastRecordAgeMs: liveRun?.last_record_completed_at
+          ? Math.max(Date.now() - new Date(liveRun.last_record_completed_at).getTime(), 0)
+          : undefined,
+        confidence:
+          (serverEstimate.observed_llm_call_count ?? 0) >= 8
+            ? "High"
+            : completed > 0
+              ? "Calibrating"
+              : "Fallback",
+      };
+    }
     const historicalMsPerExample = total > 0 ? plannedTotalMs / total : 0;
     const observedMsPerExample = completed > 0 ? elapsedMs / completed : undefined;
     const observedWeight = observedMsPerExample ? Math.min(0.9, completed / 8) : 0;
@@ -1165,6 +1365,11 @@ function DatasetView({
       remainingMs,
       totalMs,
       finishAt,
+      avgLlmCallMs: undefined,
+      avgDagNodeCount: undefined,
+      lastRecordAgeMs: liveRun?.last_record_completed_at
+        ? Math.max(Date.now() - new Date(liveRun.last_record_completed_at).getTime(), 0)
+        : undefined,
       confidence:
         completed >= 8 ? "High" : completed > 0 ? "Calibrating" : savedBenchmarkSummaries.length ? "Historical" : "Fallback",
     };
@@ -1188,6 +1393,25 @@ function DatasetView({
     listBenchmarkResults()
       .then((response) => setSavedBenchmarkSummaries(response.results))
       .catch(() => setSavedBenchmarkSummaries([]));
+  }, []);
+
+  async function refreshUnfinishedLiveRuns() {
+    try {
+      const response = await listLiveBenchmarks();
+      setUnfinishedLiveRuns(response.runs);
+      setSelectedLiveRunId((current) =>
+        current && response.runs.some((run) => run.run_id === current)
+          ? current
+          : (response.runs[0]?.run_id ?? ""),
+      );
+    } catch {
+      setUnfinishedLiveRuns([]);
+      setSelectedLiveRunId("");
+    }
+  }
+
+  useEffect(() => {
+    refreshUnfinishedLiveRuns();
   }, []);
 
   useEffect(() => {
@@ -1221,6 +1445,7 @@ function DatasetView({
         if (cancelled) return;
         if (!restored) return;
         setError("");
+        setSelectedLiveRunId(restored.run_id);
         await watchBenchmark(restored, () => cancelled);
       } catch (err) {
         if (!cancelled) {
@@ -1244,6 +1469,7 @@ function DatasetView({
     setSeedInput(String(started.seed));
     setBenchmarkName(started.name ?? "");
     window.localStorage.setItem(ACTIVE_BENCHMARK_STORAGE_KEY, started.run_id);
+    setSelectedLiveRunId(started.run_id);
 
     let current = started;
     let pollFailures = 0;
@@ -1301,6 +1527,7 @@ function DatasetView({
         throw new Error(failed.map((check) => check.detail).join(" "));
       }
       const started = await startLiveBenchmark(resolvedLimit, systems, llm, parsedSeed, name);
+      await refreshUnfinishedLiveRuns();
       await watchBenchmark(started);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Benchmark failed");
@@ -1317,6 +1544,7 @@ function DatasetView({
       setLiveRun(stopped);
       setComparisonResults(stopped.comparison_results ?? []);
       setResult(stopped.comparison_results?.[0] ?? stopped);
+      await refreshUnfinishedLiveRuns();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not stop benchmark");
     }
@@ -1328,9 +1556,36 @@ function DatasetView({
     setError("");
     try {
       const resumed = await resumeLiveBenchmark(liveRun.run_id, llm);
+      await refreshUnfinishedLiveRuns();
       await watchBenchmark(resumed);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not resume benchmark");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function loadSelectedLiveRun() {
+    if (!selectedLiveRunId) return;
+    setBusy(true);
+    setError("");
+    try {
+      const selected = await getLiveBenchmark(selectedLiveRunId);
+      setLiveRun(selected);
+      setResult(selected.comparison_results?.[0] ?? selected);
+      setComparisonResults(selected.comparison_results ?? []);
+      setSeedInput(String(selected.seed));
+      setBenchmarkName(selected.name ?? "");
+      setSystems(
+        selected.systems?.filter((system) => system === "dag_agent" || system === "direct_llm") ??
+          systems,
+      );
+      window.localStorage.setItem(ACTIVE_BENCHMARK_STORAGE_KEY, selected.run_id);
+      if (selected.phase === "running" || selected.phase === "stopping") {
+        await watchBenchmark(selected);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load benchmark");
     } finally {
       setBusy(false);
     }
@@ -1500,6 +1755,75 @@ function DatasetView({
                 )}
               </div>
             </div>
+
+            <div className="grid gap-3 rounded-lg border border-slate-200 bg-white p-3 shadow-sm lg:grid-cols-[minmax(260px,1fr)_minmax(280px,1.1fr)_auto] lg:items-center">
+              <div>
+                <div className="flex items-center gap-2">
+                  <History size={16} className="text-slate-500" />
+                  <Label htmlFor="unfinished-live-run">Unfinished runs</Label>
+                  <Badge className="bg-slate-100 text-slate-700">{unfinishedLiveRuns.length}</Badge>
+                </div>
+                <p className="mt-1 text-xs font-medium text-slate-500">
+                  Load a checkpoint, then use Resume to continue it.
+                </p>
+              </div>
+
+              <div className="grid gap-2">
+                <select
+                  className="h-10 w-full rounded-md border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-900 shadow-sm outline-none transition-colors focus:border-emerald-400 focus:bg-white"
+                  disabled={!unfinishedLiveRuns.length || busy}
+                  id="unfinished-live-run"
+                  value={selectedLiveRunId}
+                  onChange={(event) => setSelectedLiveRunId(event.target.value)}
+                >
+                  {!unfinishedLiveRuns.length && <option value="">No unfinished runs</option>}
+                  {unfinishedLiveRuns.map((run) => (
+                    <option key={run.run_id} value={run.run_id}>
+                      {(run.name || "Unnamed run")} · {formatSavedDateTime(run.created_at)} ·{" "}
+                      {run.model || "model"} · {formatNumber(run.completed)} /{" "}
+                      {formatNumber(run.total)}
+                    </option>
+                  ))}
+                </select>
+                {selectedLiveRun && (
+                  <div className="grid gap-2 rounded-md bg-slate-50 p-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-slate-600">
+                      <span>
+                        {selectedLiveRun.current_system
+                          ? `${systemLabel(selectedLiveRun.current_system)} · `
+                          : ""}
+                        {selectedLiveRun.phase}
+                      </span>
+                      <span>
+                        {formatNumber(selectedLiveRun.completed)} /{" "}
+                        {formatNumber(selectedLiveRun.total)} examples
+                      </span>
+                    </div>
+                    <Progress value={selectedLiveRunProgress} />
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-medium text-slate-500">
+                      <span>{selectedLiveRun.provider ?? "provider"}</span>
+                      <span>{selectedLiveRun.model ?? "model"}</span>
+                      <span>Elapsed {formatDuration(selectedLiveRun.total_runtime_ms)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-2 lg:justify-end">
+                <Button
+                  disabled={!selectedLiveRunId || busy}
+                  onClick={loadSelectedLiveRun}
+                  variant="outline"
+                >
+                  <RotateCcw size={16} />
+                  Load
+                </Button>
+                <Button disabled={busy} onClick={refreshUnfinishedLiveRuns} variant="outline">
+                  <History size={16} />
+                  Refresh
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -1521,11 +1845,27 @@ function DatasetView({
                 <Badge>{progressPercent.toFixed(0)}%</Badge>
             </div>
               <Progress value={progressPercent} />
-              <div className="grid gap-2 text-xs font-semibold text-slate-600 sm:grid-cols-3">
+              <div className="grid gap-2 text-xs font-semibold text-slate-600 sm:grid-cols-4">
                 <span>Elapsed {formatDuration(benchmarkEstimate.elapsedMs)}</span>
                 <span>Remaining {formatDuration(benchmarkEstimate.remainingMs)}</span>
                 <span>Estimated total {formatDuration(benchmarkEstimate.totalMs)}</span>
+                <span>
+                  Last item{" "}
+                  {benchmarkEstimate.lastRecordAgeMs === undefined
+                    ? "not yet"
+                    : `${formatDuration(benchmarkEstimate.lastRecordAgeMs)} ago`}
+                </span>
             </div>
+              {(benchmarkEstimate.avgLlmCallMs || benchmarkEstimate.avgDagNodeCount) && (
+                <div className="flex flex-wrap gap-3 text-[11px] font-semibold text-emerald-900">
+                  {benchmarkEstimate.avgLlmCallMs && (
+                    <span>LLM call avg {formatDuration(benchmarkEstimate.avgLlmCallMs)}</span>
+                  )}
+                  {benchmarkEstimate.avgDagNodeCount && (
+                    <span>DAG nodes avg {formatNumber(benchmarkEstimate.avgDagNodeCount, 1)}</span>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
@@ -1589,6 +1929,20 @@ function BenchmarkRecordDetail({
             Back
           </button>
           <div className="empty">This saved row does not contain a graph trace.</div>
+          {record.error && (
+            <section className="answer-panel">
+              <div className="section-header">
+                <div>
+                  <h2>Recorded Error</h2>
+                  <span>No prompt trace was saved for this row</span>
+                </div>
+                <GitBranch size={18} />
+              </div>
+              <div className="answer-body">
+                <pre>{record.error}</pre>
+              </div>
+            </section>
+          )}
         </section>
       </main>
     );
@@ -1679,6 +2033,19 @@ function BenchmarkRecordDetail({
             )}
           </div>
         </section>
+
+        <section className="answer-panel">
+          <div className="section-header">
+            <div>
+              <h2>Gold Answer</h2>
+              <span>Expected benchmark answer</span>
+            </div>
+            <CheckCircle2 size={18} />
+          </div>
+          <div className="answer-body">
+            <pre>{record.gold_answer || "-"}</pre>
+          </div>
+        </section>
       </section>
 
       <aside className="run-sidebar">
@@ -1696,6 +2063,7 @@ function BenchmarkRecordDetail({
           node={selectedNode}
           planNode={selectedPlanNode}
           planNodes={run.plan?.nodes ?? []}
+          goldAnswer={record.gold_answer}
         />
       </aside>
     </main>
@@ -1731,6 +2099,7 @@ function ResultsView({
         setSelectedResult(loaded);
         const paired = response.results.find(
           (item) =>
+            !item.partial &&
             item.run_id !== targetRunId &&
             item.comparison_group_id &&
             item.comparison_group_id === loaded.comparison_group_id,
@@ -1893,6 +2262,17 @@ function ModelPicker({
   );
 }
 
+function ModelRequiredView({ action }: { action: string }) {
+  return (
+    <main className="dataset-workspace">
+      <div className="empty">
+        Loading available LLM models. {action} will be available once an execution model is loaded.
+        Previous benchmark results are still available in Results.
+      </div>
+    </main>
+  );
+}
+
 function App() {
   const [route, setRoute] = useState<AppRoute>(() => parseRoute());
   const [modelCatalog, setModelCatalog] = useState<LLMModelCatalog>();
@@ -1988,10 +2368,14 @@ function App() {
           </div>
         </div>
       </aside>
-      {!selectedLLM ? (
-        <main className="dataset-workspace">
-          <div className="empty">Loading available LLM models.</div>
-        </main>
+      {route.tab === "results" ? (
+        <ResultsView
+          runId={route.runId}
+          recordId={route.recordId}
+          onNavigate={(runId, recordId) => navigate({ tab: "results", runId, recordId })}
+        />
+      ) : !selectedLLM ? (
+        <ModelRequiredView action={route.tab === "chat" ? "Chat" : "Benchmark actions"} />
       ) : route.tab === "chat" ? (
         <ChatView llm={selectedLLM} />
       ) : route.tab === "dataset" ? (
@@ -2001,11 +2385,7 @@ function App() {
           llm={selectedLLM}
         />
       ) : (
-        <ResultsView
-          runId={route.runId}
-          recordId={route.recordId}
-          onNavigate={(runId, recordId) => navigate({ tab: "results", runId, recordId })}
-        />
+        <ModelRequiredView action="This action" />
       )}
     </div>
   );
