@@ -164,6 +164,9 @@ export async function getLiveAsk(runId: string): Promise<LiveRun> {
 export type HotpotBenchmarkMeta = {
   dataset: string;
   split: string;
+  subset: BenchmarkSubset;
+  subset_label: string;
+  subsets: Array<{ id: BenchmarkSubset; label: string }>;
   total_examples: number;
   default_limit: number;
   provider?: string | null;
@@ -171,6 +174,11 @@ export type HotpotBenchmarkMeta = {
   system: string;
   baselines: Array<Record<string, unknown>>;
 };
+
+export type BenchmarkSubset =
+  | "validation"
+  | "mistral_qwen_fact_retrieval_failures"
+  | "mistral_qwen_graph_construction_failures";
 
 export type HotpotBenchmarkRecord = {
   id: string;
@@ -208,6 +216,8 @@ export type HotpotBenchmarkResult = {
   model: string;
   dataset: string;
   split: string;
+  subset?: BenchmarkSubset | string;
+  subset_label?: string | null;
   dataset_size?: number | null;
   seed: number;
   max_parallel_examples: number;
@@ -265,6 +275,8 @@ export type LiveBenchmarkSummary = {
   seed?: number | null;
   provider?: string | null;
   model?: string | null;
+  subset?: BenchmarkSubset | string | null;
+  subset_label?: string | null;
   created_at?: string | null;
   total_runtime_ms: number;
   estimate?: LiveBenchmark["estimate"];
@@ -285,6 +297,8 @@ export type SavedBenchmarkSummary = {
   created_at?: string | null;
   dataset?: string | null;
   split?: string | null;
+  subset?: BenchmarkSubset | string | null;
+  subset_label?: string | null;
   system?: string | null;
   provider?: string | null;
   model?: string | null;
@@ -296,8 +310,10 @@ export type SavedBenchmarkSummary = {
   path: string;
 };
 
-export async function getHotpotBenchmarkMeta(): Promise<HotpotBenchmarkMeta> {
-  const response = await fetch("/api/benchmarks/hotpotqa/meta");
+export async function getHotpotBenchmarkMeta(
+  subset: BenchmarkSubset = "validation",
+): Promise<HotpotBenchmarkMeta> {
+  const response = await fetch(`/api/benchmarks/hotpotqa/meta?subset=${encodeURIComponent(subset)}`);
   if (!response.ok) throw new Error(await response.text());
   return response.json();
 }
@@ -308,11 +324,12 @@ export async function benchmark(
   llm: LLMSelection,
   seed?: number,
   name?: string,
+  subset: BenchmarkSubset = "validation",
 ): Promise<HotpotBenchmarkResult> {
   const response = await fetch("/api/benchmarks/hotpotqa", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, system, seed, name, llm }),
+    body: JSON.stringify({ limit, system, seed, name, llm, subset }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
@@ -324,11 +341,12 @@ export async function startLiveBenchmark(
   llm: LLMSelection,
   seed?: number,
   name?: string,
+  subset: BenchmarkSubset = "validation",
 ): Promise<LiveBenchmark> {
   const response = await fetch("/api/benchmarks/hotpotqa/live", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, systems, seed, name, llm }),
+    body: JSON.stringify({ limit, systems, seed, name, llm, subset }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
@@ -340,11 +358,12 @@ export async function preflightBenchmark(
   llm: LLMSelection,
   seed?: number,
   name?: string,
+  subset: BenchmarkSubset = "validation",
 ): Promise<BenchmarkPreflightResult> {
   const response = await fetch("/api/benchmarks/hotpotqa/preflight", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, systems, seed, name, llm }),
+    body: JSON.stringify({ limit, systems, seed, name, llm, subset }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();

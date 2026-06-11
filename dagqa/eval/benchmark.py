@@ -76,6 +76,7 @@ class BenchmarkResult(BaseModel):
     model: str
     dataset: str = "hotpotqa"
     split: str = "validation"
+    subset: str = "validation"
     dataset_size: int | None = None
     seed: int
     max_parallel_examples: int = 1
@@ -93,6 +94,7 @@ async def benchmark_hotpotqa(
     limit: int = 100,
     path: str | Path | None = None,
     seed: int | None = None,
+    subset: str = "validation",
     max_parallel_examples: int | None = None,
     comparison_group_id: str | None = None,
     name: str | None = None,
@@ -135,6 +137,7 @@ async def benchmark_hotpotqa(
         limit=limit,
         provider=client.config.llm.provider,
         model=client.config.llm.model,
+        subset=subset,
         dataset_size=dataset_size,
         seed=seed,
         max_parallel_examples=parallel_examples,

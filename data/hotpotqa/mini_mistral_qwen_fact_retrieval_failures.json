@@ -1,0 +1,2410 @@
+{
+  "metadata": {
+    "subset_id": "mistral_qwen_fact_retrieval_failures",
+    "description": "Curated HotpotQA failure subset from Mistral and Qwen DAG benchmark runs.",
+    "source_runs": [
+      {
+        "key": "mistral",
+        "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+        "model": "mistralai/Mistral-Medium-3.5-128B",
+        "artifact": "mistral-dag.json"
+      },
+      {
+        "key": "qwen",
+        "run_id": "cc8a0446-f979-4708-9756-757eddd7ea22",
+        "model": "Qwen/Qwen3.5-122B-A10B",
+        "artifact": "qwen-dag.json"
+      }
+    ],
+    "criteria": {
+      "cosine_threshold": 0.5,
+      "allowlist": {
+        "5ae762835542997b22f6a711": "wrong_location",
+        "5a8210f355429926c1cdae24": "wrong_award"
+      },
+      "excluded_formatting_or_alias_only_ids": [
+        "5a72a9ab5542992359bc315a",
+        "5a7319bc5542992359bc3235",
+        "5a732ab25542991f29ee2d25",
+        "5a7502715542996c70cfae74",
+        "5a7602d8554299109176e5fb",
+        "5a776fc15542997042120a3a",
+        "5a77731955429972597f1541",
+        "5a78e9d155429970f5fffdcc",
+        "5a79257b55429974737f79a7",
+        "5a7a9a2255429941d65f26eb",
+        "5a7aa9425542992d025e66e4",
+        "5a7b1c6b55429931da12c9ca",
+        "5a7d119d5542995ed0d165d5",
+        "5a7dc7735542990b8f503a93",
+        "5a806aca5542996402f6a503",
+        "5a81e097554299676cceb129",
+        "5a82626655429966c78a6a08",
+        "5a890b895542995153361278",
+        "5a8f155e554299458435d54c",
+        "5ab3d2b7554299233954ffb8",
+        "5ab614e5554299488d4d9a9c",
+        "5ab6c181554299110f219a5f",
+        "5ab92f1f554299753720f77b",
+        "5ab959905542996be2020497",
+        "5abc436f5542993a06baf8c3",
+        "5ac5275755429924173fb617",
+        "5adf33a05542993344016c22",
+        "5ae09b7055429906c02daae4",
+        "5ae17d6855429901ffe4aea7"
+      ]
+    },
+    "count": 19
+  },
+  "data": [
+    {
+      "_id": "5a80799b5542992bc0c4a72e",
+      "id": "5a80799b5542992bc0c4a72e",
+      "question": "What kind of unit was led by the German general who wanted to rush north up the Channel coast to capture Boulogne, Calais and Dunkirk during the Battle of Boulogne?",
+      "answer": "Panzer",
+      "context": [
+        [
+          "University of the Littoral Opal Coast",
+          [
+            "University of the Littoral Opal Coast (\"Université du Littoral Côte d'Opale\"), also known as ULCO, is a French university, based in Boulogne, Calais, Dunkirk (Dunkerque) and Saint Omer.",
+            " The head office is in Dunkirk (Dunkerque in French).",
+            " It reports to the Academy of Lille and is a member of the European Doctoral College Lille-Nord-Pas de Calais."
+          ]
+        ],
+        [
+          "Pale of Calais",
+          [
+            "The Pale of Calais (French: \"le Calaisis\" ) was a historical region in modern-day France that was controlled by the monarchs of England following the Battle of Crécy in 1346 and the subsequent siege.",
+            " \"Pale\" is an archaic English term for \"area, jurisdiction\".",
+            " The capture by the English is the subject of Auguste Rodin's 1889 sculpture \"The Burghers of Calais\".",
+            " In 1558, the expanding Kingdom of France took the Pale of Calais in the aftermath of the Siege of Calais."
+          ]
+        ],
+        [
+          "Boulogne-sur-Mer",
+          [
+            "Boulogne-sur-Mer (] , Latin: \"Gesoriacum\" or \"Bononia\", Dutch: \"Bonen\" ), often called Boulogne ( ), is a city in Northern France.",
+            " It is a sub-prefecture of the department of Pas-de-Calais.",
+            " Boulogne lies on the Côte d'Opale, a tourist coast on the English Channel, and is the most-visited location in its region after the Lille conurbation.",
+            " Boulogne is its department's second-largest city after Calais, and the 60th largest in France.",
+            " It is also the country's largest fishing port, specialising in herring."
+          ]
+        ],
+        [
+          "Boulogne–Calais railway",
+          [
+            "The Boulogne–Calais railway is an electrified double track railway running between the ports of Boulogne-sur-Mer and Calais in France.",
+            " An extension of the Longueau–Boulogne railway it meets the Lille–Fontinettes railway and Coudekerque-Branche–Fontinettes railway to Dunkirk at Gare des Fontinettes in Calais."
+          ]
+        ],
+        [
+          "Poissonnière (Paris Métro)",
+          [
+            "Poissonnière is a station on Line 7 of the Paris Métro.",
+            " The station was opened on 5 November 1910.",
+            " It is near the junction between the streets of Rue La Fayette and the Rue du Faubourg Poissonnière, after which it is named and along which fishmongers (French: \"poissonnières\") brought fish from Boulogne and other harbours on the Channel coast to the market at Les Halles in chasse-marées.",
+            " The route from the coast generally followed that of a Roman Road and entered nineteenth century Paris at the Porte des Poissonniers."
+          ]
+        ],
+        [
+          "Siege of Calais (1940)",
+          [
+            "The Siege of Calais (1940) was a battle for the port and town of Calais during the Battle of France in 1940.",
+            " The siege was fought at the same time as the Battle of Boulogne, just before Operation Dynamo, the evacuation of the British Expeditionary Force (BEF) through Dunkirk.",
+            " After the Franco-British counter-attack at the Battle of Arras (21 May) German units were held ready to resist a resumption of the attack on 22 May, despite the protests of General Heinz Guderian, the commander of the XIX \"Armee Korps\", who wanted to rush north up the Channel coast to capture Boulogne, Calais and Dunkirk.",
+            " An attack by part of the XIX \"Armee Korps\" was not authorised until 12:40 p.m. on the night of 21/22 May."
+          ]
+        ],
+        [
+          "Battle of Boulogne (1940)",
+          [
+            "The Battle of Boulogne was the defence of the port of Boulogne-sur-Mer by French, British and Belgian troops, during the Battle of France in 1940.",
+            " The battle was fought at the same time as the Siege of Calais, just before Operation Dynamo, the evacuation of the British Expeditionary Force (BEF) through Dunkirk.",
+            " After the Franco-British counter-attack at the Battle of Arras (21 May) German units were held ready to resist a resumption of the attack on 22 May, despite the protests of General Heinz Guderian, the commander of XIX Corps, who wanted to rush north up the Channel coast to capture Boulogne, Calais and Dunkirk.",
+            " An attack by part of the XIX Corps was not authorised until 12:40 p.m. on 22 May, by when the Allied troops at Boulogne had been reinforced from England by most of the 20th Guards Brigade."
+          ]
+        ],
+        [
+          "Rush Medical College",
+          [
+            "Rush Medical College is the medical school of Rush University, located in the Illinois Medical District, just 2 miles west of the Loop in Chicago.",
+            " Offering a full-time Doctor of Medicine program, the school was chartered in 1837, and today is affiliated primarily with Rush University Medical Center, nearby John H. Stroger, Jr.",
+            " Hospital of Cook County, and NorthShore University HealthSystem – Skokie Hospital (formerly known as Rush North Shore Medical Center).",
+            " In 2017, Rush Medical College was ranked 59th among research institutions in the U.S. by \"U.S. News & World Report\" ."
+          ]
+        ],
+        [
+          "Operation Undergo",
+          [
+            "Operation Undergo was the 3rd Canadian Infantry Division's operation to take the fortified French port of Calais in September 1944.",
+            " A subsidiary operation was executed to silence and capture the heavy batteries at Cap Gris Nez, which threatened the sea approaches to Boulogne.",
+            " The operation was part of the Allied effort to capture the Channel ports, following the breakout from Normandy."
+          ]
+        ],
+        [
+          "Heinz Guderian",
+          [
+            "Heinz Wilhelm Guderian (] ; 17 June 1888 – 14 May 1954) was a German general (colonel-general from 1940) during World War II, noted for his success as a leader of \"Panzer\" units in Poland and France and for partial success in the Soviet Union."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Battle of Boulogne (1940)",
+          2
+        ],
+        [
+          "Heinz Guderian",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "XIX Corps",
+            "gold_answer": "Panzer",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.3412266969680786,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5ae762835542997b22f6a711",
+      "id": "5ae762835542997b22f6a711",
+      "question": "Were was the Mexican state after which there is Villa Unión, Sinaloa located? ",
+      "answer": "tip of the Baja California",
+      "context": [
+        [
+          "Mazatlán",
+          [
+            "Mazatlán (] ) is a city in the Mexican state of Sinaloa.",
+            " The city serves as the municipal seat for the surrounding \"municipio\", known as the Mazatlán Municipality.",
+            " It is located at on the Pacific coast, across from the southernmost tip of the Baja California Peninsula."
+          ]
+        ],
+        [
+          "Villa Unión, Sinaloa",
+          [
+            "Villa Unión is the second largest town in the municipality of Mazatlán, after the port of Mazatlán.",
+            " It is located twenty kilometers south of the city on the banks of the Presidio River."
+          ]
+        ],
+        [
+          "Mitre Department",
+          [
+            "Mitre Department is a department of Argentina in Santiago del Estero Province.",
+            " The capital city of the department is Villa Unión."
+          ]
+        ],
+        [
+          "Poanas Municipality",
+          [
+            "Poanas is one of the 39 municipalities of Durango, in northwestern Mexico.",
+            " The municipal seat lies at Villa Unión.",
+            " The municipality covers an area of 1841 km²."
+          ]
+        ],
+        [
+          "Mexican Federal Highway 40",
+          [
+            "Mexican Federal Highway 40, also called the \"Carretera Interoceánica\" (Interoceanic Highway), is a road beginning at Reynosa, Tamaulipas, just west of the Port of Brownsville, Texas, and ending at Mexican Federal Highway 15 in Villa Unión, Sinaloa, near Mazatlán and the Pacific coast.",
+            " It is called Interoceanic as, once finished, the cities of Matamoros, Tamaulipas, on the Gulf of Mexico and Mazatlán on the Pacific Ocean will be linked."
+          ]
+        ],
+        [
+          "Villa Unión",
+          [
+            "Villa Unión is a city in northwestern Argentina and the main settlement of Departamento Coronel Felipe Varela with a population of 12,263."
+          ]
+        ],
+        [
+          "Estado de Occidente",
+          [
+            "Estado de Occidente (also known as Sonora y Sinaloa) was a Mexican state established in 1824.",
+            " The constitution was drafted in that year and the government was initially established with its capital at El Fuerte, Sinaloa.",
+            " The first governor was Juan Miguel Riesgo.",
+            " The state consisted of modern Sonora and Sinaloa, and also modern Arizona more or less south of the Gila River (although in much of this area the Yaqui, Pima, Apaches, and other native inhabitants did not recognize the authority of the state),"
+          ]
+        ],
+        [
+          "Villa Unión, Santiago del Estero",
+          [
+            "Villa Unión is a municipality and village in Santiago del Estero Province in Argentina."
+          ]
+        ],
+        [
+          "Villa Unión, Coahuila",
+          [
+            "Villa Unión is a city and seat of the municipality of Villa Unión, in the north-eastern Mexican state of Coahuila."
+          ]
+        ],
+        [
+          "Operation Sinaloa",
+          [
+            "Operation Sinaloa or Operation Culiacan - Navolato (Spanish: Operacion Sinaloa/Operacion Conjunto Sinaloa) is an ongoing Anti-drug trafficking operation in the Mexican state of Sinaloa by the Federal Police and the Mexican Armed Forces.",
+            " Its main objective is to cripple all cartel organizations such as the Sinaloa Cartel, Beltrán-Leyva Cartel and Los Zetas that operate in that state.",
+            " The Military was deployed in response to the murder of Mexico's Federal Police commissioner Édgar Eusebio Millán Gómez."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Villa Unión, Sinaloa",
+          0
+        ],
+        [
+          "Mazatlán",
+          2
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "northwestern Mexico",
+            "gold_answer": "tip of the Baja California",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.506693422794342,
+            "structural_failure": false,
+            "error": null,
+            "rationale": "wrong_location"
+          },
+          {
+            "category": "fact_retrieval",
+            "run_id": "cc8a0446-f979-4708-9756-757eddd7ea22",
+            "model": "Qwen/Qwen3.5-122B-A10B",
+            "system": "dag_agent",
+            "prediction": "Pacific coast of Mexico",
+            "gold_answer": "tip of the Baja California",
+            "exact_match": 0.0,
+            "f1": 0.25,
+            "cosine_sim": 0.6221397519111633,
+            "structural_failure": false,
+            "error": null,
+            "rationale": "wrong_location"
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5ae713af554299572ea546bb",
+      "id": "5ae713af554299572ea546bb",
+      "question": "Where did Mark Pavelich win Gold in 1980?",
+      "answer": "Soviet Union",
+      "context": [
+        [
+          "Indonesia at the 1992 Summer Olympics",
+          [
+            "Indonesia competed at the 1992 Summer Olympics in Barcelona, Spain.",
+            " 42 competitors, 27 men and 15 women, took part in 31 events in 10 sports.",
+            " They won both Men's and Women's singles as their first gold medal here from badminton that appeared for the first time at the summer Olympics.",
+            " They made it the first time Indonesia won gold at the Olympics, and also made Indonesia the first Southeast Asian country to win gold.",
+            " Alan Budikusuma and Susi Susanti, who later married, had the Olympic anthem played on their wedding day."
+          ]
+        ],
+        [
+          "Liliyana Natsir",
+          [
+            "Liliyana Natsir (born 9 September 1985) is an Indonesian female badminton player who specializes in doubles.",
+            " With one gold and silver from Olympic Games and four gold medals at BWF World Championships, she is regarded as one of the greatest mixed doubles players in the history.",
+            " She gained huge success by partnering with two different players.",
+            " Her current partner is Tontowi Ahmad since 2011, after separating from her previous partner, Nova Widianto.",
+            " She also won three titles in a row from 2012–2014 at All England Badminton Championships, one of the most prestigious and oldest tournament in the sport.",
+            " Been entering the top level since 18 years old, her tactical awareness, game vision, and dominance at the front court are considered as one of the best in the tour.",
+            " In 2016, she and Tontowi Ahmad became the first Indonesian mixed doubles pair to win gold medal at the Olympic Games by beating Chan Peng Soon and Goh Liu Ying of Malaysia."
+          ]
+        ],
+        [
+          "Lauren Mitchell",
+          [
+            "Lauren Mitchell (born 23 July 1991) is a retired Australian artistic gymnast.",
+            " She is the 2010 World Champion on floor and the 2009 World Championships silver medalist on balance beam and floor.",
+            " Mitchell is only the second Australian woman gymnast to win medals at a World Championships, and the first to win gold."
+          ]
+        ],
+        [
+          "Caroline Ouellette",
+          [
+            "Caroline Ouellette (born May 25, 1979) is a Canadian ice hockey player.",
+            " She is a member of the Canadian national women's ice hockey team and a member of Canadiennes de Montreal (CWHL).",
+            " 4-time Olympic Gold Medallist / 5-time World Championships Gold / 4-time World Championships Silver / 2-time Clarkson Cup Champion, Ouellette is currently in the Top 10 in all-time NCAA scoring with 229 career points.",
+            " Ouellette is a member of the Triple Gold Club (the accomplishment is not yet officially recognized by the IIHF for women), as one of only three women to win the Clarkson Cup, a gold medal at the Olympic Winter Games, and gold at the IIHF women's world hockey championships.",
+            " She is also one of only five athletes to win gold in four consecutive Winter Games, along with teammates Jayna Hefford and Hayley Wickenheiser."
+          ]
+        ],
+        [
+          "Jeon Hyeok-jin",
+          [
+            "Jeon Hyeok-jin (born 13 June 1995) is a Korean badminton player.",
+            " Specializing in singles, he was runner-up at the 2013 Asian Junior Badminton Championships.",
+            " He was part of the Korean team that won men's team gold at the 2014 Asian Games and the following year, he beat both Chou Tien-chen and compatriot Son Wan-ho to win gold at the 2015 Summer Universiade.",
+            " In 2017, he helped the Korean national team to win the world team championships at the Sudirman Cup."
+          ]
+        ],
+        [
+          "Kim Dotson",
+          [
+            "Kim Dotson is a former national level competitor in taekwondo from Cleveland, Ohio, United States.",
+            " Kim would win the 1985 World Cup.",
+            " Kim would win gold at the 1986 PanAmerican Championships.",
+            " Kim would compete in the 1988 Seoul Olympic Games.",
+            " and would win Silver at both the 1987 and 1989 World Taekwondo Championships.",
+            " Kim would serve as a coach for several women in taekwondo."
+          ]
+        ],
+        [
+          "Valerie Brisco-Hooks",
+          [
+            "Valerie Ann Brisco-Hooks (born July 6, 1960 in Greenwood, Mississippi) won three gold medals as an Olympic track and field athlete at the 1984 Olympics at Los Angeles, California, making her the first Olympian to win gold medals in both the 200- and 400-meter races at a single Olympics."
+          ]
+        ],
+        [
+          "Sam Stoller",
+          [
+            "Sam Stoller (August 8, 1915 – May 29, 1985) was an American sprinter and long jumper who tied the world record in the 60-yard dash in 1936.",
+            " He is best known for his exclusion from the American 4 × 100 relay team at the 1936 Summer Olympics in Berlin, triggering widespread speculation that he and Marty Glickman, the only two Jews on the U.S. track team, were excluded because U.S. Olympic Committee chairman Avery Brundage wanted to avoid embarrassing Adolf Hitler by having two Jewish athletes win gold medals.",
+            " Stoller vowed at the time that he would never run again, but he returned in 1937 to win both the Big Ten Conference and NCAA championships in the 100-yard dash.",
+            " After graduating from the University of Michigan in 1937, Stoller briefly went into a singing and acting career as \"Singin' Sammy Stoller.\""
+          ]
+        ],
+        [
+          "Mark Pavelich",
+          [
+            "Mark Thomas Pavelich (born February 28, 1958 in Eveleth, Minnesota) is a retired US professional ice hockey forward who played 355 regular season games in the NHL for the New York Rangers, Minnesota North Stars and San Jose Sharks between 1981 and 1992 and was a member of the 1980 U.S. Olympic hockey team that won the gold medal in what has been called the \"Miracle on Ice\"."
+          ]
+        ],
+        [
+          "Miracle on Ice",
+          [
+            "The \"Miracle on Ice\" refers to a medal-round game during the men's ice hockey tournament at the 1980 Winter Olympics in Lake Placid, New York, played between the hosting United States, and the defending gold medalists, the Soviet Union."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Mark Pavelich",
+          0
+        ],
+        [
+          "Miracle on Ice",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "Lake Placid, United States",
+            "gold_answer": "Soviet Union",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.25286245346069336,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          },
+          {
+            "category": "fact_retrieval",
+            "run_id": "cc8a0446-f979-4708-9756-757eddd7ea22",
+            "model": "Qwen/Qwen3.5-122B-A10B",
+            "system": "dag_agent",
+            "prediction": "Lake Placid, New York",
+            "gold_answer": "Soviet Union",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.22446267306804657,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5ae142c455429920d5234355",
+      "id": "5ae142c455429920d5234355",
+      "question": "What colloquial umbrella do Rutgers and the many Ivy league schools fall under?",
+      "answer": "colonial colleges",
+      "context": [
+        [
+          "Rutgers University–Newark",
+          [
+            "Rutgers–Newark is one of three regional campuses of Rutgers University, the public research university of the U.S. state of New Jersey, located in the city of Newark.",
+            " Rutgers, founded in 1766 in New Brunswick, is the eighth oldest college in the United States and a member of the Association of American Universities.",
+            " In 1945, the state legislature voted to make Rutgers University, then a private liberal arts college, into the state university and the following year merged the school with the former University of Newark (1936–1946), which became the Rutgers–Newark campus.",
+            " Rutgers also incorporated the College of South Jersey and South Jersey Law School, in Camden, as a constituent campus of the university and renamed it Rutgers–Camden in 1950."
+          ]
+        ],
+        [
+          "Southern Ivy",
+          [
+            "Southern Ivy is an informal term, and not an official body, that has been used in the U.S. to compare Southern universities to the schools of the northeastern Ivy League in some way, usually in academic quality or in social prestige.",
+            " The \"Southern Ivy League,\" referred to as the \"Magnolia League\", was also a failed attempt to construct an athletic conference with schools that had similar \"academic missions and philosophies\".",
+            " Given that the term is colloquial, there is no comprehensive, objective or definitive list of schools that are considered \"Southern Ivies\"."
+          ]
+        ],
+        [
+          "Eastern Intercollegiate Baseball League",
+          [
+            "The Eastern Intercollegiate Baseball League was a baseball-only conference that existed from 1930 to 1992.",
+            " It consisted of the eight Ivy League schools along with Army and Navy.",
+            " The league disbanded after the 1992 season, when Army and Navy joined the Patriot League and the Ivy League began sponsoring baseball."
+          ]
+        ],
+        [
+          "Cornell Big Red men's ice hockey",
+          [
+            "The Cornell Big Red men's ice hockey team is a National Collegiate Athletic Association (NCAA) Division I college ice hockey program that represents Cornell University.",
+            " Cornell competes in the ECAC Hockey conference and plays its home games at Lynah Rink in Ithaca, New York.",
+            " Six of the eight Ivy League schools sponsor men's hockey and all six teams play in the twelve-team ECAC.",
+            " The Ivy League crowns a champion based on the results of the games played between its members during the ECAC season."
+          ]
+        ],
+        [
+          "Benjamin Banneker Academy",
+          [
+            "Benjamin Banneker Academy for Community Development (usually called Banneker) is a public high school located in the Clinton Hill section of Brooklyn, New York City.",
+            " The school was originally a Drake's Cakes factory.",
+            " Still today, different floors of the school are in Drake's colors, blue and yellow.",
+            " It has a small, but family type atmosphere for a high school.",
+            " It is usually called a junior college because the faculty and students are so focused on college.",
+            " Banneker, which serves grades 9 through 12+, is operated by the New York City Department of Education.",
+            " Many of the graduates attend SUNY schools, HBCUs (historically black colleges and universities) and CUNY schools.",
+            " There are also a few that attend Ivy League schools and a few are recruited for Posse schools.",
+            " The school's graduation rate has been at least 90% since 2002."
+          ]
+        ],
+        [
+          "Colonial colleges",
+          [
+            "The colonial colleges are nine institutions of higher education chartered in the Thirteen Colonies before the United States of America became a sovereign nation after the American Revolution.",
+            " These nine have long been considered together, notably in the survey of their origins in the 1907 \"The Cambridge History of English and American Literature\".",
+            " Seven of the nine colonial colleges are part of the Ivy League athletic conference: Harvard, Yale, Princeton, Columbia, University of Pennsylvania, Brown, and Dartmouth.",
+            " (The eighth member of the Ivy League, Cornell University, was founded in 1865.)"
+          ]
+        ],
+        [
+          "Ivy Film Festival",
+          [
+            "Ivy Film Festival (IFF) is the world's largest student-run film festival, hosted annually on the campus of Brown University.",
+            " The Festival was started in 2001 by then-Brown juniors David Peck and Justin Slosky in collaboration with students of the other seven Ivy League schools.",
+            " The founders' goal was to create a venue to showcase and honor the work of talented student filmmakers.",
+            " Ivy Film Festival currently accepts submissions from around the world for both its short film and screenplay competitions."
+          ]
+        ],
+        [
+          "Ivy Rugby Conference",
+          [
+            "The Ivy Rugby Conference is an annual rugby union competition played among the eight member schools of the Ivy League.",
+            " The Ivy Rugby Conference was formed in 2009.",
+            " The Ivy Rugby Conference was formed to foster better competition among rugby teams from the Ivy League schools and to raise the quality of play.",
+            " Ivy Rugby formed committees to manage the league, independently of the LAUs and TUs.",
+            " The Ivy Rugby Conference, and specifically its sevens tournament, has enabled the Ivy schools to tap into existing rivalries and fan bases."
+          ]
+        ],
+        [
+          "Public Ivy",
+          [
+            "\"Public Ivy\" is a term coined by Richard Moll in his 1985 book \"Public Ivies: A Guide to America's Best Public Undergraduate Colleges and Universities\" to refer to US universities that are claimed to provide an Ivy League collegiate experience at a public school price.",
+            " Public Ivies are considered, according to \"The Journal of Blacks in Higher Education\", to be capable of \"successfully competing with the Ivy League schools in academic rigor... attracting superstar faculty and in competing for the best and brightest students of all races.\""
+          ]
+        ],
+        [
+          "List of Ivy League medical schools",
+          [
+            "This list of Ivy League medical schools outlines the seven universities of the Ivy League that host a medical school.",
+            " Only one Ivy League university, Princeton University, does not have a medical school.",
+            " All Ivy League medical schools are located in the Northeast region of the United States and are privately owned and controlled.",
+            " Only two of the schools, at Dartmouth and Penn, are located adjacent to the undergraduate campuses.",
+            " The schools at Brown, Columbia, Harvard, and Yale, are located on separate campuses in the same metropolitan area as the university.",
+            " The school at Cornell, Weill Cornell Medicine, is located in New York City, far from the main Ithaca campus."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Rutgers University–Newark",
+          2
+        ],
+        [
+          "Colonial colleges",
+          0
+        ],
+        [
+          "Colonial colleges",
+          2
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "Ivy",
+            "gold_answer": "colonial colleges",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.2608829736709595,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5ae6069c55429929b0807a67",
+      "id": "5ae6069c55429929b0807a67",
+      "question": "Carlos Salazar Lomelín is the CEO of which Mexican multinational beverage retailer?",
+      "answer": "Fomento Económico Mexicano",
+      "context": [
+        [
+          "Alle tiders kupp",
+          [
+            "Alle tiders kupp is a 1964 Norwegian comedy film directed by Øyvind Vennerød, starring Rolf Just Nilsen, Arne Bang-Hansen, Henki Kolstad and Inger Marie Andersen.",
+            " Three men rob an outlet of the government owned alcoholic beverage retailer Vinmonopolet.",
+            " They then run into problems getting rid of the 50,000 bottles of liquor they have stolen."
+          ]
+        ],
+        [
+          "Vinmonopolet",
+          [
+            "Vinmonopolet (English: The Wine Monopoly ), symbolized by Ⓥ and colloquially shortened to polet, is a government-owned alcoholic beverage retailer and the only company allowed to sell beverages containing an alcohol content higher than 4.75% in Norway."
+          ]
+        ],
+        [
+          "Coca-Cola FEMSA",
+          [
+            "Coca-Cola FEMSA, S.A.B. de C.V., known as Coca-Cola FEMSA or KOF, is a Mexican multinational beverage company headquartered in Monterrey, Mexico.",
+            " It is a subsidiary of FEMSA which owns 48% of its stock, with 28% held by wholly owned subsidiaries of The Coca-Cola Company and the remaining 24% listed publicly on the Mexican Stock Exchange (since 1993) and the New York Stock Exchange (since 1998).",
+            " The largest franchise Coca-Cola bottler in the world, the company has operations in Latin America and the Philippines, although its largest and most profitable market is in Mexico."
+          ]
+        ],
+        [
+          "The Coca-Cola Company",
+          [
+            "The Coca-Cola Company, which is headquartered in Atlanta, Georgia, but incorporated in Wilmington, Delaware, is an American multinational beverage corporation, and manufacturer, retailer, and marketer of nonalcoholic beverage concentrates and syrups.",
+            " The company is best known for its flagship product Coca-Cola, invented in 1886 by pharmacist John Stith Pemberton in Columbus, Georgia.",
+            " The Coca-Cola formula and brand were bought in 1889 by Asa Griggs Candler (December 30, 1851 – March 12, 1929), who incorporated The Coca-Cola Company in 1892.",
+            " The company has operated a franchised distribution system since 1889, wherein The Coca-Cola Company only produces syrup concentrate, which is then sold to various bottlers throughout the world who hold exclusive territories.",
+            " The Coca-Cola Company owns its anchor bottler in North America, Coca-Cola Refreshments."
+          ]
+        ],
+        [
+          "Juan Carlos Salazar",
+          [
+            "Juan Carlos Salazar is a well known Venezuelan singer and cuatro player.",
+            " Juan Carlos was born in , a small oil town in the State of Monagas.",
+            " Born to a singer, guitarist and cuatro player, Juan Carlos learned how to play cuatro and guitar by ear at an early age and took piano lessons in Fort Collins, Colorado."
+          ]
+        ],
+        [
+          "Carlos Salazar Lomelín",
+          [
+            "Carlos Salazar Lomelín (born April 1951) is a Mexican businessman who serves as chief executive officer of Coca-Cola FEMSA since 1 January 2000."
+          ]
+        ],
+        [
+          "Carlos Salazar Herrera",
+          [
+            "Carlos Salazar Herrera (1906–1982) was born in San José, Costa Rica, where he attended primary and secondary school.",
+            " He wrote his first short story at the age of 9, named \"The Three Captains of a Ship\".",
+            " At the age of 14, he received his first award for an essay entitled \"El café\".",
+            " In 1928 he participated in a contest in which he presented his work about renewing Costa Rican art, and in the same year, he received the second place award for his story \"La Piedra de Toxil\" in a literary contest organized by Editorial de Costa Rica.",
+            " ."
+          ]
+        ],
+        [
+          "FEMSA",
+          [
+            "Fomento Económico Mexicano, S.A.B. de C.V., doing business as FEMSA, is a Mexican multinational beverage and retail company headquartered in Monterrey, Mexico.",
+            " It operates the largest independent Coca-Cola bottling group in the world and the largest convenience store chain in Mexico.",
+            " It is also the second largest shareholder of Heineken International."
+          ]
+        ],
+        [
+          "Carlos Salazar (actor)",
+          [
+            "Carlos Salazar (born 1933) is a Filipino actor who began his career with LVN Pictures and made several hit movies.",
+            " After making some 15 movies on the said studio, Salazar made one movie under Champion Pictures entitled \"\" and one movie under Larry Santiago Production for \"Student Canteen\"."
+          ]
+        ],
+        [
+          "Cornelio Velásquez",
+          [
+            "Cornelio H. Velásquez (born September 28, 1968 in Panama City, Panama) is a jockey in American Thoroughbred horse racing.",
+            " He was introduced to horse racing at age fifteen by trainer Carlos Salazar Guardia in his native Panama and enrolled in the national jockey school.",
+            " In his first year of racing he was his country's top apprentice jockey and was the leading rider again in 1994 and 1995."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Carlos Salazar Lomelín",
+          0
+        ],
+        [
+          "FEMSA",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "Coca-Cola FEMSA",
+            "gold_answer": "Fomento Económico Mexicano",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.28458938002586365,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5ae4a3265542995ad6573de5",
+      "id": "5ae4a3265542995ad6573de5",
+      "question": "Hayden is a singer-songwriter from Canada, but where does Buck-Tick hail from?",
+      "answer": "Fujioka, Gunma",
+      "context": [
+        [
+          "Atsushi Sakurai",
+          [
+            "Atsushi Sakurai (櫻井 敦司 , Sakurai Atsushi , born March 7, 1966 in Fujioka, Gunma) is a Japanese musician and singer-songwriter.",
+            " He has been the vocalist of the rock band Buck-Tick since 1985, previously being their drummer from 1983.",
+            " He released the solo album \"Ai no Wakusei\" in 2004 and was also a member of Schwein alongside Hisashi Imai (Buck-Tick), Sascha Konietzko (KMFDM) and Raymond Watts.",
+            " In 2015, he formed a solo project called The Mortal."
+          ]
+        ],
+        [
+          "Hayden (musician)",
+          [
+            "Paul Hayden Desser (born February 12, 1971) who records as Hayden, is a Canadian singer-songwriter from Thornhill, Ontario."
+          ]
+        ],
+        [
+          "Alberta Hail Project",
+          [
+            "The Alberta Hail Project was a research project sponsored by the Alberta Research Council and Environment Canada to study hailstorm physics and dynamics in order to design and test means for suppressing hail.",
+            " It ran from 1956 until 1985.",
+            " The main instrument in this research was an S-band circularly polarized weather radar located at the Red Deer Industrial Airport in central Alberta, Canada."
+          ]
+        ],
+        [
+          "Mild and Hazy",
+          [
+            "Mild and Hazy is a 7\" vinyl single by Canadian singer-songwriter Hayden.",
+            " It was released in 1996 on Hayden's own label, Hardwood Records as well as on Lunamoth.",
+            " The cover is a photograph of Hayden as a toddler.",
+            " The song \"Gouge Away\" is a cover of the Pixies, from their album \"Doolittle\"."
+          ]
+        ],
+        [
+          "Masami Tsuchiya",
+          [
+            "Masami Tsuchiya is a Japanese singer-songwriter and musician, coming to prominence in the late 1970s as the lead vocalist and guitarist in the group Ippu-Do.",
+            " His subsequent output includes solo work and collaborations.",
+            " Tsuchiya has worked with artists as diverse as English new wave rockers Japan and Bill Nelson, Japanese electronica composer Ryuichi Sakamoto, Duran Duran side-project Arcadia, and Japanese rock band Buck-Tick."
+          ]
+        ],
+        [
+          "Buck-Tick",
+          [
+            "Buck-Tick (stylized as BUCK-TICK) is a Japanese rock band, formed in Fujioka, Gunma in 1983.",
+            " The group has consisted of Atsushi Sakurai (lead vocals), Hisashi Imai (guitar), Hidehiko Hoshino (guitar), Yutaka Higuchi (bass) and Toll Yagami (drums) since 1985.",
+            " In their three decade career, the band has released 20 studio albums, nearly all reaching the top ten on the charts, of which three in the late eighties and early nineties topped them.",
+            " They are commonly credited as one of the founders of the visual kei movement."
+          ]
+        ],
+        [
+          "Hailstorm Alley",
+          [
+            "Hailstorm Alley is a colloquial term referring to an area of south and central Alberta, Canada where hail storms are frequently produced.",
+            " These storms frequently produce hail that is damaging to property.",
+            " This area stretches from High River in southern Alberta, northward through Calgary, through Red Deer to Lacombe and then westward to Rocky Mountain House.",
+            " It is known to be one of the worst areas in the world for damaging hail produced by thunderstorms.",
+            " These are regarded as loose boundaries.",
+            " While this area is common for damaging hailstorms, the reality is damaging hailstorms occur over much of central and southern Alberta every summer.",
+            " The City of Calgary is regarded as the hailstorm capital of Canada."
+          ]
+        ],
+        [
+          "Dewey Beard",
+          [
+            "Dewey Beard or Wasú Máza (\"Iron Hail\", 1858–1955) was a Minneconjou Lakota who fought in the Battle of Little Bighorn as a teenager.",
+            " After George Armstrong Custer's defeat, Wasu Maza followed Sitting Bull into exile in Canada and then back to South Dakota where he lived on the Cheyenne River Indian Reservation.",
+            " Chief Iron Hail is often mistaken by historians for Chief Iron Tail, being Lakota contemporaries with similar-sounding names.",
+            " Most biographies incorrectly report that Chief Iron Tail fought in the Battle of the Little Bighorn and that his family was killed in 1890 at Wounded Knee, when in truth it was Chief Iron Hail who suffered the loss."
+          ]
+        ],
+        [
+          "Kyo (musician)",
+          [
+            "Kyo (京 , Kyō ) is a Japanese musician, poet and singer-songwriter.",
+            " He is best known as the vocalist of the metal band Dir en grey.",
+            " He has been with the band since its inception in 1997 and was formerly in La:Sadie's.",
+            " Kyo was inspired to become a musician when he saw a picture of Buck-Tick vocalist Atsushi Sakurai on the desk of a junior high school classmate.",
+            " His vocals span a tenor range."
+          ]
+        ],
+        [
+          "Skyscraper National Park",
+          [
+            "Skyscraper National Park is the third album by Canadian singer-songwriter Hayden.",
+            " It was released on Hardwood Records in Canada, on Badman Recording Co. in the U.S., on Loose Music in the U.K., and on Massive!",
+            " in the Japan.",
+            " There were two limited-edition pressings of this album.",
+            " The first, comprising only 100 copies, was mainly for Hayden's friends and family.",
+            " The second, comprising 1,500 copies, was sold on Hayden's cross-Canada tour."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Hayden (musician)",
+          0
+        ],
+        [
+          "Buck-Tick",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "Japan",
+            "gold_answer": "Fujioka, Gunma",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.3961775600910187,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5a8f7a135542992414482adc",
+      "id": "5a8f7a135542992414482adc",
+      "question": "In relation to Rome, where was the city whose king was the father of Ocnus?  ",
+      "answer": "12 mi southeast of Rome",
+      "context": [
+        [
+          "Jehoash of Israel",
+          [
+            "Jehoash (Hebrew: יהואש \"Yəhō’āš\" or יואש \"Yō’āš\"; Latin: \"Joas\" ; fl.",
+            " c. 790 BC), whose name means “Yahweh has given,” was a king of the ancient northern Kingdom of Israel (Samaria) and the son of Jehoahaz.",
+            " He was the 12th king of Israel and reigned for 16 years.",
+            " William F. Albright has dated his reign to 801 BC – 786 BC, while E. R. Thiele offers the dates 798 BC – 782 BC.",
+            " When he ascended the throne, the Kingdom of Israel was suffering from the predations of the Arameans, whose king Hazael was reducing the amount of land controlled by Israel."
+          ]
+        ],
+        [
+          "Kings of Alba Longa",
+          [
+            "The kings of Alba Longa, or Alban kings (Latin: \"reges Albani\"), were a series of legendary kings of Latium, who ruled from the ancient city of Alba Longa.",
+            " In the mythic tradition of ancient Rome, they fill the 400-year gap between the settlement of Aeneas in Italy and the founding of the city of Rome by Romulus.",
+            " It was this line of descent to which the Julii claimed kinship.",
+            " The traditional line of the Alban kings ends with Numitor, the grandfather of Romulus and Remus.",
+            " One later king, Gaius Cluilius, is mentioned by Roman historians, although his relation to the original line, if any, is unknown; and after his death, a few generations after the time of Romulus, the city was destroyed by Tullus Hostilius, the third King of Rome, and its population transferred to Alba's daughter city."
+          ]
+        ],
+        [
+          "Alba Longa",
+          [
+            "Alba Longa (occasionally written Albalonga in Italian sources) was an ancient city of Latium in central Italy, 12 mi southeast of Rome, in the Alban Hills.",
+            " Founder and head of the Latin League, it was destroyed by Rome around the middle of the 7th century BC.",
+            " In legend, Romulus and Remus, founders of Rome, had come from the royal dynasty of Alba Longa, which in Virgil's Aeneid had been the bloodline of Aeneas, a son of Venus."
+          ]
+        ],
+        [
+          "La Ville dont le prince est un enfant (play)",
+          [
+            "La Ville dont le prince est un enfant is a 1955 play by French dramatist Henry de Montherlant.",
+            " The title, literally translated, \"The City Whose Prince is a Child\", is taken from Ecclesiastes 10:16: \"\"Woe to thee, O land, when thy king is a child, and thy princes eat in the morning!\""
+          ]
+        ],
+        [
+          "Germans in the American Revolution",
+          [
+            "Ethnic Germans served on both sides of the American Revolutionary War.",
+            " Many supported the Loyalist cause and served as allies of Great Britain, whose King George III was also the Elector of Hanover.",
+            " Other Germans came to assist the rebelling American patriots, but most of the Germans who were patriots were colonists."
+          ]
+        ],
+        [
+          "Eglon, Canaan",
+          [
+            "According to the Book of Joshua, Eglon was a Canaanite city, whose king Debir joined a confederacy against Gibeon when that city made peace with Israel.",
+            " The five kings involved were slain and Eglon was later conquered and its inhabitants condemned to destruction.",
+            " It was thereafter included in the territory of the Tribe of Judah, although it is not mentioned outside of the book of Joshua.",
+            " According to K. Van Bekkum, the location of Eglon is unknown, but the most plausible candidate is Tel Eiton.",
+            " The ancient name is preserved at the ruins of Khirbet Ajlan, a few km distant."
+          ]
+        ],
+        [
+          "Ocnus",
+          [
+            "In Greek and Roman mythology, Ocnus or Bianor was a son of Manto and Tiberinus, king of Alba Longa.",
+            " He founded modern Mantua in honor of his mother.",
+            " Alternatively, he was the son or brother of Auletes and founded Felsina (modern Bologna), Perusia or Cesena."
+          ]
+        ],
+        [
+          "Pompey's Georgian campaign",
+          [
+            "Pompey's campaign in Iberia and Colchis (Georgian: პომპეუსის ლაშქრობა საქართველოში ) took place in 65 BC and was a consequence of the Mithridatic Wars.",
+            " Rome sought to expand its borders and establish itself as a Hegemon of the Middle East.",
+            " After mostly subjugating the Kingdom of Pontus and the Kingdom of Armenia Romans turned to the Iberian Kingdom, whose king Artag was an ally of Pontus."
+          ]
+        ],
+        [
+          "Siege of Zara",
+          [
+            "The Siege of Zara or Siege of Zadar (Croatian: \"Opsada Zadra\" , Hungarian: \"Zára ostroma\" ; 10–24 November 1202) was the first major action of the Fourth Crusade and the first attack against a Catholic city by Catholic crusaders.",
+            " The crusaders had an agreement with Venice for transport across the sea, but the price far exceeded what they were able to pay.",
+            " Venice set the condition that the crusaders help them capture Zadar (or Zara), a constant battleground between Venice on one side and Croatia and Hungary on the other, whose king, Emeric, pledged himself to join the Crusade.",
+            " Although a part of the crusaders refused to take part in the siege, the attack on Zadar began in November 1202 despite letters from Pope Innocent III forbidding such an action and threatening excommunication.",
+            " Zadar fell on 24 November and the Venetians and the crusaders sacked the city.",
+            " After spending the winter in Zadar the Fourth Crusade continued its campaign, which led to the Siege of Constantinople."
+          ]
+        ],
+        [
+          "Ruśama",
+          [
+            "Ruśama or Rusama (Sanskrit: रुशम) was a Rigvedic tribe mentioned in Mandala 8, whose King Raṇancaya was defeated by Rigvedic Aryans,"
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Ocnus",
+          0
+        ],
+        [
+          "Alba Longa",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "southeast",
+            "gold_answer": "12 mi southeast of Rome",
+            "exact_match": 0.0,
+            "f1": 0.33333333333333337,
+            "cosine_sim": 0.44548970460891724,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5ae5691055429960a22e02f3",
+      "id": "5ae5691055429960a22e02f3",
+      "question": "Boggle is a word game originally distributed by a toy and game manufacturer that published more than how many games?",
+      "answer": "1,800",
+      "context": [
+        [
+          "Data East USA, Inc. v. Epyx, Inc.",
+          [
+            "Data East USA, Inc. v. Epyx, Inc. 862 F.2d 204, 9 U.S.P.Q.2d (BNA) 1322 (9th Cir.",
+            " 1988) is a court case in which Data East, a video game manufacturer, contended that Epyx, a competing video game manufacturer, licensed and distributed a video game, \"International Karate\", that infringed on the copyright of a video game developed by Data East, \"Karate Champ\".",
+            " After a district court sided with Data East, the United States Court of Appeals for the Ninth Circuit court on appeal reversed the decision of copyright infringement.",
+            " This judgment was based on the lack of \"substantial similarity\" between the games, because the identified similarities were inherent to all karate video games."
+          ]
+        ],
+        [
+          "Word Streak with Friends",
+          [
+            "Word Streak (formerly Scramble with Friends) is a word game developed by Zynga with Friends for iPhone, iPod Touch, and Android and released in January 2012.",
+            " Gameplay is similar to that of \"Boggle\" - players try to find as many words as possible in a jumbled 4x4 grid of letters by connecting adjacent letters to form words within a two-minute time frame - though with extra features and a different scoring system.",
+            " Words may be formed vertically, horizontally, and diagonally.",
+            " \"Scramble with Friends\" is one of the top ranking games in the iOS application store, available as both a free ad-supported version and an ad-less paid version.",
+            " \"Scramble with Friends\" replaced \"Scramble Challenge\" at the end of 2011, but did not retain the solitaire option of the latter."
+          ]
+        ],
+        [
+          "Hasbro Family Game Night",
+          [
+            "Hasbro Family Game Night is a video game originally released for the PlayStation 2 and Wii published by Electronic Arts.",
+            " It is a mini-game collection consisting of six Hasbro board games - Battleship, Boggle, Connect Four, Sorry!",
+            ", Sorry!",
+            " Sliders and Yahtzee.",
+            " The games all have traditional versions as well as \"advanced\" variants exclusive to the Family Game Night package.",
+            " The mini-game collection is hosted by Mr. Potato Head.",
+            " It was released on November 11, 2008."
+          ]
+        ],
+        [
+          "Dofus",
+          [
+            "Dofus is a Flash-based tactical turn-oriented massively multiplayer online role-playing game (MMORPG) developed and published by Ankama Games, a French computer game manufacturer.",
+            " Originally released solely in French, it has since been translated into many other languages.",
+            " It is primarily a pay-to-play game, though it still offers a limited amount of free content.",
+            " Its success has led to the marketing of spin-off products, such as books, art, comics and a movie released in 2016.",
+            " It has also led to the development of two continuations: \"Dofus Arena\", released at the beginning of 2006, which is an alternative \"tournament\" version of \"Dofus\"; and \"Wakfu\", a continuation of \"Dofus\".",
+            " The game has attracted over 25 million players worldwide and is especially well known in France.",
+            " Today, there are more than 1.5 million subscribers every month on this game."
+          ]
+        ],
+        [
+          "Parker Brothers",
+          [
+            "Parker Brothers was an American toy and game manufacturer which later became a brand of Hasbro.",
+            " More than 1,800 games were published under the Parker Brothers name since 1883.",
+            " Among its products were \"Monopoly\", \"Cluedo\" (licensed from the British publisher and known as \"Clue\" in North America), \"Sorry!",
+            "\", \"Risk\", \"Trivial Pursuit\", \"Ouija\", \"Aggravation\", \"Bop It\" and \"Probe\".",
+            " The trade name is now defunct; former products are marketed under the \"Hasbro Gaming\" label."
+          ]
+        ],
+        [
+          "Online word game",
+          [
+            "An online Word game is a word game based in an online venue.",
+            " Like many online games, many online word games are accessed via web browsers such as Facebook, Thaibg, and etc."
+          ]
+        ],
+        [
+          "WordCrex",
+          [
+            "WordCrex is a mobile app similar to the famous word game Scrabble and Wordfeud.",
+            " The iOS-version was released June 2, 2016 and the Android-version 8 september 2016.",
+            " The game was presented as the first free fair word game challenge.",
+            " \"WordCrex\" was developed by two Dutch creative friends Jelle Verwaijen and Dimitri Dirkzwager.",
+            " It is different than most word games because the players use the same set of seven letters to form words.",
+            " This way the luck factor of getting the right letters is not a decisive factor anymore.",
+            " \"WordCrex\" is a multiplayer game.",
+            " Games can be played with 2, 3 or 4 players per game."
+          ]
+        ],
+        [
+          "Boggle (1997 video game)",
+          [
+            "Boggle is a word puzzle video game based off the word game of the same name.",
+            " It was published on September 30, 1997 by Hasbro Interactive, and developed by PCA, Inc. and Third-i Productions.",
+            " The game was released for Windows 95."
+          ]
+        ],
+        [
+          "Camouflage (2007 game show)",
+          [
+            "Camouflage is a television game show airing on GSN.",
+            " Hosted by Roger Lodge, and billed as \"the hidden word game where the answer is always right in front of you\", \"Camouflage\" originally aired for 40 episodes from July 2 to 27, 2007.",
+            " The show is a word game, with contestants searching for a hidden word or phrase in a string of jumbled letters.",
+            " The show is produced by Enjoy the Ride Productions in association with McB Entertainment."
+          ]
+        ],
+        [
+          "Boggle",
+          [
+            "Boggle is a word game designed by Allan Turoff and originally distributed by Parker Brothers.",
+            " The game is played using a plastic grid of lettered dice, in which players attempt to find words in sequences of adjacent letters."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Boggle",
+          0
+        ],
+        [
+          "Parker Brothers",
+          0
+        ],
+        [
+          "Parker Brothers",
+          1
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "1799",
+            "gold_answer": "1,800",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.2519548535346985,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5a8720885542991e771816d8",
+      "id": "5a8720885542991e771816d8",
+      "question": "What language, also known as the Amazigh, is part of Siwa Oasis?",
+      "answer": "Berber",
+      "context": [
+        [
+          "Tocharian languages",
+          [
+            "Tocharian, also spelled Tokharian ( or ), is an extinct branch of the Indo-European language family.",
+            " It is known from manuscripts dating from the 6th to the 8th century AD, which were found in oasis cities on the northern edge of the Tarim Basin (now part of Xinjiang in northwest China).",
+            " The discovery of these languages in the early 20th century contradicted the formerly prevalent idea of an east–west division of Indo-European language family on the centum–satem isogloss, and contributed to re-invigorated study of the family.",
+            " Identifying the authors with the \"Tokharoi\" people of ancient Bactria (Tokharistan), early authors called these languages \"Tocharian\".",
+            " Although this identification is now generally considered mistaken, the name has stuck."
+          ]
+        ],
+        [
+          "Manx language",
+          [
+            "Manx (native name \"Gaelg\" or \"Gailck\" , pronounced ] or ] ), also known as Manx Gaelic, and also historically spelled Manks, is a Goidelic Celtic language of the Indo-European language family, historically spoken by the Manx people.",
+            " Only a small minority of the Isle of Man's population is fluent in the language, but a larger minority has some knowledge of it and Manx is considered an important part of the island's culture and heritage.",
+            " Although the last surviving native speaker of the language, Ned Maddrell, died in 1974, the language has never fallen completely out of use.",
+            " Manx has been the subject of language revival efforts, and in recent years Manx has become more visible on the island, with increased signage, radio broadcasts and a bilingual primary school.",
+            " The revival of Manx has been made easier because the language was well recorded; for example, the Bible has been translated into Manx, and audio recordings were made of native speakers."
+          ]
+        ],
+        [
+          "Berbers",
+          [
+            "Berbers (Berber: \"Mazices\" / \"Imaziɣen\" / \"Imazighen\" singular: ⴰⵎⴰⵣⵉⵖ \"Amaziɣ\" / \"Amazigh\") are an ethnolinguistic group indigenous to North Africa.",
+            " They are distributed in an area stretching from the Atlantic Ocean to the Siwa Oasis in Egypt, and from the Mediterranean Sea to the Niger River.",
+            " Historically, they spoke Berber languages, which together form the Berber branch of the Afroasiatic family.",
+            " Since the Muslim conquest of North Africa in the seventh century, a large number of Berbers inhabiting the Maghreb (Tamazgha) have acquired different degrees of knowledge of varieties of the languages of North Africa.",
+            " After the colonization of North Africa by France, \"the French government succeeded in integrating the French language in Algeria by making French the official national language and requiring all education to take place in French.\"",
+            " Foreign languages, mainly French and to some degree Spanish, inherited from former European colonial powers, are used by most educated Berbers in Algeria and Morocco in some formal contexts, such as higher education or business."
+          ]
+        ],
+        [
+          "Siwi language",
+          [
+            "The Siwi language (also known as Siwan, Siwa Berber) is the easternmost Berber language, spoken in Egypt by an estimated 15,000 to 20,000 people in the oases of Siwa and Gara, near the Libyan border.",
+            " The language has been heavily influenced by Arabic, notably Egyptian and Bedouin, but also earlier stages of Arabic.",
+            " It continues to be the normal language of communication between Siwis among themselves, but may be threatened by contacts with outsiders and the use of Arabic in mixed marriages; nearly all Siwis today learn to speak Arabic as a second language from an early age."
+          ]
+        ],
+        [
+          "Marmarica",
+          [
+            "Marmarica in ancient geography was a littoral area in Ancient Libya, located between \"Cyrenaica\" and \"Aegyptus\".",
+            " It corresponds to what is now the Libya and Egypt frontier, including the towns of Bomba (ancient \"Phthia\"), Timimi (ancient \"Paliurus\"), Tobruk (ancient \"Antipyrgus\"), Acroma (ancient \"Gonia\"), Bardiya, As-Salum, and Sidi Barrani (ancient \"Zygra\").",
+            " The territory stretched to the far south, encompassing the Siwa Oasis, which at the time was known for its sanctuary to the deity Amun.",
+            " The eastern part of Marmarica, by some geographers considered a separate district between Marmarica and Aegyptus, was known as Libycus Nomus.",
+            " In Late Antiquity, Marmarica was also known as Libya Inferior, while Cyrenaica was known as \"Libya Superior\"."
+          ]
+        ],
+        [
+          "Siwi people",
+          [
+            "The Siwi people, also known as the Oasis Berbers, are a Berber ethnic group based in Egypt's Siwa Oasis.",
+            " They speak the Siwa language.",
+            " The Siwi community is the most distant concentration of Berbers from their historical national homeland in Algeria that is still in existence today."
+          ]
+        ],
+        [
+          "Berber languages",
+          [
+            "The Berber languages, also known as Berber or the Amazigh languages (Berber name: \"Tamaziɣt\", \"Tamazight\"; Neo-Tifinagh: ⵜⴰⵎⴰⵣⵉⵖⵜ, Tuareg Tifinagh: ⵜⴰⵎⴰⵣⵉⵗⵜ, ⵝⴰⵎⴰⵣⵉⵗⵝ , ] , ] ), are a family of similar and closely related languages and dialects spoken by the Berbers indigenous to North Africa.",
+            " The Berber languages constitute a branch of the Afroasiatic family.",
+            " They were traditionally written with the ancient Libyco-Berber script, which now exists in the form of Tifinagh."
+          ]
+        ],
+        [
+          "Siwa Oasis",
+          [
+            "The Siwa Oasis (Arabic: واحة سيوة‎ ‎ , \"Wāḥat Sīwah,\" ] ; Berber: ) is an oasis in Egypt, between the Qattara Depression and the Egyptian Sand Sea in the Western Desert, nearly 50 km (30 mi) east of the Libyan border, and 560 km (348 mi) from Cairo.",
+            " About 80 km (50 mi) in length and 20 km (12 mi) wide, Siwa Oasis is one of Egypt's most isolated settlements, with 23,000 people, mostly Berbers who developed a unique culture and a distinct language of the Berber family called Siwi."
+          ]
+        ],
+        [
+          "El Morro, New Mexico",
+          [
+            "El Morro, New Mexico is an unincorporated community in Cibola County, New Mexico, United States, in the northwestern part of the state.",
+            " It is remotely located along the scenic Highway 53 (also known as the Ancient Way), 38 mi from Grants, NM to the northeast and 55 mi from Gallup, NM to the northwest.",
+            " El Morro, New Mexico is named after a nearby sandstone promontory with a pool of water at its base, a desert oasis which the Spanish conquistadors called \"El Morro\" (The Headland).",
+            " The Zuni Indians call it \"A'ts'ina\" (Place of Writings on the Rock).",
+            " Anglo-Americans called it \"Inscription Rock\".",
+            " El Morro National Monument is located 1.5 mi west on Highway 53, along the old Zuni-Acoma Trail, an ancient Pueblo trade route also known as the Ancient Way."
+          ]
+        ],
+        [
+          "Guanche language",
+          [
+            "The Guanche language, also known as Amazigh, is an extinct Berber language that was spoken by the Guanches of the Canary Islands until the 17th century or possibly later.",
+            " It died out after the conquest of the Canary Islands as the Guanche ethnic group was assimilated into the dominant Spanish culture.",
+            " The Guanche language is known today through sentences and individual words that were recorded by early geographers, as well as through several place-names and Guanche words that were retained in the Canary Islanders' Spanish."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Siwa Oasis",
+          1
+        ],
+        [
+          "Berber languages",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "Siwi",
+            "gold_answer": "Berber",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.26813679933547974,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5a8398405542993344746050",
+      "id": "5a8398405542993344746050",
+      "question": "Which town does Ronald F. Collins represent that a town in York County, Maine, United States?",
+      "answer": "Limerick",
+      "context": [
+        [
+          "Limerick, Maine",
+          [
+            "Limerick (pronounced \"LIM-rick\") is a town in York County, Maine, United States.",
+            " It is part of the Portland–South Portland–Biddeford, Maine metropolitan statistical area.",
+            " The population was 2,892 at the 2010 census."
+          ]
+        ],
+        [
+          "Ronald F. Lehman",
+          [
+            "Ambassador Ronald F. Lehman, II (born March 25, 1946) is currently Director of the Center for Global Security Research at the United States Department of Energy's Lawrence Livermore National Laboratory.",
+            " He is also Chair of the Governing Board of International Science and Technology Center, an intergovernmental organization headquartered in Moscow and is a member of the Department of Defense Threat Reduction Advisory Committee."
+          ]
+        ],
+        [
+          "York County School Division",
+          [
+            "The York County School Division or YCSD is a school division (school district) in York County, Virginia, United States.",
+            " Currently the superintendent is Victor Shandor, Ed.D.",
+            " The grading scale for all of the York County School Division is: A 90-100, B 80-89, C 70-79, D 64-79, and an F is a 63 and below.",
+            " Grades that are .5 away from a new letter grade are rounded up (i.e. a 79.5 is marked as a \"B\")."
+          ]
+        ],
+        [
+          "Dayton, Maine",
+          [
+            "Dayton is a town in York County, Maine, United States.",
+            " The population was 1,965 at the 2010 census.",
+            " It is part of the Portland–South Portland–Biddeford, Maine metropolitan statistical area.",
+            " Dayton is one of the smallest towns in York County."
+          ]
+        ],
+        [
+          "Heidelberg Township, York County, Pennsylvania",
+          [
+            "Heidelberg Township is a township in York County, Pennsylvania, United States.",
+            " The township was erected in 1750 and encompassed the land grant known as \"Digges' Choice\" (a warrant granted to John Digges in 1727 by the province of Maryland, prior to the time the Mason-Dixon line fixed the final boundary between Maryland and Pennsylvania).",
+            " The township consisted of 9,030 acres and extended as far west as the borough (town) of McSherrystown.",
+            " The township included the borough (town) of Hanover until Hanover was made a borough in 1815.",
+            " When Adams County was formed from western York County in 1800, the portion of Heidelberg Township that was included in York County was subsequently renamed Conewago Township.",
+            " In 1860, the western half of Heidelberg Township (including the area around Hanover) was split off to form Penn Township."
+          ]
+        ],
+        [
+          "Biddeford, Maine",
+          [
+            "Biddeford is a city in York County, Maine, United States.",
+            " It is the principal commercial center of York County.",
+            " The population was 21,277 at the 2010 census.",
+            " Twin city of Saco, Biddeford includes the resort community of Biddeford Pool, Fortunes Rocks and Granite Point.",
+            " The town is the site of the University of New England and the annual La Kermesse Franco-Americaine Festival.",
+            " First visited by Europeans in 1616, it is the site of one of the earliest European settlements in the United States."
+          ]
+        ],
+        [
+          "Alfred, Maine",
+          [
+            "Alfred is a town in York County, Maine, in the United States.",
+            " As of the 2010 census, the town population was 3,019.",
+            " Alfred is the county seat of York County and home to part of the Massabesic Experimental Forest.",
+            " National Register of Historic Places has two listings in the town, the Alfred Historic District, with 48 houses, and the Alfred Shaker Historic District."
+          ]
+        ],
+        [
+          "York County School of Technology",
+          [
+            "York County School of Technology, or \"YCST\", formerly known as York County Area Vocational-Technical School \"Vo-Tech\", is located at 2179 S. Queen St. in York, Pennsylvania.",
+            " The school accepts students from 14 sending school districts within York County.",
+            " York County School of Technology, the oldest on-going career and technical school in the United States, is a comprehensive career and technical school for students who want help to provide experience in a career field for their future.",
+            " The career areas or programs, commonly called \"shops\", are divided into three academies: \"Arts and Human Services\", \"Engineering and Construction.\"",
+            ", and \"Manufacturing and Transportation.\"",
+            " Each academy has 2 career pathways.",
+            " The schools colors are green and white, and the mascot is the Spartan."
+          ]
+        ],
+        [
+          "Ronald F. Collins",
+          [
+            "Ronald F. Collins is an American politician from Maine.",
+            " A Wells resident, Collins represents the 2nd Senate District.",
+            " Prior to being elected a Maine State Senator, he was a member of the Maine House of Representatives representing Wells from 2002-2010.",
+            " He represents Acton, Berwick, Cornish, Lebanon, Limerick, Newfield, North Berwick, Parsonfield, Shapleigh and Wells in the Maine State Senate."
+          ]
+        ],
+        [
+          "Ronald Ferguson (economist)",
+          [
+            "Ronald F. Ferguson (born 1950) in Cleveland, Ohio is an economist who researches factors that affect educational achievement.",
+            " Major themes in his work include the race-related achievement gap in the United States and how to improve schools and identify effective teachers."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Ronald F. Collins",
+          3
+        ],
+        [
+          "Limerick, Maine",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "Wells",
+            "gold_answer": "Limerick",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.1133948266506195,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5a8210f355429926c1cdae24",
+      "id": "5a8210f355429926c1cdae24",
+      "question": "What award did the actor in Tales from the Crypt win?",
+      "answer": "BAFTA TV Award Best Actor",
+      "context": [
+        [
+          "Riz Ahmed",
+          [
+            "Rizwan Ahmed (Urdu: ‎ ; born 1 December 1982), also known as Riz MC, is a British-Pakistani actor, rapper and activist.",
+            " As an actor, he won an Emmy Award, out of two Emmy nominations, and was also nominated for a Golden Globe, Screen Actors Guild Award, and three British Independent Film Awards.",
+            " He was initially known for his work in independent films such as \"The Road to Guantanamo\" (2006), \"Shifty\" (2008), \"Four Lions\" (2010), \"Trishna\" (2011), and \"Ill Manors\" (2012), before his breakout role in \"Nightcrawler\" (2014).",
+            " In 2016, he starred in \"Una\", \"Jason Bourne\", and as Bodhi Rook in the first \"Star Wars\" \"Anthology\" film, \"Rogue One\".",
+            " That year, he also starred in the HBO miniseries \"The Night Of\" as Nasir Khan; the show and his performance were critically lauded.",
+            " At the 2017 Emmy Awards, he received two nominations, for his performance in \"The Night Of\" and his guest spot in \"Girls\"; he won the award for Outstanding Lead Actor in a Limited Series or Movie for \"The Night Of\", becoming the first Asian and first Muslim to win in the category, the first South Asian male to win an acting Emmy, and the first Muslim and first South Asian to win a lead acting Emmy."
+          ]
+        ],
+        [
+          "Cathy Moriarty",
+          [
+            "Cathy Moriarty (born November 29, 1960) is an American actress whose career spans over 30 years.",
+            " She was nominated for an Academy Award for Best Supporting Actress for \"Raging Bull\" (1980).",
+            " She also starred in films, including \"Neighbors\", \"White of the Eye\", \"Soapdish\", \"Casper\", \"Analyze That\", and \"The Bounty Hunter\".",
+            " She starred in television roles, such as \"Tales from the Crypt\" (in which she won a CableACE Award for Best Actress in a Dramatic Series), \"Law & Order\", \"\" and \"\"."
+          ]
+        ],
+        [
+          "Tales from the Crypt (film)",
+          [
+            "Tales from the Crypt is a 1972 British horror film, directed by Freddie Francis.",
+            " It is an anthology film consisting of five separate segments, based on stories from EC Comics.",
+            " Only two of the stories, however, are actually from EC's \"Tales from the Crypt\".",
+            " The reason for this, according to \"Creepy\" founding editor Russ Jones, is that producer Milton Subotsky did not own a run of the original EC comic book but instead adapted the movie from the two paperback reprints given to him by Jones.",
+            " The movie was one of many Amicus horror anthologies made during the 1970s and features an all star cast, including Joan Collins, Peter Cushing, Richard Greene, and Roy Dotrice, with Ralph Richardson as the Crypt Keeper."
+          ]
+        ],
+        [
+          "Robert Sacchi",
+          [
+            "Robert Sacchi (born March 3, 1941 in Bronx, New York) is an American character actor who, since the 1970s, has been known for his close resemblance to Humphrey Bogart.",
+            " Sacchi has appeared in many films and TV shows playing either Bogart or a character who happens to look and sound like him.",
+            " In a notable episode of \"Tales from the Crypt\" called \"You, Murderer\", in 1995 ( season 6 épisode 15 ), Sacchi only provided the voice of a character who looks like Bogart; computer manipulated stock footage of Bogart himself provided the visuals."
+          ]
+        ],
+        [
+          "Stephen Semel",
+          [
+            "Stephen Semel (sometimes credited as Steve Semel or Steven Semel) is an American Primetime Emmy Award-winning film and television editor, film producer, production manager, and actor.",
+            " He has worked as an editor for mainstream movies, such as \"Airheads\", \"The Count of Monte Cristo\", \"Fandango\", \"Kuffs\", \"License to Drive\", \"Miracle Mile\", \"My Giant\", \"One Eight Seven\", \"Only The Strong\", \"Three to Tango\", \"The Truth About Cats & Dogs\", \"The Way of the Gun\", and \"You So Crazy\".",
+            " Semel has also edited episodes of several television series, including episodes of \"Century City\", \"Dragnet\", \"Kyle XY\", \"House\", \"Melrose Place\", and \"Tales from the Crypt\"."
+          ]
+        ],
+        [
+          "Nick Reding (actor)",
+          [
+            "Nicholas Mark \"Nick\" Reding (born 31 August 1962 in Chiswick, London) is an English actor.",
+            " During a career of more than two decades, he is probably best known for playing PC Pete Ramsey in \"The Bill\" and DI Michael Conner in the BBC crime thriller series \"Silent Witness\".",
+            " His many TV and film appearances include \"The Monocled Mutineer\", \"Bodyguards\", \"Oscar\", \"Peak Practice\", \"Frank Stubbs Promotes\", \"Minder\", \"Tales from the Crypt\", \"Bugs\", \"Sword of Honour\", \"A Touch of Frost\", \"Paradise Postponed\", \"Murder in Mind\", \"Boon\", \"The Ruth Rendell Mysteries\", \"Captive\", \"Mister Johnson\", \"The House of Eliott\", \"Police 2020\", \"Sunburn\", \"Croupier\", \"Judge John Deed\", \"The Constant Gardener\", \"Blood Diamond\" and \"Soul Boy\".",
+            " On stage he played Joseph Porter Pitt in Tony Kushner's \"Angels in America\" at the Royal National Theatre, as well as leading roles at the Royal Court.",
+            " He also appeared in \"Lovejoy\"."
+          ]
+        ],
+        [
+          "Britt Leach",
+          [
+            "Britt Leach (born July 18, 1938; Gadsden, Alabama) is an American character actor.",
+            " He is best known for his roles in the films \"Fuzz\" (1972), \"Interval\" (1973), \"The California Kid\" (1974), \"Jackson County Jail\" (1976), \"Goin' South\" (1978), \"Loose Shoes\" (1978), \"Hardly Working\" (1980), \"\" (1980), \"Night Warning\" (1982), \"The Last Starfighter\" (1984), \"Silent Night, Deadly Night\" (1984), \"Weird Science\" (1985), \"Baby Boom\" (1987) and \"The Great Outdoors\" (1988).",
+            " Leach has also made guest appearances in television shows such as \"The Brady Bunch\", \"The Partridge Family\", \"Bonanza\", \"Tales from the Crypt\" and many others."
+          ]
+        ],
+        [
+          "Peter Cushing",
+          [
+            "Peter Wilton Cushing, OBE (26 May 191311 August 1994) was an English actor and a BAFTA TV Award Best Actor winner in 1956.",
+            " He is mainly known for his prolific appearances in Hammer Films, in which he played strong character roles like the sinister scientist Baron Frankenstein, Sherlock Holmes and the vampire hunter Dr. Van Helsing, among many other roles.",
+            " He appeared frequently opposite Christopher Lee and, occasionally, Vincent Price."
+          ]
+        ],
+        [
+          "Aaron Paul",
+          [
+            "Aaron Paul Sturtevant (born August 27, 1979), known as Aaron Paul, is an American actor.",
+            " He is best known for portraying Jesse Pinkman in the AMC series \"Breaking Bad\", for which he won several awards, including the Critics' Choice Television Award for Best Supporting Actor in a Drama Series (2014), the Satellite Award for Best Supporting Actor – Series, Miniseries, or Television Film (2013), and the Primetime Emmy Award for Outstanding Supporting Actor in a Drama Series.",
+            " This made him the only actor to win the latter category three times (2010, 2012, 2014), since its separation into drama and comedy.",
+            " He has also won the Saturn Award for Best Supporting Actor on Television three times (2009, 2011, 2013), more than any other actor in that category."
+          ]
+        ],
+        [
+          "John Kassir",
+          [
+            "John Kassir (born October 24, 1957) is an American actor, voice actor and comedian.",
+            " He is known as the voice of the Crypt Keeper in HBO's \"Tales from the Crypt\" franchise.",
+            " Kassir is also known for his role as Ralph in the Off-Broadway show \"Reefer Madness\", as well as its film adaptation, as well as his voice over work as Buster Bunny (taking over for Charlie Adler late in the final season of \"Tiny Toon Adventures\"), Ray \"Raymundo\" Rocket on \"Rocket Power\", the mischievous raccoon Meeko in \"Pocahontas\" and its direct-to-video sequel, Jibolba in the \"Tak and the Power of Juju\" video game series, and the current voices of Pete Puma in \"The Looney Tunes Show\", and Deadpool in \"\" and the \"\" series.",
+            " He has also recently done the voice of Rizzo for the newest Spyro game, , and voiced Ghost Roaster in \"\", as well as Short Cut in \"\" and Pit Boss in \"\".",
+            " He is also known for his various roles in season 1 of \"The Amanda Show\".",
+            " He voiced the Ice King in the Adventure Time (pilot) but was replaced by Tom Kenny for the series.",
+            " He also provided additional voice over work for \"Sonic the Hedgehog\", \"Eek!",
+            " The Cat\", \"The Brothers Flub\", \"Dead Rising\", \"Casper's Scare School\", \"Spider-Man 3\", \"\", \"Diablo III\", \"Monsters University\", \"The Prophet\", \"\" and \"The Secret Life of Pets\"."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Tales from the Crypt (film)",
+          4
+        ],
+        [
+          "Peter Cushing",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "Daytime Emmy Award",
+            "gold_answer": "BAFTA TV Award Best Actor",
+            "exact_match": 0.0,
+            "f1": 0.25,
+            "cosine_sim": 0.5100763440132141,
+            "structural_failure": false,
+            "error": null,
+            "rationale": "wrong_award"
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5ab4b2935542996a3a969fb5",
+      "id": "5ab4b2935542996a3a969fb5",
+      "question": "Between Death in the Afternoon and Hennchata, whose inventor has more literary fame?",
+      "answer": "Death in the Afternoon",
+      "context": [
+        [
+          "Lucia Berlin",
+          [
+            "Lucia Brown Berlin (November 12, 1936 – November 12, 2004) was an American short story writer.",
+            " She had a small, devoted following, but did not reach a mass audience during her lifetime.",
+            " She rose to sudden literary fame eleven years after her death, in August 2015, with Farrar, Straus and Giroux's publication of a volume of selected stories, \"A Manual For Cleaning Women\", edited by Stephen Emerson.",
+            " It hit \"The New York Times\" bestseller list in its second week, and within a few weeks, had outsold all her previous books combined.",
+            " The collection was ineligible for most of the year-end awards (either because she was deceased, or it was recollected material), but was named to a large number of year-end lists, including the New York Times Book Review's \"10 Best Books of 2015.\"",
+            " It was also a finalist for the Kirkus Prize."
+          ]
+        ],
+        [
+          "Ion Agârbiceanu",
+          [
+            "Ion Agârbiceanu (September 12, 1882 – May 28, 1963) was an Austro-Hungarian-born Romanian writer, journalist, politician, theologian and Greek-Catholic priest.",
+            " A native of Transylvania, he graduated from Budapest University, after which he was ordained.",
+            " He was initially assigned to a parish in the Apuseni Mountains, which form the backdrop to much of his fiction.",
+            " Before 1910, Agârbiceanu had achieved literary fame in both Transylvania and the Kingdom of Romania; his work was disputed between the rival schools of \"Sămănătorul\" and Poporanism."
+          ]
+        ],
+        [
+          "Tao Yuanming",
+          [
+            "Tao Yuanming (365?",
+            "–427), also known as Tao Qian (Hanyu Pinyin) or T'ao Ch'ien (Wade-Giles), was a Chinese poet who lived during the Eastern Jin (317-420) and Liu Song (420-479) dynasties.",
+            " He is considered to be one of the greatest poets of the Six dynasties period.",
+            " Tao Yuanming spent most of his life in reclusion, living in a small house in the countryside, reading, drinking wine, receiving the occasional guest, and writing poems in which he often reflected on the pleasures and difficulties of life in the countryside, as well as his decision to withdraw from civil service.",
+            " His simple, direct, and unmannered style was at odds with the norms for literary writing in his time.",
+            " Although he was relatively well-known as a recluse poet in the Tang dynasty (618-907), it was not until the Northern Song dynasty (960-1127), when influential literati figures such as Su Shi (1037-1101) declared him a paragon of authenticity and spontaneity in poetry, that Tao Yuanming would achieve lasting literary fame.",
+            " He is also regarded as the foremost representative of what would latter be known as Fields and Gardens poetry, a style of landscape poetry that found inspiration in the beauty and serenity of the natural world close at hand."
+          ]
+        ],
+        [
+          "Al-Qastallani",
+          [
+            "Shihab al-Din Abu'l-Abbas Ahmad ibn Muhammad ibn Abu Bakr al-Qastallani al-Qutaybi al-Shafi'i, also known as Al-Qastallani was a Sunni Islamic scholar who specialized in hadith and theology.",
+            " He owed his literary fame mainly to his exhaustive commentary on the Sahih al-Bukhari entitled \"Irshad al-Sari fi Sharh al-Bukhari\"."
+          ]
+        ],
+        [
+          "White Horse Tavern (New York City)",
+          [
+            "The White Horse Tavern, located in New York City's borough of Manhattan at Hudson Street and 11th Street, is known for its 1950s and 1960s Bohemian culture.",
+            " It is one of the few major gathering-places for writers and artists from this period in Greenwich Village (specifically the West Village) that remains open.",
+            " The bar opened in 1880 but was known more as a longshoremen's bar than a literary center until Dylan Thomas and other writers began frequenting it in the early 1950s.",
+            " Due to its literary fame, in the past few decades the White Horse has become a popular destination among tourists."
+          ]
+        ],
+        [
+          "Death in the Afternoon (cocktail)",
+          [
+            "Death in the Afternoon, also called the Hemingway or the Hemingway Champagne, is a cocktail made up of absinthe and Champagne invented by Ernest Hemingway.",
+            " The cocktail shares a name with Hemingway's book \"Death in the Afternoon\", and the recipe was published in \"So Red the Nose, or Breath in the Afternoon\", 1935 cocktail book with contributions from famous authors.",
+            " Hemingway's original instructions were:"
+          ]
+        ],
+        [
+          "Väinö Linna",
+          [
+            "Väinö Linna (   ) (20 December 1920 – 21 April 1992) was a Finnish author.",
+            " He gained literary fame with his third novel, \"Tuntematon sotilas\" (\"The Unknown Soldier\", published in 1954), and consolidated his position with the trilogy \"Täällä Pohjantähden alla\" (\"Under the North Star\", published in 1959–1963 and translated into English by Richard Impola)."
+          ]
+        ],
+        [
+          "Mary Poppins (song)",
+          [
+            "\"Mary Poppins\" is a song from the 2015 stage musical \"Love Birds\" with music and lyrics by Robert J. Sherman.",
+            " It is sung by \"The Original Quack Pack\", a penguin barbershop quartet who resemble the penguins from the 1964 Walt Disney motion picture, \"Mary Poppins\".",
+            " In dialogue leading up to the song, the penguins explain that while they did know the same nanny, (Mary Poppins) they are not the same penguins as in the movie.",
+            " The song expresses their longing for the magical nanny of literary fame."
+          ]
+        ],
+        [
+          "Robert Bridges",
+          [
+            "Robert Seymour Bridges, OM (23 October 1844 – 21 April 1930) was Britain's poet laureate from 1913 to 1930.",
+            " A doctor by training, he achieved literary fame only late in life.",
+            " His poems reflect a deep Christian faith, and he is the author of many well-known hymns.",
+            " It was through Bridges’ efforts that Gerard Manley Hopkins achieved posthumous fame."
+          ]
+        ],
+        [
+          "Hennchata",
+          [
+            "The Hennchata is a cocktail consisting of Hennessy cognac and Mexican rice horchata agua fresca.",
+            " It was invented by a restaurant owner in San Jose, California."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Death in the Afternoon (cocktail)",
+          1
+        ],
+        [
+          "Hennchata",
+          1
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "Ernest Hemingway",
+            "gold_answer": "Death in the Afternoon",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.2933386564254761,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5ae8295955429952e35eaa6d",
+      "id": "5ae8295955429952e35eaa6d",
+      "question": "Henricus Antonius \"Han\" van Meegeren sold a forged painting to a military leader who was the recipient of what?",
+      "answer": "Pour le Mérite",
+      "context": [
+        [
+          "Hermann Göring",
+          [
+            "Hermann Wilhelm Göring (or Goering; ] ; 12 January 1893 – 15 October 1946) was a German political and military leader as well as one of the most powerful figures in the Nazi Party (NSDAP) that ruled Germany from 1933 to 1945.",
+            " A veteran World War I fighter pilot ace, he was a recipient of the \"Pour le Mérite\".",
+            " He was the last commander of \"Jagdgeschwader\" 1, the fighter wing once led by Manfred von Richthofen."
+          ]
+        ],
+        [
+          "Van Meegeren",
+          [
+            "Van Meegeren is a Dutch toponymic surname in which \"Meegeren\" refers to Nijmegen.",
+            " It may relate to:"
+          ]
+        ],
+        [
+          "Hans van Mierlo",
+          [
+            "Henricus Antonius Franciscus Maria Oliva \"Hans\" van Mierlo (] ; 18 August 1931 – 11 March 2010) was a Dutch politician of the Democrats 66 (D66) party."
+          ]
+        ],
+        [
+          "Harry van der Meer",
+          [
+            "Henricus Antonius Wilhelmus \"Harry\" van der Meer (born October 30, 1973 in Veenendaal) is a former water polo forward from the Netherlands, who participated in three Summer Olympics.",
+            " From 1992 on he finished in ninth (Barcelona), tenth (Atlanta, Georgia) and eleventh (Sydney) position with the National Men's Team.",
+            " Actually, he is a coach."
+          ]
+        ],
+        [
+          "Smiling Girl",
+          [
+            "The Smiling Girl, thought to be by Johannes Vermeer, was donated by collector Andrew W. Mellon in 1937 to the National Gallery of Art in Washington, D.C.",
+            " Now widely considered to be a fake, the painting was claimed by Vermeer expert Arthur Wheelock in a 1995 study to be by 20th-century artist and forger Theo van Wijngaarden, a friend of Han van Meegeren."
+          ]
+        ],
+        [
+          "Harrij Notenboom",
+          [
+            "Henricus Antonius Cornelis Marie \"Harrij\" Notenboom (born 31 August 1926) is a Dutch retired politician.",
+            " He served as member of the House of Representatives from 1963 to 1979 and in the European Parliament from 1971 to 1984.",
+            " Notenboom was a member of the Catholic People's Party and later the Christian Democratic Appeal when the former had merged into it in 1980."
+          ]
+        ],
+        [
+          "A Real Vermeer",
+          [
+            "A Real Vermeer (Dutch: Een echte Vermeer ) is a 2016 Dutch biographical film about art forger Han van Meegeren directed by Rudolf van den Berg.",
+            " It was listed as one of eleven films that could be selected as the Dutch submission for the Best Foreign Language Film at the 89th Academy Awards, but it was not nominated."
+          ]
+        ],
+        [
+          "Johan Driessen",
+          [
+            "Johannes Henricus Antonius (Johan) Driessen (born June 4, 1981 in Cuijk en Sint Agatha) is a Dutch politician and former lawyer.",
+            " He was an MP for the Party for Freedom (PVV) from 17 June 2010 to 19 September 2012.",
+            " He focused on matters of development aid."
+          ]
+        ],
+        [
+          "Harry Droog",
+          [
+            "Henricus Antonius \"Harry\" Droog (born 17 December 1944) is a retired Dutch rower.",
+            " He competed at the 1968 Summer Olympics and won a silver medal in the coxless pairs event, together with Leendert van Dis."
+          ]
+        ],
+        [
+          "Han van Meegeren",
+          [
+            "Henricus Antonius \"Han\" van Meegeren (] ; 10 October 1889 – 30 December 1947) was a Dutch painter and portraitist and is considered to be one of the most ingenious art forgers of the 20th century.",
+            " Despite his life of crime, van Meegeren became a national hero after World War Two when it was revealed that he had sold a forged painting to Reichsmarschall Hermann Göring during the Nazi Occupation of the Netherlands."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Han van Meegeren",
+          0
+        ],
+        [
+          "Han van Meegeren",
+          1
+        ],
+        [
+          "Hermann Göring",
+          0
+        ],
+        [
+          "Hermann Göring",
+          1
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "Hermann Göring",
+            "gold_answer": "Pour le Mérite",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.08337116241455078,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5a79a26d554299029c4b5f63",
+      "id": "5a79a26d554299029c4b5f63",
+      "question": "The founder of The Covenant, The Sword, and the Arm of the Lord is a close associate of what man responsible for the Oklahoma City bombing?",
+      "answer": "Timothy James McVeigh",
+      "context": [
+        [
+          "American Terrorist",
+          [
+            "American Terrorist: Timothy McVeigh & The Oklahoma City Bombing (2001) is a book by Buffalo, New York journalists Lou Michel and Dan Herbeck that chronicles the life of Timothy McVeigh from his childhood in Pendleton, New York, to his military experiences in the Persian Gulf War, to his preparations for and carrying out of the Oklahoma City bombing, to his trial and death row experience.",
+            " One of the appendices lists all 168 people killed in the blast, along with brief biographical information.",
+            " (There were plans to include a chapter about his execution in the softcover edition.)",
+            " It is the only biography authorized by McVeigh himself, and was based on 75 hours of interviews that the authors had with McVeigh.",
+            " McVeigh was said to be pleased overall with the book, but disappointed with the way he was portrayed and the explanation of his motive.",
+            " Coauthor Michel said he viewed McVeigh as a \"human being with a limited range of feelings in the areas of empathy and sympathy and with an oversized sense of rage and resentment.\""
+          ]
+        ],
+        [
+          "Kenneth Michael Trentadue",
+          [
+            "Kenneth Michael Trentadue (December 19, 1950 – August 21, 1995) was an American citizen who was found hanged in his cell at FTC Oklahoma during the investigation of the Oklahoma City bombing.",
+            " His death was officially ruled a suicide three years after it occurred.",
+            " Trentadue's family maintains that he was murdered by members of FBI who mistakenly believed he was involved in the Oklahoma bombing and that officials at the prison engaged in a cover-up.",
+            " Oklahoma City's chief medical examiner said of Trentadue that it was \"very likely he was murdered\".",
+            " Timothy McVeigh stated that he believed Trentadue was mistaken for Richard Lee Guthrie Jr., a suspected co-conspirator in the bombing who also died in federal custody, allegedly from suicide by hanging."
+          ]
+        ],
+        [
+          "Oklahoma City National Memorial",
+          [
+            "The Oklahoma City National Memorial is a memorial in the United States that honors the victims, survivors, rescuers, and all who were affected by the Oklahoma City bombing on April 19, 1995.",
+            " The memorial is located in downtown Oklahoma City on the former site of the Alfred P. Murrah Federal Building, which was destroyed in the 1995 bombing.",
+            " This building was located on NW 5th Street between N. Robinson Avenue and N. Harvey Avenue."
+          ]
+        ],
+        [
+          "Jayna Davis",
+          [
+            "Jayna Davis was a broadcast journalist for KFOR-TV in Oklahoma City at the time of the Oklahoma City Bombing.",
+            " Her TV stories about the mysteriously cancelled FBI alert for \"Middle-Eastern-looking\" suspects wanted in connection with the April 19, 1995 Oklahoma City bombing generated confidential phone tips about a group of local Iraqis, including one who seemed to match an FBI profile sketch of John Doe No. 2."
+          ]
+        ],
+        [
+          "James Ellison (polygamist)",
+          [
+            "James Ellison (  1937 ) was an American white supremacist leader from San Antonio, Texas.",
+            " In 1971, he founded the radical organization The Covenant, The Sword, and the Arm of the Lord (CSA).",
+            " Ellison purchased a 250 acre strip of land near Elijah, Missouri to serve as his compound.",
+            " He was also a close associate of both Richard Wayne Snell and Timothy McVeigh."
+          ]
+        ],
+        [
+          "History of Oklahoma City",
+          [
+            "The history of Oklahoma City refers to the history of city of Oklahoma City, and the land on which it developed.",
+            " Oklahoma City's history begins with the settlement of \"unassigned lands\" in the region in the 1880s, and continues with the city's development through statehood, World War I and the Oklahoma City bombing."
+          ]
+        ],
+        [
+          "Terry Nichols",
+          [
+            "Terry Lynn Nichols (born April 1, 1955) is an American who was convicted of being an accomplice in the Oklahoma City bombing.",
+            " Prior to his incarceration, he held a variety of short-term jobs, working as a farmer, grain elevator manager, real estate salesman and ranch hand.",
+            " He met his future conspirator, Timothy McVeigh, during a brief stint in the U.S. Army, which ended in 1989 when he requested a hardship discharge after less than one year of service.",
+            " In 1994 and 1995, he conspired with McVeigh in the planning and preparation of the Oklahoma City bombing – the truck bombing of the Alfred P. Murrah Federal Building in Oklahoma City, Oklahoma, on April 19, 1995.",
+            " The bombing claimed the lives of 168 people."
+          ]
+        ],
+        [
+          "The Third Terrorist",
+          [
+            "The Third Terrorist: The Middle East Connection to the Oklahoma City Bombing is a book by journalist Jayna Davis about evidence of an alleged conspiracy behind the 1995 Oklahoma City bombing.",
+            " The Justice Department initially sought, but then abandoned its search for, a Middle East suspect.",
+            " The book was published in April 2004 by Nelson Current Publishers, and became a New York Times best-seller.",
+            " In contrast to conspiracy theories that the bombing was a false flag attack perpetrated by elements of the US government, the book presents a theory that links the Oklahoma City bombers to agents of Iraq and Al-Qaeda, operating under Iranian state sponsorship."
+          ]
+        ],
+        [
+          "Timothy McVeigh",
+          [
+            "Timothy James McVeigh (April 23, 1968 – June 11, 2001) was an American domestic terrorist convicted and executed for the detonation of an ammonium nitrate fertilizer and nitromethane truck bomb in front of the Alfred P. Murrah Federal Building in Oklahoma City on April 19, 1995.",
+            " Commonly referred to as the Oklahoma City bombing, the attack killed 168 people and injured over 600.",
+            " According to the United States government, it was the deadliest act of terrorism within the United States prior to the September 11 attacks, and remains the most significant act of domestic terrorism in United States history."
+          ]
+        ],
+        [
+          "Oklahoma City bombing",
+          [
+            "The Oklahoma City bombing was a domestic terrorist truck bombing on the Alfred P. Murrah Federal Building in downtown Oklahoma City, Oklahoma, United States on April 19, 1995.",
+            " Perpetrated by Timothy McVeigh and Terry Nichols, the bombing killed 168 people, injured more than 680 others, and destroyed one-third of the building.",
+            " The blast destroyed or damaged 324 other buildings within a 16-block radius, shattered glass in 258 nearby buildings, and destroyed or burned 86 cars, causing an estimated $652 million worth of damage.",
+            " Extensive rescue efforts were undertaken by local, state, federal, and worldwide agencies in the wake of the bombing, and substantial donations were received from across the country.",
+            " The Federal Emergency Management Agency (FEMA) activated eleven of its Urban Search and Rescue Task Forces, consisting of 665 rescue workers who assisted in rescue and recovery operations.",
+            " The Oklahoma City bombing was the deadliest terrorist attack on American soil until the September 11 attacks six years later, and it still remains the deadliest incident of domestic terrorism in United States history."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "James Ellison (polygamist)",
+          3
+        ],
+        [
+          "Timothy McVeigh",
+          0
+        ],
+        [
+          "Timothy McVeigh",
+          1
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "Richard Wayne Snell",
+            "gold_answer": "Timothy James McVeigh",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.33876627683639526,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5ae2e61455429928c423953e",
+      "id": "5ae2e61455429928c423953e",
+      "question": "What is the inspirational source behind the name of this studio album by the British rock band Queen released by EMI Records that was included in the The Crown Jewels? ",
+      "answer": "Marx Brothers film",
+      "context": [
+        [
+          "Flash Gordon (soundtrack)",
+          [
+            "Flash Gordon is the ninth studio album and the first soundtrack album by the British rock band Queen, released on 8 December 1980 by EMI Records in the UK and in February 1981 by Elektra Records in the US.",
+            " It was one of two film soundtracks that they produced along with \"Highlander\".",
+            " It is the soundtrack to the science fiction film \"Flash Gordon\", and features lyrics on only two tracks.",
+            " \"Flash's Theme\" was the only single to be released from the album under the title \"Flash\".",
+            " The album reached #10 on the UK charts and #23 in the US.",
+            " The album was reissued worldwide on 27 June 2011 (excluding the US and Canada, where it was released on 27 September 2011) as part of the band's 40th anniversary.",
+            " The reissue adds an EP of related tracks."
+          ]
+        ],
+        [
+          "Sheer Heart Attack",
+          [
+            "Sheer Heart Attack is the third studio album by the British rock band Queen, released on 8 November 1974 by EMI Records in the United Kingdom and by Elektra Records in the United States.",
+            " Digressing from the progressive themes featured on their first two albums, this album featured more conventional rock tracks and marked a step towards the \"classic\" Queen sound.",
+            " It was produced by the band and Roy Thomas Baker and launched Queen to mainstream popularity in the UK and throughout the world."
+          ]
+        ],
+        [
+          "A Kind of Magic",
+          [
+            "A Kind of Magic is the twelfth studio album by the British rock band Queen, released on 3 June 1986 by EMI Records in the UK and by Capitol Records in the US.",
+            " It was their first studio album to be recorded digitally, and is based on the soundtrack to the film \"Highlander\", the first in a series directed by Russell Mulcahy.",
+            " \"A Kind of Magic\" was Queen's first album to be released since they had been acclaimed for their performance at the 1985 Live Aid concert.",
+            " It was an immediate hit in the UK, going straight to number one and selling 100,000 copies in its first week.",
+            " It remained in the UK charts for 63 weeks, selling about six million copies worldwide (600,000 in the UK alone).",
+            " The album spawned four hit singles: the album's title track \"A Kind of Magic\", \"One Vision\", \"Friends Will Be Friends\", and \"Who Wants to Live Forever\", which features an orchestra conducted by Michael Kamen, while the last track, \"Princes of the Universe\", is the theme song to \"Highlander\"."
+          ]
+        ],
+        [
+          "Queen II",
+          [
+            "Queen II is the second studio album by the British rock band Queen, released on 8 March 1974 by EMI Records at midnight in the UK and by Elektra Records in the US.",
+            " It was recorded at Trident Studios and Langham 1 Studios, London from February to August 1973 with co-producers Roy Thomas Baker and Robin Cable, and engineered by Mike Stone.",
+            " The album is notable for its combination of a heavy rock sound with an art rock sensibility.",
+            " It has been called \"a pillar of grandiose, assaultive hard rock\" by the Rock and Roll Hall of Fame."
+          ]
+        ],
+        [
+          "CD Single Box",
+          [
+            "The CD Single Box was a CD compilation box set by the English rock band Queen released exclusively in Japan by EMI records."
+          ]
+        ],
+        [
+          "News of the World (album)",
+          [
+            "News of the World is the sixth studio album by the British rock band Queen, released on 28 October 1977 by EMI Records in the United Kingdom and by Elektra Records in the United States.",
+            " \"News of the World\" was the band's second album to be recorded at Sarm West and Wessex Studios, London, and engineered by Mike Stone, and was co-produced by the band and Stone.",
+            " Containing the hit songs \"We Will Rock You\", \"We Are the Champions\" and \"Spread Your Wings\", it went 4x platinum in the United States, and achieved high certifications around the world, selling over 6 million copies.",
+            " \"News of the World\" is Queen's best selling studio album to date."
+          ]
+        ],
+        [
+          "A Night at the Opera (Queen album)",
+          [
+            "A Night at the Opera is the fourth studio album by the British rock band Queen, released on 21 November 1975 by EMI Records in the United Kingdom and by Elektra Records in the United States.",
+            " Produced by Roy Thomas Baker and Queen, it was the most expensive album ever recorded at the time of its release.",
+            " The album takes its name from the Marx Brothers film of the same name, which the band watched one night at the studio complex when recording.",
+            " \"A Night at the Opera\" incorporates a wide range of styles, including ballads, songs in a music hall style, hard rock tracks and progressive rock influences."
+          ]
+        ],
+        [
+          "Queen (Queen album)",
+          [
+            "Queen is the eponymous debut studio album by the British rock band Queen, released on 13 July 1973 by EMI Records in the UK and by Elektra Records in the US.",
+            " It was recorded at Trident Studios and De Lane Lea Music Centre, London, with production by Roy Thomas Baker (as Roy Baker), John Anthony and Queen.",
+            " The album was influenced by the hard rock, progressive rock and heavy metal of the time and covers subjects such as folklore (\"My Fairy King\") and religion (\"Jesus\").",
+            " Lead singer Freddie Mercury composed five of the ten tracks, guitarist Brian May composed four songs, (including \"Doing All Right\", which was co-written by then Smile band-mate Tim Staffell), and drummer Roger Taylor composed and sang \"Modern Times Rock and Roll\".",
+            " The final song on the album is a short instrumental version of \"Seven Seas of Rhye\"."
+          ]
+        ],
+        [
+          "The Crown Jewels",
+          [
+            "The Crown Jewels is a box set by Queen which comprises their first eight studio albums; \"Queen\", \"Queen II\", \"Sheer Heart Attack\", \"A Night at the Opera\", \"A Day at the Races\", \"News of the World\", \"Jazz\" and \"The Game\"; in sleeves replicating the original vinyl packaging.",
+            " The last three albums in the set, (\"News of the World\", \"Jazz\" and \"The Game\") all have modified packaging with alternative covers.",
+            " A lyric booklet is also included.",
+            " All the albums have been remastered.",
+            " The box set marks the 25th anniversary of the group's existence dated to the release of their first album."
+          ]
+        ],
+        [
+          "Hot Space",
+          [
+            "Hot Space is the tenth studio album by the British rock band Queen.",
+            " It was released on 21 May 1982 by EMI Records in the UK and by Elektra Records in the US.",
+            " Marking a notable shift in direction from their earlier work, they employed many elements of disco, funk, rhythm and blues, dance and pop music on the album.",
+            " This made the album less popular with fans who preferred the traditional rock style they had come to associate with the band.",
+            " Queen's decision to record a dance-oriented album germinated with the massive success in the US of their 1980 hit \"Another One Bites the Dust\" (and to a lesser extent, the UK success of the song)."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "The Crown Jewels",
+          0
+        ],
+        [
+          "A Night at the Opera (Queen album)",
+          0
+        ],
+        [
+          "A Night at the Opera (Queen album)",
+          2
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "Queen's first eight studio albums",
+            "gold_answer": "Marx Brothers film",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.10299447178840637,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5a8cfee555429941ae14df5c",
+      "id": "5a8cfee555429941ae14df5c",
+      "question": "How are elephants connected to Gajabrishta?",
+      "answer": "Sanskrit",
+      "context": [
+        [
+          "Elephant",
+          [
+            "Elephants are large mammals of the family Elephantidae and the order Proboscidea.",
+            " Three species are currently recognized: the African bush elephant (\"Loxodonta africana\"), the African forest elephant (\"L. cyclotis\"), and the Asian elephant (\"Elephas maximus\").",
+            " Elephants are scattered throughout sub-Saharan Africa, South Asia, and Southeast Asia.",
+            " Elephantidae is the only surviving family of the order Proboscidea; other, now extinct, members of the order include deinotheres, gomphotheres, mammoths, and mastodons."
+          ]
+        ],
+        [
+          "Gajabrishta",
+          [
+            "Gaja in Sanskrit means Elephant.",
+            " 'Brishta' is the back portion of a sitting elephant.",
+            " The later Cholas of the Chola empire in Indian subcontinent, especially the ones in the Thondai Mandalam around the North Tamil Nadu area constructed temples which had this vimanas."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Gajabrishta",
+          0
+        ],
+        [
+          "Gajabrishta",
+          1
+        ],
+        [
+          "Elephant",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "Gajabrishta refers to the back portion of a sitting elephant, where 'Gaja' means elephant.",
+            "gold_answer": "Sanskrit",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.26068517565727234,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5ac2e9c45542990b17b154a0",
+      "id": "5ac2e9c45542990b17b154a0",
+      "question": "When was the federal US law made that was responsible for shutting down Braniff Airways?",
+      "answer": "1978",
+      "context": [
+        [
+          "Center for Computer-Assisted Legal Instruction",
+          [
+            "The Center for Computer-Assisted Legal Instruction, also known as CALI, is a 501(c)(3) non-profit consortium of mostly US law schools that conducts applied research and development in the area of computer-mediated legal education.",
+            " The organization is best known in law schools for CALI Lessons, online interactive tutorials in legal subjects, and CALI Excellence for the Future Awards (CALI Awards), given to the highest scorer in a law-school course at many CALI member law schools.",
+            " Nearly every US law school is a member of CALI."
+          ]
+        ],
+        [
+          "1979 WCT World Doubles",
+          [
+            "The 1979 WCT World Doubles, also known by its sponsored name Braniff Airways World Doubles Championship, was a men's tennis tournament played on indoor carpet courts at Olympia in London, England that was part of the 1979 Colgate-Palmolive Grand Prix.",
+            " It was the tour finals for the doubles season of the WCT Tour section.",
+            " The tournament was held from January 3 through January 7, 1979."
+          ]
+        ],
+        [
+          "Ed Acker",
+          [
+            "Charles Edward Acker (born April 7, 1929) is an American businessman who served as CEO of Braniff Airways, Air Florida, and Pan American World Airways.",
+            " He is currently a principal at Intrepid Equity Group."
+          ]
+        ],
+        [
+          "Airline Deregulation Act",
+          [
+            "The Airline Deregulation Act is a 1978 United States federal law that deregulated the airline industry in the United States, removing U.S. Federal Government control over such areas as fares, routes and market entry of new airlines, introducing a free market in the commercial airline industry and leading to a great increase in the number of flights, a decrease in fares, and an increase in the number of passengers and miles flown.",
+            " The Civil Aeronautics Board's powers of regulation were phased out, but the Act did not diminish the regulatory powers of the Federal Aviation Administration (FAA) over all aspects of aviation safety."
+          ]
+        ],
+        [
+          "Braniff International Airways destinations",
+          [
+            "In 1931, Braniff Airways was serving just five destinations:"
+          ]
+        ],
+        [
+          "Braniff Flight 250",
+          [
+            "Braniff Airways Flight 250 crashed near Falls City, Nebraska, on August 6, 1966, en route to Omaha from Kansas City, Missouri.",
+            " Thirty-eight passengers and four crew members were killed in the crash, which occurred in a farm field late on a Saturday night.",
+            " In-flight structural failure due to extreme turbulence in an avoidable weather hazard was cited as the cause."
+          ]
+        ],
+        [
+          "Paul Revere Braniff",
+          [
+            "Paul Revere Braniff (August 30, 1897 – June 15, 1954) was an airline entrepreneur.",
+            " Paul, along with his brother Thomas Elmer Braniff, was one of the original founders of Braniff Airways, Inc. d/b/a Braniff International Airways (after 1948)."
+          ]
+        ],
+        [
+          "Charles Edmund Beard",
+          [
+            "Charles Edmund Beard (November 23, 1900 − July 18, 1982) was the former President of Braniff Airways, Inc. d/b/a Braniff International Airways, from 1954 until 1965.",
+            " He was the third president since its inception in 1928, the first person outside the Braniff family to be CEO of the airline.",
+            " Beard, along with Braniff Board Chairman Fred Jones (Oklahoma City, Oklahoma Ford dealer magnate), managed the airline conservatively, but recorded record growth and traffic statistics between 1954 and early 1965."
+          ]
+        ],
+        [
+          "Willy O. Rossel",
+          [
+            "Willy Otto Rossel (April 4, 1921 – September 14, 2015) was a Chef de Cuisine or Executive Chef most noted for his extensive work in the preparation of gourmet airline cuisine.",
+            " In 1965, he was hired by the progressive Dallas-based Braniff Airways, Inc., to administer the airline's commitment to providing its passengers with the finest food aloft.",
+            " Also in 1965, Braniff had begun implementing its revolutionary End of the Plain Plane Campaign, which called for an unprecedented change in the way the airline presented itself to the public.",
+            " This campaign not only included a change in the company's look but an upgrade of its inflight cuisine to gourmet status.",
+            " Rossel wrote the first manual used for the apprenticeship of American chefs."
+          ]
+        ],
+        [
+          "Braniff International Airways",
+          [
+            "Braniff Airways, Inc., doing business as Braniff International Airways, from 1948 until 1965, and then Braniff International from 1965 until 1983, was an American airline that operated from 1928 until 1982.",
+            " Its routes were primarily in the midwestern and southwestern United States, Mexico, Central America, and South America.",
+            " In the late 1970s it expanded to Asia and Europe.",
+            " The airline ceased operations in May 1982 because high fuel prices and the Airline Deregulation Act of December 1978 rendered it uncompetitive.",
+            " Two later airlines used the Braniff name: the Hyatt Hotels-backed Braniff, Inc. in 1984–89, and Braniff International Airlines, Inc. in 1991–92.",
+            " In early 2015, a series of new Braniff companies were incorporated in the State of Oklahoma, for historical purposes and for administration of the Braniff trademarks, copyrights and other intellectual property.",
+            " These companies included Braniff Air Lines, Inc., Paul R. Braniff, Inc., Braniff Airways, Inc. and Braniff International Corporation."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Braniff International Airways",
+          0
+        ],
+        [
+          "Braniff International Airways",
+          3
+        ],
+        [
+          "Airline Deregulation Act",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "The federal US law Airline Deregulation Act was enacted on October 24, 1978.",
+            "gold_answer": "1978",
+            "exact_match": 0.0,
+            "f1": 0.15384615384615385,
+            "cosine_sim": 0.36120957136154175,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5a7100435542994082a3e4a3",
+      "id": "5a7100435542994082a3e4a3",
+      "question": " Are Finding Kraftland and Shikashika both frozen drinks?",
+      "answer": "Shikashika is a shaved ice drink",
+      "context": [
+        [
+          "Nom yen",
+          [
+            "Nom Yen (Thai: นมเย็น) is a Thai drink made from Sala syrup and hot milk.",
+            " Nom in Thai means milk.",
+            " There are two kind of milk for making Nom Yen.",
+            " \"Nom sot is fresh milk, nom tamada is condensed milk, and nom kom is sweetened condensed milk\" There are two styles of Nom Yen which are iced and frappe ones.",
+            " You can find it at almost everywhere in Thailand from vendors selling drinks on street.",
+            " \"The price ranges from 15 THB (Thai baht) to 25 THB alone or from 30 to 60 THB at a café with some bakery\" Thai people also make sweet from nom Yen as well.",
+            " The other style of Nom Yen can be found in street sweet shops.",
+            " It's called \"Nam Kang Sai\" or a Thai style frozen Nom Yen.",
+            " The ingredients are similar to Nom Yen, except changing from iced into frozen one.",
+            " Unlike Nom Yen, Thai people consider Nam Kang Sai a homemade style sweet because it's easy to make and the ingredients can be found easily in local area."
+          ]
+        ],
+        [
+          "Eegee's",
+          [
+            "Eegee's (stylized eegee's) is a chain of 26 restaurants in the greater areas of Tucson, Arizona and Phoenix, Arizona, as well as one in Casa Grande, Arizona.",
+            " It specializes in submarine sandwiches (subs) and salads, but it is most famous for its frozen fruit drinks, officially called \"eegee's drinks\" but colloquially known simply as an \"eegee's.\"",
+            " It was founded in 1971 by Edmund Irving and Robert Greenberg, who combined their initials (\"E\" from Edmund and \"G\" from Greenberg) to create the name \"eegee's.\"",
+            " The company has been highly noted for its social and environmental involvement, such as its tradition of donating time, food, and money to local charities; the collection of donations for local charitable organizations; instituting the community recycling program 'Recycle for People First!'",
+            "; and its program for training and employing the mentally disabled.",
+            " It is owned and operated by CEO Foods, Inc."
+          ]
+        ],
+        [
+          "Shikashika",
+          [
+            "Shikashika is a shaved ice drink made from glacier ice in Peru and Bolivia.",
+            " In some rural communities, the extraction and sale of ice continues to be a primary natural resource for local economies.",
+            " Ice merchants extract the blocks with an axe by hand and transport them down from the mountains atop mules.",
+            " The unit of sale is usually an ice block weighing approximately 40 kilos which is sold to Shikashika vendors.",
+            " Each block sells for approximately 17 USD.",
+            " In turn, Shikashika is sold for approximately 15 cents in plastic bags with colorful sweet syrups at Andean festivals and on market day.",
+            " The word Shikashika is onomatopeia from the Amerindian language Quechua.",
+            " An alternative word for Shikashika in Spanish is \"raspadilla.\""
+          ]
+        ],
+        [
+          "Ice trade",
+          [
+            "The ice trade, also known as the frozen water trade, was a 19th-century industry, centering on the east coast of the United States and Norway, involving the large-scale harvesting, transport and sale of natural ice for domestic consumption and commercial purposes.",
+            " Ice was cut from the surface of ponds and streams, then stored in ice houses, before being sent on by ship, barge or railroad to its final destination around the world.",
+            " Networks of ice wagons were typically used to distribute the product to the final domestic and smaller commercial customers.",
+            " The ice trade revolutionized the U.S. meat, vegetable and fruit industries, enabled significant growth in the fishing industry, and encouraged the introduction of a range of new drinks and foods."
+          ]
+        ],
+        [
+          "Omar Knedlik",
+          [
+            "Omar S. Knedlik (December 21, 1915 – March 14, 1989), was an American inventor and businessman.",
+            " He was best known as the inventor of the ICEE frozen drink.",
+            " He was born and raised a poor farm boy in Barnes, Kansas in 1916.",
+            " Knedlik was a World War II veteran who bought his first ice cream shop after the war.",
+            " He owned several hotels before moving to Coffeyville, Kansas, where he became the owner of a Dairy Queen in the late-1950s.",
+            " Knedlik did not have a soda fountain, so he served semi-frozen bottled soft drinks.",
+            " He found that they were immensely popular, so he worked with a Dallas company to develop the ICEE machine.",
+            " It took him five years to replicate the consistency in slushy soft drinks.",
+            " In the mid-1960s, the first ICEE machines were sold in the United States."
+          ]
+        ],
+        [
+          "Ali Sparkes",
+          [
+            "Ali Sparkes (born 1966) is a British children's author.",
+            " Her books include \"The Shapeshifter\" series of 5 books, \"Out of this World\" (a prequel to \"The Shapeshifter\" and first released as \"Miganium\"), \"Unleashed,\" a series of 5 books (a spin-off/sequel series of \"The Shapeshifter\", centered on some of the other \"Shapeshifter\" characters), \"Dark Summer\", \"Frozen in Time\", \"Wishful Thinking\", \"Destination Earth\", the \"Monster Makers\" series, and \"S.W.I.T.C.H\".",
+            " She lives with her husband and two sons in Southampton, England.",
+            " Her debut book \"The Shapeshifter: Finding the Fox\" was nominated for the 2007 Bolton Children's Book Award.",
+            " She has also won two Blue Peter awards: \"Book I Couldn't Put Down\" and \"Book Of The Year\", for her book \"Frozen in Time\"."
+          ]
+        ],
+        [
+          "Finding Kraftland",
+          [
+            "Finding Kraftland is a 2006 independent documentary from Richard Kraft productions starring Stacey J. Aswad, Richard Kraft, and Nicky Kraft.",
+            " It premiered at the Santa Barbara International Film Festival on June 17, 2006 and continued to play in over 75 film festivals around the globe."
+          ]
+        ],
+        [
+          "Zooper Dooper",
+          [
+            "Zooper Doopers are a type of frozen iceblock treat, popular in Australia.",
+            " They geneally come in a plastic tube packaging as a liquid.",
+            " They are then frozen at home in the household freezer.",
+            " Zooper Doopers are somewhat of a cultural icon and have been popular since they first appeared in 1971.",
+            " They are produced and owned by the Daily Drinks Company."
+          ]
+        ],
+        [
+          "Dairy mix",
+          [
+            "A dairy mix is the blend of milk, cream, sugar, stabilizers, and vanilla packaged by a dairy for commercial use.",
+            " This mix can either be made directly into ice cream or placed into containers for the use in soft serve, frozen custard, or ice cream machines.",
+            " Dairy mix used in restaurants can be also used to make frozen drinks or smoothies."
+          ]
+        ],
+        [
+          "Wei-Chuan Food Corporation",
+          [
+            "Wei Chuan Foods () is a Taiwan-based manufacturer of Chinese condiments, canned goods, drinks, and frozen goods.",
+            " Its more popular, widely recognized products include canned pickles, soy sauce and oyster sauces, and frozen dumplings and wontons."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Finding Kraftland",
+          0
+        ],
+        [
+          "Shikashika",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "False",
+            "gold_answer": "Shikashika is a shaved ice drink",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.08408184349536896,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5a8d0d7b55429941ae14df79",
+      "id": "5a8d0d7b55429941ae14df79",
+      "question": "How many rooms does that largest single hotel within the United States that is owned by MGM Resorts International?",
+      "answer": "5,124 rooms",
+      "context": [
+        [
+          "MGM Growth Properties",
+          [
+            "MGM Growth Properties LLC is a real estate investment trust that invests in large-scale destination entertainment and leisure resorts.",
+            " As of December 31, 2016, the company owned 11 properties operated by MGM Resorts International, comprising 27,233 hotel rooms.",
+            " The company leases the properties to MGM Resorts International via NNN Leases for an annual payment of $745 million."
+          ]
+        ],
+        [
+          "Delano Las Vegas",
+          [
+            "Delano Las Vegas, (formerly known as THEhotel), is a 45-story 1,117 room luxury suite hotel.",
+            " It is owned and operated by MGM Resorts International.",
+            " It is located within the Mandalay Bay complex on the Las Vegas Strip in Paradise, Nevada.",
+            " It was renovated and rebranded as the Delano Las Vegas on September 2, 2014, under a partnership between MGM and Morgans Hotel Group."
+          ]
+        ],
+        [
+          "Monte Carlo Resort and Casino",
+          [
+            "The Monte Carlo Resort and Casino is a megaresort hotel and casino on the Las Vegas Strip in Paradise, Nevada, United States.",
+            " The hotel, with a height of 360 ft , has 32 floors, featuring a 102000 sqft casino floor with 1,400 slot machines, 60 table games, and 15 poker tables.",
+            " It is owned and operated by MGM Resorts International.",
+            " The hotel offers 2,992 guest rooms, including 259 luxury suites.",
+            " It is being converted from late 2016 to 2018 into the Park MGM, with the upper floors converted into a boutique hotel, NoMad Las Vegas."
+          ]
+        ],
+        [
+          "MGM Resorts International",
+          [
+            "MGM Resorts International is a global hospitality and entertainment company operating destination resorts in Las Vegas, Mississippi, New Jersey and Detroit, including Bellagio, MGM Grand, Mandalay Bay and The Mirage.",
+            " The company recently opened MGM National Harbor in Maryland and is developing MGM Springfield in Massachusetts.",
+            " It has a majority interest in MGM China Holdings Limited, which owns the MGM Macau resort and casino and is developing a gaming resort in Cotai.",
+            " MGM Resorts owns 50 percent of CityCenter in Las Vegas, which features ARIA Resort & Casino.",
+            " It has a majority controlling interest in MGM Growth Properties, a real estate investment trust."
+          ]
+        ],
+        [
+          "Corey I. Sanders",
+          [
+            "Corey Sanders has served as Chief Operating Officer of MGM Resorts International since June 2010.",
+            " He oversees operations at the Company’s wholly owned properties, which in Nevada include Bellagio (resort), MGM Grand Las Vegas, Mandalay Bay, The Mirage, New York-New York Hotel and Casino, Monte Carlo Resort and Casino, Luxor Las Vegas, Excalibur Hotel and Casino, Circus Circus Las Vegas, Circus Circus Reno, Gold Strike Jean and Railroad Pass Casino.",
+            " He also oversees Beau Rivage (Mississippi) in Biloxi and Gold Strike Tunica, both in Mississippi, as well as MGM Grand Detroit."
+          ]
+        ],
+        [
+          "Borgata",
+          [
+            "Borgata Hotel Casino & Spa is a hotel, casino, and spa in Atlantic City, New Jersey, United States.",
+            " It is owned and operated by MGM Resorts International.",
+            " The casino hotel features 2,002 rooms and is the largest hotel in New Jersey.",
+            " Borgata opened in July 2003 and is the top-grossing casino in Atlantic City."
+          ]
+        ],
+        [
+          "Steve Wynn",
+          [
+            "Stephen Alan Wynn (\"né\" Weinberg; born January 27, 1942) is an American real estate businessman and art collector.",
+            " He is known for his involvement in the American luxury casino and hotel industry.",
+            " Early in his career he oversaw the construction and operation of several notable Las Vegas and Atlantic City hotels, including the Golden Nugget, the Golden Nugget Atlantic City, The Mirage, Treasure Island, the Bellagio, and Beau Rivage in Mississippi, and he played a pivotal role in the resurgence and expansion of the Las Vegas Strip in the 1990s.",
+            " In 2000, Wynn sold his company Mirage Resorts to MGM Grand Inc., resulting in the formation of MGM Mirage (now MGM Resorts International).",
+            " Wynn afterwards took his company Wynn Resorts public in an initial public offering, and he remains Wynn Resorts' CEO and Chairman of the Board.",
+            " He is a member of the Republican Party.",
+            " Wynn is the finance chair of the Republican National Committee (RNC) since 2017."
+          ]
+        ],
+        [
+          "MGM Grand Las Vegas",
+          [
+            "The MGM Grand Las Vegas (formerly Marina and MGM-Marina) is a hotel and casino located on the Las Vegas Strip in Paradise, Nevada.",
+            " The MGM Grand is the largest single hotel in the United States with 5,124 rooms.",
+            " It is also the third-largest hotel complex in the world by number of rooms and second-largest hotel resort complex in the United States behind the combined The Venetian and The Palazzo.",
+            " When it opened in 1993, the MGM Grand was the largest hotel complex in the world."
+          ]
+        ],
+        [
+          "Mirage Resorts",
+          [
+            "Mirage Resorts (formerly Golden Nugget Companies) was an American company that owned and operated hotel-casinos.",
+            " It was acquired by MGM Grand, Inc. in 2000, forming MGM Mirage (now MGM Resorts International)."
+          ]
+        ],
+        [
+          "Nevada Landing Hotel and Casino",
+          [
+            "Nevada Landing was a hotel and casino designed to resemble two riverboats.",
+            " It was located in Jean, Nevada, United States, near the California state line, within sight of Interstate 15.",
+            " The hotel, owned by MGM Resorts International, had 303 rooms, four restaurants, over 800 slot machines (including video poker), live keno, table games, banquet facilities, and wedding services.",
+            " The property was typically marketed with its sister hotel, the Gold Strike Hotel and Gambling Hall, located across the I-15 freeway."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Corey I. Sanders",
+          1
+        ],
+        [
+          "MGM Grand Las Vegas",
+          1
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "fact_retrieval",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "5124",
+            "gold_answer": "5,124 rooms",
+            "exact_match": 0.0,
+            "f1": 0.6666666666666666,
+            "cosine_sim": 0.3535018563270569,
+            "structural_failure": false,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    }
+  ]
+}

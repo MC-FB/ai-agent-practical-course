@@ -42,6 +42,7 @@ import {
   startLiveBenchmark,
   startLiveAsk,
   stopLiveBenchmark,
+  type BenchmarkSubset,
   type DagNode,
   type HotpotBenchmarkMeta,
   type HotpotBenchmarkRecord,
@@ -895,6 +896,7 @@ function BenchmarkResultView({
               <th>Status</th>
               <th>Graph</th>
               <th>Evidence</th>
+              <th>Gold Recall</th>
             </tr>
           </thead>
           <tbody>
@@ -946,6 +948,7 @@ function BenchmarkResultView({
                       ? "-"
                       : `${formatPercent(record.wrong_supporting_text_rate)} non-gold`}
                   </td>
+                  <td>{formatPercent(record.gold_supporting_fact_recall ?? undefined)}</td>
                 </tr>
               );
             })}
@@ -989,6 +992,7 @@ function benchmarkOptionLabel(item: SavedBenchmarkSummary | HotpotBenchmarkResul
     item.name?.trim(),
     "partial" in item && item.partial ? "partial" : undefined,
     formatSavedDateTime(item.created_at),
+    item.subset_label ?? item.subset,
     runTypeLabel(item.system),
     item.model ?? "unknown model",
     "completed" in item && item.completed !== undefined && item.limit
@@ -1194,11 +1198,15 @@ function BenchmarkComparisonView({
                 <th>{focusLabel}</th>
                 <th>{referenceLabel}</th>
                 <th>{deltaLabel}</th>
+                <th>Gold recall impact</th>
               </tr>
             </thead>
             <tbody>
               {filteredAligned.slice(0, visibleRows).map(([focusRecord, referenceRecord]) => {
-                const rowDelta = focusRecord.f1 - referenceRecord.f1;
+                const cosineDelta = focusRecord.cosine_sim - referenceRecord.cosine_sim;
+                const focusRecall = focusRecord.gold_supporting_fact_recall ?? 0;
+                const referenceRecall = referenceRecord.gold_supporting_fact_recall ?? 0;
+                const recallDelta = focusRecall - referenceRecall;
                 return (
                 <tr key={focusRecord.id}>
                   <td>{focusRecord.question}</td>
@@ -1209,7 +1217,8 @@ function BenchmarkComparisonView({
                       onClick={() => onSelectRecord?.(focus, focusRecord)}
                       title={focusRecord.error || "Open benchmark detail"}
                     >
-                      {comparisonAnswerText(focusRecord)} · {formatPercent(focusRecord.f1)}
+                      <span>{comparisonAnswerText(focusRecord)}</span>
+                      <small>Gold recall {formatPercent(focusRecall)}</small>
                     </button>
                   </td>
                   <td>
@@ -1218,10 +1227,22 @@ function BenchmarkComparisonView({
                       onClick={() => onSelectRecord?.(reference, referenceRecord)}
                       title={referenceRecord.error || "Open benchmark detail"}
                     >
-                      {comparisonAnswerText(referenceRecord)} · {formatPercent(referenceRecord.f1)}
+                      <span>{comparisonAnswerText(referenceRecord)}</span>
+                      <small>Gold recall {formatPercent(referenceRecall)}</small>
                     </button>
                   </td>
-                  <td><span className={`row-delta ${deltaClass(rowDelta)}`}>{rowDelta > 0 ? "+" : ""}{formatPercent(rowDelta)}</span></td>
+                  <td>
+                    <span className={`row-delta ${deltaClass(cosineDelta)}`}>
+                      {cosineDelta > 0 ? "+" : ""}
+                      {formatNumber(cosineDelta, 3)}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`row-delta ${deltaClass(recallDelta)}`}>
+                      {recallDelta > 0 ? "+" : ""}
+                      {formatPercent(recallDelta)}
+                    </span>
+                  </td>
                 </tr>
               )})}
             </tbody>
@@ -1251,6 +1272,7 @@ function DatasetView({
 }) {
   const [limit, setLimit] = useState(5);
   const [benchmarkName, setBenchmarkName] = useState("");
+  const [benchmarkSubset, setBenchmarkSubset] = useState<BenchmarkSubset>("validation");
   const [systems, setSystems] = useState<string[]>(["dag_agent", "direct_llm"]);
   const [seedInput, setSeedInput] = useState("");
   const [meta, setMeta] = useState<HotpotBenchmarkMeta>();
@@ -1381,13 +1403,13 @@ function DatasetView({
   }
 
   useEffect(() => {
-    getHotpotBenchmarkMeta()
+    getHotpotBenchmarkMeta(benchmarkSubset)
       .then((nextMeta) => {
         setMeta(nextMeta);
         setLimit(Math.min(nextMeta.default_limit, nextMeta.total_examples));
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Could not load benchmark metadata"));
-  }, []);
+  }, [benchmarkSubset]);
 
   useEffect(() => {
     listBenchmarkResults()
@@ -1468,6 +1490,7 @@ function DatasetView({
     setComparisonResults(started.comparison_results ?? []);
     setSeedInput(String(started.seed));
     setBenchmarkName(started.name ?? "");
+    setBenchmarkSubset((started.subset as BenchmarkSubset | undefined) ?? "validation");
     window.localStorage.setItem(ACTIVE_BENCHMARK_STORAGE_KEY, started.run_id);
     setSelectedLiveRunId(started.run_id);
 
@@ -1521,12 +1544,26 @@ function DatasetView({
         throw new Error("Select at least one system.");
       }
       const name = benchmarkName.trim() || undefined;
-      const preflight = await preflightBenchmark(resolvedLimit, systems, llm, parsedSeed, name);
+      const preflight = await preflightBenchmark(
+        resolvedLimit,
+        systems,
+        llm,
+        parsedSeed,
+        name,
+        benchmarkSubset,
+      );
       if (!preflight.ok) {
         const failed = preflight.checks.filter((check) => !check.ok);
         throw new Error(failed.map((check) => check.detail).join(" "));
       }
-      const started = await startLiveBenchmark(resolvedLimit, systems, llm, parsedSeed, name);
+      const started = await startLiveBenchmark(
+        resolvedLimit,
+        systems,
+        llm,
+        parsedSeed,
+        name,
+        benchmarkSubset,
+      );
       await refreshUnfinishedLiveRuns();
       await watchBenchmark(started);
     } catch (err) {
@@ -1576,6 +1613,7 @@ function DatasetView({
       setComparisonResults(selected.comparison_results ?? []);
       setSeedInput(String(selected.seed));
       setBenchmarkName(selected.name ?? "");
+      setBenchmarkSubset((selected.subset as BenchmarkSubset | undefined) ?? "validation");
       setSystems(
         selected.systems?.filter((system) => system === "dag_agent" || system === "direct_llm") ??
           systems,
@@ -1621,6 +1659,23 @@ function DatasetView({
 
             <div className="grid gap-4 xl:grid-cols-[minmax(260px,0.9fr)_minmax(320px,1fr)_minmax(300px,0.9fr)]">
               <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
+                <div className="grid gap-2">
+                  <Label htmlFor="benchmark-subset">Dataset</Label>
+                  <select
+                    className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 shadow-sm"
+                    id="benchmark-subset"
+                    value={benchmarkSubset}
+                    onChange={(event) => setBenchmarkSubset(event.target.value as BenchmarkSubset)}
+                  >
+                    {(meta?.subsets ?? [{ id: "validation" as BenchmarkSubset, label: "Full HotpotQA validation" }]).map(
+                      (option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </div>
                 <div className="grid gap-2">
                   <Label htmlFor="benchmark-name">Benchmark name</Label>
                   <Input
@@ -1876,9 +1931,9 @@ function DatasetView({
               <h2>Benchmark Result</h2>
               <span>
                 {result
-                  ? `${result.dataset} ${result.split}, seed ${result.seed}`
+                  ? `${result.subset_label ?? result.subset ?? result.split}, seed ${result.seed}`
                   : meta
-                    ? `${formatNumber(meta.total_examples)} HotpotQA examples available`
+                    ? `${formatNumber(meta.total_examples)} ${meta.subset_label} examples available`
                     : "Loading metadata"}
               </span>
             </div>

@@ -1,0 +1,750 @@
+{
+  "metadata": {
+    "subset_id": "mistral_qwen_graph_construction_failures",
+    "description": "Curated HotpotQA failure subset from Mistral and Qwen DAG benchmark runs.",
+    "source_runs": [
+      {
+        "key": "mistral",
+        "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+        "model": "mistralai/Mistral-Medium-3.5-128B",
+        "artifact": "mistral-dag.json"
+      },
+      {
+        "key": "qwen",
+        "run_id": "cc8a0446-f979-4708-9756-757eddd7ea22",
+        "model": "Qwen/Qwen3.5-122B-A10B",
+        "artifact": "qwen-dag.json"
+      }
+    ],
+    "criteria": {
+      "criteria": [
+        "structural_failure == true",
+        "record error mentions planner, invalid DAG, dependency, or input_map"
+      ]
+    },
+    "count": 6
+  },
+  "data": [
+    {
+      "_id": "5ae712fa554299572ea546b9",
+      "id": "5ae712fa554299572ea546b9",
+      "question": "What was the name of the band of Confederate army deserters in the 2016 movie starring Matthew McConaughey, Gugu Mbatha-Raw, and Keri Russell?",
+      "answer": "the Knight Company",
+      "context": [
+        [
+          "Newton Knight",
+          [
+            "Newton Knight (November 10, 1829 – February 16, 1922) was an American farmer, soldier and Southern Unionist in Mississippi, best known as the leader of the Knight Company, a band of Confederate army deserters who resisted the Confederacy during the Civil War.",
+            " Local legends tell of Knight and his men forming the \"Free State of Jones\" in the area in and around Jones County, Mississippi, at the height of the war.",
+            " The nature and extent of the Knight Company's opposition to the Confederate government is disputed among historians.",
+            " After the war, Knight joined the Republican Party and served in Mississippi's Reconstruction government as a deputy US Marshal."
+          ]
+        ],
+        [
+          "List of Touch episodes",
+          [
+            "\"Touch\" is an American supernatural thriller television series created by Tim Kring and starring Kiefer Sutherland, Gugu Mbatha-Raw, David Mazouz and Danny Glover.",
+            " A special preview of the pilot was broadcast on Fox on January 25, 2012 before moving to its regular time slot on March 22, 2012.",
+            " Sutherland stars as Martin Bohm, a widower whose son Jake uses numbers to see into the future.",
+            " Clea Hopkins (Mbatha-Raw) is a social worker sent to evaluate Martin and Jake's living situation while Martin receives help from Arthur Teller (Glover), a professor who is also an expert on those with numerical clairvoyance."
+          ]
+        ],
+        [
+          "Miss Sloane",
+          [
+            "Miss Sloane is a 2016 political thriller film directed by John Madden and written by Jonathan Perera.",
+            " The film stars Jessica Chastain, Mark Strong, Gugu Mbatha-Raw, Michael Stuhlbarg, Alison Pill, Jake Lacy, John Lithgow, and Sam Waterston."
+          ]
+        ],
+        [
+          "The Whole Truth (2016 film)",
+          [
+            "The Whole Truth is a 2016 American thriller film directed by Courtney Hunt and written by Nicholas Kazan.",
+            " The film stars Keanu Reeves, Gabriel Basso, Gugu Mbatha-Raw, Renée Zellweger, and Jim Belushi."
+          ]
+        ],
+        [
+          "Galvanized Yankees",
+          [
+            "Galvanized Yankees was a term from the American Civil War denoting former Confederate prisoners of war who swore allegiance to the United States and joined the Union Army.",
+            " Approximately 5,600 former Confederate soldiers enlisted in the \"United States Volunteers\", organized into six regiments of infantry between January 1864 and November 1866.",
+            " Of those, more than 250 had begun their service as Union soldiers, were captured in battle, then enlisted in prison to join a regiment of the Confederate States Army.",
+            " They surrendered to Union forces in December 1864 and were held by the United States as deserters, but were saved from prosecution by being enlisted in the 5th and 6th U.S. Volunteers.",
+            " An additional 800 former Confederates served in volunteer regiments raised by the states, forming ten companies.",
+            " Four of those companies saw combat in the Western Theater against the Confederate Army, two served on the western frontier, and one became an independent company of U.S. Volunteers, serving in Minnesota."
+          ]
+        ],
+        [
+          "18th Arkansas Infantry Regiment (Marmaduke's)",
+          [
+            "The 18th Arkansas Infantry (Marmaduke's) (1861–1865) was a Confederate Army infantry regiment during the American Civil War.",
+            " The unit was also briefly identified as the 1st Arkansas Infantry Battalion.",
+            " The unit was most often referred to as the 3rd Confederate Infantry Regiment.",
+            " The designation \"Confederate Infantry Regiment\" was intended to convey the difference between Provisional Confederate Army units and Regular Confederate Army Units, with Provisional units being those regiments who received a state designation such as \"XX Arkansas Infantry Regiment\".",
+            " In practice, the designation was most often utilized when Regiments were assembled utilizing companies from more than one confederate state.",
+            " The \"3rd Confederate Infantry Regiment\" is occasionally misidentified as the 3rd Arkansas Infantry Regiment commanded by Colonel Van H. Manning."
+          ]
+        ],
+        [
+          "Free State of Jones (film)",
+          [
+            "Free State of Jones is a 2016 American historical period war film inspired by the life of Newton Knight and his armed revolt against the Confederacy in Jones County, Mississippi, throughout the American Civil War.",
+            " Written and directed by Gary Ross, the film stars Matthew McConaughey, Gugu Mbatha-Raw, Mahershala Ali, and Keri Russell."
+          ]
+        ],
+        [
+          "USADIP",
+          [
+            "USADIP (United States Army Deserter Information Point) serves as the focal point for U.S. Army deserter reporting by U.S. Army commanders.",
+            " Its mission is to maintain, verify, and disseminate information on regular Army, Army Reserve and Army National Guard deserters to military and civilian law enforcement agencies and U.S. Army commanders; to enter and maintain active Army deserters into the Wanted Person File of the FBI National Crime Information Center in order to effect the return to military control of Army deserters."
+          ]
+        ],
+        [
+          "The Curve (film)",
+          [
+            "The Curve is a 1998 thriller starring Matthew Lillard, Keri Russell and Michael Vartan, which premiered at the 1998 Sundance Film Festival under its original title, \"Dead Man's Curve\"."
+          ]
+        ],
+        [
+          "Belle (2013 film)",
+          [
+            "Belle is a 2013 British period drama film directed by Amma Asante, written by Misan Sagay and produced by Damian Jones.",
+            " It stars Gugu Mbatha-Raw, Tom Wilkinson, Miranda Richardson, Penelope Wilton, Sam Reid, Matthew Goode, Emily Watson, Sarah Gadon, Tom Felton and James Norton."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Free State of Jones (film)",
+          0
+        ],
+        [
+          "Free State of Jones (film)",
+          1
+        ],
+        [
+          "Newton Knight",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "graph_construction",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "",
+            "gold_answer": "the Knight Company",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": -1.5,
+            "structural_failure": true,
+            "error": "Planner produced invalid DAG: Node 'q3' depends on ['q1'] but input_map does not consume them.",
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5a899bf955429946c8d6e959",
+      "id": "5a899bf955429946c8d6e959",
+      "question": "When was the New Orleans Pelicans player featured on the NBA 2K16 cover first drafted?",
+      "answer": "2012",
+      "context": [
+        [
+          "Anthony Davis (basketball)",
+          [
+            "Anthony Marshon Davis Jr. (born March 11, 1993) is an American professional basketball player for the New Orleans Pelicans of the National Basketball Association (NBA).",
+            " He plays the power forward and center positions.",
+            " Davis was selected first overall in the 2012 NBA draft by New Orleans, is a four-time NBA All-Star, and has been named to two All-NBA First Teams.",
+            " He also earned a gold medal playing with Team USA at the 2012 Summer Olympics."
+          ]
+        ],
+        [
+          "List of New Orleans Pelicans seasons",
+          [
+            "The New Orleans Pelicans are a professional basketball team based in New Orleans, Louisiana.",
+            " They are members of the Southwest Division of the Western Conference in the National Basketball Association (NBA).",
+            " The franchise began play during the 2002–03 NBA season as the New Orleans Hornets following the relocation of the Charlotte Hornets, based in Charlotte, North Carolina.",
+            " After three seasons in New Orleans, Hurricane Katrina forced the franchise to temporarily relocate to Oklahoma City, Oklahoma, where they spent two seasons as the New Orleans/Oklahoma City Hornets.",
+            " The Hornets returned to New Orleans full-time for the 2007–08 season.",
+            " The team changed its name to the New Orleans Pelicans at the conclusion of the 2012–13 season."
+          ]
+        ],
+        [
+          "NBA 2K17",
+          [
+            "NBA 2K17 is a basketball simulation video game developed by Visual Concepts and published by 2K Sports.",
+            " It is the 18th installment in the \"NBA 2K\" franchise and the successor to \"NBA 2K16\".",
+            " It was released worldwide on September 20, 2016, for Microsoft Windows, PlayStation 4, PlayStation 3, Xbox One, and Xbox 360.",
+            " Players who pre-ordered the game received it on September 16, 2016.",
+            " Paul George of the Indiana Pacers is the cover athlete for the regular edition of the game, while Kobe Bryant is the cover athlete for the 'Legend Edition'.",
+            " In Italy, the cover athlete is Danilo Gallinari, and in Spain, the cover athlete is Pau Gasol.",
+            " A version of the game for iOS and Android was released on September 23, 2016."
+          ]
+        ],
+        [
+          "NBA 2K16",
+          [
+            "NBA 2K16 is a basketball simulation video game developed by Visual Concepts and published by 2K Sports.",
+            " It is the 17th installment in the \"NBA 2K\" franchise and the successor to \"NBA 2K15\".",
+            " It was released on September 29, 2015 for Microsoft Windows, Xbox One, Xbox 360, PlayStation 4, and PlayStation 3.",
+            " A mobile version for Android and iOS was also released on October 14, 2015.",
+            " There are three different covers for the main game, one featuring Anthony Davis of the New Orleans Pelicans, another featuring Stephen Curry of the Golden State Warriors, and the last featuring James Harden of the Houston Rockets.",
+            " A special edition version of the game was also released; it features Michael Jordan on the cover.",
+            " Additionally, the French version of \"NBA 2K16\" features Tony Parker of the San Antonio Spurs as the cover athlete, the German version, Dennis Schröder of the Atlanta Hawks, and the Spanish version, Marc and Pau Gasol of the Memphis Grizzlies and Chicago Bulls respectively."
+          ]
+        ],
+        [
+          "NBA 2K15",
+          [
+            "NBA 2K15 is a basketball simulation video game developed by Visual Concepts and published by 2K Sports.",
+            " It is the sixteenth installment in the \"NBA 2K\" franchise and the successor to \"NBA 2K14\".",
+            " It was released in October 2014 for Microsoft Windows, Xbox One, Xbox 360, PlayStation 3 and PlayStation 4.",
+            " Kevin Durant of the Oklahoma City Thunder, one of the three cover athletes of \"NBA 2K13\", is the solo cover athlete of \"NBA 2K15\".",
+            " \"NBA 2K15\" was succeeded by \"NBA 2K16\"."
+          ]
+        ],
+        [
+          "History of the New Orleans Pelicans",
+          [
+            "This article is about the New Orleans Pelicans of the National Basketball Association.",
+            " The New Orleans Pelicans are an official team in the National Basketball Association(NBA).",
+            " Until the conclusion of the Pelicans' 2012–2013 regular season the team was named the New Orleans Hornets.",
+            " The name change came along with the purchase of the team by its new owner, Tom Benson.",
+            " Early on in the purchasing process, Benson made it clear that he intended to change the name to something more \"local\".",
+            " Inspiration for the name change is given to Louisiana's state bird, the brown pelican.",
+            " The Pelicans have an overall franchise record of 498-552, along with six playoff qualifications.",
+            " Their achievements include one playoff series victory and one division title.",
+            " In recent years, the Pelicans have held the names of some of the NBA's brightest rising stars on its roster."
+          ]
+        ],
+        [
+          "List of New Orleans Pelicans head coaches",
+          [
+            "The New Orleans Pelicans are an American professional basketball team based in New Orleans, Louisiana.",
+            " They play in the Southwest Division of the Western Conference in the National Basketball Association (NBA).",
+            " The team was born out of the original Hornets' relocation to New Orleans in 2002.",
+            " The team has had three names since its inception; it was called the New Orleans Hornets (2002–2005; 2007–2013), the New Orleans / Oklahoma City Hornets (2005–2007), and the New Orleans Pelicans (2013–present).",
+            " The Pelicans have never been to the NBA Finals since its inception.",
+            " The team has played their home games at the New Orleans Arena since 2002.",
+            " The Pelicans are owned by Tom Benson, with Dell Demps as their general manager."
+          ]
+        ],
+        [
+          "New Orleans Pelicans draft history",
+          [
+            "The New Orleans Pelicans are an American professional basketball team based in New Orleans, Louisiana.",
+            " They play in the Southwest Division of the Western Conference of the National Basketball Association (NBA).",
+            " The Pelicans were established as the New Orleans Hornets in the when then-owner of the Charlotte Hornets, George Shinn, relocated the franchise to New Orleans.",
+            " During the 2005–07 period, the Hornets played 71 games in Oklahoma City due to the damage caused by Hurricane Katrina.",
+            " The team officially changed its name to the New Orleans Pelicans on April 18, 2013."
+          ]
+        ],
+        [
+          "List of Charlotte Hornets seasons",
+          [
+            "The Charlotte Hornets are a professional basketball club based in Charlotte, North Carolina.",
+            " They are members of the National Basketball Association (NBA), playing in the Southeast Division of the Eastern Conference.",
+            " The original Charlotte Hornets franchise played in Charlotte from 1988–2002 before relocating to New Orleans, Louisiana and becoming the New Orleans Hornets.",
+            " A new franchise, the \"Charlotte Bobcats\", began play in the 2004–05 season.",
+            " The team played for ten seasons as the Bobcats before adopting the Hornets name for the 2014–15 season.",
+            " The Hornets name was left available after the New Orleans Hornets became the New Orleans Pelicans.",
+            " As part of a deal between the Bobcats, Hornets and NBA, the renamed Hornets reclaimed the original Hornets' history and records from 1988 to 2002, while all of the Hornets' records from 2002 to 2013 remained with the Pelicans.",
+            " As a result, the Hornets are now reckoned as having suspended operations after the 2001–02 season before returning as the Bobcats in 2004; This has allowed all of Charlotte's NBA history to be recognized under one single franchise."
+          ]
+        ],
+        [
+          "2014 NBA All-Star Game",
+          [
+            "The 2014 NBA All Star Game was an exhibition basketball game that took place on February 16, 2014, at Smoothie King Center in New Orleans, Louisiana, home of the New Orleans Pelicans.",
+            " The game was the 63rd edition of the National Basketball Association (NBA) All-Star Game and was played during the 2013–14 NBA season.",
+            " The Pelicans (the name was changed by new team owner Tom Benson for the 2013-14 season) were awarded the All-Star Game in an announcement by commissioner David Stern on April 16, 2012.",
+            " It was the second time that New Orleans had hosted the All-Star game; the city had previously hosted the event in 2008, also at the Smoothie King Center (then known as New Orleans Arena)."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "NBA 2K16",
+          4
+        ],
+        [
+          "Anthony Davis (basketball)",
+          0
+        ],
+        [
+          "Anthony Davis (basketball)",
+          2
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "graph_construction",
+            "run_id": "621c9986-59d2-4c7d-933d-08e014d71406",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "system": "dag_agent",
+            "prediction": "",
+            "gold_answer": "2012",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": -1.5,
+            "structural_failure": true,
+            "error": "Planner produced invalid DAG: Node 'q3' depends on ['q2'] but input_map does not consume them.",
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5ae3f2395542995ad6573cc6",
+      "id": "5ae3f2395542995ad6573cc6",
+      "question": "Are Ganzhou and Jimo District both located in China?",
+      "answer": "yes",
+      "context": [
+        [
+          "Ganzhou District",
+          [
+            "Ganzhou District, formerly the separate city of Ganzhou or Kanchow, is a district in and the seat of the prefecture-level city of Zhangye in Gansu Province in the People's Republic of China.",
+            " Ganzhou was formerly an important outpost in western China and, along with Suzhou (now the central district of Jiuquan), it is the namesake of the province.",
+            " As a settlement, it is now known as Zhangye after the prefecture it heads."
+          ]
+        ],
+        [
+          "Zhanggong District",
+          [
+            "Zhanggong District () is the administrative center of the prefecture-level city of Ganzhou in Jiangxi Province, China.",
+            " The oldest part of Ganzhou's ancient sewage system named Fushou Gou (福寿沟, literally \"\"Happiness and Longevity Ditch\"\"), which was built during the eleventh century AD and still in use today, is located in Zhanggong District."
+          ]
+        ],
+        [
+          "Wenquan, Jimo",
+          [
+            "Wenquan () is a town of Jimo City in eastern Shandong province, China, located about 20 km east of Jimo's city centre and more than twice that distance northeast of Qingdao.",
+            " , it has 28 villages under its administration."
+          ]
+        ],
+        [
+          "Bajing Pavilion",
+          [
+            "The Bajing Pavilion (Bajing Tai, 八境台 Bājìng Tái) in Ganzhou, Jiangxi province, China is a three-level pavilion located on the northeast corner of the Ganzhou city wall.",
+            " Zhang River and Gong River join at a confluence as Gan River at its base."
+          ]
+        ],
+        [
+          "Roman Catholic Diocese of Ganzhou",
+          [
+            "The Roman Catholic Diocese of Ganzhou/Kanchow (Latin: \"Canceuven(sis)\" , ) is a diocese located in the city of Ganzhou in the Ecclesiastical province of Nanchang in China."
+          ]
+        ],
+        [
+          "Ganzhou",
+          [
+            "Ganzhou (), formerly romanized as Kanchow, is a prefecture-level city in southern Jiangxi, China, bordering Fujian to the east, Guangdong to the south, and Hunan to the west.",
+            " Its administrative seat is at Zhanggong District.",
+            " Its population was 8,361,447 at the 2010 census whom 1,977,253 in the built-up (or \"metro\") area made of Zhanggong and Nankang, and Ganxian largely being urbanized."
+          ]
+        ],
+        [
+          "Wangcun, Jimo",
+          [
+            "Wangcun () is a town in the eastern jurisdiction of Jimo City in eastern Shandong province, China, located about 39 km east-northeast of downtown Jimo.",
+            " , it has 35 villages under its administration."
+          ]
+        ],
+        [
+          "Ganzhou Huangjin Airport",
+          [
+            "Ganzhou Huangjin Airport (IATA: KOW, ICAO: ZSGZ) is an airport serving the city of Ganzhou in Jiangxi Province, China.",
+            " The airport is located in the town of Fenggang in Nankang District of Ganzhou.",
+            " It is 16 kilometers from the city center of Ganzhou."
+          ]
+        ],
+        [
+          "Jimo District",
+          [
+            "Jimo () is a District of Qingdao, Shandong."
+          ]
+        ],
+        [
+          "Ganzhou Huangjin Airport (former)",
+          [
+            "Ganzhou Huangjin Airport (former) () was the old airport serving the city of Ganzhou in Jiangxi Province, China.",
+            " The airport was located in Shuinan New Area in Zhanggong District.",
+            " It was named after the nearby village of Huangjin.",
+            " Originally built in 1936, it was one of the first civil airports in China, but was closed in March 2008 when all services were transferred to the new airport, also named Ganzhou Huangjin Airport."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Ganzhou",
+          0
+        ],
+        [
+          "Jimo District",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "graph_construction",
+            "run_id": "cc8a0446-f979-4708-9756-757eddd7ea22",
+            "model": "Qwen/Qwen3.5-122B-A10B",
+            "system": "dag_agent",
+            "prediction": "",
+            "gold_answer": "yes",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.0,
+            "structural_failure": true,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5a72429355429971e9dc9375",
+      "id": "5a72429355429971e9dc9375",
+      "question": "What machine has the same name as another machine created by Ludwig Boltzmann?",
+      "answer": "Boltzmann machine",
+      "context": [
+        [
+          "Boltzmann machine",
+          [
+            "A Boltzmann machine is a type of stochastic recurrent neural network (and Markov Random Field)."
+          ]
+        ],
+        [
+          "Boltzmann Medal",
+          [
+            "The Boltzmann Medal (or Boltzmann Award) is the most important prize awarded to physicists that obtain new results concerning statistical mechanics; it is named after the celebrated physicist Ludwig Boltzmann.",
+            " The Boltzmann Medal is awarded once every three years by the \"Commission on Statistical Physics of the International Union of Pure and Applied Physics\", during the STATPHYS conference."
+          ]
+        ],
+        [
+          "Ludwig Boltzmann Gesellschaft",
+          [
+            "The Ludwig Boltzmann Gesellschaft (LBG) is an Austrian network of specialized research institutes that are not part of a university.",
+            " It was founded in 1961 and named after physicist Ludwig Boltzmann.",
+            " In 1999, the Ludwig Boltzmann Gesellschaft comprised 131 institutes in the fields of medicine, humanities and social sciences.",
+            " After 2006, the number of institutes was greatly reduced."
+          ]
+        ],
+        [
+          "Boltzmann constant",
+          [
+            "The Boltzmann constant (\"k\" or k ), which is named after Ludwig Boltzmann, is a physical constant relating the average kinetic energy of particles in a gas with the temperature of the gas.",
+            " It is the gas constant R divided by the Avogadro constant \"N\" :"
+          ]
+        ],
+        [
+          "Boltzmann equation",
+          [
+            "The Boltzmann equation or Boltzmann transport equation (BTE) describes the statistical behaviour of a thermodynamic system not in a state of equilibrium, devised by Ludwig Boltzmann in 1872."
+          ]
+        ],
+        [
+          "Ludwig Boltzmann Prize",
+          [
+            "The Ludwig Boltzmann Prize is awarded by the Austrian Physical Society and honors outstanding achievements in theoretical physics.",
+            " It is named after the famous Austrian physicist Ludwig Boltzmann."
+          ]
+        ],
+        [
+          "Ludwig Boltzmann Institut für Menschenrechte",
+          [
+            "The Ludwig Boltzmann Institute of Human Rights (German: Ludwig Boltzmann Institut für Menschenrechte, BIM) is a Vienna-based research institute affiliated with the Austrian Ludwig Boltzmann Gesellschaft, that specializes in the area of human rights."
+          ]
+        ],
+        [
+          "Stefan–Boltzmann constant",
+          [
+            "The Stefan–Boltzmann constant (also Stefan's constant), a physical constant denoted by the Greek letter \"σ\" (sigma), is the constant of proportionality in the Stefan–Boltzmann law: \"the total intensity radiated over all wavelengths increases as the temperature increases\", of a black body which is proportional to the fourth power of the thermodynamic temperature.",
+            " The theory of thermal radiation lays down the theory of quantum mechanics, by using physics to relate to molecular, atomic and sub-atomic levels.",
+            " Slovenian physicist Josef Stefan formulated the constant in 1879, and it was later derived in 1884 by Austrian physicist Ludwig Boltzmann.",
+            " The equation can also be derived from Planck's Law, by integrating over all wavelengths at a given temperature, which will represent a small flat black body box.",
+            " \"The amount of thermal radiation emitted increases rapidly and the principal frequency of the radiation becomes higher with increasing temperatures\".",
+            " The Stefan–Boltzmann constant can be used to measure the amount of heat that is emitted by a blackbody, which absorbs all of the radiant energy that hits it, and will emit all the radiant energy.",
+            " Furthermore, the Stefan–Boltzmann constant allows for temperature (K) to be converted to units for intensity (W m), which is power per unit area."
+          ]
+        ],
+        [
+          "Ludwig Boltzmann Institute for Neo-Latin Studies",
+          [
+            "The Ludwig Boltzmann Institute for Neo-Latin Studies (LBI) (German: \"Ludwig Boltzmann Institut für Neulateinische Studien\" ) in Innsbruck is a research institute of the Austrian Ludwig Boltzmann Gesellschaft.",
+            " Partner organizations of the LBI are the University of Innsbruck, the University of Freiburg, the Austrian National Library in Vienna, and the Pontificio Comitato di Scienze Storiche in Rome."
+          ]
+        ],
+        [
+          "Ludwig Boltzmann",
+          [
+            "Ludwig Eduard Boltzmann (February 20, 1844 – September 5, 1906) was an Austrian physicist and philosopher whose greatest achievement was in the development of statistical mechanics, which explains and predicts how the properties of atoms (such as mass, charge, and structure) determine the physical properties of matter (such as viscosity, thermal conductivity, and diffusion)."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Boltzmann machine",
+          0
+        ],
+        [
+          "Ludwig Boltzmann",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "graph_construction",
+            "run_id": "cc8a0446-f979-4708-9756-757eddd7ea22",
+            "model": "Qwen/Qwen3.5-122B-A10B",
+            "system": "dag_agent",
+            "prediction": "",
+            "gold_answer": "Boltzmann machine",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.0,
+            "structural_failure": true,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5a8765ad5542996e4f3087cf",
+      "id": "5a8765ad5542996e4f3087cf",
+      "question": "Who is affiliated with more countries as a director, Robert Florey and R. G. Springsteen?",
+      "answer": "Robert Florey",
+      "context": [
+        [
+          "R. G. Springsteen",
+          [
+            "Robert G. Springsteen (September 8, 1904 – December 9, 1989) was an American director of Hollywood B movies and television shows.",
+            " He was most often credited on screen as R. G. Springsteen."
+          ]
+        ],
+        [
+          "Robert Florey",
+          [
+            "Robert Florey (14 September 1900 – 16 May 1979) was a French-American director, screenwriter, film journalist, and occasional actor."
+          ]
+        ],
+        [
+          "The Beast with Five Fingers",
+          [
+            "The Beast with Five Fingers is a 1946 mystery horror film directed by Robert Florey from a screenplay by Curt Siodmak, based on a short story written by W. F. Harvey and first published in 1919 in \"The New Decameron\".",
+            " The film stars Robert Alda, Victor Francen, Andrea King, and Peter Lorre.",
+            " The film's score was composed by Max Steiner."
+          ]
+        ],
+        [
+          "The Preview Murder Mystery",
+          [
+            "The Preview Murder Mystery is a 1936 American mystery-comedy, directed by Robert Florey and shot in the Paramount studio.",
+            " The plot follows a studio public relations man who attempts to trap a killer using television technology, allowing on-screen glimpses of technicians like Florey's cinematographer Karl Struss."
+          ]
+        ],
+        [
+          "Telephone Time",
+          [
+            "Telephone Time is an American anthology drama series that aired on CBS in 1956, and on ABC from 1957 to 1958.",
+            " The series features plays by John Nesbitt who hosted the first season.",
+            " Frank C. Baxter hosted the 1957 and 1958 seasons.",
+            " The program was directed by Arthur Hiller, Robert Florey, and Lewis Allen (director).",
+            " A total of 81 episodes aired from April 1956 to March 1957 on CBS and from April 1957 to April 1958 on the American Broadcasting Company (ABC)."
+          ]
+        ],
+        [
+          "The Hole in the Wall (1929 film)",
+          [
+            "The Hole in the Wall is a 1929 mystery drama film directed by Robert Florey, and starring Claudette Colbert and Edward G. Robinson.",
+            " This film marks the first appearance of Edward G. Robinson as a gangster."
+          ]
+        ],
+        [
+          "Adventures of Don Juan",
+          [
+            "Adventures of Don Juan (released in the UK as The New Adventures of Don Juan) is a 1948 American Technicolor swashbuckling adventure romance film from Warner Bros., produced by Jerry Wald, directed by Vincent Sherman, that stars Errol Flynn and Viveca Lindfors, with Robert Douglas, Alan Hale, Ann Rutherford, and Robert Warwick.",
+            " Also in the cast are Barbara Bates, Raymond Burr, and Mary Stuart.",
+            " The screenplay by George Oppenheimer and Harry Kurnitz, based on a story by Herbert Dalmas, has uncredited contributions by William Faulkner and Robert Florey."
+          ]
+        ],
+        [
+          "The Cocoanuts",
+          [
+            "The Cocoanuts is a 1929 musical comedy film starring the Marx Brothers.",
+            " Produced for Paramount Pictures by Walter Wanger, who is not credited, the film stars the four Marx Brothers, Oscar Shaw, Mary Eaton, and Margaret Dumont.",
+            " It was the first sound film to credit more than one director (Robert Florey and Joseph Santley), and was adapted to the screen by Morrie Ryskind from the George S. Kaufman Broadway musical play.",
+            " Five of the film's tunes were composed by Irving Berlin, including \"When My Dreams Come True\", sung by Oscar Shaw and Mary Eaton."
+          ]
+        ],
+        [
+          "San Antonio (film)",
+          [
+            "San Antonio is a 1945 Western Technicolor film starring Errol Flynn and Alexis Smith.",
+            " The film was written by W. R. Burnett and Alan Le May, and directed by David Butler as well as uncredited Robert Florey and Raoul Walsh."
+          ]
+        ],
+        [
+          "God Is My Co-Pilot (film)",
+          [
+            "God is My Co-Pilot is a 1945 American black-and-white biographical war film from Warner Bros.",
+            " Pictures, produced by Robert Buckner, directed by Robert Florey, that stars Dennis Morgan and co-stars Dane Clark and Raymond Massey.",
+            " The screenplay by Abem Finkel and Peter Milne is based on the 1943 autobiography of the same name by Robert Lee Scott, Jr. (April 12, 1908 – February 27, 2006) and tells the story of Scott's involvement with the Flying Tigers and the United States Army Air Forces in China and Burma during World War II."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Robert Florey",
+          0
+        ],
+        [
+          "R. G. Springsteen",
+          0
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "graph_construction",
+            "run_id": "cc8a0446-f979-4708-9756-757eddd7ea22",
+            "model": "Qwen/Qwen3.5-122B-A10B",
+            "system": "dag_agent",
+            "prediction": "",
+            "gold_answer": "Robert Florey",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": 0.0,
+            "structural_failure": true,
+            "error": null,
+            "rationale": null
+          }
+        ]
+      }
+    },
+    {
+      "_id": "5ab5499e5542992aa134a295",
+      "id": "5ab5499e5542992aa134a295",
+      "question": "In what year was the team that Luke Clark plays either right back or central midfielder for founded?",
+      "answer": "1963",
+      "context": [
+        [
+          "Martin Linnes",
+          [
+            "Martin Linnes (born 20 September 1991) is a Norwegian professional footballer who plays as a right back for Turkish club Galatasaray.",
+            " As a versatile player, he also played as a left back, central midfielder, right midfielder and right winger."
+          ]
+        ],
+        [
+          "Leigh Broxham",
+          [
+            "Leigh Michael Broxham (born 13 January 1988) is an Australian professional footballer who plays as a midfielder for Melbourne Victory in the A-League.",
+            " A natural defensive midfielder, Broxham can also play as an attacking midfielder, central midfielder, centre back, left back or right back."
+          ]
+        ],
+        [
+          "Ibrahim Tall",
+          [
+            "Ibrahim Tall (born 23 June 1981 in Aubervilliers, Paris) is a Senegalese international footballer who plays for FC Stade Nyonnais.",
+            " He is a versatile defender capable of playing either right back or centre back."
+          ]
+        ],
+        [
+          "Nico Pandiani",
+          [
+            "Jorge Nicolás Pandiani Quaglia (born 10 April 1994), known as Nicolás or Nico Pandiani, is a Uruguayan footballer who plays for Canadian Soccer Club of the Uruguayan Segunda División.",
+            " He plays either at right back or as a central defender."
+          ]
+        ],
+        [
+          "Luke Clark",
+          [
+            "Luke Stephen Clark (born 24 May 1994) is an English footballer who is plays for Curzon Ashton.",
+            " He can play either as a right back or as a central midfielder."
+          ]
+        ],
+        [
+          "Michalis Bakakis",
+          [
+            "Michalis Bakakis (Greek: Μιχάλης Μπακάκης ; born 18 March 1991) is a professional footballer, currently playing for AEK Athens.",
+            " Bakakis can play either right back or as a right midfielder."
+          ]
+        ],
+        [
+          "Bjørn Helge Riise",
+          [
+            "Bjørn Helge Semundseth Riise (born 21 June 1983 in Ålesund) is a Norwegian professional footballer.",
+            " He currently plays for Aalesund.",
+            " Riise plays either a central midfielder or a right winger, and has earned 35 international caps for Norway.",
+            " He played for Fulham of the Premier League from July 2009 to August 2012.",
+            " He is the younger brother of former Liverpool and Fulham player John Arne Riise, also a Norwegian international."
+          ]
+        ],
+        [
+          "Curzon Ashton F.C.",
+          [
+            "Curzon Ashton Football Club is a semi-professional football club based in the market town of Ashton-under-Lyne, Greater Manchester, England, that competes in the National League North, the sixth-highest division overall in the English football league system, and are members of the Manchester County Football Association.",
+            " Nicknamed \"the Nash\", the club was founded in 1963 and moved to its current stadium, Tameside Stadium, in 2005."
+          ]
+        ],
+        [
+          "Luke Hubbins",
+          [
+            "Luke Anthony Hubbins (born 11 September 1991 ) is an English footballer.",
+            " He began his career with Birmingham City, but made his professional debut in August 2010 in the Football League Cup while on loan to Notts County, and also spent a brief spell on loan to Conference National club Tamworth.",
+            " He never played for Birmingham's first team, and was released at the end of the 2011–12 season, when he signed for AFC Telford United of the Conference.",
+            " He plays either as a winger or at right back.",
+            " On 2 May 2013 he left A.F.C. Telford United."
+          ]
+        ],
+        [
+          "Atiqur Rahman Meshu",
+          [
+            "Atiqur Rahman Meshu (Bengali: আতিকুর রহমান মিশু ; born 26 August 1988 ) is a Bangladeshi footballer who plays as a defender for Brothers Union and the Bangladesh national football team.",
+            " He plays either a centre back or right back.",
+            " In 2010 AFC Challenge Cup, his stunning diving header saw the Tajiks face their first ever defeat in history against Bangladesh."
+          ]
+        ]
+      ],
+      "supporting_facts": [
+        [
+          "Luke Clark",
+          0
+        ],
+        [
+          "Luke Clark",
+          1
+        ],
+        [
+          "Curzon Ashton F.C.",
+          1
+        ]
+      ],
+      "metadata": {
+        "failure_sources": [
+          {
+            "category": "graph_construction",
+            "run_id": "cc8a0446-f979-4708-9756-757eddd7ea22",
+            "model": "Qwen/Qwen3.5-122B-A10B",
+            "system": "dag_agent",
+            "prediction": "",
+            "gold_answer": "1963",
+            "exact_match": 0.0,
+            "f1": 0.0,
+            "cosine_sim": -1.5,
+            "structural_failure": true,
+            "error": "Planner produced invalid DAG: Node 'q3' depends on children but has an empty input_map.",
+            "rationale": null
+          }
+        ]
+      }
+    }
+  ]
+}

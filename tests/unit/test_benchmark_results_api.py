@@ -18,6 +18,8 @@ from dagqa.schemas import (
     TaskType,
 )
 
+EXPECTED_FACT_RETRIEVAL_SUBSET_COUNT = 19
+
 
 def _single_node_run_trace() -> dict:
     plan = DagPlan(
@@ -357,6 +359,20 @@ def test_list_live_benchmarks_returns_unfinished_summaries(monkeypatch, tmp_path
     assert "records" not in summary
 
 
+def test_hotpotqa_meta_reports_selected_failure_subset() -> None:
+    meta = api.hotpotqa_meta(subset="mistral_qwen_fact_retrieval_failures")
+
+    assert meta["subset"] == "mistral_qwen_fact_retrieval_failures"
+    assert meta["subset_label"] == "Mistral + Qwen fact-retrieval failures"
+    assert meta["total_examples"] == EXPECTED_FACT_RETRIEVAL_SUBSET_COUNT
+    assert meta["default_limit"] == EXPECTED_FACT_RETRIEVAL_SUBSET_COUNT
+    assert {subset["id"] for subset in meta["subsets"]} == {
+        "validation",
+        "mistral_qwen_fact_retrieval_failures",
+        "mistral_qwen_graph_construction_failures",
+    }
+
+
 async def test_paired_live_benchmark_reuses_sample_and_saves_two_results(
     monkeypatch,
     tmp_path,
@@ -423,6 +439,64 @@ async def test_paired_live_benchmark_reuses_sample_and_saves_two_results(
     assert {result["system"] for result in saved} == {"dag_agent", "direct_llm"}
     assert {result["seed"] for result in saved} == {123}
     assert {result["comparison_group_id"] for result in saved} == {group_id}
+
+
+async def test_live_benchmark_persists_selected_subset(monkeypatch, tmp_path) -> None:
+    examples = [
+        HotpotExample(id=str(index), question=f"q{index}", answer=f"a{index}") for index in range(2)
+    ]
+    seen_paths: list[str | None] = []
+
+    async def run_examples(client, sampled, system, max_parallel, on_complete):  # noqa: ANN001, ARG001
+        records = [
+            BenchmarkRecord(
+                id=example.id,
+                question=example.question,
+                gold_answer=example.answer,
+                prediction=example.answer,
+                exact_match=1,
+                f1=1,
+                latency_ms=1,
+            )
+            for example in sampled
+        ]
+        for record in records:
+            on_complete(record)
+        return records
+
+    def load_examples(path=None):  # noqa: ANN001, ANN202
+        seen_paths.append(path)
+        return examples
+
+    monkeypatch.setattr(api, "load_hotpot_examples", load_examples)
+    monkeypatch.setattr(api, "_run_examples", run_examples)
+    monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
+    cfg = AppConfig()
+    dag_client = type("Client", (), {"config": cfg})()
+    run_id = "subset-run"
+    api.LIVE_BENCHMARKS[run_id] = {"created_at": "2026-06-04T00:00:00Z"}
+
+    await api._run_live_benchmark(
+        run_id,
+        api.BenchmarkRequest(
+            limit=2,
+            seed=123,
+            systems=["dag_agent"],
+            subset="mistral_qwen_graph_construction_failures",
+        ),
+        123,
+        dag_client,  # type: ignore[arg-type]
+        cfg,
+        ["dag_agent"],
+    )
+
+    live = api.LIVE_BENCHMARKS[run_id]
+    saved = [json.loads(path.read_text()) for path in tmp_path.glob("*.json")]
+
+    assert seen_paths == ["data/hotpotqa/mini_mistral_qwen_graph_construction_failures.json"]
+    assert live["subset"] == "mistral_qwen_graph_construction_failures"
+    assert live["subset_label"] == "Mistral + Qwen graph-construction failures"
+    assert saved[0]["subset"] == "mistral_qwen_graph_construction_failures"
 
 
 async def test_hotpotqa_preflight_checks_dataset_storage_and_model(
