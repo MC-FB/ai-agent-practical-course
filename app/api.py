@@ -52,6 +52,25 @@ CLUSTER_MODEL_MAX_PARALLEL_EXAMPLES = {
     "google/gemma-4-31B-it": 2,
 }
 PAIRED_SYSTEM_COUNT = 2
+BenchmarkSubset = Literal[
+    "validation",
+    "mistral_qwen_fact_retrieval_failures",
+    "mistral_qwen_graph_construction_failures",
+]
+BENCHMARK_SUBSETS: dict[str, dict[str, str | None]] = {
+    "validation": {
+        "label": "Full HotpotQA validation",
+        "path": None,
+    },
+    "mistral_qwen_fact_retrieval_failures": {
+        "label": "Mistral + Qwen fact-retrieval failures",
+        "path": "data/hotpotqa/mini_mistral_qwen_fact_retrieval_failures.json",
+    },
+    "mistral_qwen_graph_construction_failures": {
+        "label": "Mistral + Qwen graph-construction failures",
+        "path": "data/hotpotqa/mini_mistral_qwen_graph_construction_failures.json",
+    },
+}
 
 
 class LLMSelection(BaseModel):
@@ -74,6 +93,7 @@ class BenchmarkRequest(BaseModel):
     systems: list[Literal["dag_agent", "direct_llm"]] | None = None
     limit: int = 10
     seed: int | None = None
+    subset: BenchmarkSubset = "validation"
     data_path: str | None = None
     llm: LLMSelection | None = None
 
@@ -111,6 +131,23 @@ def _azure_llm_config() -> LLMConfig:
     if path.exists():
         return AppConfig.from_file(path).llm
     raise HTTPException(status_code=503, detail="Azure OpenAI config is not available.")
+
+
+def _benchmark_subset_path(request: BenchmarkRequest) -> str | None:
+    if request.data_path:
+        return request.data_path
+    subset = BENCHMARK_SUBSETS[request.subset]
+    return subset["path"]
+
+
+def _benchmark_subset_label(subset: str) -> str:
+    return str(BENCHMARK_SUBSETS.get(subset, {}).get("label") or subset)
+
+
+def _benchmark_default_limit(config: AppConfig, subset: str, data_path: str | None = None) -> int:
+    if data_path is not None or subset != "validation":
+        return count_hotpot_examples(data_path or str(BENCHMARK_SUBSETS[subset]["path"]))
+    return config.benchmark.default_limit
 
 
 def _with_model_parallelism(config: AppConfig, model: str) -> AppConfig:
@@ -450,12 +487,14 @@ async def hotpotqa(request: BenchmarkRequest) -> BenchmarkResult:
     if len(systems) != 1:
         raise HTTPException(status_code=422, detail="Use the live endpoint for paired benchmarks.")
     dag_client = await validated_client(request.llm)
+    data_path = _benchmark_subset_path(request)
     result = await benchmark_hotpotqa(
         dag_client,
         system=systems[0],
         limit=request.limit,
         seed=request.seed,
-        path=request.data_path,
+        path=data_path,
+        subset=request.subset,
         name=_benchmark_name(request),
     )
     result = _write_benchmark_result(result)
@@ -467,8 +506,11 @@ async def hotpotqa(request: BenchmarkRequest) -> BenchmarkResult:
     tags=["Benchmarks"],
     summary="Get HotpotQA benchmark metadata",
 )
-def hotpotqa_info(data_path: str | None = None) -> dict[str, Any]:
-    return hotpotqa_meta(data_path)
+def hotpotqa_info(
+    data_path: str | None = None,
+    subset: BenchmarkSubset = "validation",
+) -> dict[str, Any]:
+    return hotpotqa_meta(data_path, subset)
 
 
 @router.post(
@@ -483,6 +525,8 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
     cfg = await validated_config_for_selection(request.llm)
     dag_client = DagQaClient(cfg)
     seed = request.seed if request.seed is not None else int(time.time_ns() % 2_147_483_647)
+    data_path = _benchmark_subset_path(request)
+    dataset_size = count_hotpot_examples(data_path)
     state = {
         "run_id": run_id,
         "name": _benchmark_name(request),
@@ -499,7 +543,9 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
         "max_parallel_examples": cfg.benchmark.max_parallel_examples,
         "dataset": "hotpotqa",
         "split": cfg.benchmark.split,
-        "dataset_size": count_hotpot_examples(request.data_path),
+        "subset": request.subset,
+        "subset_label": _benchmark_subset_label(request.subset),
+        "dataset_size": dataset_size,
         "provider": cfg.llm.provider,
         "model": cfg.llm.model,
         "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -585,7 +631,8 @@ async def hotpotqa_preflight(request: BenchmarkRequest) -> BenchmarkPreflightRes
         add("limit", False, "Benchmark limit must be greater than zero.")
 
     try:
-        dataset_size = await asyncio.to_thread(count_hotpot_examples, request.data_path)
+        data_path = _benchmark_subset_path(request)
+        dataset_size = await asyncio.to_thread(count_hotpot_examples, data_path)
         if request.limit > dataset_size:
             add(
                 "dataset",
@@ -774,6 +821,7 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
     benchmark_name = _benchmark_name(request)
     total_examples = request.limit * len(systems)
     dataset_size = 0
+    data_path = _benchmark_subset_path(request)
     last_record_completed_at = prior_state.get("last_record_completed_at")
 
     def update(
@@ -815,6 +863,8 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
             "max_parallel_examples": cfg.benchmark.max_parallel_examples,
             "dataset": "hotpotqa",
             "split": cfg.benchmark.split,
+            "subset": request.subset,
+            "subset_label": _benchmark_subset_label(request.subset),
             "dataset_size": dataset_size or None,
             "provider": dag_client.config.llm.provider,
             "model": dag_client.config.llm.model,
@@ -839,11 +889,11 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
         _store_live_benchmark(state)
 
     try:
-        if request.limit <= 0 and request.data_path is None:
+        if request.limit <= 0 and data_path is None:
             dataset_size = count_hotpot_examples()
             all_examples = []
         else:
-            all_examples = await asyncio.to_thread(load_hotpot_examples, request.data_path)
+            all_examples = await asyncio.to_thread(load_hotpot_examples, data_path)
             dataset_size = len(all_examples)
         sampled_examples = _sample_examples(all_examples, request.limit, seed)
         per_system_total = len(sampled_examples)
@@ -943,6 +993,7 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
                 model=dag_client.config.llm.model,
                 dataset="hotpotqa",
                 split=cfg.benchmark.split,
+                subset=request.subset,
                 dataset_size=dataset_size,
                 seed=seed,
                 max_parallel_examples=cfg.benchmark.max_parallel_examples,
@@ -991,22 +1042,38 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
     tags=["Benchmarks"],
     summary="Get HotpotQA benchmark metadata",
 )
-def hotpotqa_meta(data_path: str | None = None) -> dict[str, Any]:
+def hotpotqa_meta(
+    data_path: str | None = None,
+    subset: BenchmarkSubset = "validation",
+) -> dict[str, Any]:
     cfg = load_config()
+    resolved_path = data_path or BENCHMARK_SUBSETS[subset]["path"]
+    total_examples = count_hotpot_examples(resolved_path)
+    default_limit = _benchmark_default_limit(cfg, subset, data_path)
     return {
         "dataset": "hotpotqa",
         "split": cfg.benchmark.split,
-        "total_examples": count_hotpot_examples(data_path),
-        "default_limit": cfg.benchmark.default_limit,
+        "subset": subset,
+        "subset_label": _benchmark_subset_label(subset),
+        "subsets": [
+            {"id": subset_id, "label": str(details["label"])}
+            for subset_id, details in BENCHMARK_SUBSETS.items()
+        ],
+        "total_examples": total_examples,
+        "default_limit": default_limit,
         "provider": cfg.llm.provider,
         "model": cfg.llm.model,
         "system": "dag_agent",
         "baselines": [
             {
-                "label": "HotpotQA distractor validation size",
+                "label": _benchmark_subset_label(subset),
                 "metric": "examples",
-                "value": count_hotpot_examples(data_path),
-                "source": "Hugging Face hotpotqa/hotpot_qa dataset card",
+                "value": total_examples,
+                "source": (
+                    "Hugging Face hotpotqa/hotpot_qa dataset card"
+                    if resolved_path is None
+                    else str(resolved_path)
+                ),
             }
         ],
     }
@@ -1131,6 +1198,8 @@ def list_benchmark_results() -> dict[str, Any]:
             "created_at": normalized.get("created_at"),
             "dataset": normalized.get("dataset"),
             "split": normalized.get("split"),
+            "subset": normalized.get("subset") or "validation",
+            "subset_label": _benchmark_subset_label(normalized.get("subset") or "validation"),
             "system": normalized.get("system"),
             "provider": normalized.get("provider"),
             "model": normalized.get("model"),
@@ -1174,6 +1243,7 @@ def _result_completion_key(item: dict[str, Any]) -> tuple[Any, ...] | None:
         item.get("seed"),
         item.get("model"),
         item.get("limit"),
+        item.get("subset") or "validation",
     )
 
 
@@ -1251,6 +1321,8 @@ def _cleanup_partial_benchmark_results(result: BenchmarkResult, output_path: Pat
             continue
         if data.get("limit") != result.limit:
             continue
+        if (data.get("subset") or "validation") != result.subset:
+            continue
         if len(data.get("records", [])) >= result.limit:
             continue
         try:
@@ -1274,6 +1346,9 @@ def _live_benchmark_summary(state: dict[str, Any]) -> dict[str, Any]:
         "seed": state.get("seed"),
         "provider": state.get("provider"),
         "model": state.get("model"),
+        "subset": state.get("subset") or "validation",
+        "subset_label": state.get("subset_label")
+        or _benchmark_subset_label(state.get("subset") or "validation"),
         "created_at": state.get("created_at"),
         "total_runtime_ms": state.get("total_runtime_ms") or 0,
         "estimate": state.get("estimate"),
@@ -1421,6 +1496,7 @@ def _normalize_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, 
         "run_id": data.get("run_id") or path.stem,
         "dataset": data.get("dataset") or "hotpotqa",
         "split": data.get("split") or "validation",
+        "subset": data.get("subset") or "validation",
         "dataset_size": dataset_size,
         "system": data.get("system") or "dag_agent",
         "provider": data.get("provider"),
