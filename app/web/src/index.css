@@ -957,12 +957,20 @@ button {
 }
 
 .comparison-answer {
+  display: grid;
+  gap: 3px;
   border: 0;
   background: transparent;
   color: #17655b;
   padding: 0;
   text-align: left;
   cursor: pointer;
+}
+
+.comparison-answer small {
+  color: #667680;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .comparison-answer.failed {
@@ -978,9 +986,15 @@ button {
   min-width: 1000px;
 }
 
-.comparison-table th:last-child,
-.comparison-table td:last-child {
+.comparison-table th:nth-last-child(-n + 2),
+.comparison-table td:nth-last-child(-n + 2) {
   text-align: right;
+}
+
+.comparison-table td:nth-last-child(-n + 2) {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
 }
 
 .benchmark-metrics {

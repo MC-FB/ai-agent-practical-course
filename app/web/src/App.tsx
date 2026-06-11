@@ -896,6 +896,7 @@ function BenchmarkResultView({
               <th>Status</th>
               <th>Graph</th>
               <th>Evidence</th>
+              <th>Gold Recall</th>
             </tr>
           </thead>
           <tbody>
@@ -947,6 +948,7 @@ function BenchmarkResultView({
                       ? "-"
                       : `${formatPercent(record.wrong_supporting_text_rate)} non-gold`}
                   </td>
+                  <td>{formatPercent(record.gold_supporting_fact_recall ?? undefined)}</td>
                 </tr>
               );
             })}
@@ -1196,11 +1198,15 @@ function BenchmarkComparisonView({
                 <th>{focusLabel}</th>
                 <th>{referenceLabel}</th>
                 <th>{deltaLabel}</th>
+                <th>Gold recall impact</th>
               </tr>
             </thead>
             <tbody>
               {filteredAligned.slice(0, visibleRows).map(([focusRecord, referenceRecord]) => {
-                const rowDelta = focusRecord.f1 - referenceRecord.f1;
+                const cosineDelta = focusRecord.cosine_sim - referenceRecord.cosine_sim;
+                const focusRecall = focusRecord.gold_supporting_fact_recall ?? 0;
+                const referenceRecall = referenceRecord.gold_supporting_fact_recall ?? 0;
+                const recallDelta = focusRecall - referenceRecall;
                 return (
                 <tr key={focusRecord.id}>
                   <td>{focusRecord.question}</td>
@@ -1211,7 +1217,8 @@ function BenchmarkComparisonView({
                       onClick={() => onSelectRecord?.(focus, focusRecord)}
                       title={focusRecord.error || "Open benchmark detail"}
                     >
-                      {comparisonAnswerText(focusRecord)} · {formatPercent(focusRecord.f1)}
+                      <span>{comparisonAnswerText(focusRecord)}</span>
+                      <small>Gold recall {formatPercent(focusRecall)}</small>
                     </button>
                   </td>
                   <td>
@@ -1220,10 +1227,22 @@ function BenchmarkComparisonView({
                       onClick={() => onSelectRecord?.(reference, referenceRecord)}
                       title={referenceRecord.error || "Open benchmark detail"}
                     >
-                      {comparisonAnswerText(referenceRecord)} · {formatPercent(referenceRecord.f1)}
+                      <span>{comparisonAnswerText(referenceRecord)}</span>
+                      <small>Gold recall {formatPercent(referenceRecall)}</small>
                     </button>
                   </td>
-                  <td><span className={`row-delta ${deltaClass(rowDelta)}`}>{rowDelta > 0 ? "+" : ""}{formatPercent(rowDelta)}</span></td>
+                  <td>
+                    <span className={`row-delta ${deltaClass(cosineDelta)}`}>
+                      {cosineDelta > 0 ? "+" : ""}
+                      {formatNumber(cosineDelta, 3)}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`row-delta ${deltaClass(recallDelta)}`}>
+                      {recallDelta > 0 ? "+" : ""}
+                      {formatPercent(recallDelta)}
+                    </span>
+                  </td>
                 </tr>
               )})}
             </tbody>
