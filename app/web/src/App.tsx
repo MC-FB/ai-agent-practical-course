@@ -4,6 +4,7 @@ import {
   BarChart3,
   BookOpen,
   CheckCircle2,
+  ChevronDown,
   Database,
   GitBranch,
   History,
@@ -29,6 +30,7 @@ import { Label } from "./components/ui/label";
 import { Progress } from "./components/ui/progress";
 import {
   ApiError,
+  getAppConfig,
   getBenchmarkResult,
   getHotpotBenchmarkMeta,
   getLLMModels,
@@ -50,6 +52,7 @@ import {
   type LLMModelCatalog,
   type LLMSelection,
   type NodeTrace,
+  type PlannerSelection,
   type RunTrace,
   type SavedBenchmarkSummary,
 } from "./api";
@@ -72,6 +75,159 @@ const SAMPLE_QUESTIONS = [
 
 const ACTIVE_BENCHMARK_STORAGE_KEY = "dagqa.activeBenchmarkRunId";
 const LIVE_BENCHMARK_POLL_RETRY_LIMIT = 5;
+
+const TREE_PARAM_BOUNDS = {
+  max_nodes: { min: 1, max: 30 },
+  max_depth: { min: 1, max: 8 },
+};
+// Shown until GET /api/config resolves; mirrors the PlannerConfig field defaults.
+const TREE_PARAM_FALLBACK = { max_nodes: 10, max_depth: 3 };
+
+type PlannerDefaults = { max_nodes: number; max_depth: number };
+
+// Only send the fields the user changed; unchanged fields fall back to server config.
+function buildPlannerOverride(
+  current: PlannerDefaults,
+  defaults: PlannerDefaults | undefined,
+): PlannerSelection | undefined {
+  if (!defaults) return undefined;
+  const override: PlannerSelection = {};
+  if (current.max_nodes !== defaults.max_nodes) override.max_nodes = current.max_nodes;
+  if (current.max_depth !== defaults.max_depth) override.max_depth = current.max_depth;
+  return Object.keys(override).length ? override : undefined;
+}
+
+// Fetches the active planner config, seeds the sliders from it, and derives the
+// override payload to send (undefined when sliders match the server defaults).
+function usePlannerSettings() {
+  const [defaults, setDefaults] = useState<PlannerDefaults>();
+  const [maxNodes, setMaxNodes] = useState(TREE_PARAM_FALLBACK.max_nodes);
+  const [maxDepth, setMaxDepth] = useState(TREE_PARAM_FALLBACK.max_depth);
+
+  useEffect(() => {
+    let cancelled = false;
+    getAppConfig()
+      .then((config) => {
+        if (cancelled) return;
+        const next = {
+          max_nodes: config.planner.max_nodes,
+          max_depth: config.planner.max_depth,
+        };
+        setDefaults(next);
+        setMaxNodes(next.max_nodes);
+        setMaxDepth(next.max_depth);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const override = useMemo(
+    () => buildPlannerOverride({ max_nodes: maxNodes, max_depth: maxDepth }, defaults),
+    [maxNodes, maxDepth, defaults],
+  );
+
+  return { maxNodes, setMaxNodes, maxDepth, setMaxDepth, override };
+}
+
+function TreeParamSlider({
+  label,
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (value: number) => void;
+}) {
+  function update(next: number) {
+    if (!Number.isFinite(next)) return;
+    onChange(Math.min(Math.max(Math.trunc(next), min), max));
+  }
+  return (
+    <div className="grid gap-2">
+      <div className="flex items-center justify-between gap-3">
+        <Label>{label}</Label>
+        <Input
+          aria-label={label}
+          className="h-9 w-20 bg-white text-right"
+          min={min}
+          max={max}
+          type="number"
+          value={value}
+          onChange={(event) => update(Number(event.target.value))}
+        />
+      </div>
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 text-xs font-medium text-slate-500">
+        <span>{min}</span>
+        <input
+          className="h-7 w-full accent-emerald-800"
+          min={min}
+          max={max}
+          type="range"
+          value={value}
+          onChange={(event) => update(Number(event.target.value))}
+        />
+        <span>{max}</span>
+      </div>
+    </div>
+  );
+}
+
+// Collapsible "dropdown" box exposing the planner's max_nodes / max_depth sliders.
+function TreeParametersControl({
+  maxNodes,
+  maxDepth,
+  onMaxNodesChange,
+  onMaxDepthChange,
+}: {
+  maxNodes: number;
+  maxDepth: number;
+  onMaxNodesChange: (value: number) => void;
+  onMaxDepthChange: (value: number) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50/70">
+      <button
+        className="flex w-full items-center justify-between gap-3 p-3 text-left"
+        onClick={() => setOpen((value) => !value)}
+        type="button"
+      >
+        <span className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+          <GitBranch size={16} />
+          Tree parameters
+        </span>
+        <span className="flex items-center gap-2 text-xs font-medium text-slate-500">
+          {maxNodes} nodes · depth {maxDepth}
+          <ChevronDown className={`transition-transform ${open ? "rotate-180" : ""}`} size={16} />
+        </span>
+      </button>
+      {open && (
+        <div className="grid gap-4 border-t border-slate-200 p-3">
+          <TreeParamSlider
+            label="Max nodes"
+            max={TREE_PARAM_BOUNDS.max_nodes.max}
+            min={TREE_PARAM_BOUNDS.max_nodes.min}
+            onChange={onMaxNodesChange}
+            value={maxNodes}
+          />
+          <TreeParamSlider
+            label="Max depth"
+            max={TREE_PARAM_BOUNDS.max_depth.max}
+            min={TREE_PARAM_BOUNDS.max_depth.min}
+            onChange={onMaxDepthChange}
+            value={maxDepth}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
 
 type Tab = "chat" | "dataset" | "results";
 type RunPhase = "idle" | "planning" | "executing" | "complete" | "error";
@@ -565,6 +721,8 @@ function ChatView({ llm }: { llm: LLMSelection }) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>();
   const [phase, setPhase] = useState<RunPhase>("idle");
   const [error, setError] = useState("");
+  const { maxNodes, setMaxNodes, maxDepth, setMaxDepth, override: plannerOverride } =
+    usePlannerSettings();
   const busy = phase === "planning" || phase === "executing";
   const selectedNode = run?.nodes.find((node) => node.node_id === selectedNodeId) ?? run?.nodes[0];
   const selectedPlanNode = run?.plan?.nodes.find((node) => node.id === selectedNode?.node_id);
@@ -586,7 +744,7 @@ function ChatView({ llm }: { llm: LLMSelection }) {
     setRun(null);
     setSelectedNodeId(undefined);
     try {
-      const started = await startLiveAsk(question.trim(), llm);
+      const started = await startLiveAsk(question.trim(), llm, plannerOverride);
       setRun(started);
       setPhase(started.phase);
 
@@ -652,6 +810,13 @@ function ChatView({ llm }: { llm: LLMSelection }) {
             {busy ? "Running" : "Ask"}
           </button>
         </div>
+
+        <TreeParametersControl
+          maxDepth={maxDepth}
+          maxNodes={maxNodes}
+          onMaxDepthChange={setMaxDepth}
+          onMaxNodesChange={setMaxNodes}
+        />
 
         {error && <div className="error-box">{error}</div>}
 
@@ -1089,6 +1254,8 @@ function DatasetView({
   const [benchmarkName, setBenchmarkName] = useState("");
   const [systems, setSystems] = useState<string[]>(["dag_agent", "direct_llm"]);
   const [seedInput, setSeedInput] = useState("");
+  const { maxNodes, setMaxNodes, maxDepth, setMaxDepth, override: plannerOverride } =
+    usePlannerSettings();
   const [meta, setMeta] = useState<HotpotBenchmarkMeta>();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<HotpotBenchmarkResult>();
@@ -1295,12 +1462,26 @@ function DatasetView({
         throw new Error("Select at least one system.");
       }
       const name = benchmarkName.trim() || undefined;
-      const preflight = await preflightBenchmark(resolvedLimit, systems, llm, parsedSeed, name);
+      const preflight = await preflightBenchmark(
+        resolvedLimit,
+        systems,
+        llm,
+        parsedSeed,
+        name,
+        plannerOverride,
+      );
       if (!preflight.ok) {
         const failed = preflight.checks.filter((check) => !check.ok);
         throw new Error(failed.map((check) => check.detail).join(" "));
       }
-      const started = await startLiveBenchmark(resolvedLimit, systems, llm, parsedSeed, name);
+      const started = await startLiveBenchmark(
+        resolvedLimit,
+        systems,
+        llm,
+        parsedSeed,
+        name,
+        plannerOverride,
+      );
       await watchBenchmark(started);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Benchmark failed");
@@ -1476,6 +1657,13 @@ function DatasetView({
                 </div>
               </div>
             </div>
+
+            <TreeParametersControl
+              maxDepth={maxDepth}
+              maxNodes={maxNodes}
+              onMaxDepthChange={setMaxDepth}
+              onMaxNodesChange={setMaxNodes}
+            />
 
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-100 bg-emerald-50/70 p-3">
               <div className="text-sm font-semibold text-emerald-950">
