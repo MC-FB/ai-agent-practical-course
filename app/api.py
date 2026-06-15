@@ -12,7 +12,7 @@ from uuid import uuid4
 
 import httpx
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from dagqa.client import DagQaClient
 from dagqa.config import AppConfig, LLMConfig
@@ -66,9 +66,21 @@ class LLMSelection(BaseModel):
     model: str
 
 
+class PlannerSelection(BaseModel):
+    """Per-request overrides for the planner's DAG-shape constraints.
+
+    Each field is optional; an omitted field falls back to the active config.
+    Bounds mirror the frontend slider ranges and reject out-of-range values.
+    """
+
+    max_nodes: int | None = Field(default=None, ge=1, le=30)
+    max_depth: int | None = Field(default=None, ge=1, le=8)
+
+
 class AskRequest(BaseModel):
     question: str
     llm: LLMSelection | None = None
+    planner: PlannerSelection | None = None
 
 
 class ExecuteRequest(BaseModel):
@@ -85,6 +97,7 @@ class BenchmarkRequest(BaseModel):
     subset: str = "validation"
     data_path: str | None = None
     llm: LLMSelection | None = None
+    planner: PlannerSelection | None = None
 
 
 class BenchmarkResumeRequest(BaseModel):
@@ -147,7 +160,8 @@ def _azure_llm_config() -> LLMConfig:
 def _benchmark_subset_path(request: BenchmarkRequest) -> str | None:
     if request.data_path:
         return request.data_path
-    return get_benchmark_dataset(request.dataset).subset(request.subset).path
+    subset = BENCHMARK_SUBSETS[request.subset]
+    return subset["path"]
 
 
 def _benchmark_subset_label(subset: str, dataset: str = "hotpotqa") -> str:
@@ -169,25 +183,30 @@ def _benchmark_default_limit(
     return config.benchmark.default_limit
 
 
-def _with_model_parallelism(config: AppConfig, model: str) -> AppConfig:
-    max_parallel = CLUSTER_MODEL_MAX_PARALLEL_EXAMPLES.get(model)
-    if max_parallel is None:
-        return config
-    return config.model_copy(
-        update={
-            "benchmark": config.benchmark.model_copy(update={"max_parallel_examples": max_parallel})
-        }
-    )
+def _with_planner_override(cfg: AppConfig, planner: PlannerSelection | None) -> AppConfig:
+    if planner is None:
+        return cfg
+    updates = {
+        key: value
+        for key, value in (("max_nodes", planner.max_nodes), ("max_depth", planner.max_depth))
+        if value is not None
+    }
+    if not updates:
+        return cfg
+    return cfg.model_copy(update={"planner": cfg.planner.model_copy(update=updates)})
 
 
-def config_for_selection(selection: LLMSelection | None = None) -> AppConfig:
+def config_for_selection(
+    selection: LLMSelection | None = None,
+    planner: PlannerSelection | None = None,
+) -> AppConfig:
     config = load_config()
     if selection is None:
         resolved = _resolved_model(config.llm)
-        selected = config.model_copy(
+        cfg = config.model_copy(
             update={"llm": config.llm.model_copy(update={"model": resolved, "model_env": None})}
         )
-        return _with_model_parallelism(selected, resolved)
+        return _with_planner_override(cfg, planner)
 
     model = selection.model.strip()
     if not model:
@@ -210,50 +229,15 @@ def config_for_selection(selection: LLMSelection | None = None) -> AppConfig:
             retry_initial_delay_seconds=config.llm.retry_initial_delay_seconds,
             retry_max_delay_seconds=config.llm.retry_max_delay_seconds,
         )
-    return _with_model_parallelism(config.model_copy(update={"llm": llm}), llm.model)
+    cfg = config.model_copy(update={"llm": llm})
+    return _with_planner_override(cfg, planner)
 
 
-def client(selection: LLMSelection | None = None) -> DagQaClient:
-    return DagQaClient(config_for_selection(selection))
-
-
-async def validated_config_for_selection(selection: LLMSelection | None = None) -> AppConfig:
-    config = load_config()
-    if selection is None:
-        resolved = _resolved_model(config.llm)
-        if config.llm.provider != "cluster":
-            return config.model_copy(
-                update={"llm": config.llm.model_copy(update={"model": resolved, "model_env": None})}
-            )
-        cluster_models = await _cluster_models()
-        selected_model = (
-            resolved if resolved in cluster_models else _preferred_cluster_model(cluster_models)
-        )
-        selected = config.model_copy(
-            update={
-                "llm": config.llm.model_copy(update={"model": selected_model, "model_env": None})
-            }
-        )
-        return _with_model_parallelism(selected, selected_model)
-
-    if selection.provider != "cluster":
-        return config_for_selection(selection)
-
-    model = selection.model.strip()
-    if not model:
-        raise HTTPException(status_code=422, detail="A model must be selected.")
-    cluster_models = await _cluster_models()
-    if model not in cluster_models:
-        available = ", ".join(cluster_models) if cluster_models else "none"
-        raise HTTPException(
-            status_code=422,
-            detail=f"Selected cluster model is not available. Current cluster models: {available}.",
-        )
-    return config_for_selection(selection)
-
-
-async def validated_client(selection: LLMSelection | None = None) -> DagQaClient:
-    return DagQaClient(await validated_config_for_selection(selection))
+def client(
+    selection: LLMSelection | None = None,
+    planner: PlannerSelection | None = None,
+) -> DagQaClient:
+    return DagQaClient(config_for_selection(selection, planner))
 
 
 def _config_for_benchmark_dataset(config: AppConfig, dataset: str) -> AppConfig:
@@ -340,7 +324,7 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
 
 @router.post("/plan")
 async def plan(request: AskRequest) -> dict[str, Any]:
-    dag = await (await validated_client(request.llm)).plan(request.question)
+    dag = await client(request.llm, request.planner).plan(request.question)
     return dag.model_dump(mode="json")
 
 
@@ -356,7 +340,7 @@ async def execute(request: ExecuteRequest) -> dict[str, Any]:
 @router.post("/ask")
 async def ask(request: AskRequest) -> dict[str, Any]:
     try:
-        run = await (await validated_client(request.llm)).ask(request.question)
+        run = await client(request.llm, request.planner).ask(request.question)
     except PlannerError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     RUNS[run.run_id] = run
@@ -368,7 +352,7 @@ async def ask(request: AskRequest) -> dict[str, Any]:
 @router.post("/ask/live")
 async def ask_live(request: AskRequest) -> dict[str, Any]:
     run_id = str(uuid4())
-    cfg = await validated_config_for_selection(request.llm)
+    cfg = config_for_selection(request.llm, request.planner)
     dag_client = DagQaClient(cfg)
     LIVE_RUNS[run_id] = {
         "run_id": run_id,
@@ -515,11 +499,7 @@ async def hotpotqa(request: BenchmarkRequest) -> BenchmarkResult:
     systems = _benchmark_systems(request)
     if len(systems) != 1:
         raise HTTPException(status_code=422, detail="Use the live endpoint for paired benchmarks.")
-    cfg = _config_for_benchmark_dataset(
-        await validated_config_for_selection(request.llm),
-        request.dataset,
-    )
-    dag_client = DagQaClient(cfg)
+    dag_client = await validated_client(request.llm)
     data_path = _benchmark_subset_path(request)
     result = await benchmark_dataset(
         dag_client,
@@ -557,10 +537,7 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
     run_id = str(uuid4())
     systems = _benchmark_systems(request)
     comparison_group_id = str(uuid4()) if len(systems) == PAIRED_SYSTEM_COUNT else None
-    cfg = _config_for_benchmark_dataset(
-        await validated_config_for_selection(request.llm),
-        request.dataset,
-    )
+    cfg = await validated_config_for_selection(request.llm)
     dag_client = DagQaClient(cfg)
     seed = request.seed if request.seed is not None else int(time.time_ns() % 2_147_483_647)
     data_path = _benchmark_subset_path(request)
@@ -691,10 +668,7 @@ async def hotpotqa_preflight(request: BenchmarkRequest) -> BenchmarkPreflightRes
         add("dataset", False, f"Dataset could not be loaded: {exc}")
 
     try:
-        cfg = _config_for_benchmark_dataset(
-            await validated_config_for_selection(request.llm),
-            request.dataset,
-        )
+        cfg = await validated_config_for_selection(request.llm)
         add(
             "configuration",
             True,
@@ -818,10 +792,7 @@ async def resume_live_benchmark(
     if request is not None and request.llm is not None:
         benchmark_request.llm = request.llm
     systems = _benchmark_systems(benchmark_request)
-    cfg = _config_for_benchmark_dataset(
-        await validated_config_for_selection(benchmark_request.llm),
-        benchmark_request.dataset,
-    )
+    cfg = await validated_config_for_selection(benchmark_request.llm)
     dag_client = DagQaClient(cfg)
     stop_event = asyncio.Event()
     LIVE_BENCHMARK_STOPS[run_id] = stop_event
