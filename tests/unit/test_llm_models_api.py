@@ -33,6 +33,29 @@ def test_config_for_cluster_selection_builds_openai_compatible_config(monkeypatc
     assert config.llm.api_base == api.CLUSTER_API_BASE
 
 
+def test_config_for_selection_applies_partial_planner_override(monkeypatch) -> None:
+    monkeypatch.setattr(api, "load_config", _azure_config)
+    base = _azure_config().planner
+
+    override_max_nodes = 5
+    config = api.config_for_selection(planner=api.PlannerSelection(max_nodes=override_max_nodes))
+
+    assert config.planner.max_nodes == override_max_nodes
+    assert config.planner.max_depth == base.max_depth
+    assert config.planner.repair_rounds == base.repair_rounds
+
+
+def test_config_for_selection_without_planner_keeps_config_defaults(monkeypatch) -> None:
+    monkeypatch.setattr(api, "load_config", _azure_config)
+    base = _azure_config().planner
+
+    assert api.config_for_selection().planner.max_nodes == base.max_nodes
+    # An override with no set fields is a no-op, same as passing nothing.
+    assert api.config_for_selection(planner=api.PlannerSelection()).planner.max_nodes == (
+        base.max_nodes
+    )
+
+
 async def test_list_llm_models_combines_azure_and_live_cluster_catalog(monkeypatch) -> None:
     monkeypatch.setattr(api, "load_config", _azure_config)
 
