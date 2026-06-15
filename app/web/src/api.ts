@@ -30,6 +30,7 @@ export type EvidenceSelection = {
   strategy: string;
   total_available: number;
   documents: EvidenceDocument[];
+  metadata?: Record<string, unknown>;
 };
 
 export type EvidenceCitation = {
@@ -127,9 +128,13 @@ export type LiveRun = {
   nodes: NodeTrace[];
   waves: { index: number; node_ids: string[] }[];
   error?: string | null;
+  features?: Record<string, unknown>;
 };
 
-export async function ask(question: string, llm: LLMSelection): Promise<RunTrace> {
+export async function ask(
+  question: string,
+  llm: LLMSelection,
+): Promise<RunTrace> {
   const response = await fetch("/api/ask", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -145,7 +150,10 @@ export async function getLLMModels(): Promise<LLMModelCatalog> {
   return response.json();
 }
 
-export async function startLiveAsk(question: string, llm: LLMSelection): Promise<LiveRun> {
+export async function startLiveAsk(
+  question: string,
+  llm: LLMSelection,
+): Promise<LiveRun> {
   const response = await fetch("/api/ask/live", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -226,6 +234,7 @@ export type HotpotBenchmarkResult = {
   total_runtime_ms: number;
   records: HotpotBenchmarkRecord[];
   metrics: Record<string, number>;
+  features?: Record<string, unknown>;
 };
 
 export type LiveBenchmark = HotpotBenchmarkResult & {
@@ -259,6 +268,7 @@ export type LiveBenchmark = HotpotBenchmarkResult & {
   current_system?: string;
   comparison_run_ids?: string[];
   comparison_results?: HotpotBenchmarkResult[];
+  features?: Record<string, unknown>;
 };
 
 export type LiveBenchmarkSummary = {
@@ -389,7 +399,10 @@ export async function stopLiveBenchmark(runId: string): Promise<LiveBenchmark> {
   return response.json();
 }
 
-export async function resumeLiveBenchmark(runId: string, llm: LLMSelection): Promise<LiveBenchmark> {
+export async function resumeLiveBenchmark(
+  runId: string,
+  llm: LLMSelection,
+): Promise<LiveBenchmark> {
   const response = await fetch(`/api/benchmarks/hotpotqa/live/${runId}/resume`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
