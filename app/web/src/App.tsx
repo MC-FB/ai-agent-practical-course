@@ -52,6 +52,7 @@ import {
   type LiveRun,
   type LLMModelCatalog,
   type LLMSelection,
+  type GoldSupportingFact,
   type NodeTrace,
   type RunTrace,
   type SavedBenchmarkSummary,
@@ -383,15 +384,21 @@ function NodeInspector({
   planNode,
   planNodes,
   goldAnswer,
+  structuralIssues,
+  goldSupportingFacts,
 }: {
   node?: NodeTrace;
   planNode?: DagNode;
   planNodes: DagNode[];
   goldAnswer?: string;
+  structuralIssues?: string[];
+  goldSupportingFacts?: GoldSupportingFact[];
 }) {
   const hasInputMap = planNode?.input_map && Object.keys(planNode.input_map).length > 0;
   const expectedInputs = expectedInputsForNode(planNode, planNodes);
   const evidenceCitations = node?.evidence_citations ?? [];
+  const failureReasons = node ? failureReasonsForNode(node, structuralIssues ?? []) : [];
+  const goldFactsByTitle = goldSupportingFactsByTitle(goldSupportingFacts ?? []);
 
   return (
     <section className="panel-section inspector-section">
@@ -406,6 +413,22 @@ function NodeInspector({
         <div className="empty">Select a trace row to inspect prompts and outputs.</div>
       ) : (
         <div className="inspector-grid">
+          {failureReasons.length > 0 && (
+            <div className="failure-panel">
+              <div className="failure-heading">
+                <GitBranch size={16} />
+                <div>
+                  <strong>Failure Reason</strong>
+                  <span>{failureReasons.length} signal{failureReasons.length === 1 ? "" : "s"}</span>
+                </div>
+              </div>
+              <ul>
+                {failureReasons.map((reason, index) => (
+                  <li key={`${reason}-${index}`}>{reason}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           {planNode && (
             <div className="inspector-summary">
               <div>
@@ -489,22 +512,40 @@ function NodeInspector({
             </div>
             {node.supporting_evidence?.documents.length ? (
               <div className="evidence-list">
-                {node.supporting_evidence.documents.map((document, index) => (
-                  <details className="evidence-document" key={document.id}>
-                    <summary>
-                      <span>{index + 1}</span>
-                      <strong>{document.title || "Untitled document"}</strong>
-                      <code>{document.id}</code>
-                    </summary>
-                    <pre>{document.text}</pre>
-                    {Object.keys(document.metadata).length > 0 && (
-                      <div className="evidence-metadata">
-                        <label>Metadata</label>
-                        <pre>{formatJson(document.metadata)}</pre>
-                      </div>
-                    )}
-                  </details>
-                ))}
+                {node.supporting_evidence.documents.map((document, index) => {
+                  const goldSentenceIndices = goldFactsByTitle.get(document.title) ?? [];
+                  const isGoldDocument = goldSentenceIndices.length > 0;
+                  return (
+                    <details
+                      className={`evidence-document ${isGoldDocument ? "gold-document" : "distractor-document"}`}
+                      key={document.id}
+                    >
+                      <summary>
+                        <span>{index + 1}</span>
+                        <strong>{document.title || "Untitled document"}</strong>
+                        <div className="evidence-summary-meta">
+                          <em className={isGoldDocument ? "gold-evidence-badge" : "distractor-evidence-badge"}>
+                            {isGoldDocument ? "Gold evidence" : "Distractor"}
+                          </em>
+                          <code>{document.id}</code>
+                        </div>
+                      </summary>
+                      {isGoldDocument && (
+                        <div className="gold-sentence-note">
+                          Expected gold sentence{goldSentenceIndices.length === 1 ? "" : "s"}:{" "}
+                          {goldSentenceIndices.join(", ")}
+                        </div>
+                      )}
+                      <pre>{document.text}</pre>
+                      {Object.keys(document.metadata).length > 0 && (
+                        <div className="evidence-metadata">
+                          <label>Metadata</label>
+                          <pre>{formatJson(document.metadata)}</pre>
+                        </div>
+                      )}
+                    </details>
+                  );
+                })}
               </div>
             ) : (
               <div className="empty compact-empty">This node did not receive supporting evidence.</div>
@@ -605,6 +646,58 @@ function NodeInspector({
       )}
     </section>
   );
+}
+
+function failureReasonsForNode(node: NodeTrace, structuralIssues: string[]): string[] {
+  const reasons: string[] = [];
+  const add = (reason?: string | null) => {
+    const value = reason?.trim();
+    if (value && !reasons.includes(value)) {
+      reasons.push(value);
+    }
+  };
+
+  if (node.status !== "succeeded") {
+    add(`Node status is ${node.status}.`);
+  }
+  add(node.error);
+
+  if (!node.validation.valid) {
+    for (const error of node.validation.errors ?? []) {
+      add(error);
+    }
+  }
+
+  const directStructuralIssues = structuralIssues.filter((issue) =>
+    issue.startsWith(`${node.node_id}:`),
+  );
+  for (const issue of directStructuralIssues) {
+    add(issue.replace(`${node.node_id}:`, "").trim());
+  }
+
+  if (
+    node.status !== "succeeded" &&
+    !node.returned_value &&
+    !reasons.some((reason) => reason.toLowerCase().includes("returned"))
+  ) {
+    add("The node did not return a value usable by downstream nodes.");
+  }
+
+  return reasons;
+}
+
+function goldSupportingFactsByTitle(facts: GoldSupportingFact[]): Map<string, number[]> {
+  const byTitle = new Map<string, number[]>();
+  for (const fact of facts) {
+    const title = fact.title?.trim();
+    if (!title) continue;
+    const indices = byTitle.get(title) ?? [];
+    if (!indices.includes(fact.sentence_index)) {
+      indices.push(fact.sentence_index);
+    }
+    byTitle.set(title, indices.sort((left, right) => left - right));
+  }
+  return byTitle;
 }
 
 function ChatView({ llm }: { llm: LLMSelection }) {
@@ -2119,6 +2212,8 @@ function BenchmarkRecordDetail({
           planNode={selectedPlanNode}
           planNodes={run.plan?.nodes ?? []}
           goldAnswer={record.gold_answer}
+          structuralIssues={record.structural_issues ?? []}
+          goldSupportingFacts={record.gold_supporting_facts ?? []}
         />
       </aside>
     </main>

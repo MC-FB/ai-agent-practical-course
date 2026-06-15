@@ -667,6 +667,43 @@ button {
   padding: 10px;
 }
 
+.failure-panel {
+  border: 1px solid #efb5ac;
+  border-radius: 8px;
+  background: #fff5f3;
+  color: #6f2a22;
+  padding: 12px;
+}
+
+.failure-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.failure-heading strong {
+  display: block;
+  font-size: 13px;
+}
+
+.failure-heading span {
+  display: block;
+  color: #9b4f44;
+  font-size: 12px;
+}
+
+.failure-panel ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.failure-panel li {
+  line-height: 1.45;
+}
+
 .contract-panel pre {
   margin-bottom: 0;
 }
@@ -1043,9 +1080,18 @@ button {
   background: #ffffff;
 }
 
+.evidence-document.gold-document {
+  border-color: #9fd6b8;
+  box-shadow: inset 3px 0 0 #2f8d5a;
+}
+
+.evidence-document.distractor-document {
+  border-color: #e1e7ea;
+}
+
 .evidence-document summary {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) auto;
+  grid-template-columns: 24px minmax(0, 1fr) minmax(140px, auto);
   align-items: center;
   gap: 8px;
   padding: 9px 10px;
@@ -1062,6 +1108,43 @@ button {
 .evidence-document summary code {
   color: #6b7d84;
   font-size: 11px;
+}
+
+.evidence-summary-meta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+
+.gold-evidence-badge,
+.distractor-evidence-badge {
+  border-radius: 999px;
+  padding: 3px 7px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.gold-evidence-badge {
+  background: #e7f5ed;
+  color: #26734d;
+}
+
+.distractor-evidence-badge {
+  background: #eef2f4;
+  color: #65757d;
+}
+
+.gold-sentence-note {
+  border-top: 1px solid #d7eadf;
+  background: #f3faf6;
+  color: #2f6d4b;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .evidence-document > pre,
