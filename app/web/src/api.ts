@@ -248,6 +248,8 @@ export type HotpotBenchmarkResult = {
   dataset_size?: number | null;
   seed: number;
   max_parallel_examples: number;
+  max_nodes?: number | null;
+  max_depth?: number | null;
   created_at: string;
   output_path?: string | null;
   total_runtime_ms: number;

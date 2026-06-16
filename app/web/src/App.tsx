@@ -1145,6 +1145,16 @@ function BenchmarkResultView({
           <strong>{result.seed}</strong>
         </div>
         <div>
+          <label>Tree params</label>
+          <strong>
+            {result.system === "dag_agent" &&
+            result.max_nodes != null &&
+            result.max_depth != null
+              ? `${result.max_nodes} nodes · depth ${result.max_depth}`
+              : "—"}
+          </strong>
+        </div>
+        <div>
           <label>Saved File</label>
           <span>{result.output_path ?? "Not saved"}</span>
         </div>
