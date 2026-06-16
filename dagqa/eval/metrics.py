@@ -5,7 +5,10 @@ import string
 from collections import Counter
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 from functools import lru_cache
+from typing import NamedTuple
 from typing import NamedTuple
 
 import numpy as np
@@ -120,7 +123,7 @@ class Metric:
     """
 
     name: str  # output key, e.g. "f1"
-    score: Callable[[str, str, str], float]  # (prediction, ground_truth, question) -> float
+    score: Callable[[str, str], float]  # (prediction, ground_truth) -> float
     aggregate: Callable[[Sequence[MetricSample]], float] = _mean
     error_default: float = 0.0  # per-record value stored when an example errors
 
