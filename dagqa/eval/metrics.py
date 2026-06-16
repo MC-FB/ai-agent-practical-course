@@ -3,7 +3,10 @@ from __future__ import annotations
 import re
 import string
 from collections import Counter
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 from functools import lru_cache
+from typing import NamedTuple
 
 import numpy as np
 import torch
@@ -83,3 +86,47 @@ def cosine_sim(prediction: str, ground_truth: str) -> float:
 
     metric = np.dot(norm_pred_embedding, norm_gt_embedding)
     return float(metric)
+
+
+class MetricSample(NamedTuple):
+    """A single (score, prediction, ground_truth) triple fed to a metric aggregator.
+
+    Carrying the raw strings alongside the score lets an aggregator apply
+    metric-specific filtering (e.g. ``cosine_sim`` drops empty pairs) without
+    importing the benchmark record type.
+    """
+
+    score: float
+    prediction: str
+    ground_truth: str
+
+
+def _mean(samples: Sequence[MetricSample]) -> float:
+    return sum(sample.score for sample in samples) / len(samples) if samples else 0.0
+
+
+def _cosine_mean(samples: Sequence[MetricSample]) -> float:
+    # Drop pairs where both sides are empty, mirroring the historical aggregate.
+    kept = [sample for sample in samples if sample.prediction or sample.ground_truth]
+    return sum(sample.score for sample in kept) / len(kept) if kept else 0.0
+
+
+@dataclass(frozen=True)
+class Metric:
+    """A benchmark answer metric: a scoring function plus how to aggregate it.
+
+    To add a metric, append a ``Metric`` to ``ANSWER_METRICS`` — the benchmark
+    then computes, stores, and aggregates it automatically.
+    """
+
+    name: str  # output key, e.g. "f1"
+    score: Callable[[str, str], float]  # (prediction, ground_truth) -> float
+    aggregate: Callable[[Sequence[MetricSample]], float] = _mean
+    error_default: float = 0.0  # per-record value stored when an example errors
+
+
+ANSWER_METRICS: list[Metric] = [
+    Metric("exact_match", exact_match),
+    Metric("f1", answer_f1),
+    Metric("cosine_sim", cosine_sim, aggregate=_cosine_mean),
+]

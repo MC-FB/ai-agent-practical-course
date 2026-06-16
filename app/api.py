@@ -25,7 +25,7 @@ from dagqa.eval.benchmark import (
     benchmark_hotpotqa,
 )
 from dagqa.eval.hotpot_loader import count_hotpot_examples, load_hotpot_examples
-from dagqa.eval.metrics import cosine_sim
+from dagqa.eval.metrics import ANSWER_METRICS, cosine_sim
 from dagqa.graph.render import render_mermaid
 from dagqa.graph.scheduler import Scheduler
 from dagqa.nodes.runner import NodeRunner
@@ -1609,6 +1609,15 @@ def _repair_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, Any
                 record.get("prediction", " "),
                 record.get("gold_answer", " "),
             )
+            needs_save = True
+        # Upgrade legacy records to the metric_scores dict format (keeping the
+        # legacy top-level keys, which the frontend and scripts still read).
+        if "metric_scores" not in record:
+            record["metric_scores"] = {
+                metric.name: record[metric.name]
+                for metric in ANSWER_METRICS
+                if record.get(metric.name) is not None
+            }
             needs_save = True
 
     # Patch aggregate metrics if missing

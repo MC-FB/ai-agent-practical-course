@@ -1,0 +1,843 @@
+{
+  "run_id": "66d5bacc-a0f2-420c-ab2d-641b73ee9a64",
+  "name": null,
+  "comparison_group_id": "abf4494f-d20b-46b1-b9c2-5ec164188ee3",
+  "system": "direct_llm",
+  "limit": 2,
+  "provider": "cluster",
+  "model": "Qwen/Qwen3.5-122B-A10B",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "subset": "validation",
+  "dataset_size": 7405,
+  "seed": 994435110,
+  "max_parallel_examples": 4,
+  "created_at": "2026-06-16T15:14:47Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260616T151447Z-66d5bacc-a0f2-420c-ab2d-641b73ee9a64.json",
+  "total_runtime_ms": 42502.75589299963,
+  "records": [
+    {
+      "id": "5a8edb5c55429917b4a5bde9",
+      "question": "How many years was the politician coauthor of Common Sense, subtitled A new constitution for Britain an MP for?",
+      "gold_answer": "47 years",
+      "prediction": "47 years",
+      "raw_prediction": null,
+      "metric_scores": {
+        "exact_match": 1.0,
+        "f1": 1.0,
+        "cosine_sim": 1.0
+      },
+      "latency_ms": 21720.137321999573,
+      "llm_call_count": 1,
+      "llm_retry_count": 0,
+      "node_count": 1,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Common Sense (Benn)",
+          "sentence_index": 0
+        },
+        {
+          "title": "Tony Benn",
+          "sentence_index": 0
+        },
+        {
+          "title": "Tony Benn",
+          "sentence_index": 1
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 0.6666666666666666,
+      "run_trace": {
+        "run_id": "b94b239e-f225-4022-9478-d0ed3b007a21",
+        "question": "How many years was the politician coauthor of Common Sense, subtitled A new constitution for Britain an MP for?",
+        "plan": {
+          "question": "How many years was the politician coauthor of Common Sense, subtitled A new constitution for Britain an MP for?",
+          "nodes": [
+            {
+              "id": "single_prompt",
+              "label": "Single prompt",
+              "task_type": "synthesis",
+              "question": "How many years was the politician coauthor of Common Sense, subtitled A new constitution for Britain an MP for?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "Answer the question concisely using only the supplied sources.",
+                "user_template": "Question: How many years was the politician coauthor of Common Sense, subtitled A new constitution for Britain an MP for?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Medical Common Sense\n  (0) Medical Common Sense: Applied to the Causes, Prevention and Cure of Chronic Diseases and Unhappiness in Marriage was an 1858 work authored and published by Edward Bliss Foote.\n  (1)  The work sold well and an expanded version, Plain Home Talk, Embracing Medical Common Sense, sold 500,000 copies.\n  (2)  This expanded version would include over 500 pages of new content and whereas the initial work was written in two parts, \"Plain Home Talk\" contained four parts and put a large emphasis on marriage and sexual health and ethics topics.\n\nDocument ID: context-1\nTitle: Mauritanian constitutional referendum, 2006\n  (0) A constitutional referendum was held in Mauritania on June 25, 2006 and approved by nearly 97% of voters.\n  (1)  Following the August 2005 ouster of long-time president Maaouya Ould Sid'Ahmed Taya, the new transitional military regime called the referendum on a new constitution, which limits presidents to two five-year terms; previously presidential terms were six years and there was no limit on re-election.\n  (2)  The new constitution also establishes a maximum age limit of 75 for presidential candidates.\n\nDocument ID: context-2\nTitle: Common Sense Revolution\n  (0) The phrase Common Sense Revolution (CSR) has been used as a political slogan to describe conservative platforms with a main goal of reducing taxes while balancing the budget by reducing the size and role of government.\n  (1)  It has been used in places such as Australia and the U.S. state of New Jersey in the 1990s.\n  (2)  This article deals with the \"Common Sense Revolution\" as it was under Ontario Premier Mike Harris, and the Progressive Conservative Party of Ontario from 1995 to 2002.\n\nDocument ID: context-3\nTitle: Constituent Assembly (Peru)\n  (0) The Constituent Assembly was the tenth Constituent Assembly of Peru, convened by the government of General Francisco Morales Bermudez to facilitate the return of democracy following a decade of the self-styled Revolutionary Government of the Armed Forces.\n  (1)  It was settled on July 28, 1978 and was led by V\u00edctor Ra\u00fal Haya de la Torre, historical leader of the American Popular Revolutionary Alliance.\n  (2)  Its main mission was to develop a new constitution replacing the old 1933 Constitution.\n  (3)  This new Constitution was enacted and promulgated on July 12, 1979, and entered into force on July 28, 1980, on the opening of the constitutional government of the architect Fernando Bela\u00fande Terry.\n  (4)  It was replaced 14\u00a0years later by the 1993 Constitution.\n\nDocument ID: context-4\nTitle: Common Sense (Benn)\n  (0) Common Sense, subtitled A new constitution for Britain is a book written by the British Labour politician Tony Benn and the journalist Andrew Hood.\n\nDocument ID: context-5\nTitle: Plan of Tacubaya\n  (0) Plan of Tacubaya, also known as Tacubaya Plan or War of the Three Years (Spanish: \"Plan de Tacubaya\" ) was formulated to abolish the Reform Laws by Benito Ju\u00e1rez.\n  (1)  In Mexico the new constitution was rejected by a large part of society, which had the support of the clergy and the army.\n  (2)  Comonfort, aware of the limitations imposed by the new regime, proposed reforms to strengthen the government and mitigate \"radical\" measures; however, Congress rejected them.\n  (3)  Given the delicate situation, F\u00e9lix Zuloaga and other generals convinced Comonfort to convene another congress to draft a new constitution more in keeping with the customs of the nation.\n  (4)  On December 17, 1857, Zuloaga proclaimed the Plan of Tacubaya.\n  (5)  Comonfort joined the Plan of Tacubaya, which began the three-year war.\n\nDocument ID: context-6\nTitle: Puerto Rican constitutional referendum, 1952\n  (0) A referendum on a new constitution was held in Puerto Rico on 3 March 1952.\n  (1)  It was approved by 81.9% of voters.\n  (2)  This was considered by many US and Puerto Rican politicians an affirmation of the new Constitution of the island as an \"Estado Libre Associado\", or Commonwealth, as proposed by legislation in 1950 by the US Congress after negotiation with its political leaders.\n  (3)  Puerto Rican nationalists question the meaning of the referendum, complaining that the only alternative offered was direct US rule, and no choice of independence was offered.\n  (4)  In 1980, the US Supreme Court adjudicated (\"Harris v. Rosario\") that as a result of this referendum of 1952, the actual Territorial Status was not changed at all.\n\nDocument ID: context-7\nTitle: Tony Benn\n  (0) Anthony Neil Wedgwood Benn (3 April 1925 \u2013 14 March 2014), originally known as Anthony Wedgwood Benn, but later as Tony Benn, was a British politician, writer, and diarist.\n  (1)  He was a member of parliament (MP) for 47 years between the 1950 and 2001 general elections and a Cabinet minister in the Labour governments of Harold Wilson and James Callaghan in the 1960s and 1970s.\n  (2)  Originally a moderate, he was identified as being on the party's hard left from the early 1980s, and was widely seen as a key proponent of democratic socialism within the party.\n\nDocument ID: context-8\nTitle: Bulgarian Constitutional Assembly election, 1946\n  (0) Constitutional Assembly elections were held in Bulgaria on 27 October 1946.\n  (1)  The elections served to elect members to the 6th Grand National Assembly, tasked with adopting a new constitution.\n  (2)  The Fatherland Front, an anti-fascist coalition dominated by the Bulgarian Communist Party, had come to power in 1944 following a coup.\n  (3)  Now that the Second World War was over and the monarchy abolished the communists wanted to adopt a new constitution.\n  (4)  The Communists won a large majority, with 53.5 percent of the vote and 278 of the 465 seats.\n  (5)  Voter turnout was 92.6%.\n  (6)  This would be the lowest vote share that the Communists or the Fatherland Front would claim during the 43 years of undisguised Communist rule in Bulgaria.\n  (7)  In subsequent years, the Fatherland Front would claim to win elections with unanimous or near-unanimous support.\n\nDocument ID: context-9\nTitle: Moyen-Congo constitutional referendum, 1958\n  (0) A referendum on the new Constitution of France was held in Moyen-Congo on 28 September 1958 as part of a wider referendum held across the French Union.\n  (1)  The new constitution would make the territory an autonomous republic within the French Community, and was approved by 99% of voters.\n  (2)  The Territorial Assembly proclaimed the Republic of the Congo on 28 November 1958, and the country became independent two years later.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "single_prompt"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "single_prompt"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "single_prompt",
+            "label": "Single prompt",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "How many years was the politician coauthor of Common Sense, subtitled A new constitution for Britain an MP for?",
+            "rendered_prompt": "Question: How many years was the politician coauthor of Common Sense, subtitled A new constitution for Britain an MP for?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Medical Common Sense\n  (0) Medical Common Sense: Applied to the Causes, Prevention and Cure of Chronic Diseases and Unhappiness in Marriage was an 1858 work authored and published by Edward Bliss Foote.\n  (1)  The work sold well and an expanded version, Plain Home Talk, Embracing Medical Common Sense, sold 500,000 copies.\n  (2)  This expanded version would include over 500 pages of new content and whereas the initial work was written in two parts, \"Plain Home Talk\" contained four parts and put a large emphasis on marriage and sexual health and ethics topics.\n\nDocument ID: context-1\nTitle: Mauritanian constitutional referendum, 2006\n  (0) A constitutional referendum was held in Mauritania on June 25, 2006 and approved by nearly 97% of voters.\n  (1)  Following the August 2005 ouster of long-time president Maaouya Ould Sid'Ahmed Taya, the new transitional military regime called the referendum on a new constitution, which limits presidents to two five-year terms; previously presidential terms were six years and there was no limit on re-election.\n  (2)  The new constitution also establishes a maximum age limit of 75 for presidential candidates.\n\nDocument ID: context-2\nTitle: Common Sense Revolution\n  (0) The phrase Common Sense Revolution (CSR) has been used as a political slogan to describe conservative platforms with a main goal of reducing taxes while balancing the budget by reducing the size and role of government.\n  (1)  It has been used in places such as Australia and the U.S. state of New Jersey in the 1990s.\n  (2)  This article deals with the \"Common Sense Revolution\" as it was under Ontario Premier Mike Harris, and the Progressive Conservative Party of Ontario from 1995 to 2002.\n\nDocument ID: context-3\nTitle: Constituent Assembly (Peru)\n  (0) The Constituent Assembly was the tenth Constituent Assembly of Peru, convened by the government of General Francisco Morales Bermudez to facilitate the return of democracy following a decade of the self-styled Revolutionary Government of the Armed Forces.\n  (1)  It was settled on July 28, 1978 and was led by V\u00edctor Ra\u00fal Haya de la Torre, historical leader of the American Popular Revolutionary Alliance.\n  (2)  Its main mission was to develop a new constitution replacing the old 1933 Constitution.\n  (3)  This new Constitution was enacted and promulgated on July 12, 1979, and entered into force on July 28, 1980, on the opening of the constitutional government of the architect Fernando Bela\u00fande Terry.\n  (4)  It was replaced 14\u00a0years later by the 1993 Constitution.\n\nDocument ID: context-4\nTitle: Common Sense (Benn)\n  (0) Common Sense, subtitled A new constitution for Britain is a book written by the British Labour politician Tony Benn and the journalist Andrew Hood.\n\nDocument ID: context-5\nTitle: Plan of Tacubaya\n  (0) Plan of Tacubaya, also known as Tacubaya Plan or War of the Three Years (Spanish: \"Plan de Tacubaya\" ) was formulated to abolish the Reform Laws by Benito Ju\u00e1rez.\n  (1)  In Mexico the new constitution was rejected by a large part of society, which had the support of the clergy and the army.\n  (2)  Comonfort, aware of the limitations imposed by the new regime, proposed reforms to strengthen the government and mitigate \"radical\" measures; however, Congress rejected them.\n  (3)  Given the delicate situation, F\u00e9lix Zuloaga and other generals convinced Comonfort to convene another congress to draft a new constitution more in keeping with the customs of the nation.\n  (4)  On December 17, 1857, Zuloaga proclaimed the Plan of Tacubaya.\n  (5)  Comonfort joined the Plan of Tacubaya, which began the three-year war.\n\nDocument ID: context-6\nTitle: Puerto Rican constitutional referendum, 1952\n  (0) A referendum on a new constitution was held in Puerto Rico on 3 March 1952.\n  (1)  It was approved by 81.9% of voters.\n  (2)  This was considered by many US and Puerto Rican politicians an affirmation of the new Constitution of the island as an \"Estado Libre Associado\", or Commonwealth, as proposed by legislation in 1950 by the US Congress after negotiation with its political leaders.\n  (3)  Puerto Rican nationalists question the meaning of the referendum, complaining that the only alternative offered was direct US rule, and no choice of independence was offered.\n  (4)  In 1980, the US Supreme Court adjudicated (\"Harris v. Rosario\") that as a result of this referendum of 1952, the actual Territorial Status was not changed at all.\n\nDocument ID: context-7\nTitle: Tony Benn\n  (0) Anthony Neil Wedgwood Benn (3 April 1925 \u2013 14 March 2014), originally known as Anthony Wedgwood Benn, but later as Tony Benn, was a British politician, writer, and diarist.\n  (1)  He was a member of parliament (MP) for 47 years between the 1950 and 2001 general elections and a Cabinet minister in the Labour governments of Harold Wilson and James Callaghan in the 1960s and 1970s.\n  (2)  Originally a moderate, he was identified as being on the party's hard left from the early 1980s, and was widely seen as a key proponent of democratic socialism within the party.\n\nDocument ID: context-8\nTitle: Bulgarian Constitutional Assembly election, 1946\n  (0) Constitutional Assembly elections were held in Bulgaria on 27 October 1946.\n  (1)  The elections served to elect members to the 6th Grand National Assembly, tasked with adopting a new constitution.\n  (2)  The Fatherland Front, an anti-fascist coalition dominated by the Bulgarian Communist Party, had come to power in 1944 following a coup.\n  (3)  Now that the Second World War was over and the monarchy abolished the communists wanted to adopt a new constitution.\n  (4)  The Communists won a large majority, with 53.5 percent of the vote and 278 of the 465 seats.\n  (5)  Voter turnout was 92.6%.\n  (6)  This would be the lowest vote share that the Communists or the Fatherland Front would claim during the 43 years of undisguised Communist rule in Bulgaria.\n  (7)  In subsequent years, the Fatherland Front would claim to win elections with unanimous or near-unanimous support.\n\nDocument ID: context-9\nTitle: Moyen-Congo constitutional referendum, 1958\n  (0) A referendum on the new Constitution of France was held in Moyen-Congo on 28 September 1958 as part of a wider referendum held across the French Union.\n  (1)  The new constitution would make the territory an autonomous republic within the French Community, and was approved by 99% of voters.\n  (2)  The Territorial Assembly proclaimed the Republic of the Congo on 28 November 1958, and the country became independent two years later.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer.",
+            "raw_response": "\n\n{\n  \"answer\": \"47 years\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-4\",\n      \"title\": \"Common Sense (Benn)\",\n      \"sentence_indices\": [\n        0\n      ],\n      \"fact\": \"Common Sense, subtitled A new constitution for Britain is a book written by the British Labour politician Tony Benn\"\n    },\n    {\n      \"document_id\": \"context-7\",\n      \"title\": \"Tony Benn\",\n      \"sentence_indices\": [\n        1\n      ],\n      \"fact\": \"He was a member of parliament (MP) for 47 years\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "answer": "47 years",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-4",
+                  "title": "Common Sense (Benn)",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Common Sense, subtitled A new constitution for Britain is a book written by the British Labour politician Tony Benn"
+                },
+                {
+                  "document_id": "context-7",
+                  "title": "Tony Benn",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "He was a member of parliament (MP) for 47 years"
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "47 years"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Medical Common Sense",
+                  "text": "Medical Common Sense: Applied to the Causes, Prevention and Cure of Chronic Diseases and Unhappiness in Marriage was an 1858 work authored and published by Edward Bliss Foote. The work sold well and an expanded version, Plain Home Talk, Embracing Medical Common Sense, sold 500,000 copies. This expanded version would include over 500 pages of new content and whereas the initial work was written in two parts, \"Plain Home Talk\" contained four parts and put a large emphasis on marriage and sexual health and ethics topics.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Medical Common Sense: Applied to the Causes, Prevention and Cure of Chronic Diseases and Unhappiness in Marriage was an 1858 work authored and published by Edward Bliss Foote.",
+                      " The work sold well and an expanded version, Plain Home Talk, Embracing Medical Common Sense, sold 500,000 copies.",
+                      " This expanded version would include over 500 pages of new content and whereas the initial work was written in two parts, \"Plain Home Talk\" contained four parts and put a large emphasis on marriage and sexual health and ethics topics."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Mauritanian constitutional referendum, 2006",
+                  "text": "A constitutional referendum was held in Mauritania on June 25, 2006 and approved by nearly 97% of voters. Following the August 2005 ouster of long-time president Maaouya Ould Sid'Ahmed Taya, the new transitional military regime called the referendum on a new constitution, which limits presidents to two five-year terms; previously presidential terms were six years and there was no limit on re-election. The new constitution also establishes a maximum age limit of 75 for presidential candidates.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "A constitutional referendum was held in Mauritania on June 25, 2006 and approved by nearly 97% of voters.",
+                      " Following the August 2005 ouster of long-time president Maaouya Ould Sid'Ahmed Taya, the new transitional military regime called the referendum on a new constitution, which limits presidents to two five-year terms; previously presidential terms were six years and there was no limit on re-election.",
+                      " The new constitution also establishes a maximum age limit of 75 for presidential candidates."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Common Sense Revolution",
+                  "text": "The phrase Common Sense Revolution (CSR) has been used as a political slogan to describe conservative platforms with a main goal of reducing taxes while balancing the budget by reducing the size and role of government. It has been used in places such as Australia and the U.S. state of New Jersey in the 1990s. This article deals with the \"Common Sense Revolution\" as it was under Ontario Premier Mike Harris, and the Progressive Conservative Party of Ontario from 1995 to 2002.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The phrase Common Sense Revolution (CSR) has been used as a political slogan to describe conservative platforms with a main goal of reducing taxes while balancing the budget by reducing the size and role of government.",
+                      " It has been used in places such as Australia and the U.S. state of New Jersey in the 1990s.",
+                      " This article deals with the \"Common Sense Revolution\" as it was under Ontario Premier Mike Harris, and the Progressive Conservative Party of Ontario from 1995 to 2002."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Constituent Assembly (Peru)",
+                  "text": "The Constituent Assembly was the tenth Constituent Assembly of Peru, convened by the government of General Francisco Morales Bermudez to facilitate the return of democracy following a decade of the self-styled Revolutionary Government of the Armed Forces. It was settled on July 28, 1978 and was led by V\u00edctor Ra\u00fal Haya de la Torre, historical leader of the American Popular Revolutionary Alliance. Its main mission was to develop a new constitution replacing the old 1933 Constitution. This new Constitution was enacted and promulgated on July 12, 1979, and entered into force on July 28, 1980, on the opening of the constitutional government of the architect Fernando Bela\u00fande Terry. It was replaced 14\u00a0years later by the 1993 Constitution.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "The Constituent Assembly was the tenth Constituent Assembly of Peru, convened by the government of General Francisco Morales Bermudez to facilitate the return of democracy following a decade of the self-styled Revolutionary Government of the Armed Forces.",
+                      " It was settled on July 28, 1978 and was led by V\u00edctor Ra\u00fal Haya de la Torre, historical leader of the American Popular Revolutionary Alliance.",
+                      " Its main mission was to develop a new constitution replacing the old 1933 Constitution.",
+                      " This new Constitution was enacted and promulgated on July 12, 1979, and entered into force on July 28, 1980, on the opening of the constitutional government of the architect Fernando Bela\u00fande Terry.",
+                      " It was replaced 14\u00a0years later by the 1993 Constitution."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Common Sense (Benn)",
+                  "text": "Common Sense, subtitled A new constitution for Britain is a book written by the British Labour politician Tony Benn and the journalist Andrew Hood.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Common Sense, subtitled A new constitution for Britain is a book written by the British Labour politician Tony Benn and the journalist Andrew Hood."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Plan of Tacubaya",
+                  "text": "Plan of Tacubaya, also known as Tacubaya Plan or War of the Three Years (Spanish: \"Plan de Tacubaya\" ) was formulated to abolish the Reform Laws by Benito Ju\u00e1rez. In Mexico the new constitution was rejected by a large part of society, which had the support of the clergy and the army. Comonfort, aware of the limitations imposed by the new regime, proposed reforms to strengthen the government and mitigate \"radical\" measures; however, Congress rejected them. Given the delicate situation, F\u00e9lix Zuloaga and other generals convinced Comonfort to convene another congress to draft a new constitution more in keeping with the customs of the nation. On December 17, 1857, Zuloaga proclaimed the Plan of Tacubaya. Comonfort joined the Plan of Tacubaya, which began the three-year war.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Plan of Tacubaya, also known as Tacubaya Plan or War of the Three Years (Spanish: \"Plan de Tacubaya\" ) was formulated to abolish the Reform Laws by Benito Ju\u00e1rez.",
+                      " In Mexico the new constitution was rejected by a large part of society, which had the support of the clergy and the army.",
+                      " Comonfort, aware of the limitations imposed by the new regime, proposed reforms to strengthen the government and mitigate \"radical\" measures; however, Congress rejected them.",
+                      " Given the delicate situation, F\u00e9lix Zuloaga and other generals convinced Comonfort to convene another congress to draft a new constitution more in keeping with the customs of the nation.",
+                      " On December 17, 1857, Zuloaga proclaimed the Plan of Tacubaya.",
+                      " Comonfort joined the Plan of Tacubaya, which began the three-year war."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Puerto Rican constitutional referendum, 1952",
+                  "text": "A referendum on a new constitution was held in Puerto Rico on 3 March 1952. It was approved by 81.9% of voters. This was considered by many US and Puerto Rican politicians an affirmation of the new Constitution of the island as an \"Estado Libre Associado\", or Commonwealth, as proposed by legislation in 1950 by the US Congress after negotiation with its political leaders. Puerto Rican nationalists question the meaning of the referendum, complaining that the only alternative offered was direct US rule, and no choice of independence was offered. In 1980, the US Supreme Court adjudicated (\"Harris v. Rosario\") that as a result of this referendum of 1952, the actual Territorial Status was not changed at all.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "A referendum on a new constitution was held in Puerto Rico on 3 March 1952.",
+                      " It was approved by 81.9% of voters.",
+                      " This was considered by many US and Puerto Rican politicians an affirmation of the new Constitution of the island as an \"Estado Libre Associado\", or Commonwealth, as proposed by legislation in 1950 by the US Congress after negotiation with its political leaders.",
+                      " Puerto Rican nationalists question the meaning of the referendum, complaining that the only alternative offered was direct US rule, and no choice of independence was offered.",
+                      " In 1980, the US Supreme Court adjudicated (\"Harris v. Rosario\") that as a result of this referendum of 1952, the actual Territorial Status was not changed at all."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Tony Benn",
+                  "text": "Anthony Neil Wedgwood Benn (3 April 1925 \u2013 14 March 2014), originally known as Anthony Wedgwood Benn, but later as Tony Benn, was a British politician, writer, and diarist. He was a member of parliament (MP) for 47 years between the 1950 and 2001 general elections and a Cabinet minister in the Labour governments of Harold Wilson and James Callaghan in the 1960s and 1970s. Originally a moderate, he was identified as being on the party's hard left from the early 1980s, and was widely seen as a key proponent of democratic socialism within the party.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Anthony Neil Wedgwood Benn (3 April 1925 \u2013 14 March 2014), originally known as Anthony Wedgwood Benn, but later as Tony Benn, was a British politician, writer, and diarist.",
+                      " He was a member of parliament (MP) for 47 years between the 1950 and 2001 general elections and a Cabinet minister in the Labour governments of Harold Wilson and James Callaghan in the 1960s and 1970s.",
+                      " Originally a moderate, he was identified as being on the party's hard left from the early 1980s, and was widely seen as a key proponent of democratic socialism within the party."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Bulgarian Constitutional Assembly election, 1946",
+                  "text": "Constitutional Assembly elections were held in Bulgaria on 27 October 1946. The elections served to elect members to the 6th Grand National Assembly, tasked with adopting a new constitution. The Fatherland Front, an anti-fascist coalition dominated by the Bulgarian Communist Party, had come to power in 1944 following a coup. Now that the Second World War was over and the monarchy abolished the communists wanted to adopt a new constitution. The Communists won a large majority, with 53.5 percent of the vote and 278 of the 465 seats. Voter turnout was 92.6%. This would be the lowest vote share that the Communists or the Fatherland Front would claim during the 43 years of undisguised Communist rule in Bulgaria. In subsequent years, the Fatherland Front would claim to win elections with unanimous or near-unanimous support.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Constitutional Assembly elections were held in Bulgaria on 27 October 1946.",
+                      " The elections served to elect members to the 6th Grand National Assembly, tasked with adopting a new constitution.",
+                      " The Fatherland Front, an anti-fascist coalition dominated by the Bulgarian Communist Party, had come to power in 1944 following a coup.",
+                      " Now that the Second World War was over and the monarchy abolished the communists wanted to adopt a new constitution.",
+                      " The Communists won a large majority, with 53.5 percent of the vote and 278 of the 465 seats.",
+                      " Voter turnout was 92.6%.",
+                      " This would be the lowest vote share that the Communists or the Fatherland Front would claim during the 43 years of undisguised Communist rule in Bulgaria.",
+                      " In subsequent years, the Fatherland Front would claim to win elections with unanimous or near-unanimous support."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Moyen-Congo constitutional referendum, 1958",
+                  "text": "A referendum on the new Constitution of France was held in Moyen-Congo on 28 September 1958 as part of a wider referendum held across the French Union. The new constitution would make the territory an autonomous republic within the French Community, and was approved by 99% of voters. The Territorial Assembly proclaimed the Republic of the Congo on 28 November 1958, and the country became independent two years later.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "A referendum on the new Constitution of France was held in Moyen-Congo on 28 September 1958 as part of a wider referendum held across the French Union.",
+                      " The new constitution would make the territory an autonomous republic within the French Community, and was approved by 99% of voters.",
+                      " The Territorial Assembly proclaimed the Republic of the Congo on 28 November 1958, and the country became independent two years later."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-4",
+                "title": "Common Sense (Benn)",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Common Sense, subtitled A new constitution for Britain is a book written by the British Labour politician Tony Benn"
+              },
+              {
+                "document_id": "context-7",
+                "title": "Tony Benn",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "He was a member of parliament (MP) for 47 years"
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-4",
+                  "title": "Common Sense (Benn)",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Common Sense, subtitled A new constitution for Britain is a book written by the British Labour politician Tony Benn"
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Common Sense (Benn)",
+                    "sentence_index": 0
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-7",
+                  "title": "Tony Benn",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "He was a member of parliament (MP) for 47 years"
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Tony Benn",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": 21719.760591000522,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "47 years"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 21719.8329189996,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "Qwen/Qwen3.5-122B-A10B",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 180.0,
+            "max_retries": 8,
+            "retry_initial_delay_seconds": 2.0,
+            "retry_max_delay_seconds": 120.0
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "empty_prediction_retries": 1,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  single_prompt[\"single_prompt: Single prompt\\nsynthesis\\nsucceeded\"]\n  click single_prompt dagqaSelectGraphNode"
+      },
+      "error": null,
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0
+    },
+    {
+      "id": "5a7e32905542991319bc943b",
+      "question": "Jennifer Jones captained the gold medalists for Canada at the Sochi Winter Olympics in which event?",
+      "gold_answer": "Curling",
+      "prediction": "Curling",
+      "raw_prediction": null,
+      "metric_scores": {
+        "exact_match": 1.0,
+        "f1": 1.0,
+        "cosine_sim": 1.0
+      },
+      "latency_ms": 42452.6552490006,
+      "llm_call_count": 1,
+      "llm_retry_count": 0,
+      "node_count": 1,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "2007 Trail Appliances Autumn Gold Curling Classic",
+          "sentence_index": 0
+        },
+        {
+          "title": "2007 Trail Appliances Autumn Gold Curling Classic",
+          "sentence_index": 1
+        },
+        {
+          "title": "2007 Trail Appliances Autumn Gold Curling Classic",
+          "sentence_index": 2
+        },
+        {
+          "title": "2007 Trail Appliances Autumn Gold Curling Classic",
+          "sentence_index": 3
+        },
+        {
+          "title": "Jennifer Jones (curler)",
+          "sentence_index": 1
+        },
+        {
+          "title": "Jennifer Jones (curler)",
+          "sentence_index": 5
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 1,
+      "wrong_evidence_citation_count": 1,
+      "wrong_supporting_text_rate": 0.5,
+      "gold_supporting_fact_recall": 0.16666666666666666,
+      "run_trace": {
+        "run_id": "dc08e10a-0e7c-4dd4-9157-48a5605552c5",
+        "question": "Jennifer Jones captained the gold medalists for Canada at the Sochi Winter Olympics in which event?",
+        "plan": {
+          "question": "Jennifer Jones captained the gold medalists for Canada at the Sochi Winter Olympics in which event?",
+          "nodes": [
+            {
+              "id": "single_prompt",
+              "label": "Single prompt",
+              "task_type": "synthesis",
+              "question": "Jennifer Jones captained the gold medalists for Canada at the Sochi Winter Olympics in which event?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "Answer the question concisely using only the supplied sources.",
+                "user_template": "Question: Jennifer Jones captained the gold medalists for Canada at the Sochi Winter Olympics in which event?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Meghan Agosta\n  (0) Meghan Christina Agosta (born February 12, 1987) is a Canadian women's ice hockey forward, who last played for the Montreal Stars of the Canadian Women's Hockey League.\n  (1)  Agosta plays for the Canada women's national ice hockey team and has represented Canada at the 2006 Winter Olympics in Turin, the 2010 Winter Olympics in Vancouver, and the 2014 Winter Olympics in Sochi, winning gold medals at all three.\n  (2)  At the 2010 Winter Olympics, Agosta was named MVP of the Women's Hockey Tournament.\n  (3)  She has also played at the Women's World Championship three times, capturing a gold medal and two silvers.\n\nDocument ID: context-1\nTitle: Canada at the 2010 Winter Olympics\n  (0) Canada hosted and participated in the 2010 Winter Olympics in Vancouver, British Columbia.\n  (1)  Canada previously hosted the 1976 Summer Olympics in Montreal and the 1988 Winter Olympics in Calgary.\n  (2)  Canada sent a team of 206 athletes (116 men, 90 women), including participants in all 15 sports, and finished with 14 gold medals and 26 in total (ranking 1st and 3rd respectively), surpassing their previous best medal performance at the 2006 Winter Olympics.\n  (3)  The 14 gold medals also set the all-time record for most gold medals at a single Winter Olympics, one more than the previous record of 13 set by the former Soviet Union in 1976 and Norway in 2002.\n  (4)  Canada was the first host nation to win the gold medal count at a Winter Olympics since Norway at the 1952 Winter Olympics.\n\nDocument ID: context-2\nTitle: 2014 Winter Olympics\n  (0) The 2014 Winter Olympics, officially called the XXII Olympic Winter Games (French: \"Les XXIIes Jeux olympiques d'hiver\" ) (Russian: XXII \u041e\u043b\u0438\u043c\u043f\u0438\u0439\u0441\u043a\u0438\u0435 \u0437\u0438\u043c\u043d\u0438\u0435 \u0438\u0433\u0440\u044b , \"XXII Olimpiyskiye zimniye igry\" ) and commonly known as Sochi 2014, were a major international multi-sport event held from 7 to 23 February 2014 in Sochi, Krasnodar Krai, Russia, with opening rounds in certain events held on the eve of the opening ceremony, 6 February 2014.\n  (1)  Both the Olympics and 2014 Winter Paralympics were organized by the Sochi Organizing Committee (SOOC).\n  (2)  Sochi was selected as the host city in July 2007, during the 119th IOC Session held in Guatemala City.\n  (3)  It was the first Olympics in Russia since the breakup of the Soviet Union in 1991.\n  (4)  The Soviet Union was previously the host nation for the 1980 Summer Olympics in Moscow.\n  (5)  These were the first Olympic Games under the International Olympic Committee (IOC) presidency of Thomas Bach.\n\nDocument ID: context-3\nTitle: 2007 Trail Appliances Autumn Gold Curling Classic\n  (0) The 2007 Trail Appliances Autumn Gold Curling Classic was the 30th annual edition of the event.\n  (1)  It marked the first Grand Slam event of the Women's World Curling Tour.\n  (2)  It was held October 5-9 at the Calgary Curling Club in Calgary, Alberta.\n  (3)  The total purse for the event was $56,000 with $14,000 going to the winning team of Jennifer Jones, Cathy Overton-Clapham, Jill Officer and Dawn Askin.\n  (4)  They beat Shannon Kleibrink's rink in the final.\n\nDocument ID: context-4\nTitle: Rugby sevens at the 2009 World Games\n  (0) Rugby union, specifically in the sevens format, was introduced as a World Games sport for men at the 2001 World Games in Akita.\n  (1)  Fiji entered the 2009 games as the two time defending Gold Medalists.\n  (2)  Held on July 24 and 25 of 2009 in Taiwan, Fiji clinched gold for the 3rd time in front of a crowd of 39,000.\n  (3)  The Fijian win preserves Fiji as the only nation to ever capture gold at the games.\n  (4)  Represented were South Africa (the reigning IRB Sevens World Series Champions), Portugal (the reigning European Sevens Champions), Argentina (the reigning USA Sevens Champions), Fiji (the reigning World Games Gold Medalists), and Chinese Taipei (the host nation).\n  (5)  The USA was the biggest disappointment of Day 1 going 0\u20133 having been expected to compete for a medal.\n  (6)  The biggest surprise of the event was Portugal finding their way into the Gold Medal Match and coming away with the Silver Medal.\n\nDocument ID: context-5\nTitle: Johan Gr\u00f8ttumsbr\u00e5ten\n  (0) Johan Hagbart Pedersen Gr\u00f8ttumsbraaten (12 February 1899 \u2013 24 January 1983) was a Norwegian skier who competed in Nordic combined and cross-country.\n  (1)  Dominating both events in the 1920s and early 1930s, he won several medals in the early Winter Olympics.\n  (2)  Most notably, he won two gold medals at the 1928 Winter Olympics, and as one of the only two entrants to win two gold medalists from St. Moritz, was the most successful athlete there, along with Clas Thunberg of Finland.\n  (3)  He previously won three medals (one silver, two bronzes) at the inaugural Winter Olympics held in Chamonix in 1924, and went on to defend his Olympic Nordic Combined at the 1932 Winter Olympics.\n\nDocument ID: context-6\nTitle: Chloe Kim\n  (0) Chloe Kim (Korean: \uae40\uc120, born April 23, 2000) is an elite American snowboarder, currently sponsored by Target.\n  (1)  While being too young to compete in the 2014 Sochi Winter Olympics Kim earned silver in superpipe in the 2014 Winter X Games, coming behind Kelly Clark.\n  (2)  In 2015 Chloe won Gold in the super pipe event in the Winter X Games beating Kelly Clark.\n  (3)  With this win, at age 14, Kim became the youngest gold medalist until she lost this record to Kelly Sildaru who won gold in 2016 at the age of 13.\n  (4)  In the 2016 X Games, she became the first person under the age of 16 to win three gold medals (and thus the first such person to win back-to-back gold medals) at an X Games.\n  (5)  At that year's U.S. Snowboarding Grand Prix, she became the first woman to land back-to-back 1080 spins in a snowboarding competition.\n  (6)  She scored a perfect 100 points, and is believed to be the second rider ever to do so, after Shaun White.\n\nDocument ID: context-7\nTitle: Sochi bid for the 2014 Winter Olympics\n  (0) Sochi 2014 was a successful bid by the Russian Olympic Committee to host the 2014 Winter Olympics and 2014 Winter Paralympics in Sochi, Russia.\n  (1)  Sochi was one of seven applicants for the games, and one of three to be short-listed, along with Pyeongchang, South Korea, and Salzburg, Austria.\n  (2)  Sochi is a resort city located on the Black Sea.\n  (3)  The bid involved the city itself hosting ice events, while ski events were to be held at the ski resort in Krasnaya Polyana.\n  (4)  The bid's advantages include ample hotel rooms and strong public and political support.\n  (5)  Sochi also bid for the 2002 Winter Olympics, but failed to make the short-list.\n\nDocument ID: context-8\nTitle: Jennifer Jones (curler)\n  (0) Jennifer Judith Jones (born July 7, 1974) is a Canadian curler.\n  (1)  She won an Olympic gold medal as skip of the Canadian team at the 2014 Sochi Games.\n  (2)  She is the first female skip to go through the Games undefeated.\n  (3)  The only male skip to achieve this is fellow Canadian Kevin Martin in 2010.\n  (4)  Jones and her squad are the first Manitoba based curling team to win an Olympic gold medal.\n  (5)  They won the 2008 World Women's Curling Championship, and were the last Canadian women's team to do so until Rachel Homan in 2017.\n  (6)  Jones has won the national championship five times, most recently during the 2015 Scotties Tournament of Hearts.\n  (7)  To go along with her national championships, Jones has also won the Manitoba provincial championship ten times, with a total of 12 Tournament of Heart appearances as of 2017.\n\nDocument ID: context-9\nTitle: 2014 Winter Olympics torch relay\n  (0) The 2014 Winter Olympics torch relay was run from October 7, 2013, 123 days prior to the Sochi 2014 Winter Olympics, until February 7, 2014, the day of the opening ceremony at Sochi.\n  (1)  In Russia the relay traveled from Moscow to Sochi through 2,900 towns and villages across all 83\u00a0federal subjects of Russia by foot, car, train, plane, and \"troika\" for over 65,000\u00a0km of journey.\n  (2)  The event became the longest relay in Winter Olympics history.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "single_prompt"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "single_prompt"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "single_prompt",
+            "label": "Single prompt",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Jennifer Jones captained the gold medalists for Canada at the Sochi Winter Olympics in which event?",
+            "rendered_prompt": "Question: Jennifer Jones captained the gold medalists for Canada at the Sochi Winter Olympics in which event?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Meghan Agosta\n  (0) Meghan Christina Agosta (born February 12, 1987) is a Canadian women's ice hockey forward, who last played for the Montreal Stars of the Canadian Women's Hockey League.\n  (1)  Agosta plays for the Canada women's national ice hockey team and has represented Canada at the 2006 Winter Olympics in Turin, the 2010 Winter Olympics in Vancouver, and the 2014 Winter Olympics in Sochi, winning gold medals at all three.\n  (2)  At the 2010 Winter Olympics, Agosta was named MVP of the Women's Hockey Tournament.\n  (3)  She has also played at the Women's World Championship three times, capturing a gold medal and two silvers.\n\nDocument ID: context-1\nTitle: Canada at the 2010 Winter Olympics\n  (0) Canada hosted and participated in the 2010 Winter Olympics in Vancouver, British Columbia.\n  (1)  Canada previously hosted the 1976 Summer Olympics in Montreal and the 1988 Winter Olympics in Calgary.\n  (2)  Canada sent a team of 206 athletes (116 men, 90 women), including participants in all 15 sports, and finished with 14 gold medals and 26 in total (ranking 1st and 3rd respectively), surpassing their previous best medal performance at the 2006 Winter Olympics.\n  (3)  The 14 gold medals also set the all-time record for most gold medals at a single Winter Olympics, one more than the previous record of 13 set by the former Soviet Union in 1976 and Norway in 2002.\n  (4)  Canada was the first host nation to win the gold medal count at a Winter Olympics since Norway at the 1952 Winter Olympics.\n\nDocument ID: context-2\nTitle: 2014 Winter Olympics\n  (0) The 2014 Winter Olympics, officially called the XXII Olympic Winter Games (French: \"Les XXIIes Jeux olympiques d'hiver\" ) (Russian: XXII \u041e\u043b\u0438\u043c\u043f\u0438\u0439\u0441\u043a\u0438\u0435 \u0437\u0438\u043c\u043d\u0438\u0435 \u0438\u0433\u0440\u044b , \"XXII Olimpiyskiye zimniye igry\" ) and commonly known as Sochi 2014, were a major international multi-sport event held from 7 to 23 February 2014 in Sochi, Krasnodar Krai, Russia, with opening rounds in certain events held on the eve of the opening ceremony, 6 February 2014.\n  (1)  Both the Olympics and 2014 Winter Paralympics were organized by the Sochi Organizing Committee (SOOC).\n  (2)  Sochi was selected as the host city in July 2007, during the 119th IOC Session held in Guatemala City.\n  (3)  It was the first Olympics in Russia since the breakup of the Soviet Union in 1991.\n  (4)  The Soviet Union was previously the host nation for the 1980 Summer Olympics in Moscow.\n  (5)  These were the first Olympic Games under the International Olympic Committee (IOC) presidency of Thomas Bach.\n\nDocument ID: context-3\nTitle: 2007 Trail Appliances Autumn Gold Curling Classic\n  (0) The 2007 Trail Appliances Autumn Gold Curling Classic was the 30th annual edition of the event.\n  (1)  It marked the first Grand Slam event of the Women's World Curling Tour.\n  (2)  It was held October 5-9 at the Calgary Curling Club in Calgary, Alberta.\n  (3)  The total purse for the event was $56,000 with $14,000 going to the winning team of Jennifer Jones, Cathy Overton-Clapham, Jill Officer and Dawn Askin.\n  (4)  They beat Shannon Kleibrink's rink in the final.\n\nDocument ID: context-4\nTitle: Rugby sevens at the 2009 World Games\n  (0) Rugby union, specifically in the sevens format, was introduced as a World Games sport for men at the 2001 World Games in Akita.\n  (1)  Fiji entered the 2009 games as the two time defending Gold Medalists.\n  (2)  Held on July 24 and 25 of 2009 in Taiwan, Fiji clinched gold for the 3rd time in front of a crowd of 39,000.\n  (3)  The Fijian win preserves Fiji as the only nation to ever capture gold at the games.\n  (4)  Represented were South Africa (the reigning IRB Sevens World Series Champions), Portugal (the reigning European Sevens Champions), Argentina (the reigning USA Sevens Champions), Fiji (the reigning World Games Gold Medalists), and Chinese Taipei (the host nation).\n  (5)  The USA was the biggest disappointment of Day 1 going 0\u20133 having been expected to compete for a medal.\n  (6)  The biggest surprise of the event was Portugal finding their way into the Gold Medal Match and coming away with the Silver Medal.\n\nDocument ID: context-5\nTitle: Johan Gr\u00f8ttumsbr\u00e5ten\n  (0) Johan Hagbart Pedersen Gr\u00f8ttumsbraaten (12 February 1899 \u2013 24 January 1983) was a Norwegian skier who competed in Nordic combined and cross-country.\n  (1)  Dominating both events in the 1920s and early 1930s, he won several medals in the early Winter Olympics.\n  (2)  Most notably, he won two gold medals at the 1928 Winter Olympics, and as one of the only two entrants to win two gold medalists from St. Moritz, was the most successful athlete there, along with Clas Thunberg of Finland.\n  (3)  He previously won three medals (one silver, two bronzes) at the inaugural Winter Olympics held in Chamonix in 1924, and went on to defend his Olympic Nordic Combined at the 1932 Winter Olympics.\n\nDocument ID: context-6\nTitle: Chloe Kim\n  (0) Chloe Kim (Korean: \uae40\uc120, born April 23, 2000) is an elite American snowboarder, currently sponsored by Target.\n  (1)  While being too young to compete in the 2014 Sochi Winter Olympics Kim earned silver in superpipe in the 2014 Winter X Games, coming behind Kelly Clark.\n  (2)  In 2015 Chloe won Gold in the super pipe event in the Winter X Games beating Kelly Clark.\n  (3)  With this win, at age 14, Kim became the youngest gold medalist until she lost this record to Kelly Sildaru who won gold in 2016 at the age of 13.\n  (4)  In the 2016 X Games, she became the first person under the age of 16 to win three gold medals (and thus the first such person to win back-to-back gold medals) at an X Games.\n  (5)  At that year's U.S. Snowboarding Grand Prix, she became the first woman to land back-to-back 1080 spins in a snowboarding competition.\n  (6)  She scored a perfect 100 points, and is believed to be the second rider ever to do so, after Shaun White.\n\nDocument ID: context-7\nTitle: Sochi bid for the 2014 Winter Olympics\n  (0) Sochi 2014 was a successful bid by the Russian Olympic Committee to host the 2014 Winter Olympics and 2014 Winter Paralympics in Sochi, Russia.\n  (1)  Sochi was one of seven applicants for the games, and one of three to be short-listed, along with Pyeongchang, South Korea, and Salzburg, Austria.\n  (2)  Sochi is a resort city located on the Black Sea.\n  (3)  The bid involved the city itself hosting ice events, while ski events were to be held at the ski resort in Krasnaya Polyana.\n  (4)  The bid's advantages include ample hotel rooms and strong public and political support.\n  (5)  Sochi also bid for the 2002 Winter Olympics, but failed to make the short-list.\n\nDocument ID: context-8\nTitle: Jennifer Jones (curler)\n  (0) Jennifer Judith Jones (born July 7, 1974) is a Canadian curler.\n  (1)  She won an Olympic gold medal as skip of the Canadian team at the 2014 Sochi Games.\n  (2)  She is the first female skip to go through the Games undefeated.\n  (3)  The only male skip to achieve this is fellow Canadian Kevin Martin in 2010.\n  (4)  Jones and her squad are the first Manitoba based curling team to win an Olympic gold medal.\n  (5)  They won the 2008 World Women's Curling Championship, and were the last Canadian women's team to do so until Rachel Homan in 2017.\n  (6)  Jones has won the national championship five times, most recently during the 2015 Scotties Tournament of Hearts.\n  (7)  To go along with her national championships, Jones has also won the Manitoba provincial championship ten times, with a total of 12 Tournament of Heart appearances as of 2017.\n\nDocument ID: context-9\nTitle: 2014 Winter Olympics torch relay\n  (0) The 2014 Winter Olympics torch relay was run from October 7, 2013, 123 days prior to the Sochi 2014 Winter Olympics, until February 7, 2014, the day of the opening ceremony at Sochi.\n  (1)  In Russia the relay traveled from Moscow to Sochi through 2,900 towns and villages across all 83\u00a0federal subjects of Russia by foot, car, train, plane, and \"troika\" for over 65,000\u00a0km of journey.\n  (2)  The event became the longest relay in Winter Olympics history.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer.",
+            "raw_response": "\n\n{\n  \"answer\": \"Curling\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-8\",\n      \"title\": \"Jennifer Jones (curler)\",\n      \"sentence_indices\": [\n        0\n      ],\n      \"fact\": \"Jennifer Judith Jones (born July 7, 1974) is a Canadian curler.\"\n    },\n    {\n      \"document_id\": \"context-8\",\n      \"title\": \"Jennifer Jones (curler)\",\n      \"sentence_indices\": [\n        1\n      ],\n      \"fact\": \"She won an Olympic gold medal as skip of the Canadian team at the 2014 Sochi Games.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "answer": "Curling",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-8",
+                  "title": "Jennifer Jones (curler)",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Jennifer Judith Jones (born July 7, 1974) is a Canadian curler."
+                },
+                {
+                  "document_id": "context-8",
+                  "title": "Jennifer Jones (curler)",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "She won an Olympic gold medal as skip of the Canadian team at the 2014 Sochi Games."
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "Curling"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Meghan Agosta",
+                  "text": "Meghan Christina Agosta (born February 12, 1987) is a Canadian women's ice hockey forward, who last played for the Montreal Stars of the Canadian Women's Hockey League. Agosta plays for the Canada women's national ice hockey team and has represented Canada at the 2006 Winter Olympics in Turin, the 2010 Winter Olympics in Vancouver, and the 2014 Winter Olympics in Sochi, winning gold medals at all three. At the 2010 Winter Olympics, Agosta was named MVP of the Women's Hockey Tournament. She has also played at the Women's World Championship three times, capturing a gold medal and two silvers.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Meghan Christina Agosta (born February 12, 1987) is a Canadian women's ice hockey forward, who last played for the Montreal Stars of the Canadian Women's Hockey League.",
+                      " Agosta plays for the Canada women's national ice hockey team and has represented Canada at the 2006 Winter Olympics in Turin, the 2010 Winter Olympics in Vancouver, and the 2014 Winter Olympics in Sochi, winning gold medals at all three.",
+                      " At the 2010 Winter Olympics, Agosta was named MVP of the Women's Hockey Tournament.",
+                      " She has also played at the Women's World Championship three times, capturing a gold medal and two silvers."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Canada at the 2010 Winter Olympics",
+                  "text": "Canada hosted and participated in the 2010 Winter Olympics in Vancouver, British Columbia. Canada previously hosted the 1976 Summer Olympics in Montreal and the 1988 Winter Olympics in Calgary. Canada sent a team of 206 athletes (116 men, 90 women), including participants in all 15 sports, and finished with 14 gold medals and 26 in total (ranking 1st and 3rd respectively), surpassing their previous best medal performance at the 2006 Winter Olympics. The 14 gold medals also set the all-time record for most gold medals at a single Winter Olympics, one more than the previous record of 13 set by the former Soviet Union in 1976 and Norway in 2002. Canada was the first host nation to win the gold medal count at a Winter Olympics since Norway at the 1952 Winter Olympics.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Canada hosted and participated in the 2010 Winter Olympics in Vancouver, British Columbia.",
+                      " Canada previously hosted the 1976 Summer Olympics in Montreal and the 1988 Winter Olympics in Calgary.",
+                      " Canada sent a team of 206 athletes (116 men, 90 women), including participants in all 15 sports, and finished with 14 gold medals and 26 in total (ranking 1st and 3rd respectively), surpassing their previous best medal performance at the 2006 Winter Olympics.",
+                      " The 14 gold medals also set the all-time record for most gold medals at a single Winter Olympics, one more than the previous record of 13 set by the former Soviet Union in 1976 and Norway in 2002.",
+                      " Canada was the first host nation to win the gold medal count at a Winter Olympics since Norway at the 1952 Winter Olympics."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "2014 Winter Olympics",
+                  "text": "The 2014 Winter Olympics, officially called the XXII Olympic Winter Games (French: \"Les XXIIes Jeux olympiques d'hiver\" ) (Russian: XXII \u041e\u043b\u0438\u043c\u043f\u0438\u0439\u0441\u043a\u0438\u0435 \u0437\u0438\u043c\u043d\u0438\u0435 \u0438\u0433\u0440\u044b , \"XXII Olimpiyskiye zimniye igry\" ) and commonly known as Sochi 2014, were a major international multi-sport event held from 7 to 23 February 2014 in Sochi, Krasnodar Krai, Russia, with opening rounds in certain events held on the eve of the opening ceremony, 6 February 2014. Both the Olympics and 2014 Winter Paralympics were organized by the Sochi Organizing Committee (SOOC). Sochi was selected as the host city in July 2007, during the 119th IOC Session held in Guatemala City. It was the first Olympics in Russia since the breakup of the Soviet Union in 1991. The Soviet Union was previously the host nation for the 1980 Summer Olympics in Moscow. These were the first Olympic Games under the International Olympic Committee (IOC) presidency of Thomas Bach.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The 2014 Winter Olympics, officially called the XXII Olympic Winter Games (French: \"Les XXIIes Jeux olympiques d'hiver\" ) (Russian: XXII \u041e\u043b\u0438\u043c\u043f\u0438\u0439\u0441\u043a\u0438\u0435 \u0437\u0438\u043c\u043d\u0438\u0435 \u0438\u0433\u0440\u044b , \"XXII Olimpiyskiye zimniye igry\" ) and commonly known as Sochi 2014, were a major international multi-sport event held from 7 to 23 February 2014 in Sochi, Krasnodar Krai, Russia, with opening rounds in certain events held on the eve of the opening ceremony, 6 February 2014.",
+                      " Both the Olympics and 2014 Winter Paralympics were organized by the Sochi Organizing Committee (SOOC).",
+                      " Sochi was selected as the host city in July 2007, during the 119th IOC Session held in Guatemala City.",
+                      " It was the first Olympics in Russia since the breakup of the Soviet Union in 1991.",
+                      " The Soviet Union was previously the host nation for the 1980 Summer Olympics in Moscow.",
+                      " These were the first Olympic Games under the International Olympic Committee (IOC) presidency of Thomas Bach."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "2007 Trail Appliances Autumn Gold Curling Classic",
+                  "text": "The 2007 Trail Appliances Autumn Gold Curling Classic was the 30th annual edition of the event. It marked the first Grand Slam event of the Women's World Curling Tour. It was held October 5-9 at the Calgary Curling Club in Calgary, Alberta. The total purse for the event was $56,000 with $14,000 going to the winning team of Jennifer Jones, Cathy Overton-Clapham, Jill Officer and Dawn Askin. They beat Shannon Kleibrink's rink in the final.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "The 2007 Trail Appliances Autumn Gold Curling Classic was the 30th annual edition of the event.",
+                      " It marked the first Grand Slam event of the Women's World Curling Tour.",
+                      " It was held October 5-9 at the Calgary Curling Club in Calgary, Alberta.",
+                      " The total purse for the event was $56,000 with $14,000 going to the winning team of Jennifer Jones, Cathy Overton-Clapham, Jill Officer and Dawn Askin.",
+                      " They beat Shannon Kleibrink's rink in the final."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Rugby sevens at the 2009 World Games",
+                  "text": "Rugby union, specifically in the sevens format, was introduced as a World Games sport for men at the 2001 World Games in Akita. Fiji entered the 2009 games as the two time defending Gold Medalists. Held on July 24 and 25 of 2009 in Taiwan, Fiji clinched gold for the 3rd time in front of a crowd of 39,000. The Fijian win preserves Fiji as the only nation to ever capture gold at the games. Represented were South Africa (the reigning IRB Sevens World Series Champions), Portugal (the reigning European Sevens Champions), Argentina (the reigning USA Sevens Champions), Fiji (the reigning World Games Gold Medalists), and Chinese Taipei (the host nation). The USA was the biggest disappointment of Day 1 going 0\u20133 having been expected to compete for a medal. The biggest surprise of the event was Portugal finding their way into the Gold Medal Match and coming away with the Silver Medal.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Rugby union, specifically in the sevens format, was introduced as a World Games sport for men at the 2001 World Games in Akita.",
+                      " Fiji entered the 2009 games as the two time defending Gold Medalists.",
+                      " Held on July 24 and 25 of 2009 in Taiwan, Fiji clinched gold for the 3rd time in front of a crowd of 39,000.",
+                      " The Fijian win preserves Fiji as the only nation to ever capture gold at the games.",
+                      " Represented were South Africa (the reigning IRB Sevens World Series Champions), Portugal (the reigning European Sevens Champions), Argentina (the reigning USA Sevens Champions), Fiji (the reigning World Games Gold Medalists), and Chinese Taipei (the host nation).",
+                      " The USA was the biggest disappointment of Day 1 going 0\u20133 having been expected to compete for a medal.",
+                      " The biggest surprise of the event was Portugal finding their way into the Gold Medal Match and coming away with the Silver Medal."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Johan Gr\u00f8ttumsbr\u00e5ten",
+                  "text": "Johan Hagbart Pedersen Gr\u00f8ttumsbraaten (12 February 1899 \u2013 24 January 1983) was a Norwegian skier who competed in Nordic combined and cross-country. Dominating both events in the 1920s and early 1930s, he won several medals in the early Winter Olympics. Most notably, he won two gold medals at the 1928 Winter Olympics, and as one of the only two entrants to win two gold medalists from St. Moritz, was the most successful athlete there, along with Clas Thunberg of Finland. He previously won three medals (one silver, two bronzes) at the inaugural Winter Olympics held in Chamonix in 1924, and went on to defend his Olympic Nordic Combined at the 1932 Winter Olympics.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Johan Hagbart Pedersen Gr\u00f8ttumsbraaten (12 February 1899 \u2013 24 January 1983) was a Norwegian skier who competed in Nordic combined and cross-country.",
+                      " Dominating both events in the 1920s and early 1930s, he won several medals in the early Winter Olympics.",
+                      " Most notably, he won two gold medals at the 1928 Winter Olympics, and as one of the only two entrants to win two gold medalists from St. Moritz, was the most successful athlete there, along with Clas Thunberg of Finland.",
+                      " He previously won three medals (one silver, two bronzes) at the inaugural Winter Olympics held in Chamonix in 1924, and went on to defend his Olympic Nordic Combined at the 1932 Winter Olympics."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Chloe Kim",
+                  "text": "Chloe Kim (Korean: \uae40\uc120, born April 23, 2000) is an elite American snowboarder, currently sponsored by Target. While being too young to compete in the 2014 Sochi Winter Olympics Kim earned silver in superpipe in the 2014 Winter X Games, coming behind Kelly Clark. In 2015 Chloe won Gold in the super pipe event in the Winter X Games beating Kelly Clark. With this win, at age 14, Kim became the youngest gold medalist until she lost this record to Kelly Sildaru who won gold in 2016 at the age of 13. In the 2016 X Games, she became the first person under the age of 16 to win three gold medals (and thus the first such person to win back-to-back gold medals) at an X Games. At that year's U.S. Snowboarding Grand Prix, she became the first woman to land back-to-back 1080 spins in a snowboarding competition. She scored a perfect 100 points, and is believed to be the second rider ever to do so, after Shaun White.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Chloe Kim (Korean: \uae40\uc120, born April 23, 2000) is an elite American snowboarder, currently sponsored by Target.",
+                      " While being too young to compete in the 2014 Sochi Winter Olympics Kim earned silver in superpipe in the 2014 Winter X Games, coming behind Kelly Clark.",
+                      " In 2015 Chloe won Gold in the super pipe event in the Winter X Games beating Kelly Clark.",
+                      " With this win, at age 14, Kim became the youngest gold medalist until she lost this record to Kelly Sildaru who won gold in 2016 at the age of 13.",
+                      " In the 2016 X Games, she became the first person under the age of 16 to win three gold medals (and thus the first such person to win back-to-back gold medals) at an X Games.",
+                      " At that year's U.S. Snowboarding Grand Prix, she became the first woman to land back-to-back 1080 spins in a snowboarding competition.",
+                      " She scored a perfect 100 points, and is believed to be the second rider ever to do so, after Shaun White."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Sochi bid for the 2014 Winter Olympics",
+                  "text": "Sochi 2014 was a successful bid by the Russian Olympic Committee to host the 2014 Winter Olympics and 2014 Winter Paralympics in Sochi, Russia. Sochi was one of seven applicants for the games, and one of three to be short-listed, along with Pyeongchang, South Korea, and Salzburg, Austria. Sochi is a resort city located on the Black Sea. The bid involved the city itself hosting ice events, while ski events were to be held at the ski resort in Krasnaya Polyana. The bid's advantages include ample hotel rooms and strong public and political support. Sochi also bid for the 2002 Winter Olympics, but failed to make the short-list.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Sochi 2014 was a successful bid by the Russian Olympic Committee to host the 2014 Winter Olympics and 2014 Winter Paralympics in Sochi, Russia.",
+                      " Sochi was one of seven applicants for the games, and one of three to be short-listed, along with Pyeongchang, South Korea, and Salzburg, Austria.",
+                      " Sochi is a resort city located on the Black Sea.",
+                      " The bid involved the city itself hosting ice events, while ski events were to be held at the ski resort in Krasnaya Polyana.",
+                      " The bid's advantages include ample hotel rooms and strong public and political support.",
+                      " Sochi also bid for the 2002 Winter Olympics, but failed to make the short-list."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Jennifer Jones (curler)",
+                  "text": "Jennifer Judith Jones (born July 7, 1974) is a Canadian curler. She won an Olympic gold medal as skip of the Canadian team at the 2014 Sochi Games. She is the first female skip to go through the Games undefeated. The only male skip to achieve this is fellow Canadian Kevin Martin in 2010. Jones and her squad are the first Manitoba based curling team to win an Olympic gold medal. They won the 2008 World Women's Curling Championship, and were the last Canadian women's team to do so until Rachel Homan in 2017. Jones has won the national championship five times, most recently during the 2015 Scotties Tournament of Hearts. To go along with her national championships, Jones has also won the Manitoba provincial championship ten times, with a total of 12 Tournament of Heart appearances as of 2017.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Jennifer Judith Jones (born July 7, 1974) is a Canadian curler.",
+                      " She won an Olympic gold medal as skip of the Canadian team at the 2014 Sochi Games.",
+                      " She is the first female skip to go through the Games undefeated.",
+                      " The only male skip to achieve this is fellow Canadian Kevin Martin in 2010.",
+                      " Jones and her squad are the first Manitoba based curling team to win an Olympic gold medal.",
+                      " They won the 2008 World Women's Curling Championship, and were the last Canadian women's team to do so until Rachel Homan in 2017.",
+                      " Jones has won the national championship five times, most recently during the 2015 Scotties Tournament of Hearts.",
+                      " To go along with her national championships, Jones has also won the Manitoba provincial championship ten times, with a total of 12 Tournament of Heart appearances as of 2017."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "2014 Winter Olympics torch relay",
+                  "text": "The 2014 Winter Olympics torch relay was run from October 7, 2013, 123 days prior to the Sochi 2014 Winter Olympics, until February 7, 2014, the day of the opening ceremony at Sochi. In Russia the relay traveled from Moscow to Sochi through 2,900 towns and villages across all 83\u00a0federal subjects of Russia by foot, car, train, plane, and \"troika\" for over 65,000\u00a0km of journey. The event became the longest relay in Winter Olympics history.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "The 2014 Winter Olympics torch relay was run from October 7, 2013, 123 days prior to the Sochi 2014 Winter Olympics, until February 7, 2014, the day of the opening ceremony at Sochi.",
+                      " In Russia the relay traveled from Moscow to Sochi through 2,900 towns and villages across all 83\u00a0federal subjects of Russia by foot, car, train, plane, and \"troika\" for over 65,000\u00a0km of journey.",
+                      " The event became the longest relay in Winter Olympics history."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-8",
+                "title": "Jennifer Jones (curler)",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Jennifer Judith Jones (born July 7, 1974) is a Canadian curler."
+              },
+              {
+                "document_id": "context-8",
+                "title": "Jennifer Jones (curler)",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "She won an Olympic gold medal as skip of the Canadian team at the 2014 Sochi Games."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-8",
+                  "title": "Jennifer Jones (curler)",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Jennifer Judith Jones (born July 7, 1974) is a Canadian curler."
+                },
+                "matches_gold": false,
+                "matched_gold_facts": []
+              },
+              {
+                "citation": {
+                  "document_id": "context-8",
+                  "title": "Jennifer Jones (curler)",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "She won an Olympic gold medal as skip of the Canadian team at the 2014 Sochi Games."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Jennifer Jones (curler)",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": 42452.348589000394,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Curling"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 42452.41549400089,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "Qwen/Qwen3.5-122B-A10B",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 180.0,
+            "max_retries": 8,
+            "retry_initial_delay_seconds": 2.0,
+            "retry_max_delay_seconds": 120.0
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "empty_prediction_retries": 1,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  single_prompt[\"single_prompt: Single prompt\\nsynthesis\\nsucceeded\"]\n  click single_prompt dagqaSelectGraphNode"
+      },
+      "error": null,
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0
+    }
+  ],
+  "metrics": {
+    "example_count": 2.0,
+    "success_count": 2.0,
+    "failure_count": 0.0,
+    "error_count": 0.0,
+    "exact_match": 1.0,
+    "f1": 1.0,
+    "cosine_sim": 1.0,
+    "avg_latency_ms": 32086.396285500086,
+    "p50_latency_ms": 42452.6552490006,
+    "total_llm_call_count": 2.0,
+    "total_llm_retry_count": 0.0,
+    "avg_llm_retry_count": 0.0,
+    "avg_llm_call_count": 1.0,
+    "avg_node_count": 1.0,
+    "avg_graph_depth": 0.0,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.0,
+    "total_evidence_citation_count": 4.0,
+    "correct_evidence_citation_count": 3.0,
+    "wrong_evidence_citation_count": 1.0,
+    "wrong_supporting_text_rate": 0.25,
+    "avg_gold_supporting_fact_recall": 0.41666666666666663,
+    "total_runtime_ms": 42502.75589299963
+  }
+}

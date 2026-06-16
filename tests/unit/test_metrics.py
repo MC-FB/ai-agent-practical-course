@@ -14,7 +14,14 @@ from dagqa.eval.benchmark import (
     _sample_examples,
 )
 from dagqa.eval.hotpot_loader import HotpotExample
-from dagqa.eval.metrics import answer_f1, exact_match, normalize_answer
+from dagqa.eval.metrics import (
+    ANSWER_METRICS,
+    MetricSample,
+    _cosine_mean,
+    answer_f1,
+    exact_match,
+    normalize_answer,
+)
 from dagqa.schemas import (
     DagNode,
     DagPlan,
@@ -366,3 +373,96 @@ def test_aggregate_reports_wrong_supporting_text_rate() -> None:
 
     assert metrics["wrong_supporting_text_rate"] == expected_wrong_rate
     assert metrics["avg_gold_supporting_fact_recall"] == expected_recall
+
+
+def test_legacy_metric_kwargs_fold_into_metric_scores() -> None:
+    """Legacy ``exact_match=``/``f1=`` kwargs (cosine omitted) populate the dict.
+
+    Also verifies the computed-field attribute access that ``cli.py`` relies on,
+    and that ``model_dump`` re-emits the legacy top-level keys for the frontend.
+    """
+    record = BenchmarkRecord(
+        id="1", question="q", gold_answer="a", prediction="a", exact_match=1.0, f1=1.0, latency_ms=1
+    )
+
+    assert record.metric_scores == {"exact_match": 1.0, "f1": 1.0}
+    assert record.exact_match == 1.0
+    assert record.f1 == 1.0
+    assert record.cosine_sim == 0.0  # missing metric falls back to 0.0
+
+    dumped = record.model_dump(mode="json")
+    assert dumped["exact_match"] == 1.0
+    assert dumped["cosine_sim"] == 0.0
+    assert dumped["metric_scores"]["f1"] == 1.0
+
+
+def test_old_json_record_migrates_on_validate() -> None:
+    """Old-format records (named keys, no ``metric_scores``) load into the dict."""
+    old = {
+        "id": "2",
+        "question": "q",
+        "gold_answer": "a",
+        "prediction": "a",
+        "exact_match": 1.0,
+        "f1": 0.5,
+        "cosine_sim": 0.9,
+        "latency_ms": 1,
+    }
+
+    record = BenchmarkRecord.model_validate(old)
+
+    assert record.metric_scores == {"exact_match": 1.0, "f1": 0.5, "cosine_sim": 0.9}
+
+
+def test_aggregate_emits_one_key_per_registered_metric() -> None:
+    """Adding a metric to the registry makes it appear in the aggregate output."""
+    records = [
+        BenchmarkRecord(
+            id=str(index),
+            question="q",
+            gold_answer="Paris",
+            prediction="Paris",
+            metric_scores={"exact_match": 1.0, "f1": 1.0, "cosine_sim": 1.0},
+            latency_ms=1,
+        )
+        for index in range(2)
+    ]
+
+    metrics = _aggregate(records)
+
+    for metric in ANSWER_METRICS:
+        assert metric.name in metrics
+
+
+def test_aggregate_includes_error_record_cosine_as_zero() -> None:
+    """Error records store cosine 0.0 and are averaged in as 0.0 (not the old -1.5)."""
+    expected_mean = 0.5  # one perfect record (1.0) + one errored record (0.0)
+    ok = BenchmarkRecord(
+        id="ok",
+        question="q",
+        gold_answer="Paris",
+        prediction="Paris",
+        metric_scores={"exact_match": 1.0, "f1": 1.0, "cosine_sim": 1.0},
+        latency_ms=1,
+    )
+    errored = BenchmarkRecord(
+        id="err",
+        question="q",
+        gold_answer="London",
+        prediction="",
+        metric_scores={metric.name: metric.error_default for metric in ANSWER_METRICS},
+        latency_ms=1,
+        error="boom",
+    )
+
+    metrics = _aggregate([ok, errored])
+
+    assert errored.metric_scores["cosine_sim"] == 0.0
+    assert metrics["cosine_sim"] == expected_mean
+    assert metrics["exact_match"] == expected_mean
+
+
+def test_cosine_mean_skips_empty_pairs() -> None:
+    samples = [MetricSample(1.0, "a", "a"), MetricSample(0.5, "", "")]
+
+    assert _cosine_mean(samples) == 1.0
