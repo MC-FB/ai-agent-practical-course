@@ -104,6 +104,8 @@ class BenchmarkResult(BaseModel):
     dataset_size: int | None = None
     seed: int
     max_parallel_examples: int = 1
+    max_nodes: int | None = None
+    max_depth: int | None = None
     created_at: str
     output_path: str | None = None
     total_runtime_ms: float
@@ -198,6 +200,8 @@ async def benchmark_dataset(
         dataset_size=dataset_size,
         seed=seed,
         max_parallel_examples=parallel_examples,
+        max_nodes=client.config.planner.max_nodes,
+        max_depth=client.config.planner.max_depth,
         created_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         total_runtime_ms=total_runtime_ms,
         records=records,

@@ -12,4 +12,4 @@ __pycache__/
 .venv/
 app/web/node_modules/
 app/web/dist/
-runs/benchmarks/.live/
+runs/benchmarks/.live/*
