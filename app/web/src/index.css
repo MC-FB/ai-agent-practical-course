@@ -1019,6 +1019,30 @@ button {
   text-decoration: underline;
 }
 
+.mark-record-button {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #cbd8dc;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #60727a;
+  cursor: pointer;
+}
+
+.mark-record-button:hover {
+  border-color: #9bc7bf;
+  background: #eef8f5;
+  color: #17655b;
+}
+
+.mark-record-button.marked {
+  border-color: #9bc7bf;
+  background: #dff2ed;
+  color: #17655b;
+}
+
 .comparison-table {
   min-width: 1000px;
 }
@@ -1247,6 +1271,24 @@ button {
 
 .record-table .clickable-row:hover td {
   background: #eef8f5;
+}
+
+.marked-question {
+  display: grid;
+  gap: 5px;
+  min-width: 260px;
+}
+
+.marked-question strong {
+  color: #26343b;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.marked-question small {
+  color: #667680;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .table-load-sentinel {

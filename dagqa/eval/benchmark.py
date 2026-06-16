@@ -12,6 +12,11 @@ from uuid import uuid4
 from pydantic import BaseModel, Field
 
 from dagqa.client import DagQaClient
+from dagqa.eval.answer_postprocess import (
+    answer_value_to_text,
+    canonicalize_prediction,
+    is_placeholder_or_unsupported,
+)
 from dagqa.eval.hotpot_loader import (
     HOTPOTQA_DISTRACTOR_VALIDATION_SIZE,
     HotpotExample,
@@ -45,6 +50,7 @@ class BenchmarkRecord(BaseModel):
     question: str
     gold_answer: str
     prediction: str
+    raw_prediction: str | None = None
     exact_match: float
     f1: float
     cosine_sim: float = 0.0
@@ -227,7 +233,11 @@ def _sample_examples(
     return [examples[index] for index in indices]
 
 
-async def _run_example(client: DagQaClient, example: HotpotExample, system: str) -> BenchmarkRecord:
+async def _run_example(  # noqa: PLR0915
+    client: DagQaClient,
+    example: HotpotExample,
+    system: str,
+) -> BenchmarkRecord:
     started = time.perf_counter()
     try:
         if system == "direct_llm":
@@ -258,7 +268,17 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
                 )
                 response_text = response.text
                 parsed = parse_node_output(response.text)
-                prediction = str(parsed.get("answer", "")).strip()
+                raw_prediction = answer_value_to_text(parsed.get("answer", "")).strip()
+                prediction = canonicalize_prediction(
+                    raw_prediction,
+                    question=example.question,
+                    evidence_documents=example.context,
+                    supporting_texts=[
+                        str(citation.get("fact", ""))
+                        for citation in parsed.get("_evidence_citations", [])
+                        if isinstance(citation, dict)
+                    ],
+                )
                 citations = [
                     EvidenceCitation.model_validate(citation)
                     for citation in parsed.get("_evidence_citations", [])
@@ -278,7 +298,7 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
                     exc,
                     client.config.model_dump(mode="json"),
                 )
-            returned_value = {"answer": prediction}
+            returned_value = {"answer": raw_prediction}
             plan = DagPlan(
                 question=example.question,
                 nodes=[
@@ -343,11 +363,34 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
         else:
             run = await client.ask(example.question, evidence_documents=example.context)
             evidence_metrics = _evaluate_evidence_citations(run, example.supporting_facts)
+            raw_prediction = _extract_answer(run.final_answer)
+            repair_llm_calls = 0
+            repair_retry_count = 0
+            if is_placeholder_or_unsupported(
+                raw_prediction,
+                question=example.question,
+                evidence_documents=example.context,
+            ):
+                repaired, repair_retry_count = await _repair_unsupported_prediction(
+                    client,
+                    example,
+                    raw_prediction,
+                    run_trace=run.model_dump(mode="json"),
+                )
+                repair_llm_calls = 1
+                if repaired:
+                    raw_prediction = repaired
+                    run.final_answer = {"answer": repaired}
+            prediction = canonicalize_prediction(
+                raw_prediction,
+                question=example.question,
+                evidence_documents=example.context,
+                supporting_texts=_supporting_texts_from_run(run),
+            )
             run_trace = run.model_dump(mode="json")
             run_trace["mermaid"] = render_mermaid(run.plan, run.nodes)
-            prediction = _extract_answer(run.final_answer)
-            llm_call_count = len(run.nodes) + 1
-            llm_retry_count = sum(trace.llm_retry_count for trace in run.nodes)
+            llm_call_count = len(run.nodes) + 1 + repair_llm_calls
+            llm_retry_count = sum(trace.llm_retry_count for trace in run.nodes) + repair_retry_count
             node_count = len(run.plan.nodes)
             graph_depth = max((wave.index for wave in run.waves), default=0)
             structural_issues = _structural_issues(run)
@@ -358,6 +401,7 @@ async def _run_example(client: DagQaClient, example: HotpotExample, system: str)
             question=example.question,
             gold_answer=example.answer,
             prediction=prediction,
+            raw_prediction=raw_prediction if raw_prediction != prediction else None,
             exact_match=exact_match(prediction, example.answer),
             f1=answer_f1(prediction, example.answer),
             cosine_sim=cosine_sim(prediction, example.answer),
@@ -475,15 +519,78 @@ def _extract_answer(final_answer: dict[str, Any] | None) -> str:
         return ""
     value = final_answer.get("answer")
     if value is not None:
-        return str(value)
+        return answer_value_to_text(value)
     non_reasoning_values = [
         value
         for key, value in final_answer.items()
         if key not in {"reasoning", "confidence"} and value is not None
     ]
     if len(non_reasoning_values) == 1:
-        return str(non_reasoning_values[0])
+        return answer_value_to_text(non_reasoning_values[0])
     return ""
+
+
+def _supporting_texts_from_run(run: Any) -> list[str]:
+    texts: list[str] = []
+    for trace in run.nodes:
+        texts.extend(citation.fact for citation in trace.evidence_citations if citation.fact)
+    return texts
+
+
+async def _repair_unsupported_prediction(
+    client: DagQaClient,
+    example: HotpotExample,
+    raw_prediction: str,
+    *,
+    run_trace: dict[str, Any],
+) -> tuple[str | None, int]:
+    evidence = EvidenceSelection(
+        strategy="all_documents",
+        total_available=len(example.context),
+        documents=example.context,
+    )
+    child_outputs = [
+        {
+            "node_id": node.get("node_id"),
+            "question": node.get("resolved_question"),
+            "returned_value": node.get("returned_value"),
+            "citations": node.get("evidence_citations", []),
+        }
+        for node in run_trace.get("nodes", [])
+        if isinstance(node, dict)
+    ]
+    prompt = (
+        "The DAG final answer appears unsupported by the supplied evidence. "
+        "Repair only the concise final answer for scoring.\n\n"
+        f"Original question: {example.question}\n"
+        f"Unsupported answer: {raw_prediction}\n\n"
+        "DAG node outputs and citations:\n"
+        f"{json.dumps(child_outputs, indent=2, ensure_ascii=False)}"
+        f"{render_evidence_section(evidence)}"
+        "\nReturn JSON only with this exact shape:\n"
+        '{"answer": "concise answer", "_evidence_citations": ['
+        '{"document_id": "exact document ID", "title": "exact title", '
+        '"sentence_indices": [0], "fact": "directly supporting fact"}]}\n'
+        "Rules: use only supplied evidence; do not invent organisations, people, or films; "
+        'do not answer "none" when evidence contains a supported entity; keep yes/no as yes or no.'
+    )
+    response = await client.llm.complete(
+        LLMRequest(
+            system="Repair an unsupported benchmark answer using only cited evidence.",
+            prompt=prompt,
+            temperature=client.config.llm.temperature,
+        )
+    )
+    retry_count = int(response.metadata.get("retry_count", 0))
+    try:
+        parsed = parse_node_output(response.text)
+    except Exception:
+        return None, retry_count
+    repaired = answer_value_to_text(parsed.get("answer", "")).strip()
+    citations = parsed.get("_evidence_citations", [])
+    if not repaired or not citations:
+        return None, retry_count
+    return repaired, retry_count
 
 
 def _structural_issues(run: Any) -> list[str]:
