@@ -1,0 +1,1523 @@
+{
+  "run_id": "66ce14ac-dd87-450d-841c-ef92866dffb7",
+  "name": null,
+  "comparison_group_id": "950e8586-fca3-4112-b540-f4350f1a1b5b",
+  "system": "direct_llm",
+  "limit": 4,
+  "provider": "cluster",
+  "model": "mistralai/Mistral-Medium-3.5-128B",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "dataset_size": 7405,
+  "seed": 1142094994,
+  "max_parallel_examples": 4,
+  "max_nodes": 15,
+  "max_depth": 5,
+  "created_at": "2026-06-16T13:53:30Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260616T135330Z-66ce14ac-dd87-450d-841c-ef92866dffb7.json",
+  "total_runtime_ms": 8014.960665999752,
+  "records": [
+    {
+      "id": "5a77d12755429967ab1052b8",
+      "question": "Who was born first, Jaap Speyer or Bruce Conner?",
+      "gold_answer": "Jaap Speyer",
+      "prediction": "Jaap Speyer",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0,
+      "latency_ms": 7320.131661999767,
+      "llm_call_count": 1,
+      "llm_retry_count": 0,
+      "node_count": 1,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Bruce Conner",
+          "sentence_index": 0
+        },
+        {
+          "title": "Jaap Speyer",
+          "sentence_index": 0
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 1.0,
+      "run_trace": {
+        "run_id": "044c1bfb-2f2e-4bff-a29c-985c6d9647a6",
+        "question": "Who was born first, Jaap Speyer or Bruce Conner?",
+        "plan": {
+          "question": "Who was born first, Jaap Speyer or Bruce Conner?",
+          "nodes": [
+            {
+              "id": "single_prompt",
+              "label": "Single prompt",
+              "task_type": "synthesis",
+              "question": "Who was born first, Jaap Speyer or Bruce Conner?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "Answer the question concisely using only the supplied sources.",
+                "user_template": "Question: Who was born first, Jaap Speyer or Bruce Conner?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: The Schorrsiegel Affair\n  (0) The Schorrsiegel Affair (German: Die Sache mit Schorrsiegel) is a 1928 German silent film directed by Jaap Speyer that featured Bernhard Goetzke, Walter Rilla and Anita Dorris.\n  (1)  It was adapted from a novel by Fred Andreas.\n  (2)  The film's art direction was by Hans Jacoby.\n\nDocument ID: context-1\nTitle: The Elegant Bunch\n  (0) The Elegant Bunch (German:Elegantes Pack) is a 1925 German silent film directed by Jaap Speyer and starring Eugen Kl\u00f6pfer, Mary Odette and Ralph Arthur Roberts.\n\nDocument ID: context-2\nTitle: The Tars\n  (0) The Tars or De Jantjes is a 1934 Dutch comedy film drama directed by Jaap Speyer.\n\nDocument ID: context-3\nTitle: Jaap Speyer\n  (0) Jaap Speyer (1891\u20131952) was a Dutch film director.\n  (1)  He was married to the German actress Mia Pankau.\n\nDocument ID: context-4\nTitle: Take the 5:10 to Dreamland\n  (0) Take the 5:10 to Dreamland (1976) is a short experimental film by Bruce Conner, using the technique of found footage.\n  (1)  It is composed out of found images from the 1940s-1950s from different sources such as educational hm and soundtrack.\n  (2)  It is closely related to \"Valse Triste\", another found footage short by Bruce Conner.\n\nDocument ID: context-5\nTitle: Moritz Makes His Fortune\n  (0) Moritz Makes his Fortune (German:Moritz macht sein Gl\u00fcck) is a 1931 German comedy film directed by Jaap Speyer and starring Sig Arno, Viktor Schwanneke and Willy Prager.\n\nDocument ID: context-6\nTitle: The Morals of the Alley\n  (0) The Morals of the Alley (German:Die Moral der Gasse) is a 1925 German silent film directed by Jaap Speyer and starring  Werner Krauss, Ernst Hofmann and Mary Odette.\n\nDocument ID: context-7\nTitle: Bigamy (film)\n  (0) Bigamy (German:Bigamie) is a 1927 German silent drama film directed by Jaap Speyer and starring Heinrich George, Maria Jacobini and Anita Dorris.\n\nDocument ID: context-8\nTitle: A Kingdom For a Horse\n  (0) A Kingdom For a Horse or Een Koninkrijk voor een huis is a 1949 Dutch comedy film directed by Jaap Speyer.\n\nDocument ID: context-9\nTitle: Bruce Conner\n  (0) Bruce Conner (November 18, 1933 \u2013 July 7, 2008) was an American artist renowned for his work in assemblage, film, drawing, sculpture, painting, collage, and photography, among other disciplines.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "single_prompt"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "single_prompt"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "single_prompt",
+            "label": "Single prompt",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Who was born first, Jaap Speyer or Bruce Conner?",
+            "rendered_prompt": "Question: Who was born first, Jaap Speyer or Bruce Conner?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: The Schorrsiegel Affair\n  (0) The Schorrsiegel Affair (German: Die Sache mit Schorrsiegel) is a 1928 German silent film directed by Jaap Speyer that featured Bernhard Goetzke, Walter Rilla and Anita Dorris.\n  (1)  It was adapted from a novel by Fred Andreas.\n  (2)  The film's art direction was by Hans Jacoby.\n\nDocument ID: context-1\nTitle: The Elegant Bunch\n  (0) The Elegant Bunch (German:Elegantes Pack) is a 1925 German silent film directed by Jaap Speyer and starring Eugen Kl\u00f6pfer, Mary Odette and Ralph Arthur Roberts.\n\nDocument ID: context-2\nTitle: The Tars\n  (0) The Tars or De Jantjes is a 1934 Dutch comedy film drama directed by Jaap Speyer.\n\nDocument ID: context-3\nTitle: Jaap Speyer\n  (0) Jaap Speyer (1891\u20131952) was a Dutch film director.\n  (1)  He was married to the German actress Mia Pankau.\n\nDocument ID: context-4\nTitle: Take the 5:10 to Dreamland\n  (0) Take the 5:10 to Dreamland (1976) is a short experimental film by Bruce Conner, using the technique of found footage.\n  (1)  It is composed out of found images from the 1940s-1950s from different sources such as educational hm and soundtrack.\n  (2)  It is closely related to \"Valse Triste\", another found footage short by Bruce Conner.\n\nDocument ID: context-5\nTitle: Moritz Makes His Fortune\n  (0) Moritz Makes his Fortune (German:Moritz macht sein Gl\u00fcck) is a 1931 German comedy film directed by Jaap Speyer and starring Sig Arno, Viktor Schwanneke and Willy Prager.\n\nDocument ID: context-6\nTitle: The Morals of the Alley\n  (0) The Morals of the Alley (German:Die Moral der Gasse) is a 1925 German silent film directed by Jaap Speyer and starring  Werner Krauss, Ernst Hofmann and Mary Odette.\n\nDocument ID: context-7\nTitle: Bigamy (film)\n  (0) Bigamy (German:Bigamie) is a 1927 German silent drama film directed by Jaap Speyer and starring Heinrich George, Maria Jacobini and Anita Dorris.\n\nDocument ID: context-8\nTitle: A Kingdom For a Horse\n  (0) A Kingdom For a Horse or Een Koninkrijk voor een huis is a 1949 Dutch comedy film directed by Jaap Speyer.\n\nDocument ID: context-9\nTitle: Bruce Conner\n  (0) Bruce Conner (November 18, 1933 \u2013 July 7, 2008) was an American artist renowned for his work in assemblage, film, drawing, sculpture, painting, collage, and photography, among other disciplines.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer.",
+            "raw_response": "{\"answer\": \"Jaap Speyer\", \"_evidence_citations\": [{\"document_id\": \"context-3\", \"title\": \"Jaap Speyer\", \"sentence_indices\": [0], \"fact\": \"Jaap Speyer (1891\u20131952) was a Dutch film director.\"}, {\"document_id\": \"context-9\", \"title\": \"Bruce Conner\", \"sentence_indices\": [0], \"fact\": \"Bruce Conner (November 18, 1933 \u2013 July 7, 2008) was an American artist...\"}]}",
+            "parsed_output": {
+              "answer": "Jaap Speyer",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-3",
+                  "title": "Jaap Speyer",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Jaap Speyer (1891\u20131952) was a Dutch film director."
+                },
+                {
+                  "document_id": "context-9",
+                  "title": "Bruce Conner",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Bruce Conner (November 18, 1933 \u2013 July 7, 2008) was an American artist..."
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "Jaap Speyer"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "The Schorrsiegel Affair",
+                  "text": "The Schorrsiegel Affair (German: Die Sache mit Schorrsiegel) is a 1928 German silent film directed by Jaap Speyer that featured Bernhard Goetzke, Walter Rilla and Anita Dorris. It was adapted from a novel by Fred Andreas. The film's art direction was by Hans Jacoby.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "The Schorrsiegel Affair (German: Die Sache mit Schorrsiegel) is a 1928 German silent film directed by Jaap Speyer that featured Bernhard Goetzke, Walter Rilla and Anita Dorris.",
+                      " It was adapted from a novel by Fred Andreas.",
+                      " The film's art direction was by Hans Jacoby."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "The Elegant Bunch",
+                  "text": "The Elegant Bunch (German:Elegantes Pack) is a 1925 German silent film directed by Jaap Speyer and starring Eugen Kl\u00f6pfer, Mary Odette and Ralph Arthur Roberts.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "The Elegant Bunch (German:Elegantes Pack) is a 1925 German silent film directed by Jaap Speyer and starring Eugen Kl\u00f6pfer, Mary Odette and Ralph Arthur Roberts."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "The Tars",
+                  "text": "The Tars or De Jantjes is a 1934 Dutch comedy film drama directed by Jaap Speyer.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The Tars or De Jantjes is a 1934 Dutch comedy film drama directed by Jaap Speyer."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Jaap Speyer",
+                  "text": "Jaap Speyer (1891\u20131952) was a Dutch film director. He was married to the German actress Mia Pankau.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Jaap Speyer (1891\u20131952) was a Dutch film director.",
+                      " He was married to the German actress Mia Pankau."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Take the 5:10 to Dreamland",
+                  "text": "Take the 5:10 to Dreamland (1976) is a short experimental film by Bruce Conner, using the technique of found footage. It is composed out of found images from the 1940s-1950s from different sources such as educational hm and soundtrack. It is closely related to \"Valse Triste\", another found footage short by Bruce Conner.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Take the 5:10 to Dreamland (1976) is a short experimental film by Bruce Conner, using the technique of found footage.",
+                      " It is composed out of found images from the 1940s-1950s from different sources such as educational hm and soundtrack.",
+                      " It is closely related to \"Valse Triste\", another found footage short by Bruce Conner."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Moritz Makes His Fortune",
+                  "text": "Moritz Makes his Fortune (German:Moritz macht sein Gl\u00fcck) is a 1931 German comedy film directed by Jaap Speyer and starring Sig Arno, Viktor Schwanneke and Willy Prager.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Moritz Makes his Fortune (German:Moritz macht sein Gl\u00fcck) is a 1931 German comedy film directed by Jaap Speyer and starring Sig Arno, Viktor Schwanneke and Willy Prager."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "The Morals of the Alley",
+                  "text": "The Morals of the Alley (German:Die Moral der Gasse) is a 1925 German silent film directed by Jaap Speyer and starring  Werner Krauss, Ernst Hofmann and Mary Odette.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "The Morals of the Alley (German:Die Moral der Gasse) is a 1925 German silent film directed by Jaap Speyer and starring  Werner Krauss, Ernst Hofmann and Mary Odette."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Bigamy (film)",
+                  "text": "Bigamy (German:Bigamie) is a 1927 German silent drama film directed by Jaap Speyer and starring Heinrich George, Maria Jacobini and Anita Dorris.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Bigamy (German:Bigamie) is a 1927 German silent drama film directed by Jaap Speyer and starring Heinrich George, Maria Jacobini and Anita Dorris."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "A Kingdom For a Horse",
+                  "text": "A Kingdom For a Horse or Een Koninkrijk voor een huis is a 1949 Dutch comedy film directed by Jaap Speyer.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "A Kingdom For a Horse or Een Koninkrijk voor een huis is a 1949 Dutch comedy film directed by Jaap Speyer."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Bruce Conner",
+                  "text": "Bruce Conner (November 18, 1933 \u2013 July 7, 2008) was an American artist renowned for his work in assemblage, film, drawing, sculpture, painting, collage, and photography, among other disciplines.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Bruce Conner (November 18, 1933 \u2013 July 7, 2008) was an American artist renowned for his work in assemblage, film, drawing, sculpture, painting, collage, and photography, among other disciplines."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-3",
+                "title": "Jaap Speyer",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Jaap Speyer (1891\u20131952) was a Dutch film director."
+              },
+              {
+                "document_id": "context-9",
+                "title": "Bruce Conner",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Bruce Conner (November 18, 1933 \u2013 July 7, 2008) was an American artist..."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-3",
+                  "title": "Jaap Speyer",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Jaap Speyer (1891\u20131952) was a Dutch film director."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Jaap Speyer",
+                    "sentence_index": 0
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-9",
+                  "title": "Bruce Conner",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Bruce Conner (November 18, 1933 \u2013 July 7, 2008) was an American artist..."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Bruce Conner",
+                    "sentence_index": 0
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": 7319.7462930002075,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Jaap Speyer"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 7319.816496001295,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 120.0,
+            "max_retries": 2,
+            "retry_initial_delay_seconds": 0.5,
+            "retry_max_delay_seconds": 8.0
+          },
+          "planner": {
+            "max_nodes": 15,
+            "max_depth": 5,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  single_prompt[\"single_prompt: Single prompt\\nsynthesis\\nsucceeded\"]\n  click single_prompt dagqaSelectGraphNode"
+      },
+      "error": null
+    },
+    {
+      "id": "5a84a7f95542992a431d1a85",
+      "question": "Who was the wife of the United States Army lieutenant general who received the Distinguished Service Cross, and was the first of his West Point class to be promoted to brigadier general, major general, and lieutenant general",
+      "gold_answer": "Julia Compton Moore",
+      "prediction": "Julia Compton Moore",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0,
+      "latency_ms": 7879.34166299965,
+      "llm_call_count": 1,
+      "llm_retry_count": 0,
+      "node_count": 1,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Julia Compton Moore",
+          "sentence_index": 0
+        },
+        {
+          "title": "Julia Compton Moore",
+          "sentence_index": 1
+        },
+        {
+          "title": "Hal Moore",
+          "sentence_index": 0
+        },
+        {
+          "title": "Hal Moore",
+          "sentence_index": 1
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 0.75,
+      "run_trace": {
+        "run_id": "0b4217fe-1255-464c-9acd-16ba194fbabf",
+        "question": "Who was the wife of the United States Army lieutenant general who received the Distinguished Service Cross, and was the first of his West Point class to be promoted to brigadier general, major general, and lieutenant general",
+        "plan": {
+          "question": "Who was the wife of the United States Army lieutenant general who received the Distinguished Service Cross, and was the first of his West Point class to be promoted to brigadier general, major general, and lieutenant general",
+          "nodes": [
+            {
+              "id": "single_prompt",
+              "label": "Single prompt",
+              "task_type": "synthesis",
+              "question": "Who was the wife of the United States Army lieutenant general who received the Distinguished Service Cross, and was the first of his West Point class to be promoted to brigadier general, major general, and lieutenant general",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "Answer the question concisely using only the supplied sources.",
+                "user_template": "Question: Who was the wife of the United States Army lieutenant general who received the Distinguished Service Cross, and was the first of his West Point class to be promoted to brigadier general, major general, and lieutenant general\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Charles Pede\n  (0) Lieutenant General Charles N. Pede is a military lawyer who currently serves as the 40th Judge Advocate General of the United States Army.\n  (1)  General Pede was promoted from the rank of Brigadier General to the rank of Lieutenant General, bypassing the rank of Major General on July 26, 2017.\n\nDocument ID: context-1\nTitle: Andrew Davis Bruce\n  (0) Lieutenant General Andrew Davis Bruce (September 14, 1894 \u2013 July 28, 1969) was an American academic and soldier who served as the third president of the University of Houston.\n  (1)  He retired from the United States Army in 1954 as a lieutenant general after seeing action in both World War I and World War II and founding Fort Hood, Texas.\n  (2)  Three countries, France, the Philippines, and the United States, awarded him service medals, including the Distinguished Service Cross, the U.S. Army's second highest military decoration.\n  (3)  Bruce is interred in Arlington National Cemetery.\n\nDocument ID: context-2\nTitle: Distinguished Service Cross (United States)\n  (0) The Distinguished Service Cross is the second highest military award that can be given to a member of the United States Army (and previously, the United States Army Air Forces and the United States Air Force), for extreme gallantry and risk of life in actual combat with an armed enemy force.\n  (1)  Actions that merit the Distinguished Service Cross must be of such a high degree that they are above those required for all other U.S. combat decorations but do not meet the criteria for the Medal of Honor.\n  (2)  The Distinguished Service Cross is equivalent to the Navy Cross (Navy and Marine Corps), the Air Force Cross (Air Force), and the Coast Guard Cross (Coast Guard).\n\nDocument ID: context-3\nTitle: Richard E. Cavazos\n  (0) Richard Edward Cavazos (born January 31, 1929), a Korean War recipient of the Distinguished Service Cross as a first lieutenant, who advanced in rank to become the United States Army's first Hispanic four-star general.\n  (1)  During the Vietnam War, as a lieutenant colonel, Cavazos was awarded a second Distinguished Service Cross.\n  (2)  In 1976, Cavazos became the first Mexican American to reach the rank of brigadier general in the U.S. Army.\n  (3)  Cavazos served with great distinction for thirty-three years, with his final command as head of the U.S. Army Forces Command.\n\nDocument ID: context-4\nTitle: Major general (United States)\n  (0) In the United States Army, United States Marine Corps, and United States Air Force, major general is a two-star general-officer rank, with the pay grade of O-8.\n  (1)  Major general ranks above brigadier general and below lieutenant general.\n  (2)  A major general typically commands division-sized units of 10,000 to 15,000 soldiers.\n  (3)  Major general is equivalent to the two-star rank of rear admiral in the United States Navy and United States Coast Guard and is the highest permanent rank during peacetime in the uniformed services.\n  (4)  (The higher ranks are temporary ranks linked to specific positions, although virtually all officers who have been promoted to those ranks are approved to retire at their highest earned rank.)\n\nDocument ID: context-5\nTitle: Nadja West\n  (0) Nadja Y. West (born 1961) is a United States Army lieutenant general and the 44th U.S. Army Surgeon General and Commanding General of the U.S. Army Medical Command.\n  (1)  West is the first black Army Surgeon General, and was the first black female, active-duty, major general and the first black female major general in Army Medicine.\n  (2)  West is also the first Army black female lieutenant general.\n  (3)  She is the highest ranking female to have graduated from the United States Military Academy.\n  (4)  She received the Army Distinguished Service Medal, the Defense Superior Service Medal, the Legion of Merit, and others.\n\nDocument ID: context-6\nTitle: Frank A. Armstrong\n  (0) Frank Alton Armstrong Jr. (May 24, 1902 \u2013 August 20, 1969) was a lieutenant general of the United States Air Force.\n  (1)  As a brigadier general in the United States Army Air Forces during World War II, he was the inspiration for the main character in the novel and subsequent film, \"Twelve O'Clock High.\"\n  (2)  After the war, he held a variety of senior leadership positions prior to and following the establishment of the USAF as an independent service in 1947.\n  (3)  Promoted to major general in 1950, he advanced to lieutenant general in 1956 and retired at that rank in 1962.\n\nDocument ID: context-7\nTitle: Hal Moore\n  (0) Harold Gregory \"Hal\" Moore, Jr. (February 13, 1922 \u2013 February 10, 2017) was a United States Army lieutenant general and author.\n  (1)  He was a recipient of the Distinguished Service Cross, which is the U.S. military's second highest decoration for valor, and was the first of his West Point class (1945) to be promoted to brigadier general, major general, and lieutenant general.\n\nDocument ID: context-8\nTitle: Wayne W. Lambert\n  (0) Wayne W. Lambert (born 1936) was an Air force Brigadier General (United States).\n  (1)  He attended the United States Military Academy at West Point, New York, after already having served a year in the US Army.\n  (2)  Lambert graduated from the Academy in 1959 and was commissioned a 2nd Lieutenant in the USAF that same year.\n  (3)  He trained as a bomber pilot, receiving his Aviator badge in 1960.\n  (4)  He has logged over 5,800 flying hours with the US Air Force.\n  (5)  A seasoned combat veteran, Lambert flew over 225 combat missions in South East Asia as a B-52 crew member.\n  (6)  He was awarded the Distinguished Flying Cross (United States) and received 10 awards of the Air Medal for his service during the Vietnamese War.\n  (7)  After serving in a succession of lesser command positions, Lambert was promoted to the rank of Brigadier General in 1983, assuming command of the former Strategic Air Command\u2019s 7th Air Division, headquartered then at Ramstein Air Base in West Germany, and overseeing SAC operations throughout the European theater.\n  (8)  The Brigadier General retired from the US Air Force in 1989.\n  (9)  Lambert also holds an MBA from Chapman College (\u201976).\n  (10)  In retirement, Lambert publicly supported U.S. presidential candidate Mitt Romney and U.S. vice presidential candidate Paul Ryan in the 2012 general election.\n\nDocument ID: context-9\nTitle: Julia Compton Moore\n  (0) Julia Compton Moore (February 10, 1929April 18, 2004) was the wife of Lieutenant General (Ret.)\n  (1)  Hal Moore, a United States Army officer.\n  (2)  Her efforts and complaints in the aftermath of the Battle of Ia Drang prompted the U.S. Army to set up survivor support networks and casualty notification teams consisting of uniformed officers, which are still in use.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "single_prompt"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "single_prompt"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "single_prompt",
+            "label": "Single prompt",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Who was the wife of the United States Army lieutenant general who received the Distinguished Service Cross, and was the first of his West Point class to be promoted to brigadier general, major general, and lieutenant general",
+            "rendered_prompt": "Question: Who was the wife of the United States Army lieutenant general who received the Distinguished Service Cross, and was the first of his West Point class to be promoted to brigadier general, major general, and lieutenant general\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Charles Pede\n  (0) Lieutenant General Charles N. Pede is a military lawyer who currently serves as the 40th Judge Advocate General of the United States Army.\n  (1)  General Pede was promoted from the rank of Brigadier General to the rank of Lieutenant General, bypassing the rank of Major General on July 26, 2017.\n\nDocument ID: context-1\nTitle: Andrew Davis Bruce\n  (0) Lieutenant General Andrew Davis Bruce (September 14, 1894 \u2013 July 28, 1969) was an American academic and soldier who served as the third president of the University of Houston.\n  (1)  He retired from the United States Army in 1954 as a lieutenant general after seeing action in both World War I and World War II and founding Fort Hood, Texas.\n  (2)  Three countries, France, the Philippines, and the United States, awarded him service medals, including the Distinguished Service Cross, the U.S. Army's second highest military decoration.\n  (3)  Bruce is interred in Arlington National Cemetery.\n\nDocument ID: context-2\nTitle: Distinguished Service Cross (United States)\n  (0) The Distinguished Service Cross is the second highest military award that can be given to a member of the United States Army (and previously, the United States Army Air Forces and the United States Air Force), for extreme gallantry and risk of life in actual combat with an armed enemy force.\n  (1)  Actions that merit the Distinguished Service Cross must be of such a high degree that they are above those required for all other U.S. combat decorations but do not meet the criteria for the Medal of Honor.\n  (2)  The Distinguished Service Cross is equivalent to the Navy Cross (Navy and Marine Corps), the Air Force Cross (Air Force), and the Coast Guard Cross (Coast Guard).\n\nDocument ID: context-3\nTitle: Richard E. Cavazos\n  (0) Richard Edward Cavazos (born January 31, 1929), a Korean War recipient of the Distinguished Service Cross as a first lieutenant, who advanced in rank to become the United States Army's first Hispanic four-star general.\n  (1)  During the Vietnam War, as a lieutenant colonel, Cavazos was awarded a second Distinguished Service Cross.\n  (2)  In 1976, Cavazos became the first Mexican American to reach the rank of brigadier general in the U.S. Army.\n  (3)  Cavazos served with great distinction for thirty-three years, with his final command as head of the U.S. Army Forces Command.\n\nDocument ID: context-4\nTitle: Major general (United States)\n  (0) In the United States Army, United States Marine Corps, and United States Air Force, major general is a two-star general-officer rank, with the pay grade of O-8.\n  (1)  Major general ranks above brigadier general and below lieutenant general.\n  (2)  A major general typically commands division-sized units of 10,000 to 15,000 soldiers.\n  (3)  Major general is equivalent to the two-star rank of rear admiral in the United States Navy and United States Coast Guard and is the highest permanent rank during peacetime in the uniformed services.\n  (4)  (The higher ranks are temporary ranks linked to specific positions, although virtually all officers who have been promoted to those ranks are approved to retire at their highest earned rank.)\n\nDocument ID: context-5\nTitle: Nadja West\n  (0) Nadja Y. West (born 1961) is a United States Army lieutenant general and the 44th U.S. Army Surgeon General and Commanding General of the U.S. Army Medical Command.\n  (1)  West is the first black Army Surgeon General, and was the first black female, active-duty, major general and the first black female major general in Army Medicine.\n  (2)  West is also the first Army black female lieutenant general.\n  (3)  She is the highest ranking female to have graduated from the United States Military Academy.\n  (4)  She received the Army Distinguished Service Medal, the Defense Superior Service Medal, the Legion of Merit, and others.\n\nDocument ID: context-6\nTitle: Frank A. Armstrong\n  (0) Frank Alton Armstrong Jr. (May 24, 1902 \u2013 August 20, 1969) was a lieutenant general of the United States Air Force.\n  (1)  As a brigadier general in the United States Army Air Forces during World War II, he was the inspiration for the main character in the novel and subsequent film, \"Twelve O'Clock High.\"\n  (2)  After the war, he held a variety of senior leadership positions prior to and following the establishment of the USAF as an independent service in 1947.\n  (3)  Promoted to major general in 1950, he advanced to lieutenant general in 1956 and retired at that rank in 1962.\n\nDocument ID: context-7\nTitle: Hal Moore\n  (0) Harold Gregory \"Hal\" Moore, Jr. (February 13, 1922 \u2013 February 10, 2017) was a United States Army lieutenant general and author.\n  (1)  He was a recipient of the Distinguished Service Cross, which is the U.S. military's second highest decoration for valor, and was the first of his West Point class (1945) to be promoted to brigadier general, major general, and lieutenant general.\n\nDocument ID: context-8\nTitle: Wayne W. Lambert\n  (0) Wayne W. Lambert (born 1936) was an Air force Brigadier General (United States).\n  (1)  He attended the United States Military Academy at West Point, New York, after already having served a year in the US Army.\n  (2)  Lambert graduated from the Academy in 1959 and was commissioned a 2nd Lieutenant in the USAF that same year.\n  (3)  He trained as a bomber pilot, receiving his Aviator badge in 1960.\n  (4)  He has logged over 5,800 flying hours with the US Air Force.\n  (5)  A seasoned combat veteran, Lambert flew over 225 combat missions in South East Asia as a B-52 crew member.\n  (6)  He was awarded the Distinguished Flying Cross (United States) and received 10 awards of the Air Medal for his service during the Vietnamese War.\n  (7)  After serving in a succession of lesser command positions, Lambert was promoted to the rank of Brigadier General in 1983, assuming command of the former Strategic Air Command\u2019s 7th Air Division, headquartered then at Ramstein Air Base in West Germany, and overseeing SAC operations throughout the European theater.\n  (8)  The Brigadier General retired from the US Air Force in 1989.\n  (9)  Lambert also holds an MBA from Chapman College (\u201976).\n  (10)  In retirement, Lambert publicly supported U.S. presidential candidate Mitt Romney and U.S. vice presidential candidate Paul Ryan in the 2012 general election.\n\nDocument ID: context-9\nTitle: Julia Compton Moore\n  (0) Julia Compton Moore (February 10, 1929April 18, 2004) was the wife of Lieutenant General (Ret.)\n  (1)  Hal Moore, a United States Army officer.\n  (2)  Her efforts and complaints in the aftermath of the Battle of Ia Drang prompted the U.S. Army to set up survivor support networks and casualty notification teams consisting of uniformed officers, which are still in use.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer.",
+            "raw_response": "```json\n{\n  \"answer\": \"Julia Compton Moore\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-7\",\n      \"title\": \"Hal Moore\",\n      \"sentence_indices\": [1],\n      \"fact\": \"He was a recipient of the Distinguished Service Cross, which is the U.S. military's second highest decoration for valor, and was the first of his West Point class (1945) to be promoted to brigadier general, major general, and lieutenant general.\"\n    },\n    {\n      \"document_id\": \"context-9\",\n      \"title\": \"Julia Compton Moore\",\n      \"sentence_indices\": [0, 1],\n      \"fact\": \"Julia Compton Moore was the wife of Lieutenant General (Ret.) Hal Moore, a United States Army officer.\"\n    }\n  ]\n}\n```",
+            "parsed_output": {
+              "answer": "Julia Compton Moore",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-7",
+                  "title": "Hal Moore",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "He was a recipient of the Distinguished Service Cross, which is the U.S. military's second highest decoration for valor, and was the first of his West Point class (1945) to be promoted to brigadier general, major general, and lieutenant general."
+                },
+                {
+                  "document_id": "context-9",
+                  "title": "Julia Compton Moore",
+                  "sentence_indices": [
+                    0,
+                    1
+                  ],
+                  "fact": "Julia Compton Moore was the wife of Lieutenant General (Ret.) Hal Moore, a United States Army officer."
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "Julia Compton Moore"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Charles Pede",
+                  "text": "Lieutenant General Charles N. Pede is a military lawyer who currently serves as the 40th Judge Advocate General of the United States Army. General Pede was promoted from the rank of Brigadier General to the rank of Lieutenant General, bypassing the rank of Major General on July 26, 2017.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Lieutenant General Charles N. Pede is a military lawyer who currently serves as the 40th Judge Advocate General of the United States Army.",
+                      " General Pede was promoted from the rank of Brigadier General to the rank of Lieutenant General, bypassing the rank of Major General on July 26, 2017."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Andrew Davis Bruce",
+                  "text": "Lieutenant General Andrew Davis Bruce (September 14, 1894 \u2013 July 28, 1969) was an American academic and soldier who served as the third president of the University of Houston. He retired from the United States Army in 1954 as a lieutenant general after seeing action in both World War I and World War II and founding Fort Hood, Texas. Three countries, France, the Philippines, and the United States, awarded him service medals, including the Distinguished Service Cross, the U.S. Army's second highest military decoration. Bruce is interred in Arlington National Cemetery.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Lieutenant General Andrew Davis Bruce (September 14, 1894 \u2013 July 28, 1969) was an American academic and soldier who served as the third president of the University of Houston.",
+                      " He retired from the United States Army in 1954 as a lieutenant general after seeing action in both World War I and World War II and founding Fort Hood, Texas.",
+                      " Three countries, France, the Philippines, and the United States, awarded him service medals, including the Distinguished Service Cross, the U.S. Army's second highest military decoration.",
+                      " Bruce is interred in Arlington National Cemetery."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Distinguished Service Cross (United States)",
+                  "text": "The Distinguished Service Cross is the second highest military award that can be given to a member of the United States Army (and previously, the United States Army Air Forces and the United States Air Force), for extreme gallantry and risk of life in actual combat with an armed enemy force. Actions that merit the Distinguished Service Cross must be of such a high degree that they are above those required for all other U.S. combat decorations but do not meet the criteria for the Medal of Honor. The Distinguished Service Cross is equivalent to the Navy Cross (Navy and Marine Corps), the Air Force Cross (Air Force), and the Coast Guard Cross (Coast Guard).",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The Distinguished Service Cross is the second highest military award that can be given to a member of the United States Army (and previously, the United States Army Air Forces and the United States Air Force), for extreme gallantry and risk of life in actual combat with an armed enemy force.",
+                      " Actions that merit the Distinguished Service Cross must be of such a high degree that they are above those required for all other U.S. combat decorations but do not meet the criteria for the Medal of Honor.",
+                      " The Distinguished Service Cross is equivalent to the Navy Cross (Navy and Marine Corps), the Air Force Cross (Air Force), and the Coast Guard Cross (Coast Guard)."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Richard E. Cavazos",
+                  "text": "Richard Edward Cavazos (born January 31, 1929), a Korean War recipient of the Distinguished Service Cross as a first lieutenant, who advanced in rank to become the United States Army's first Hispanic four-star general. During the Vietnam War, as a lieutenant colonel, Cavazos was awarded a second Distinguished Service Cross. In 1976, Cavazos became the first Mexican American to reach the rank of brigadier general in the U.S. Army. Cavazos served with great distinction for thirty-three years, with his final command as head of the U.S. Army Forces Command.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Richard Edward Cavazos (born January 31, 1929), a Korean War recipient of the Distinguished Service Cross as a first lieutenant, who advanced in rank to become the United States Army's first Hispanic four-star general.",
+                      " During the Vietnam War, as a lieutenant colonel, Cavazos was awarded a second Distinguished Service Cross.",
+                      " In 1976, Cavazos became the first Mexican American to reach the rank of brigadier general in the U.S. Army.",
+                      " Cavazos served with great distinction for thirty-three years, with his final command as head of the U.S. Army Forces Command."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Major general (United States)",
+                  "text": "In the United States Army, United States Marine Corps, and United States Air Force, major general is a two-star general-officer rank, with the pay grade of O-8. Major general ranks above brigadier general and below lieutenant general. A major general typically commands division-sized units of 10,000 to 15,000 soldiers. Major general is equivalent to the two-star rank of rear admiral in the United States Navy and United States Coast Guard and is the highest permanent rank during peacetime in the uniformed services. (The higher ranks are temporary ranks linked to specific positions, although virtually all officers who have been promoted to those ranks are approved to retire at their highest earned rank.)",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "In the United States Army, United States Marine Corps, and United States Air Force, major general is a two-star general-officer rank, with the pay grade of O-8.",
+                      " Major general ranks above brigadier general and below lieutenant general.",
+                      " A major general typically commands division-sized units of 10,000 to 15,000 soldiers.",
+                      " Major general is equivalent to the two-star rank of rear admiral in the United States Navy and United States Coast Guard and is the highest permanent rank during peacetime in the uniformed services.",
+                      " (The higher ranks are temporary ranks linked to specific positions, although virtually all officers who have been promoted to those ranks are approved to retire at their highest earned rank.)"
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Nadja West",
+                  "text": "Nadja Y. West (born 1961) is a United States Army lieutenant general and the 44th U.S. Army Surgeon General and Commanding General of the U.S. Army Medical Command. West is the first black Army Surgeon General, and was the first black female, active-duty, major general and the first black female major general in Army Medicine. West is also the first Army black female lieutenant general. She is the highest ranking female to have graduated from the United States Military Academy. She received the Army Distinguished Service Medal, the Defense Superior Service Medal, the Legion of Merit, and others.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Nadja Y. West (born 1961) is a United States Army lieutenant general and the 44th U.S. Army Surgeon General and Commanding General of the U.S. Army Medical Command.",
+                      " West is the first black Army Surgeon General, and was the first black female, active-duty, major general and the first black female major general in Army Medicine.",
+                      " West is also the first Army black female lieutenant general.",
+                      " She is the highest ranking female to have graduated from the United States Military Academy.",
+                      " She received the Army Distinguished Service Medal, the Defense Superior Service Medal, the Legion of Merit, and others."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Frank A. Armstrong",
+                  "text": "Frank Alton Armstrong Jr. (May 24, 1902 \u2013 August 20, 1969) was a lieutenant general of the United States Air Force. As a brigadier general in the United States Army Air Forces during World War II, he was the inspiration for the main character in the novel and subsequent film, \"Twelve O'Clock High.\" After the war, he held a variety of senior leadership positions prior to and following the establishment of the USAF as an independent service in 1947. Promoted to major general in 1950, he advanced to lieutenant general in 1956 and retired at that rank in 1962.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Frank Alton Armstrong Jr. (May 24, 1902 \u2013 August 20, 1969) was a lieutenant general of the United States Air Force.",
+                      " As a brigadier general in the United States Army Air Forces during World War II, he was the inspiration for the main character in the novel and subsequent film, \"Twelve O'Clock High.\"",
+                      " After the war, he held a variety of senior leadership positions prior to and following the establishment of the USAF as an independent service in 1947.",
+                      " Promoted to major general in 1950, he advanced to lieutenant general in 1956 and retired at that rank in 1962."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Hal Moore",
+                  "text": "Harold Gregory \"Hal\" Moore, Jr. (February 13, 1922 \u2013 February 10, 2017) was a United States Army lieutenant general and author. He was a recipient of the Distinguished Service Cross, which is the U.S. military's second highest decoration for valor, and was the first of his West Point class (1945) to be promoted to brigadier general, major general, and lieutenant general.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Harold Gregory \"Hal\" Moore, Jr. (February 13, 1922 \u2013 February 10, 2017) was a United States Army lieutenant general and author.",
+                      " He was a recipient of the Distinguished Service Cross, which is the U.S. military's second highest decoration for valor, and was the first of his West Point class (1945) to be promoted to brigadier general, major general, and lieutenant general."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Wayne W. Lambert",
+                  "text": "Wayne W. Lambert (born 1936) was an Air force Brigadier General (United States). He attended the United States Military Academy at West Point, New York, after already having served a year in the US Army. Lambert graduated from the Academy in 1959 and was commissioned a 2nd Lieutenant in the USAF that same year. He trained as a bomber pilot, receiving his Aviator badge in 1960. He has logged over 5,800 flying hours with the US Air Force. A seasoned combat veteran, Lambert flew over 225 combat missions in South East Asia as a B-52 crew member. He was awarded the Distinguished Flying Cross (United States) and received 10 awards of the Air Medal for his service during the Vietnamese War. After serving in a succession of lesser command positions, Lambert was promoted to the rank of Brigadier General in 1983, assuming command of the former Strategic Air Command\u2019s 7th Air Division, headquartered then at Ramstein Air Base in West Germany, and overseeing SAC operations throughout the European theater. The Brigadier General retired from the US Air Force in 1989. Lambert also holds an MBA from Chapman College (\u201976). In retirement, Lambert publicly supported U.S. presidential candidate Mitt Romney and U.S. vice presidential candidate Paul Ryan in the 2012 general election.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Wayne W. Lambert (born 1936) was an Air force Brigadier General (United States).",
+                      " He attended the United States Military Academy at West Point, New York, after already having served a year in the US Army.",
+                      " Lambert graduated from the Academy in 1959 and was commissioned a 2nd Lieutenant in the USAF that same year.",
+                      " He trained as a bomber pilot, receiving his Aviator badge in 1960.",
+                      " He has logged over 5,800 flying hours with the US Air Force.",
+                      " A seasoned combat veteran, Lambert flew over 225 combat missions in South East Asia as a B-52 crew member.",
+                      " He was awarded the Distinguished Flying Cross (United States) and received 10 awards of the Air Medal for his service during the Vietnamese War.",
+                      " After serving in a succession of lesser command positions, Lambert was promoted to the rank of Brigadier General in 1983, assuming command of the former Strategic Air Command\u2019s 7th Air Division, headquartered then at Ramstein Air Base in West Germany, and overseeing SAC operations throughout the European theater.",
+                      " The Brigadier General retired from the US Air Force in 1989.",
+                      " Lambert also holds an MBA from Chapman College (\u201976).",
+                      " In retirement, Lambert publicly supported U.S. presidential candidate Mitt Romney and U.S. vice presidential candidate Paul Ryan in the 2012 general election."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Julia Compton Moore",
+                  "text": "Julia Compton Moore (February 10, 1929April 18, 2004) was the wife of Lieutenant General (Ret.) Hal Moore, a United States Army officer. Her efforts and complaints in the aftermath of the Battle of Ia Drang prompted the U.S. Army to set up survivor support networks and casualty notification teams consisting of uniformed officers, which are still in use.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Julia Compton Moore (February 10, 1929April 18, 2004) was the wife of Lieutenant General (Ret.)",
+                      " Hal Moore, a United States Army officer.",
+                      " Her efforts and complaints in the aftermath of the Battle of Ia Drang prompted the U.S. Army to set up survivor support networks and casualty notification teams consisting of uniformed officers, which are still in use."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-7",
+                "title": "Hal Moore",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "He was a recipient of the Distinguished Service Cross, which is the U.S. military's second highest decoration for valor, and was the first of his West Point class (1945) to be promoted to brigadier general, major general, and lieutenant general."
+              },
+              {
+                "document_id": "context-9",
+                "title": "Julia Compton Moore",
+                "sentence_indices": [
+                  0,
+                  1
+                ],
+                "fact": "Julia Compton Moore was the wife of Lieutenant General (Ret.) Hal Moore, a United States Army officer."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-7",
+                  "title": "Hal Moore",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "He was a recipient of the Distinguished Service Cross, which is the U.S. military's second highest decoration for valor, and was the first of his West Point class (1945) to be promoted to brigadier general, major general, and lieutenant general."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Hal Moore",
+                    "sentence_index": 1
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-9",
+                  "title": "Julia Compton Moore",
+                  "sentence_indices": [
+                    0,
+                    1
+                  ],
+                  "fact": "Julia Compton Moore was the wife of Lieutenant General (Ret.) Hal Moore, a United States Army officer."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Julia Compton Moore",
+                    "sentence_index": 0
+                  },
+                  {
+                    "title": "Julia Compton Moore",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": 7879.029449999507,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Julia Compton Moore"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 7879.091660000995,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 120.0,
+            "max_retries": 2,
+            "retry_initial_delay_seconds": 0.5,
+            "retry_max_delay_seconds": 8.0
+          },
+          "planner": {
+            "max_nodes": 15,
+            "max_depth": 5,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  single_prompt[\"single_prompt: Single prompt\\nsynthesis\\nsucceeded\"]\n  click single_prompt dagqaSelectGraphNode"
+      },
+      "error": null
+    },
+    {
+      "id": "5adf5c175542995ec70e8fd0",
+      "question": "What company headquartered in Whitley, Coventry, United Kingdom will start production in Nitra in 2018?",
+      "gold_answer": "Jaguar Land Rover",
+      "prediction": "Jaguar Land Rover",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0,
+      "latency_ms": 7753.840600000331,
+      "llm_call_count": 1,
+      "llm_retry_count": 0,
+      "node_count": 1,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Automotive industry in Slovakia",
+          "sentence_index": 3
+        },
+        {
+          "title": "Jaguar Land Rover",
+          "sentence_index": 0
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 1.0,
+      "run_trace": {
+        "run_id": "172d1a4e-36ab-4358-8f71-1a2ea47b2e5d",
+        "question": "What company headquartered in Whitley, Coventry, United Kingdom will start production in Nitra in 2018?",
+        "plan": {
+          "question": "What company headquartered in Whitley, Coventry, United Kingdom will start production in Nitra in 2018?",
+          "nodes": [
+            {
+              "id": "single_prompt",
+              "label": "Single prompt",
+              "task_type": "synthesis",
+              "question": "What company headquartered in Whitley, Coventry, United Kingdom will start production in Nitra in 2018?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "Answer the question concisely using only the supplied sources.",
+                "user_template": "Question: What company headquartered in Whitley, Coventry, United Kingdom will start production in Nitra in 2018?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Avro Canada C102 Jetliner\n  (0) The Avro C102 Jetliner was a Canadian prototype medium-range turbojet-powered jet airliner built by Avro Canada in 1949.\n  (1)  It was beaten to the air by only 13 days by the de Havilland Comet, thereby becoming the second jet airliner in the world.\n  (2)  The name \"Jetliner\" was chosen as a shortening of the term \"jet airliner\", a term which is still in popular usage in Canada and the United States.\n  (3)  The aircraft was considered suitable for busy routes along the US eastern seaboard and garnered intense interest, notably from Howard Hughes who even offered to start production under license.\n  (4)  However continued delays in Avro's all-weather interceptor project, the Avro CF-100, led to an order to stop working on the project in 1951, with the prototype Jetliner later cut up for scrap.\n\nDocument ID: context-1\nTitle: GMT T1XX\n  (0) The GMT T1XX is the assembly code for an vehicle platform architecture in development by General Motors for its line of full-size trucks and large SUVs that has been announced to start production in the fall of 2018 for the 2019 model year.\n  (1)  The \"XX\" is a place holder for the last two digits of the specific assembly code for each model.\n  (2)  As an example, the project code for the Suburban is T1YC.\n  (3)  The platform is intended to replaced the GMT K2XX series that was introduced in April 2013 for the trucks, followed by the December 2013 production of large SUVs.\n\nDocument ID: context-2\nTitle: Jaguar Land Rover\n  (0) Jaguar Land Rover Automotive PLC is the holding company of Jaguar Land Rover Limited, a British multinational automotive company with its headquarters in Whitley, Coventry, United Kingdom, and a subsidiary of Indian automaker Tata Motors.\n  (1)  The principal activity of Jaguar Land Rover Limited is the design, development, manufacture and sale of vehicles bearing the Jaguar and Land Rover (including Range Rover) marques.\n  (2)  Both marques have long and complex histories prior to their merger, going back to the 1940s, first coming together in 1968 as part of the ill-fated British Leyland conglomerate; and later existed independently of each other as subsidiaries of BMW (in the case of Land Rover), and Ford Motor Company (in the case of Jaguar); Ford later acquired Land Rover from BMW in 2000 following the break-up of the former Rover Group; which was effectively the remainder of British Leyland.\n\nDocument ID: context-3\nTitle: Coventry City Derby Dolls\n  (0) Coventry City Derby Dolls (CCDD) are Coventry\u2019s first and only all female flat track roller derby league based in Coventry, United Kingdom.\n\nDocument ID: context-4\nTitle: Fulton ethanol plant\n  (0) Sunoco's Fulton ethanol plant in Fulton, New York is the first such facility owned by the company.\n  (1)  The plant is spread over an area of 115 acres in Riverview Business Park and includes a 250,000\u00a0ft\u00b2 brewhouse.\n  (2)  The plant has the capacity to produce 85m gallons of ethanol annually.\n  (3)  Northeast Biofuels opened the plant in 2008; however, design flaws led to growth of bacteria in pipes that were difficult to clean.\n  (4)  Northeast Biofuels tried to rectify the problem and fix the pipes but failed.\n  (5)  The company filed for bankruptcy in 2009.\n  (6)  Sunoco bought the plant from Northeast Biofuels in June 2009 for $8.5m.\n  (7)  The company spent $25m, and contracted ICM, to repair the design flaws and start production.\n  (8)  The refurbished facility became fully operational with the production of the first batch of ethanol in June 2010.\n\nDocument ID: context-5\nTitle: Bablake School\n  (0) Bablake School is a co-educational Independent school located in Coventry, England and founded in 1344 by Queen Isabella, making it one of the oldest schools in the United Kingdom (List of the oldest schools in the United Kingdom).\n  (1)  Bablake is part of the Coventry School Foundation, a registered charity, along with King Henry VIII School, King Henry VIII Preparatory School and Cheshunt School.\n  (2)  The current headmaster is John Watson, who succeeded Dr Stuart Nuttall following his retirement in 2006.\n  (3)  Today Bablake is a selective, fee-paying independent school and a member of the HMC.\n\nDocument ID: context-6\nTitle: Automotive industry in Slovakia\n  (0) Since 2007, Slovakia has been the world's largest producer of cars per capita, with a total of 1,040,000 cars manufactured in 2016 alone in a country with 5 million people.\n  (1)  With production of more than million cars in 2016, Slovakia was 20th in the list of worldwide car production by country and the 7th largest car producer in the European Union.\n  (2)  Automotive is the largest industry in Slovakia with a share of 12% on the Slovak GDP in 2013 which was 41% of industrial production and 26% of Slovakia's export.\n  (3)  80.000 people were employed in the automotive industry in 2014, which will be even increased when Jaguar Land Rover starts production in Nitra in 2018.\n\nDocument ID: context-7\nTitle: The London Taxi Company\n  (0) London Electric Vehicle Company Ltd., formerly The London Taxi Corporation Ltd trading as The London Taxi Company; formerly part of Manganese Bronze Holdings plc is an automotive engineering company headquartered in Coventry, United Kingdom, and a wholly owned subsidiary of Chinese automaker Geely.\n  (1)  It was founded in 1899 and its principal activity is the design, development and production of taxicabs. With the launch of the new TX electric taxi in 2017, the company changed its name to London Electric Vehicle Company Ltd. and announced its intentions to begin production of electric commercial vehicles in addition to the taxi cabs.\n\nDocument ID: context-8\nTitle: Lockheed L-100 Hercules\n  (0) The Lockheed L-100 Hercules is the civilian variant of the prolific C-130 Hercules military transport aircraft made by the Lockheed Corporation.\n  (1)  Its first flight occurred in 1964.\n  (2)  Longer L-100-20 and L-100-30 versions were developed.\n  (3)  L-100 production ended in 1992 with 114 aircraft delivered.\n  (4)  An updated variant of the model, LM-100J, have completed its first flight in Marietta, Georgia on May 25, 2017, and is set to start production in 2018-2019.\n\nDocument ID: context-9\nTitle: Coventry University Business School\n  (0) Coventry Business School is a business school located in Coventry, United Kingdom.\n  (1)  It is a department of Coventry University and its Faculty of Business and Law.\n  (2)  The School offers a number of undergraduate and postgraduate degrees in subjects such as economics, marketing, event management and applied management.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "single_prompt"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "single_prompt"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "single_prompt",
+            "label": "Single prompt",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "What company headquartered in Whitley, Coventry, United Kingdom will start production in Nitra in 2018?",
+            "rendered_prompt": "Question: What company headquartered in Whitley, Coventry, United Kingdom will start production in Nitra in 2018?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Avro Canada C102 Jetliner\n  (0) The Avro C102 Jetliner was a Canadian prototype medium-range turbojet-powered jet airliner built by Avro Canada in 1949.\n  (1)  It was beaten to the air by only 13 days by the de Havilland Comet, thereby becoming the second jet airliner in the world.\n  (2)  The name \"Jetliner\" was chosen as a shortening of the term \"jet airliner\", a term which is still in popular usage in Canada and the United States.\n  (3)  The aircraft was considered suitable for busy routes along the US eastern seaboard and garnered intense interest, notably from Howard Hughes who even offered to start production under license.\n  (4)  However continued delays in Avro's all-weather interceptor project, the Avro CF-100, led to an order to stop working on the project in 1951, with the prototype Jetliner later cut up for scrap.\n\nDocument ID: context-1\nTitle: GMT T1XX\n  (0) The GMT T1XX is the assembly code for an vehicle platform architecture in development by General Motors for its line of full-size trucks and large SUVs that has been announced to start production in the fall of 2018 for the 2019 model year.\n  (1)  The \"XX\" is a place holder for the last two digits of the specific assembly code for each model.\n  (2)  As an example, the project code for the Suburban is T1YC.\n  (3)  The platform is intended to replaced the GMT K2XX series that was introduced in April 2013 for the trucks, followed by the December 2013 production of large SUVs.\n\nDocument ID: context-2\nTitle: Jaguar Land Rover\n  (0) Jaguar Land Rover Automotive PLC is the holding company of Jaguar Land Rover Limited, a British multinational automotive company with its headquarters in Whitley, Coventry, United Kingdom, and a subsidiary of Indian automaker Tata Motors.\n  (1)  The principal activity of Jaguar Land Rover Limited is the design, development, manufacture and sale of vehicles bearing the Jaguar and Land Rover (including Range Rover) marques.\n  (2)  Both marques have long and complex histories prior to their merger, going back to the 1940s, first coming together in 1968 as part of the ill-fated British Leyland conglomerate; and later existed independently of each other as subsidiaries of BMW (in the case of Land Rover), and Ford Motor Company (in the case of Jaguar); Ford later acquired Land Rover from BMW in 2000 following the break-up of the former Rover Group; which was effectively the remainder of British Leyland.\n\nDocument ID: context-3\nTitle: Coventry City Derby Dolls\n  (0) Coventry City Derby Dolls (CCDD) are Coventry\u2019s first and only all female flat track roller derby league based in Coventry, United Kingdom.\n\nDocument ID: context-4\nTitle: Fulton ethanol plant\n  (0) Sunoco's Fulton ethanol plant in Fulton, New York is the first such facility owned by the company.\n  (1)  The plant is spread over an area of 115 acres in Riverview Business Park and includes a 250,000\u00a0ft\u00b2 brewhouse.\n  (2)  The plant has the capacity to produce 85m gallons of ethanol annually.\n  (3)  Northeast Biofuels opened the plant in 2008; however, design flaws led to growth of bacteria in pipes that were difficult to clean.\n  (4)  Northeast Biofuels tried to rectify the problem and fix the pipes but failed.\n  (5)  The company filed for bankruptcy in 2009.\n  (6)  Sunoco bought the plant from Northeast Biofuels in June 2009 for $8.5m.\n  (7)  The company spent $25m, and contracted ICM, to repair the design flaws and start production.\n  (8)  The refurbished facility became fully operational with the production of the first batch of ethanol in June 2010.\n\nDocument ID: context-5\nTitle: Bablake School\n  (0) Bablake School is a co-educational Independent school located in Coventry, England and founded in 1344 by Queen Isabella, making it one of the oldest schools in the United Kingdom (List of the oldest schools in the United Kingdom).\n  (1)  Bablake is part of the Coventry School Foundation, a registered charity, along with King Henry VIII School, King Henry VIII Preparatory School and Cheshunt School.\n  (2)  The current headmaster is John Watson, who succeeded Dr Stuart Nuttall following his retirement in 2006.\n  (3)  Today Bablake is a selective, fee-paying independent school and a member of the HMC.\n\nDocument ID: context-6\nTitle: Automotive industry in Slovakia\n  (0) Since 2007, Slovakia has been the world's largest producer of cars per capita, with a total of 1,040,000 cars manufactured in 2016 alone in a country with 5 million people.\n  (1)  With production of more than million cars in 2016, Slovakia was 20th in the list of worldwide car production by country and the 7th largest car producer in the European Union.\n  (2)  Automotive is the largest industry in Slovakia with a share of 12% on the Slovak GDP in 2013 which was 41% of industrial production and 26% of Slovakia's export.\n  (3)  80.000 people were employed in the automotive industry in 2014, which will be even increased when Jaguar Land Rover starts production in Nitra in 2018.\n\nDocument ID: context-7\nTitle: The London Taxi Company\n  (0) London Electric Vehicle Company Ltd., formerly The London Taxi Corporation Ltd trading as The London Taxi Company; formerly part of Manganese Bronze Holdings plc is an automotive engineering company headquartered in Coventry, United Kingdom, and a wholly owned subsidiary of Chinese automaker Geely.\n  (1)  It was founded in 1899 and its principal activity is the design, development and production of taxicabs. With the launch of the new TX electric taxi in 2017, the company changed its name to London Electric Vehicle Company Ltd. and announced its intentions to begin production of electric commercial vehicles in addition to the taxi cabs.\n\nDocument ID: context-8\nTitle: Lockheed L-100 Hercules\n  (0) The Lockheed L-100 Hercules is the civilian variant of the prolific C-130 Hercules military transport aircraft made by the Lockheed Corporation.\n  (1)  Its first flight occurred in 1964.\n  (2)  Longer L-100-20 and L-100-30 versions were developed.\n  (3)  L-100 production ended in 1992 with 114 aircraft delivered.\n  (4)  An updated variant of the model, LM-100J, have completed its first flight in Marietta, Georgia on May 25, 2017, and is set to start production in 2018-2019.\n\nDocument ID: context-9\nTitle: Coventry University Business School\n  (0) Coventry Business School is a business school located in Coventry, United Kingdom.\n  (1)  It is a department of Coventry University and its Faculty of Business and Law.\n  (2)  The School offers a number of undergraduate and postgraduate degrees in subjects such as economics, marketing, event management and applied management.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer.",
+            "raw_response": "{\"answer\": \"Jaguar Land Rover\", \"_evidence_citations\": [{\"document_id\": \"context-2\", \"title\": \"Jaguar Land Rover\", \"sentence_indices\": [0], \"fact\": \"Jaguar Land Rover Automotive PLC is the holding company of Jaguar Land Rover Limited, a British multinational automotive company with its headquarters in Whitley, Coventry, United Kingdom\"}, {\"document_id\": \"context-6\", \"title\": \"Automotive industry in Slovakia\", \"sentence_indices\": [3], \"fact\": \"80.000 people were employed in the automotive industry in 2014, which will be even increased when Jaguar Land Rover starts production in Nitra in 2018.\"}]}",
+            "parsed_output": {
+              "answer": "Jaguar Land Rover",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-2",
+                  "title": "Jaguar Land Rover",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Jaguar Land Rover Automotive PLC is the holding company of Jaguar Land Rover Limited, a British multinational automotive company with its headquarters in Whitley, Coventry, United Kingdom"
+                },
+                {
+                  "document_id": "context-6",
+                  "title": "Automotive industry in Slovakia",
+                  "sentence_indices": [
+                    3
+                  ],
+                  "fact": "80.000 people were employed in the automotive industry in 2014, which will be even increased when Jaguar Land Rover starts production in Nitra in 2018."
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "Jaguar Land Rover"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Avro Canada C102 Jetliner",
+                  "text": "The Avro C102 Jetliner was a Canadian prototype medium-range turbojet-powered jet airliner built by Avro Canada in 1949. It was beaten to the air by only 13 days by the de Havilland Comet, thereby becoming the second jet airliner in the world. The name \"Jetliner\" was chosen as a shortening of the term \"jet airliner\", a term which is still in popular usage in Canada and the United States. The aircraft was considered suitable for busy routes along the US eastern seaboard and garnered intense interest, notably from Howard Hughes who even offered to start production under license. However continued delays in Avro's all-weather interceptor project, the Avro CF-100, led to an order to stop working on the project in 1951, with the prototype Jetliner later cut up for scrap.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "The Avro C102 Jetliner was a Canadian prototype medium-range turbojet-powered jet airliner built by Avro Canada in 1949.",
+                      " It was beaten to the air by only 13 days by the de Havilland Comet, thereby becoming the second jet airliner in the world.",
+                      " The name \"Jetliner\" was chosen as a shortening of the term \"jet airliner\", a term which is still in popular usage in Canada and the United States.",
+                      " The aircraft was considered suitable for busy routes along the US eastern seaboard and garnered intense interest, notably from Howard Hughes who even offered to start production under license.",
+                      " However continued delays in Avro's all-weather interceptor project, the Avro CF-100, led to an order to stop working on the project in 1951, with the prototype Jetliner later cut up for scrap."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "GMT T1XX",
+                  "text": "The GMT T1XX is the assembly code for an vehicle platform architecture in development by General Motors for its line of full-size trucks and large SUVs that has been announced to start production in the fall of 2018 for the 2019 model year. The \"XX\" is a place holder for the last two digits of the specific assembly code for each model. As an example, the project code for the Suburban is T1YC. The platform is intended to replaced the GMT K2XX series that was introduced in April 2013 for the trucks, followed by the December 2013 production of large SUVs.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "The GMT T1XX is the assembly code for an vehicle platform architecture in development by General Motors for its line of full-size trucks and large SUVs that has been announced to start production in the fall of 2018 for the 2019 model year.",
+                      " The \"XX\" is a place holder for the last two digits of the specific assembly code for each model.",
+                      " As an example, the project code for the Suburban is T1YC.",
+                      " The platform is intended to replaced the GMT K2XX series that was introduced in April 2013 for the trucks, followed by the December 2013 production of large SUVs."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Jaguar Land Rover",
+                  "text": "Jaguar Land Rover Automotive PLC is the holding company of Jaguar Land Rover Limited, a British multinational automotive company with its headquarters in Whitley, Coventry, United Kingdom, and a subsidiary of Indian automaker Tata Motors. The principal activity of Jaguar Land Rover Limited is the design, development, manufacture and sale of vehicles bearing the Jaguar and Land Rover (including Range Rover) marques. Both marques have long and complex histories prior to their merger, going back to the 1940s, first coming together in 1968 as part of the ill-fated British Leyland conglomerate; and later existed independently of each other as subsidiaries of BMW (in the case of Land Rover), and Ford Motor Company (in the case of Jaguar); Ford later acquired Land Rover from BMW in 2000 following the break-up of the former Rover Group; which was effectively the remainder of British Leyland.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "Jaguar Land Rover Automotive PLC is the holding company of Jaguar Land Rover Limited, a British multinational automotive company with its headquarters in Whitley, Coventry, United Kingdom, and a subsidiary of Indian automaker Tata Motors.",
+                      " The principal activity of Jaguar Land Rover Limited is the design, development, manufacture and sale of vehicles bearing the Jaguar and Land Rover (including Range Rover) marques.",
+                      " Both marques have long and complex histories prior to their merger, going back to the 1940s, first coming together in 1968 as part of the ill-fated British Leyland conglomerate; and later existed independently of each other as subsidiaries of BMW (in the case of Land Rover), and Ford Motor Company (in the case of Jaguar); Ford later acquired Land Rover from BMW in 2000 following the break-up of the former Rover Group; which was effectively the remainder of British Leyland."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Coventry City Derby Dolls",
+                  "text": "Coventry City Derby Dolls (CCDD) are Coventry\u2019s first and only all female flat track roller derby league based in Coventry, United Kingdom.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Coventry City Derby Dolls (CCDD) are Coventry\u2019s first and only all female flat track roller derby league based in Coventry, United Kingdom."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Fulton ethanol plant",
+                  "text": "Sunoco's Fulton ethanol plant in Fulton, New York is the first such facility owned by the company. The plant is spread over an area of 115 acres in Riverview Business Park and includes a 250,000\u00a0ft\u00b2 brewhouse. The plant has the capacity to produce 85m gallons of ethanol annually. Northeast Biofuels opened the plant in 2008; however, design flaws led to growth of bacteria in pipes that were difficult to clean. Northeast Biofuels tried to rectify the problem and fix the pipes but failed. The company filed for bankruptcy in 2009. Sunoco bought the plant from Northeast Biofuels in June 2009 for $8.5m. The company spent $25m, and contracted ICM, to repair the design flaws and start production. The refurbished facility became fully operational with the production of the first batch of ethanol in June 2010.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Sunoco's Fulton ethanol plant in Fulton, New York is the first such facility owned by the company.",
+                      " The plant is spread over an area of 115 acres in Riverview Business Park and includes a 250,000\u00a0ft\u00b2 brewhouse.",
+                      " The plant has the capacity to produce 85m gallons of ethanol annually.",
+                      " Northeast Biofuels opened the plant in 2008; however, design flaws led to growth of bacteria in pipes that were difficult to clean.",
+                      " Northeast Biofuels tried to rectify the problem and fix the pipes but failed.",
+                      " The company filed for bankruptcy in 2009.",
+                      " Sunoco bought the plant from Northeast Biofuels in June 2009 for $8.5m.",
+                      " The company spent $25m, and contracted ICM, to repair the design flaws and start production.",
+                      " The refurbished facility became fully operational with the production of the first batch of ethanol in June 2010."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Bablake School",
+                  "text": "Bablake School is a co-educational Independent school located in Coventry, England and founded in 1344 by Queen Isabella, making it one of the oldest schools in the United Kingdom (List of the oldest schools in the United Kingdom). Bablake is part of the Coventry School Foundation, a registered charity, along with King Henry VIII School, King Henry VIII Preparatory School and Cheshunt School. The current headmaster is John Watson, who succeeded Dr Stuart Nuttall following his retirement in 2006. Today Bablake is a selective, fee-paying independent school and a member of the HMC.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Bablake School is a co-educational Independent school located in Coventry, England and founded in 1344 by Queen Isabella, making it one of the oldest schools in the United Kingdom (List of the oldest schools in the United Kingdom).",
+                      " Bablake is part of the Coventry School Foundation, a registered charity, along with King Henry VIII School, King Henry VIII Preparatory School and Cheshunt School.",
+                      " The current headmaster is John Watson, who succeeded Dr Stuart Nuttall following his retirement in 2006.",
+                      " Today Bablake is a selective, fee-paying independent school and a member of the HMC."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Automotive industry in Slovakia",
+                  "text": "Since 2007, Slovakia has been the world's largest producer of cars per capita, with a total of 1,040,000 cars manufactured in 2016 alone in a country with 5 million people. With production of more than million cars in 2016, Slovakia was 20th in the list of worldwide car production by country and the 7th largest car producer in the European Union. Automotive is the largest industry in Slovakia with a share of 12% on the Slovak GDP in 2013 which was 41% of industrial production and 26% of Slovakia's export. 80.000 people were employed in the automotive industry in 2014, which will be even increased when Jaguar Land Rover starts production in Nitra in 2018.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Since 2007, Slovakia has been the world's largest producer of cars per capita, with a total of 1,040,000 cars manufactured in 2016 alone in a country with 5 million people.",
+                      " With production of more than million cars in 2016, Slovakia was 20th in the list of worldwide car production by country and the 7th largest car producer in the European Union.",
+                      " Automotive is the largest industry in Slovakia with a share of 12% on the Slovak GDP in 2013 which was 41% of industrial production and 26% of Slovakia's export.",
+                      " 80.000 people were employed in the automotive industry in 2014, which will be even increased when Jaguar Land Rover starts production in Nitra in 2018."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "The London Taxi Company",
+                  "text": "London Electric Vehicle Company Ltd., formerly The London Taxi Corporation Ltd trading as The London Taxi Company; formerly part of Manganese Bronze Holdings plc is an automotive engineering company headquartered in Coventry, United Kingdom, and a wholly owned subsidiary of Chinese automaker Geely. It was founded in 1899 and its principal activity is the design, development and production of taxicabs. With the launch of the new TX electric taxi in 2017, the company changed its name to London Electric Vehicle Company Ltd. and announced its intentions to begin production of electric commercial vehicles in addition to the taxi cabs.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "London Electric Vehicle Company Ltd., formerly The London Taxi Corporation Ltd trading as The London Taxi Company; formerly part of Manganese Bronze Holdings plc is an automotive engineering company headquartered in Coventry, United Kingdom, and a wholly owned subsidiary of Chinese automaker Geely.",
+                      " It was founded in 1899 and its principal activity is the design, development and production of taxicabs. With the launch of the new TX electric taxi in 2017, the company changed its name to London Electric Vehicle Company Ltd. and announced its intentions to begin production of electric commercial vehicles in addition to the taxi cabs."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Lockheed L-100 Hercules",
+                  "text": "The Lockheed L-100 Hercules is the civilian variant of the prolific C-130 Hercules military transport aircraft made by the Lockheed Corporation. Its first flight occurred in 1964. Longer L-100-20 and L-100-30 versions were developed. L-100 production ended in 1992 with 114 aircraft delivered. An updated variant of the model, LM-100J, have completed its first flight in Marietta, Georgia on May 25, 2017, and is set to start production in 2018-2019.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "The Lockheed L-100 Hercules is the civilian variant of the prolific C-130 Hercules military transport aircraft made by the Lockheed Corporation.",
+                      " Its first flight occurred in 1964.",
+                      " Longer L-100-20 and L-100-30 versions were developed.",
+                      " L-100 production ended in 1992 with 114 aircraft delivered.",
+                      " An updated variant of the model, LM-100J, have completed its first flight in Marietta, Georgia on May 25, 2017, and is set to start production in 2018-2019."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Coventry University Business School",
+                  "text": "Coventry Business School is a business school located in Coventry, United Kingdom. It is a department of Coventry University and its Faculty of Business and Law. The School offers a number of undergraduate and postgraduate degrees in subjects such as economics, marketing, event management and applied management.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Coventry Business School is a business school located in Coventry, United Kingdom.",
+                      " It is a department of Coventry University and its Faculty of Business and Law.",
+                      " The School offers a number of undergraduate and postgraduate degrees in subjects such as economics, marketing, event management and applied management."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-2",
+                "title": "Jaguar Land Rover",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Jaguar Land Rover Automotive PLC is the holding company of Jaguar Land Rover Limited, a British multinational automotive company with its headquarters in Whitley, Coventry, United Kingdom"
+              },
+              {
+                "document_id": "context-6",
+                "title": "Automotive industry in Slovakia",
+                "sentence_indices": [
+                  3
+                ],
+                "fact": "80.000 people were employed in the automotive industry in 2014, which will be even increased when Jaguar Land Rover starts production in Nitra in 2018."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-2",
+                  "title": "Jaguar Land Rover",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Jaguar Land Rover Automotive PLC is the holding company of Jaguar Land Rover Limited, a British multinational automotive company with its headquarters in Whitley, Coventry, United Kingdom"
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Jaguar Land Rover",
+                    "sentence_index": 0
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-6",
+                  "title": "Automotive industry in Slovakia",
+                  "sentence_indices": [
+                    3
+                  ],
+                  "fact": "80.000 people were employed in the automotive industry in 2014, which will be even increased when Jaguar Land Rover starts production in Nitra in 2018."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Automotive industry in Slovakia",
+                    "sentence_index": 3
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": 7753.543628999978,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Jaguar Land Rover"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 7753.598110999519,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 120.0,
+            "max_retries": 2,
+            "retry_initial_delay_seconds": 0.5,
+            "retry_max_delay_seconds": 8.0
+          },
+          "planner": {
+            "max_nodes": 15,
+            "max_depth": 5,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  single_prompt[\"single_prompt: Single prompt\\nsynthesis\\nsucceeded\"]\n  click single_prompt dagqaSelectGraphNode"
+      },
+      "error": null
+    },
+    {
+      "id": "5a7653d25542992db9473765",
+      "question": "Nick Hexum of which American rock band helped produce Decomposer by The Matches?",
+      "gold_answer": "311",
+      "prediction": "311",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0,
+      "latency_ms": 7242.449307999777,
+      "llm_call_count": 1,
+      "llm_retry_count": 0,
+      "node_count": 1,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Decomposer (album)",
+          "sentence_index": 0
+        },
+        {
+          "title": "Decomposer (album)",
+          "sentence_index": 1
+        },
+        {
+          "title": "311 (band)",
+          "sentence_index": 0
+        }
+      ],
+      "evidence_citation_count": 1,
+      "correct_evidence_citation_count": 1,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 0.3333333333333333,
+      "run_trace": {
+        "run_id": "e5ae2c80-3729-486c-9623-201d51f3a9d9",
+        "question": "Nick Hexum of which American rock band helped produce Decomposer by The Matches?",
+        "plan": {
+          "question": "Nick Hexum of which American rock band helped produce Decomposer by The Matches?",
+          "nodes": [
+            {
+              "id": "single_prompt",
+              "label": "Single prompt",
+              "task_type": "synthesis",
+              "question": "Nick Hexum of which American rock band helped produce Decomposer by The Matches?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "Answer the question concisely using only the supplied sources.",
+                "user_template": "Question: Nick Hexum of which American rock band helped produce Decomposer by The Matches?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Nick Hexum\n  (0) Nicholas Lofton \"Nick\" Hexum (born April 12, 1970) is an American singer, songwriter and rapper, currently the vocalist and guitarist for the multi-platinum alternative rock band 311 and The Nick Hexum Quintet.\n\nDocument ID: context-1\nTitle: 311 (band)\n  (0) 311 (pronounced \"three-eleven\") is an American rock band from Omaha, Nebraska.\n  (1)  The band was formed in 1988 by vocalist and guitarist Nick Hexum, lead guitarist Jim Watson (a member briefly, before being replaced by Tim Mahoney in 1991), bassist Aaron \"P-Nut\" Wills.\n  (2)  and drummer Chad Sexton.\n  (3)  In 1992, Doug \"SA\" Martinez joined to sing and provide turntables for 311's later albums, rounding out the current line-up.\n  (4)  The band's name originates from the police code for indecent exposure in Omaha, Nebraska, after the original guitarist for the band was arrested for streaking.\n\nDocument ID: context-2\nTitle: Decomposer (album)\n  (0) Decomposer is the second album by The Matches, released by Epitaph Records on September 11, 2006 worldwide and on September 12, 2006.\n  (1)  The band took an unusual approach to the album and enlisted the help of nine producers including John Feldmann of Goldfinger, Mark Hoppus of +44 and Blink-182, Nick Hexum of 311, Tim Armstrong of Rancid and Brett Gurewitz of Bad Religion.\n\nDocument ID: context-3\nTitle: Stiffed (band)\n  (0) Stiffed was an American punk rock band from Philadelphia, Pennsylvania.\n  (1)  They incorporated both new wave and no wave elements into their work.\n  (2)  Founded by vocalist Santi White, the band also included guitarist Matt Schleck, bassist Chris Shar and drummer Chuck Treece.\n  (3)  The band's \"stripped-raw rhythm and eerie vocals [...] created so much buzz in the underground rock scenes in New York and Philadelphia that record producer Ryko and publicity hotshots Girlie Action (the White Stripes and Ryan Adams are also clients) approached the band hoping to distribute and represent Stiffed's music.\"\n  (4)  Their initial EP \"Sex Sells\" was released in 2003, and their debut album \"Burned Again\", produced by Darryl Jennifer of Bad Brains, was released in 2005.\n  (5)  The band helped launch the solo career for White (stage name Santigold).\n\nDocument ID: context-4\nTitle: I'll Be Here Awhile\n  (0) \"I'll Be Here Awhile\" is a single by alternative rock band 311.\n  (1)  It is the 12th and closing track on their album \"From Chaos\".\n  (2)  Lead singer Nick Hexum originally wrote it when he was twenty, hence the line in the refrain \"Twenty years of age, \" though Hexum was thirty when he recorded it.\n  (3)  He comments on the interview included on the disc of \"From Chaos\" that he was living a wild and crazy life at that young age.\n\nDocument ID: context-5\nTitle: Steve Miller Band\n  (0) The Steve Miller Band is an American rock band formed in 1966 in San Francisco, California.\n  (1)  The band is led by Steve Miller on guitar and lead vocals.\n  (2)  It is best known today for a string of (mainly) mid-1970s hit singles that are staples of classic rock radio, as well as several earlier acid rock albums.\n  (3)  Miller left his first band to move to San Francisco and form the Steve Miller Blues Band.\n  (4)  Shortly after Harvey Kornspan negotiated the band\u2019s landmark contract with Capitol Records in 1967, the band shortened its name to the Steve Miller Band.\n  (5)  In February 1968, the band recorded its debut album, \"Children of the Future\".\n  (6)  It went on to produce the albums \"Sailor\", \"Brave New World\", \"Your Saving Grace\", \"Number 5\", \"Rock Love\" and more.\n  (7)  The band's \"Greatest Hits 1974\u201378\", released in 1978, sold over 13 million copies.\n  (8)  The band continued to produce more albums and in 2014 toured with the rock band Journey.\n  (9)  In 2016, Steve Miller was inducted as a solo artist in the Rock and Roll Hall of Fame.\n\nDocument ID: context-6\nTitle: Master of Styles\n  (0) Master of Styles is the fifth studio album by alternative rock band The Urge.\n  (1)  It was released in 1998 in cassette and CD format.\n  (2)  The album produced 3 singles (\u201cJump Right In\u201d, \u201cStraight to Hell\u201d, and \u201cCloser\u201d) and sold 250,000 copies.\n  (3)  \u201cJump Right In\u201d featured guest vocals by Nick Hexum of 311 and hit the #10 position on the Modern Rock list.\n\nDocument ID: context-7\nTitle: Five of Everything\n  (0) \"Five of Everything\" is a song by the American rock band 311.\n  (1)  The song was released as the first single from their 11th studio album \"Stereolithic\" on February 4, 2014.\n  (2)  Nick Hexum stated \"This song rocks.\n  (3)  I'm glad we're starting with a rocker\".\n\nDocument ID: context-8\nTitle: American Tragedy (album)\n  (0) American Tragedy is the second studio album by American rap rock band Hollywood Undead.\n  (1)  Production for the album began following the induction of Daniel Murillo into the band in early 2010 and lasted until December.\n  (2)  Don Gilmore and Ben Grosse, who helped produce the band's debut album, \"Swan Songs\" (2008), also returned to produce the album along with several other producers including Kevin Rudolf, Sam Hollander, Dave Katz, Griffin Boice, Jeff Halavacs, and Jacob Kasher.\n  (3)  The album is musically heavier and features darker lyrical content than the band's previous effort.\n  (4)  Originally set to release in March, \"American Tragedy\" was released on April\u00a05, 2011 in the United States and was released on various other dates that month in other countries.\n  (5)  A remix of the album, \"American Tragedy Redux\", was released on November 21, 2011.\n\nDocument ID: context-9\nTitle: Butterglory\n  (0) Butterglory is an American indie rock band from Lawrence, Kansas.\n  (1)  Contemporaries of indie rock groups like Pavement and Archers of Loaf, the band helped explore similar musical territories and expand the genre.\n  (2)  The band released four albums with Merge Records.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "single_prompt"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "single_prompt"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "single_prompt",
+            "label": "Single prompt",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Nick Hexum of which American rock band helped produce Decomposer by The Matches?",
+            "rendered_prompt": "Question: Nick Hexum of which American rock band helped produce Decomposer by The Matches?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Nick Hexum\n  (0) Nicholas Lofton \"Nick\" Hexum (born April 12, 1970) is an American singer, songwriter and rapper, currently the vocalist and guitarist for the multi-platinum alternative rock band 311 and The Nick Hexum Quintet.\n\nDocument ID: context-1\nTitle: 311 (band)\n  (0) 311 (pronounced \"three-eleven\") is an American rock band from Omaha, Nebraska.\n  (1)  The band was formed in 1988 by vocalist and guitarist Nick Hexum, lead guitarist Jim Watson (a member briefly, before being replaced by Tim Mahoney in 1991), bassist Aaron \"P-Nut\" Wills.\n  (2)  and drummer Chad Sexton.\n  (3)  In 1992, Doug \"SA\" Martinez joined to sing and provide turntables for 311's later albums, rounding out the current line-up.\n  (4)  The band's name originates from the police code for indecent exposure in Omaha, Nebraska, after the original guitarist for the band was arrested for streaking.\n\nDocument ID: context-2\nTitle: Decomposer (album)\n  (0) Decomposer is the second album by The Matches, released by Epitaph Records on September 11, 2006 worldwide and on September 12, 2006.\n  (1)  The band took an unusual approach to the album and enlisted the help of nine producers including John Feldmann of Goldfinger, Mark Hoppus of +44 and Blink-182, Nick Hexum of 311, Tim Armstrong of Rancid and Brett Gurewitz of Bad Religion.\n\nDocument ID: context-3\nTitle: Stiffed (band)\n  (0) Stiffed was an American punk rock band from Philadelphia, Pennsylvania.\n  (1)  They incorporated both new wave and no wave elements into their work.\n  (2)  Founded by vocalist Santi White, the band also included guitarist Matt Schleck, bassist Chris Shar and drummer Chuck Treece.\n  (3)  The band's \"stripped-raw rhythm and eerie vocals [...] created so much buzz in the underground rock scenes in New York and Philadelphia that record producer Ryko and publicity hotshots Girlie Action (the White Stripes and Ryan Adams are also clients) approached the band hoping to distribute and represent Stiffed's music.\"\n  (4)  Their initial EP \"Sex Sells\" was released in 2003, and their debut album \"Burned Again\", produced by Darryl Jennifer of Bad Brains, was released in 2005.\n  (5)  The band helped launch the solo career for White (stage name Santigold).\n\nDocument ID: context-4\nTitle: I'll Be Here Awhile\n  (0) \"I'll Be Here Awhile\" is a single by alternative rock band 311.\n  (1)  It is the 12th and closing track on their album \"From Chaos\".\n  (2)  Lead singer Nick Hexum originally wrote it when he was twenty, hence the line in the refrain \"Twenty years of age, \" though Hexum was thirty when he recorded it.\n  (3)  He comments on the interview included on the disc of \"From Chaos\" that he was living a wild and crazy life at that young age.\n\nDocument ID: context-5\nTitle: Steve Miller Band\n  (0) The Steve Miller Band is an American rock band formed in 1966 in San Francisco, California.\n  (1)  The band is led by Steve Miller on guitar and lead vocals.\n  (2)  It is best known today for a string of (mainly) mid-1970s hit singles that are staples of classic rock radio, as well as several earlier acid rock albums.\n  (3)  Miller left his first band to move to San Francisco and form the Steve Miller Blues Band.\n  (4)  Shortly after Harvey Kornspan negotiated the band\u2019s landmark contract with Capitol Records in 1967, the band shortened its name to the Steve Miller Band.\n  (5)  In February 1968, the band recorded its debut album, \"Children of the Future\".\n  (6)  It went on to produce the albums \"Sailor\", \"Brave New World\", \"Your Saving Grace\", \"Number 5\", \"Rock Love\" and more.\n  (7)  The band's \"Greatest Hits 1974\u201378\", released in 1978, sold over 13 million copies.\n  (8)  The band continued to produce more albums and in 2014 toured with the rock band Journey.\n  (9)  In 2016, Steve Miller was inducted as a solo artist in the Rock and Roll Hall of Fame.\n\nDocument ID: context-6\nTitle: Master of Styles\n  (0) Master of Styles is the fifth studio album by alternative rock band The Urge.\n  (1)  It was released in 1998 in cassette and CD format.\n  (2)  The album produced 3 singles (\u201cJump Right In\u201d, \u201cStraight to Hell\u201d, and \u201cCloser\u201d) and sold 250,000 copies.\n  (3)  \u201cJump Right In\u201d featured guest vocals by Nick Hexum of 311 and hit the #10 position on the Modern Rock list.\n\nDocument ID: context-7\nTitle: Five of Everything\n  (0) \"Five of Everything\" is a song by the American rock band 311.\n  (1)  The song was released as the first single from their 11th studio album \"Stereolithic\" on February 4, 2014.\n  (2)  Nick Hexum stated \"This song rocks.\n  (3)  I'm glad we're starting with a rocker\".\n\nDocument ID: context-8\nTitle: American Tragedy (album)\n  (0) American Tragedy is the second studio album by American rap rock band Hollywood Undead.\n  (1)  Production for the album began following the induction of Daniel Murillo into the band in early 2010 and lasted until December.\n  (2)  Don Gilmore and Ben Grosse, who helped produce the band's debut album, \"Swan Songs\" (2008), also returned to produce the album along with several other producers including Kevin Rudolf, Sam Hollander, Dave Katz, Griffin Boice, Jeff Halavacs, and Jacob Kasher.\n  (3)  The album is musically heavier and features darker lyrical content than the band's previous effort.\n  (4)  Originally set to release in March, \"American Tragedy\" was released on April\u00a05, 2011 in the United States and was released on various other dates that month in other countries.\n  (5)  A remix of the album, \"American Tragedy Redux\", was released on November 21, 2011.\n\nDocument ID: context-9\nTitle: Butterglory\n  (0) Butterglory is an American indie rock band from Lawrence, Kansas.\n  (1)  Contemporaries of indie rock groups like Pavement and Archers of Loaf, the band helped explore similar musical territories and expand the genre.\n  (2)  The band released four albums with Merge Records.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer.",
+            "raw_response": "{\"answer\": \"311\", \"_evidence_citations\": [{\"document_id\": \"context-2\", \"title\": \"Decomposer (album)\", \"sentence_indices\": [1], \"fact\": \"The band took an unusual approach to the album and enlisted the help of nine producers including John Feldmann of Goldfinger, Mark Hoppus of +44 and Blink-182, Nick Hexum of 311, Tim Armstrong of Rancid and Brett Gurewitz of Bad Religion.\"}]}",
+            "parsed_output": {
+              "answer": "311",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-2",
+                  "title": "Decomposer (album)",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "The band took an unusual approach to the album and enlisted the help of nine producers including John Feldmann of Goldfinger, Mark Hoppus of +44 and Blink-182, Nick Hexum of 311, Tim Armstrong of Rancid and Brett Gurewitz of Bad Religion."
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "311"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Nick Hexum",
+                  "text": "Nicholas Lofton \"Nick\" Hexum (born April 12, 1970) is an American singer, songwriter and rapper, currently the vocalist and guitarist for the multi-platinum alternative rock band 311 and The Nick Hexum Quintet.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Nicholas Lofton \"Nick\" Hexum (born April 12, 1970) is an American singer, songwriter and rapper, currently the vocalist and guitarist for the multi-platinum alternative rock band 311 and The Nick Hexum Quintet."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "311 (band)",
+                  "text": "311 (pronounced \"three-eleven\") is an American rock band from Omaha, Nebraska. The band was formed in 1988 by vocalist and guitarist Nick Hexum, lead guitarist Jim Watson (a member briefly, before being replaced by Tim Mahoney in 1991), bassist Aaron \"P-Nut\" Wills. and drummer Chad Sexton. In 1992, Doug \"SA\" Martinez joined to sing and provide turntables for 311's later albums, rounding out the current line-up. The band's name originates from the police code for indecent exposure in Omaha, Nebraska, after the original guitarist for the band was arrested for streaking.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "311 (pronounced \"three-eleven\") is an American rock band from Omaha, Nebraska.",
+                      " The band was formed in 1988 by vocalist and guitarist Nick Hexum, lead guitarist Jim Watson (a member briefly, before being replaced by Tim Mahoney in 1991), bassist Aaron \"P-Nut\" Wills.",
+                      " and drummer Chad Sexton.",
+                      " In 1992, Doug \"SA\" Martinez joined to sing and provide turntables for 311's later albums, rounding out the current line-up.",
+                      " The band's name originates from the police code for indecent exposure in Omaha, Nebraska, after the original guitarist for the band was arrested for streaking."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Decomposer (album)",
+                  "text": "Decomposer is the second album by The Matches, released by Epitaph Records on September 11, 2006 worldwide and on September 12, 2006. The band took an unusual approach to the album and enlisted the help of nine producers including John Feldmann of Goldfinger, Mark Hoppus of +44 and Blink-182, Nick Hexum of 311, Tim Armstrong of Rancid and Brett Gurewitz of Bad Religion.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "Decomposer is the second album by The Matches, released by Epitaph Records on September 11, 2006 worldwide and on September 12, 2006.",
+                      " The band took an unusual approach to the album and enlisted the help of nine producers including John Feldmann of Goldfinger, Mark Hoppus of +44 and Blink-182, Nick Hexum of 311, Tim Armstrong of Rancid and Brett Gurewitz of Bad Religion."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Stiffed (band)",
+                  "text": "Stiffed was an American punk rock band from Philadelphia, Pennsylvania. They incorporated both new wave and no wave elements into their work. Founded by vocalist Santi White, the band also included guitarist Matt Schleck, bassist Chris Shar and drummer Chuck Treece. The band's \"stripped-raw rhythm and eerie vocals [...] created so much buzz in the underground rock scenes in New York and Philadelphia that record producer Ryko and publicity hotshots Girlie Action (the White Stripes and Ryan Adams are also clients) approached the band hoping to distribute and represent Stiffed's music.\" Their initial EP \"Sex Sells\" was released in 2003, and their debut album \"Burned Again\", produced by Darryl Jennifer of Bad Brains, was released in 2005. The band helped launch the solo career for White (stage name Santigold).",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Stiffed was an American punk rock band from Philadelphia, Pennsylvania.",
+                      " They incorporated both new wave and no wave elements into their work.",
+                      " Founded by vocalist Santi White, the band also included guitarist Matt Schleck, bassist Chris Shar and drummer Chuck Treece.",
+                      " The band's \"stripped-raw rhythm and eerie vocals [...] created so much buzz in the underground rock scenes in New York and Philadelphia that record producer Ryko and publicity hotshots Girlie Action (the White Stripes and Ryan Adams are also clients) approached the band hoping to distribute and represent Stiffed's music.\"",
+                      " Their initial EP \"Sex Sells\" was released in 2003, and their debut album \"Burned Again\", produced by Darryl Jennifer of Bad Brains, was released in 2005.",
+                      " The band helped launch the solo career for White (stage name Santigold)."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "I'll Be Here Awhile",
+                  "text": "\"I'll Be Here Awhile\" is a single by alternative rock band 311. It is the 12th and closing track on their album \"From Chaos\". Lead singer Nick Hexum originally wrote it when he was twenty, hence the line in the refrain \"Twenty years of age, \" though Hexum was thirty when he recorded it. He comments on the interview included on the disc of \"From Chaos\" that he was living a wild and crazy life at that young age.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "\"I'll Be Here Awhile\" is a single by alternative rock band 311.",
+                      " It is the 12th and closing track on their album \"From Chaos\".",
+                      " Lead singer Nick Hexum originally wrote it when he was twenty, hence the line in the refrain \"Twenty years of age, \" though Hexum was thirty when he recorded it.",
+                      " He comments on the interview included on the disc of \"From Chaos\" that he was living a wild and crazy life at that young age."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Steve Miller Band",
+                  "text": "The Steve Miller Band is an American rock band formed in 1966 in San Francisco, California. The band is led by Steve Miller on guitar and lead vocals. It is best known today for a string of (mainly) mid-1970s hit singles that are staples of classic rock radio, as well as several earlier acid rock albums. Miller left his first band to move to San Francisco and form the Steve Miller Blues Band. Shortly after Harvey Kornspan negotiated the band\u2019s landmark contract with Capitol Records in 1967, the band shortened its name to the Steve Miller Band. In February 1968, the band recorded its debut album, \"Children of the Future\". It went on to produce the albums \"Sailor\", \"Brave New World\", \"Your Saving Grace\", \"Number 5\", \"Rock Love\" and more. The band's \"Greatest Hits 1974\u201378\", released in 1978, sold over 13 million copies. The band continued to produce more albums and in 2014 toured with the rock band Journey. In 2016, Steve Miller was inducted as a solo artist in the Rock and Roll Hall of Fame.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "The Steve Miller Band is an American rock band formed in 1966 in San Francisco, California.",
+                      " The band is led by Steve Miller on guitar and lead vocals.",
+                      " It is best known today for a string of (mainly) mid-1970s hit singles that are staples of classic rock radio, as well as several earlier acid rock albums.",
+                      " Miller left his first band to move to San Francisco and form the Steve Miller Blues Band.",
+                      " Shortly after Harvey Kornspan negotiated the band\u2019s landmark contract with Capitol Records in 1967, the band shortened its name to the Steve Miller Band.",
+                      " In February 1968, the band recorded its debut album, \"Children of the Future\".",
+                      " It went on to produce the albums \"Sailor\", \"Brave New World\", \"Your Saving Grace\", \"Number 5\", \"Rock Love\" and more.",
+                      " The band's \"Greatest Hits 1974\u201378\", released in 1978, sold over 13 million copies.",
+                      " The band continued to produce more albums and in 2014 toured with the rock band Journey.",
+                      " In 2016, Steve Miller was inducted as a solo artist in the Rock and Roll Hall of Fame."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Master of Styles",
+                  "text": "Master of Styles is the fifth studio album by alternative rock band The Urge. It was released in 1998 in cassette and CD format. The album produced 3 singles (\u201cJump Right In\u201d, \u201cStraight to Hell\u201d, and \u201cCloser\u201d) and sold 250,000 copies. \u201cJump Right In\u201d featured guest vocals by Nick Hexum of 311 and hit the #10 position on the Modern Rock list.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Master of Styles is the fifth studio album by alternative rock band The Urge.",
+                      " It was released in 1998 in cassette and CD format.",
+                      " The album produced 3 singles (\u201cJump Right In\u201d, \u201cStraight to Hell\u201d, and \u201cCloser\u201d) and sold 250,000 copies.",
+                      " \u201cJump Right In\u201d featured guest vocals by Nick Hexum of 311 and hit the #10 position on the Modern Rock list."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Five of Everything",
+                  "text": "\"Five of Everything\" is a song by the American rock band 311. The song was released as the first single from their 11th studio album \"Stereolithic\" on February 4, 2014. Nick Hexum stated \"This song rocks. I'm glad we're starting with a rocker\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "\"Five of Everything\" is a song by the American rock band 311.",
+                      " The song was released as the first single from their 11th studio album \"Stereolithic\" on February 4, 2014.",
+                      " Nick Hexum stated \"This song rocks.",
+                      " I'm glad we're starting with a rocker\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "American Tragedy (album)",
+                  "text": "American Tragedy is the second studio album by American rap rock band Hollywood Undead. Production for the album began following the induction of Daniel Murillo into the band in early 2010 and lasted until December. Don Gilmore and Ben Grosse, who helped produce the band's debut album, \"Swan Songs\" (2008), also returned to produce the album along with several other producers including Kevin Rudolf, Sam Hollander, Dave Katz, Griffin Boice, Jeff Halavacs, and Jacob Kasher. The album is musically heavier and features darker lyrical content than the band's previous effort. Originally set to release in March, \"American Tragedy\" was released on April\u00a05, 2011 in the United States and was released on various other dates that month in other countries. A remix of the album, \"American Tragedy Redux\", was released on November 21, 2011.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "American Tragedy is the second studio album by American rap rock band Hollywood Undead.",
+                      " Production for the album began following the induction of Daniel Murillo into the band in early 2010 and lasted until December.",
+                      " Don Gilmore and Ben Grosse, who helped produce the band's debut album, \"Swan Songs\" (2008), also returned to produce the album along with several other producers including Kevin Rudolf, Sam Hollander, Dave Katz, Griffin Boice, Jeff Halavacs, and Jacob Kasher.",
+                      " The album is musically heavier and features darker lyrical content than the band's previous effort.",
+                      " Originally set to release in March, \"American Tragedy\" was released on April\u00a05, 2011 in the United States and was released on various other dates that month in other countries.",
+                      " A remix of the album, \"American Tragedy Redux\", was released on November 21, 2011."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Butterglory",
+                  "text": "Butterglory is an American indie rock band from Lawrence, Kansas. Contemporaries of indie rock groups like Pavement and Archers of Loaf, the band helped explore similar musical territories and expand the genre. The band released four albums with Merge Records.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Butterglory is an American indie rock band from Lawrence, Kansas.",
+                      " Contemporaries of indie rock groups like Pavement and Archers of Loaf, the band helped explore similar musical territories and expand the genre.",
+                      " The band released four albums with Merge Records."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-2",
+                "title": "Decomposer (album)",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "The band took an unusual approach to the album and enlisted the help of nine producers including John Feldmann of Goldfinger, Mark Hoppus of +44 and Blink-182, Nick Hexum of 311, Tim Armstrong of Rancid and Brett Gurewitz of Bad Religion."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-2",
+                  "title": "Decomposer (album)",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "The band took an unusual approach to the album and enlisted the help of nine producers including John Feldmann of Goldfinger, Mark Hoppus of +44 and Blink-182, Nick Hexum of 311, Tim Armstrong of Rancid and Brett Gurewitz of Bad Religion."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Decomposer (album)",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": 7242.063579999012,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "311"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 7242.176010999174,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 120.0,
+            "max_retries": 2,
+            "retry_initial_delay_seconds": 0.5,
+            "retry_max_delay_seconds": 8.0
+          },
+          "planner": {
+            "max_nodes": 15,
+            "max_depth": 5,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  single_prompt[\"single_prompt: Single prompt\\nsynthesis\\nsucceeded\"]\n  click single_prompt dagqaSelectGraphNode"
+      },
+      "error": null
+    }
+  ],
+  "metrics": {
+    "example_count": 4.0,
+    "success_count": 4.0,
+    "failure_count": 0.0,
+    "error_count": 0.0,
+    "exact_match": 1.0,
+    "f1": 1.0,
+    "cosine_sim": 1.0,
+    "avg_latency_ms": 7548.940808249881,
+    "p50_latency_ms": 7753.840600000331,
+    "total_llm_call_count": 4.0,
+    "total_llm_retry_count": 0.0,
+    "avg_llm_retry_count": 0.0,
+    "avg_llm_call_count": 1.0,
+    "avg_node_count": 1.0,
+    "avg_graph_depth": 0.0,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.0,
+    "total_evidence_citation_count": 7.0,
+    "correct_evidence_citation_count": 7.0,
+    "wrong_evidence_citation_count": 0.0,
+    "wrong_supporting_text_rate": 0.0,
+    "avg_gold_supporting_fact_recall": 0.7708333333333334,
+    "total_runtime_ms": 8014.960665999752
+  }
+}

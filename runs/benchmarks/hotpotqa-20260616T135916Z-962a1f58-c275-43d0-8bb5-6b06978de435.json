@@ -1,0 +1,516 @@
+{
+  "run_id": "962a1f58-c275-43d0-8bb5-6b06978de435",
+  "name": null,
+  "comparison_group_id": "91ec3ec6-a779-4631-b8de-7b609ec4cb13",
+  "system": "dag_agent",
+  "limit": 2,
+  "provider": "cluster",
+  "model": "mistralai/Mistral-Medium-3.5-128B",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "dataset_size": 7405,
+  "seed": 716080932,
+  "max_parallel_examples": 4,
+  "max_nodes": 4,
+  "max_depth": 2,
+  "created_at": "2026-06-16T13:59:16Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260616T135916Z-962a1f58-c275-43d0-8bb5-6b06978de435.json",
+  "total_runtime_ms": 29972.64916399945,
+  "records": [
+    {
+      "id": "5a75083b5542996c70cfae7e",
+      "question": "Which British independent private day school for boys did Charles John Godfrey Saunders attend?",
+      "gold_answer": "Merchant Taylors' School (MTS)",
+      "prediction": "Merchant Taylors' School",
+      "exact_match": 0.0,
+      "f1": 0.8571428571428571,
+      "cosine_sim": 0.9092666506767273,
+      "latency_ms": 29827.003350001178,
+      "llm_call_count": 3,
+      "llm_retry_count": 0,
+      "node_count": 2,
+      "graph_depth": 2,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Charles Saunders (bishop)",
+          "sentence_index": 0
+        },
+        {
+          "title": "Charles Saunders (bishop)",
+          "sentence_index": 1
+        },
+        {
+          "title": "Merchant Taylors' School, Northwood",
+          "sentence_index": 0
+        }
+      ],
+      "evidence_citation_count": 1,
+      "correct_evidence_citation_count": 1,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 0.6666666666666666,
+      "run_trace": {
+        "run_id": "420d39cc-0767-41bd-98bf-fe598eb08c65",
+        "question": "Which British independent private day school for boys did Charles John Godfrey Saunders attend?",
+        "plan": {
+          "question": "Which British independent private day school for boys did Charles John Godfrey Saunders attend?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Identify Charles John Godfrey Saunders",
+              "task_type": "fact_lookup",
+              "question": "Who is Charles John Godfrey Saunders?",
+              "operation": "compare",
+              "depends_on": [],
+              "prompt": {
+                "system": "You are a precise fact lookup assistant. Return the full name and key biographical details of the person.",
+                "user_template": "Who is Charles John Godfrey Saunders?"
+              },
+              "input_map": {},
+              "child_output_policy": "return_all",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "full_name",
+                  "biography"
+                ],
+                "properties": {
+                  "full_name": {
+                    "type": "string",
+                    "description": "The full name of the person."
+                  },
+                  "biography": {
+                    "type": "string",
+                    "description": "Key biographical details, including education."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Extract school name from biography",
+              "task_type": "synthesis",
+              "question": "Which British independent private day school for boys did Charles John Godfrey Saunders attend?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q1"
+              ],
+              "prompt": {
+                "system": "You are a precise information extractor. Return the name of the school from the provided biography.",
+                "user_template": "From the biography of {q1.full_name}: {q1.biography}, what is the name of the British independent private day school for boys he attended?"
+              },
+              "input_map": {
+                "full_name": "q1.full_name",
+                "biography": "q1.biography"
+              },
+              "child_output_policy": "return_all",
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "The name of the school Charles John Godfrey Saunders attended."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q2"
+        },
+        "waves": [
+          {
+            "index": 1,
+            "node_ids": [
+              "q1"
+            ]
+          },
+          {
+            "index": 2,
+            "node_ids": [
+              "q2"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "q1",
+            "label": "Identify Charles John Godfrey Saunders",
+            "task_type": "fact_lookup",
+            "operation": "compare",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Who is Charles John Godfrey Saunders?",
+            "rendered_prompt": "Who is Charles John Godfrey Saunders?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Saint John XXIII High School\n  (0) Saint John XXIII College Preparatory, formerly Pope John XXIII High School, is a Catholic independent, non-profit, coeducational, private day school in unincorporated Harris County, Texas, United States, near Katy.\n  (1)  The school serves grades 9-12.\n  (2)  The academic year consists of two semesters extending from approximately August to December and January to May.\n  (3)  Student leadership development through the Works of Ministries program is a distinct characteristic of the school, and leadership principles are integrated into every course at Saint John XXIII.\n  (4)  'SJ' is accredited by/a member of the Roman Catholic Archdiocese of Galveston-Houston (RCAGH), led by Archbishop Daniel DiNardo.\n  (5)  SJ is also the newest private day school in the Katy area for over fifty years, effective 2004.\n  (6)  It is located at 1800 West Grand Parkway North.\n\nDocument ID: context-1\nTitle: Madison Country Day School\n  (0) Madison Country Day School is a nonsectarian, private day school in Dane County, Wisconsin for grades PreK through 12.\n  (1)  The school has an enrollment of about 400 students.\n  (2)  It is accredited by the Independent Schools Association of the Central States (ISACS), and is a member of the National Association of Independent Schools (NAIS).\n  (3)  It is an International Baccalaureate (IB) World School that offers the IB Diploma Program to high school students.\n  (4)  Madison Country Day School is informally known as \"MCDS\", and \"Country Day\".\n\nDocument ID: context-2\nTitle: Merchant Taylors' School, Northwood\n  (0) Merchant Taylors' School (MTS) is a British independent private day school for boys, originally located in the City of London.\n  (1)  Since 1933 it has been located on 285 acre of grounds at Sandy Lodge in the Three Rivers district of Hertfordshire.\n\nDocument ID: context-3\nTitle: La Martiniere Calcutta\n  (0) \"La Martini\u00e8re\" Calcutta (informally known as LMC) is an independent private day school located in Kolkata (Calcutta), West Bengal.\n  (1)  It comprises two single-sex boys and girls school.\n  (2)  It was established in 1836 in accordance with the will of the French soldier of fortune and philanthropist, Major General Claude Martin.\n  (3)  They are both Christian schools, controlled by the Protestant Church of North India and independent from the Government, with English as the primary language of instruction.\n\nDocument ID: context-4\nTitle: Canterbury School (Fort Wayne, Indiana)\n  (0) Canterbury School is an independent, college preparatory day school for students age 2 through Grade 12.\n  (1)  The school is located in Fort Wayne, Indiana, USA.\n  (2)  The school was ranked the best private day school in Indiana by Niche in 2017.\n\nDocument ID: context-5\nTitle: St. Xavier's Collegiate School\n  (0) St. Xavier's Collegiate School (informally SXCS) is an independent private day school for boys located in Kolkata, West Bengal, India.\n  (1)  It was founded in 1860 by the Jesuits, and it is named after Francis Xavier, a 16th century Jesuit missionary to India.\n  (2)  The school completed its sesquicentennial year in 2010.\n\nDocument ID: context-6\nTitle: Renbrook School\n  (0) Renbrook School is an independent, private day school in West Hartford, Connecticut Renbrook School prepares your Preschool to Grade 8 child for success at secondary school and beyond.\n  (1)  Founded in 1935, Renbrook is an independent day school for students in two divisions, Lower School for preschool-grade 5 and Upper School for grades 6-8.\n  (2)  With about 200 students in each of the Lower and Upper Schools, class sizes of 10\u201315 are typical.\n  (3)  The building where it is located was the house of Frederick Rentschler.\n\nDocument ID: context-7\nTitle: Almaden Country Day School (San Jose, California)\n  (0) Almaden Country Day School (formerly known as Almaden Country School) is an independent, nonsectarian, coeducational private day school founded in 1982 by Mrs. Nan Hunter.\n\nDocument ID: context-8\nTitle: Charles Saunders (bishop)\n  (0) Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938.\n  (1)  He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford.\n  (2)  Ordained in 1912 he emigrated to India where he worked as a missionary with the SPG.\n  (3)  From 1921 to 1925 he was Staff Chaplain at the headquarters of the Indian Army followed by another three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate.\n  (4)  On returning to England he was Vicar of Uckfield, and an Assistant Bishop within the Chichester Diocese.\n  (5)  His last post was an honorary one in retirement at Bristol where he died on 16 October 1973.\n\nDocument ID: context-9\nTitle: Hamden Hall Country Day School\n  (0) Hamden Hall Country Day School is a coeducational private day school in Hamden, Connecticut, educating students in preschool through grade 12.\n  (1)  Hamden Hall was founded in 1912 as a country day school for boys by Dr. John P. Cushing, its first headmaster.\n  (2)  It was the nation\u2019s fourth country day school.\n  (3)  The school has been coeducational since 1927 and expanded to include classes through grade 12 in 1934.\n  (4)  Now split into three separate divisions, Hamden Hall enrolls the majority of its nearly 600 students in the upper and middle schools (Grades 7\u201312) and the remainder in the lower school (preschool through grade 6).\n\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"full_name\",\n    \"biography\",\n    \"_evidence_citations\"\n  ],\n  \"properties\": {\n    \"full_name\": {\n      \"type\": \"string\",\n      \"description\": \"The full name of the person.\"\n    },\n    \"biography\": {\n      \"type\": \"string\",\n      \"description\": \"Key biographical details, including education.\"\n    },\n    \"_evidence_citations\": {\n      \"type\": \"array\",\n      \"description\": \"Only evidence facts that directly determine the returned values; exclude inspected or rejected candidates.\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"document_id\",\n          \"title\",\n          \"sentence_indices\",\n          \"fact\"\n        ],\n        \"properties\": {\n          \"document_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"sentence_indices\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            }\n          },\n          \"fact\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\n  \"full_name\": \"Charles John Godfrey Saunders\",\n  \"biography\": \"Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938. He was educated at Merchant Taylors' School and St John\u2019s College, Oxford. Ordained in 1912, he emigrated to India, where he worked as a missionary with the SPG. From 1921 to 1925, he was Staff Chaplain at the headquarters of the Indian Army, followed by three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate. On returning to England, he was Vicar of Uckfield and an Assistant Bishop within the Chichester Diocese. His last post was an honorary one in retirement at Bristol, where he died on 16 October 1973.\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-8\",\n      \"title\": \"Charles Saunders (bishop)\",\n      \"sentence_indices\": [0, 1, 2, 3, 4, 5],\n      \"fact\": \"Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938. He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford. Ordained in 1912 he emigrated to India where he worked as a missionary with the SPG. From 1921 to 1925 he was Staff Chaplain at the headquarters of the Indian Army followed by another three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate. On returning to England he was Vicar of Uckfield, and an Assistant Bishop within the Chichester Diocese. His last post was an honorary one in retirement at Bristol where he died on 16 October 1973.\"\n    }\n  ]\n}",
+            "parsed_output": {
+              "full_name": "Charles John Godfrey Saunders",
+              "biography": "Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938. He was educated at Merchant Taylors' School and St John\u2019s College, Oxford. Ordained in 1912, he emigrated to India, where he worked as a missionary with the SPG. From 1921 to 1925, he was Staff Chaplain at the headquarters of the Indian Army, followed by three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate. On returning to England, he was Vicar of Uckfield and an Assistant Bishop within the Chichester Diocese. His last post was an honorary one in retirement at Bristol, where he died on 16 October 1973.",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-8",
+                  "title": "Charles Saunders (bishop)",
+                  "sentence_indices": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                  ],
+                  "fact": "Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938. He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford. Ordained in 1912 he emigrated to India where he worked as a missionary with the SPG. From 1921 to 1925 he was Staff Chaplain at the headquarters of the Indian Army followed by another three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate. On returning to England he was Vicar of Uckfield, and an Assistant Bishop within the Chichester Diocese. His last post was an honorary one in retirement at Bristol where he died on 16 October 1973."
+                }
+              ]
+            },
+            "returned_value": {
+              "full_name": "Charles John Godfrey Saunders",
+              "biography": "Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938. He was educated at Merchant Taylors' School and St John\u2019s College, Oxford. Ordained in 1912, he emigrated to India, where he worked as a missionary with the SPG. From 1921 to 1925, he was Staff Chaplain at the headquarters of the Indian Army, followed by three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate. On returning to England, he was Vicar of Uckfield and an Assistant Bishop within the Chichester Diocese. His last post was an honorary one in retirement at Bristol, where he died on 16 October 1973."
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Saint John XXIII High School",
+                  "text": "Saint John XXIII College Preparatory, formerly Pope John XXIII High School, is a Catholic independent, non-profit, coeducational, private day school in unincorporated Harris County, Texas, United States, near Katy. The school serves grades 9-12. The academic year consists of two semesters extending from approximately August to December and January to May. Student leadership development through the Works of Ministries program is a distinct characteristic of the school, and leadership principles are integrated into every course at Saint John XXIII. 'SJ' is accredited by/a member of the Roman Catholic Archdiocese of Galveston-Houston (RCAGH), led by Archbishop Daniel DiNardo. SJ is also the newest private day school in the Katy area for over fifty years, effective 2004. It is located at 1800 West Grand Parkway North.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Saint John XXIII College Preparatory, formerly Pope John XXIII High School, is a Catholic independent, non-profit, coeducational, private day school in unincorporated Harris County, Texas, United States, near Katy.",
+                      " The school serves grades 9-12.",
+                      " The academic year consists of two semesters extending from approximately August to December and January to May.",
+                      " Student leadership development through the Works of Ministries program is a distinct characteristic of the school, and leadership principles are integrated into every course at Saint John XXIII.",
+                      " 'SJ' is accredited by/a member of the Roman Catholic Archdiocese of Galveston-Houston (RCAGH), led by Archbishop Daniel DiNardo.",
+                      " SJ is also the newest private day school in the Katy area for over fifty years, effective 2004.",
+                      " It is located at 1800 West Grand Parkway North."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Madison Country Day School",
+                  "text": "Madison Country Day School is a nonsectarian, private day school in Dane County, Wisconsin for grades PreK through 12. The school has an enrollment of about 400 students. It is accredited by the Independent Schools Association of the Central States (ISACS), and is a member of the National Association of Independent Schools (NAIS). It is an International Baccalaureate (IB) World School that offers the IB Diploma Program to high school students. Madison Country Day School is informally known as \"MCDS\", and \"Country Day\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Madison Country Day School is a nonsectarian, private day school in Dane County, Wisconsin for grades PreK through 12.",
+                      " The school has an enrollment of about 400 students.",
+                      " It is accredited by the Independent Schools Association of the Central States (ISACS), and is a member of the National Association of Independent Schools (NAIS).",
+                      " It is an International Baccalaureate (IB) World School that offers the IB Diploma Program to high school students.",
+                      " Madison Country Day School is informally known as \"MCDS\", and \"Country Day\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Merchant Taylors' School, Northwood",
+                  "text": "Merchant Taylors' School (MTS) is a British independent private day school for boys, originally located in the City of London. Since 1933 it has been located on 285 acre of grounds at Sandy Lodge in the Three Rivers district of Hertfordshire.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "Merchant Taylors' School (MTS) is a British independent private day school for boys, originally located in the City of London.",
+                      " Since 1933 it has been located on 285 acre of grounds at Sandy Lodge in the Three Rivers district of Hertfordshire."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "La Martiniere Calcutta",
+                  "text": "\"La Martini\u00e8re\" Calcutta (informally known as LMC) is an independent private day school located in Kolkata (Calcutta), West Bengal. It comprises two single-sex boys and girls school. It was established in 1836 in accordance with the will of the French soldier of fortune and philanthropist, Major General Claude Martin. They are both Christian schools, controlled by the Protestant Church of North India and independent from the Government, with English as the primary language of instruction.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "\"La Martini\u00e8re\" Calcutta (informally known as LMC) is an independent private day school located in Kolkata (Calcutta), West Bengal.",
+                      " It comprises two single-sex boys and girls school.",
+                      " It was established in 1836 in accordance with the will of the French soldier of fortune and philanthropist, Major General Claude Martin.",
+                      " They are both Christian schools, controlled by the Protestant Church of North India and independent from the Government, with English as the primary language of instruction."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Canterbury School (Fort Wayne, Indiana)",
+                  "text": "Canterbury School is an independent, college preparatory day school for students age 2 through Grade 12. The school is located in Fort Wayne, Indiana, USA. The school was ranked the best private day school in Indiana by Niche in 2017.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Canterbury School is an independent, college preparatory day school for students age 2 through Grade 12.",
+                      " The school is located in Fort Wayne, Indiana, USA.",
+                      " The school was ranked the best private day school in Indiana by Niche in 2017."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "St. Xavier's Collegiate School",
+                  "text": "St. Xavier's Collegiate School (informally SXCS) is an independent private day school for boys located in Kolkata, West Bengal, India. It was founded in 1860 by the Jesuits, and it is named after Francis Xavier, a 16th century Jesuit missionary to India. The school completed its sesquicentennial year in 2010.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "St. Xavier's Collegiate School (informally SXCS) is an independent private day school for boys located in Kolkata, West Bengal, India.",
+                      " It was founded in 1860 by the Jesuits, and it is named after Francis Xavier, a 16th century Jesuit missionary to India.",
+                      " The school completed its sesquicentennial year in 2010."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Renbrook School",
+                  "text": "Renbrook School is an independent, private day school in West Hartford, Connecticut Renbrook School prepares your Preschool to Grade 8 child for success at secondary school and beyond. Founded in 1935, Renbrook is an independent day school for students in two divisions, Lower School for preschool-grade 5 and Upper School for grades 6-8. With about 200 students in each of the Lower and Upper Schools, class sizes of 10\u201315 are typical. The building where it is located was the house of Frederick Rentschler.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Renbrook School is an independent, private day school in West Hartford, Connecticut Renbrook School prepares your Preschool to Grade 8 child for success at secondary school and beyond.",
+                      " Founded in 1935, Renbrook is an independent day school for students in two divisions, Lower School for preschool-grade 5 and Upper School for grades 6-8.",
+                      " With about 200 students in each of the Lower and Upper Schools, class sizes of 10\u201315 are typical.",
+                      " The building where it is located was the house of Frederick Rentschler."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Almaden Country Day School (San Jose, California)",
+                  "text": "Almaden Country Day School (formerly known as Almaden Country School) is an independent, nonsectarian, coeducational private day school founded in 1982 by Mrs. Nan Hunter.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Almaden Country Day School (formerly known as Almaden Country School) is an independent, nonsectarian, coeducational private day school founded in 1982 by Mrs. Nan Hunter."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Charles Saunders (bishop)",
+                  "text": "Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938. He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford. Ordained in 1912 he emigrated to India where he worked as a missionary with the SPG. From 1921 to 1925 he was Staff Chaplain at the headquarters of the Indian Army followed by another three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate. On returning to England he was Vicar of Uckfield, and an Assistant Bishop within the Chichester Diocese. His last post was an honorary one in retirement at Bristol where he died on 16 October 1973.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938.",
+                      " He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford.",
+                      " Ordained in 1912 he emigrated to India where he worked as a missionary with the SPG.",
+                      " From 1921 to 1925 he was Staff Chaplain at the headquarters of the Indian Army followed by another three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate.",
+                      " On returning to England he was Vicar of Uckfield, and an Assistant Bishop within the Chichester Diocese.",
+                      " His last post was an honorary one in retirement at Bristol where he died on 16 October 1973."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Hamden Hall Country Day School",
+                  "text": "Hamden Hall Country Day School is a coeducational private day school in Hamden, Connecticut, educating students in preschool through grade 12. Hamden Hall was founded in 1912 as a country day school for boys by Dr. John P. Cushing, its first headmaster. It was the nation\u2019s fourth country day school. The school has been coeducational since 1927 and expanded to include classes through grade 12 in 1934. Now split into three separate divisions, Hamden Hall enrolls the majority of its nearly 600 students in the upper and middle schools (Grades 7\u201312) and the remainder in the lower school (preschool through grade 6).",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Hamden Hall Country Day School is a coeducational private day school in Hamden, Connecticut, educating students in preschool through grade 12.",
+                      " Hamden Hall was founded in 1912 as a country day school for boys by Dr. John P. Cushing, its first headmaster.",
+                      " It was the nation\u2019s fourth country day school.",
+                      " The school has been coeducational since 1927 and expanded to include classes through grade 12 in 1934.",
+                      " Now split into three separate divisions, Hamden Hall enrolls the majority of its nearly 600 students in the upper and middle schools (Grades 7\u201312) and the remainder in the lower school (preschool through grade 6)."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-8",
+                "title": "Charles Saunders (bishop)",
+                "sentence_indices": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5
+                ],
+                "fact": "Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938. He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford. Ordained in 1912 he emigrated to India where he worked as a missionary with the SPG. From 1921 to 1925 he was Staff Chaplain at the headquarters of the Indian Army followed by another three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate. On returning to England he was Vicar of Uckfield, and an Assistant Bishop within the Chichester Diocese. His last post was an honorary one in retirement at Bristol where he died on 16 October 1973."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-8",
+                  "title": "Charles Saunders (bishop)",
+                  "sentence_indices": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                  ],
+                  "fact": "Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938. He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford. Ordained in 1912 he emigrated to India where he worked as a missionary with the SPG. From 1921 to 1925 he was Staff Chaplain at the headquarters of the Indian Army followed by another three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate. On returning to England he was Vicar of Uckfield, and an Assistant Bishop within the Chichester Diocese. His last post was an honorary one in retirement at Bristol where he died on 16 October 1973."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Charles Saunders (bishop)",
+                    "sentence_index": 0
+                  },
+                  {
+                    "title": "Charles Saunders (bishop)",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": "2026-06-16T13:59:34.422200+00:00",
+            "finished_at": "2026-06-16T13:59:41.294394+00:00",
+            "duration_ms": 6872.22270699931,
+            "error": null
+          },
+          {
+            "node_id": "q2",
+            "label": "Extract school name from biography",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {
+              "full_name": "Charles John Godfrey Saunders",
+              "biography": "Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938. He was educated at Merchant Taylors' School and St John\u2019s College, Oxford. Ordained in 1912, he emigrated to India, where he worked as a missionary with the SPG. From 1921 to 1925, he was Staff Chaplain at the headquarters of the Indian Army, followed by three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate. On returning to England, he was Vicar of Uckfield and an Assistant Bishop within the Chichester Diocese. His last post was an honorary one in retirement at Bristol, where he died on 16 October 1973."
+            },
+            "resolved_question": "Which British independent private day school for boys did Charles John Godfrey Saunders attend?",
+            "rendered_prompt": "Dependency values available to this node:\n{\n  \"full_name\": \"Charles John Godfrey Saunders\",\n  \"biography\": \"Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938. He was educated at Merchant Taylors' School and St John\u2019s College, Oxford. Ordained in 1912, he emigrated to India, where he worked as a missionary with the SPG. From 1921 to 1925, he was Staff Chaplain at the headquarters of the Indian Army, followed by three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate. On returning to England, he was Vicar of Uckfield and an Assistant Bishop within the Chichester Diocese. His last post was an honorary one in retirement at Bristol, where he died on 16 October 1973.\"\n}\n\nFrom the biography of Charles John Godfrey Saunders: Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938. He was educated at Merchant Taylors' School and St John\u2019s College, Oxford. Ordained in 1912, he emigrated to India, where he worked as a missionary with the SPG. From 1921 to 1925, he was Staff Chaplain at the headquarters of the Indian Army, followed by three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate. On returning to England, he was Vicar of Uckfield and an Assistant Bishop within the Chichester Diocese. His last post was an honorary one in retirement at Bristol, where he died on 16 October 1973., what is the name of the British independent private day school for boys he attended?\n\nReturn format JSON Schema:\n{\n  \"type\": \"object\",\n  \"required\": [\n    \"answer\"\n  ],\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the school Charles John Godfrey Saunders attended.\"\n    }\n  }\n}\n\nReturn JSON only. Do not wrap the JSON in markdown fences.\nNormalize final answer values:\n- yes/no questions: answer with \"yes\" or \"no\", not true/false.\n- dates: use the natural date form requested by the question when possible.\n- numbers: return only the concise number or quantity unless units are part of the answer.\n- if the schema contains an answer field, put the concise final answer there.\n",
+            "raw_response": "{\"answer\": \"Merchant Taylors' School\"}",
+            "parsed_output": {
+              "answer": "Merchant Taylors' School"
+            },
+            "returned_value": {
+              "answer": "Merchant Taylors' School"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": null,
+            "evidence_citations": [],
+            "evidence_citation_evaluations": [],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": "2026-06-16T13:59:41.294580+00:00",
+            "finished_at": "2026-06-16T13:59:42.006495+00:00",
+            "duration_ms": 711.9487109994225,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Merchant Taylors' School"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 7584.6655130008,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 120.0,
+            "max_retries": 2,
+            "retry_initial_delay_seconds": 0.5,
+            "retry_max_delay_seconds": 8.0
+          },
+          "planner": {
+            "max_nodes": 4,
+            "max_depth": 2,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Identify Charles John Godfrey Saunders\\nfact_lookup\\nsucceeded\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: Extract school name from biography\\nsynthesis\\nsucceeded\"]\n  click q2 dagqaSelectGraphNode\n  q1 --> q2"
+      },
+      "error": null
+    },
+    {
+      "id": "5a820897554299676cceb1f4",
+      "question": "Which founding member drew critical acclaim as a bass guitarist with melodic basslines  on Murmur?",
+      "gold_answer": "Mike\" Mills",
+      "prediction": "",
+      "exact_match": 0.0,
+      "f1": 0.0,
+      "cosine_sim": -1.5,
+      "latency_ms": 22686.98954700085,
+      "llm_call_count": null,
+      "llm_retry_count": null,
+      "node_count": null,
+      "graph_depth": null,
+      "structural_valid": null,
+      "structural_issues": [],
+      "structural_failure": true,
+      "gold_supporting_facts": [],
+      "evidence_citation_count": null,
+      "correct_evidence_citation_count": null,
+      "wrong_evidence_citation_count": null,
+      "wrong_supporting_text_rate": null,
+      "gold_supporting_fact_recall": null,
+      "run_trace": null,
+      "error": "Planner produced invalid DAG: Plan depth is 3; max_depth is 2."
+    }
+  ],
+  "metrics": {
+    "example_count": 2.0,
+    "success_count": 1.0,
+    "failure_count": 1.0,
+    "error_count": 1.0,
+    "exact_match": 0.0,
+    "f1": 0.42857142857142855,
+    "cosine_sim": 0.45463332533836365,
+    "avg_latency_ms": 26256.996448501013,
+    "p50_latency_ms": 29827.003350001178,
+    "total_llm_call_count": 3.0,
+    "total_llm_retry_count": 0.0,
+    "avg_llm_retry_count": 0.0,
+    "avg_llm_call_count": 3.0,
+    "avg_node_count": 2.0,
+    "avg_graph_depth": 2.0,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.5,
+    "total_evidence_citation_count": 1.0,
+    "correct_evidence_citation_count": 1.0,
+    "wrong_evidence_citation_count": 0.0,
+    "wrong_supporting_text_rate": 0.0,
+    "avg_gold_supporting_fact_recall": 0.6666666666666666,
+    "total_runtime_ms": 29972.64916399945
+  }
+}
