@@ -1,0 +1,777 @@
+{
+  "run_id": "964b5a05-55c4-48cb-b2f8-62f084983a89",
+  "name": null,
+  "comparison_group_id": "91ec3ec6-a779-4631-b8de-7b609ec4cb13",
+  "system": "direct_llm",
+  "limit": 2,
+  "provider": "cluster",
+  "model": "mistralai/Mistral-Medium-3.5-128B",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "dataset_size": 7405,
+  "seed": 716080932,
+  "max_parallel_examples": 4,
+  "max_nodes": 4,
+  "max_depth": 2,
+  "created_at": "2026-06-16T13:59:16Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260616T135916Z-964b5a05-55c4-48cb-b2f8-62f084983a89.json",
+  "total_runtime_ms": 5254.819320000024,
+  "records": [
+    {
+      "id": "5a75083b5542996c70cfae7e",
+      "question": "Which British independent private day school for boys did Charles John Godfrey Saunders attend?",
+      "gold_answer": "Merchant Taylors' School (MTS)",
+      "prediction": "Merchant Taylors' School",
+      "exact_match": 0.0,
+      "f1": 0.8571428571428571,
+      "cosine_sim": 0.9092666506767273,
+      "latency_ms": 5060.7795670002815,
+      "llm_call_count": 1,
+      "llm_retry_count": 0,
+      "node_count": 1,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Charles Saunders (bishop)",
+          "sentence_index": 0
+        },
+        {
+          "title": "Charles Saunders (bishop)",
+          "sentence_index": 1
+        },
+        {
+          "title": "Merchant Taylors' School, Northwood",
+          "sentence_index": 0
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 0.6666666666666666,
+      "run_trace": {
+        "run_id": "c105b663-5fd7-45e9-9a74-442da08a9eae",
+        "question": "Which British independent private day school for boys did Charles John Godfrey Saunders attend?",
+        "plan": {
+          "question": "Which British independent private day school for boys did Charles John Godfrey Saunders attend?",
+          "nodes": [
+            {
+              "id": "single_prompt",
+              "label": "Single prompt",
+              "task_type": "synthesis",
+              "question": "Which British independent private day school for boys did Charles John Godfrey Saunders attend?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "Answer the question concisely using only the supplied sources.",
+                "user_template": "Question: Which British independent private day school for boys did Charles John Godfrey Saunders attend?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Saint John XXIII High School\n  (0) Saint John XXIII College Preparatory, formerly Pope John XXIII High School, is a Catholic independent, non-profit, coeducational, private day school in unincorporated Harris County, Texas, United States, near Katy.\n  (1)  The school serves grades 9-12.\n  (2)  The academic year consists of two semesters extending from approximately August to December and January to May.\n  (3)  Student leadership development through the Works of Ministries program is a distinct characteristic of the school, and leadership principles are integrated into every course at Saint John XXIII.\n  (4)  'SJ' is accredited by/a member of the Roman Catholic Archdiocese of Galveston-Houston (RCAGH), led by Archbishop Daniel DiNardo.\n  (5)  SJ is also the newest private day school in the Katy area for over fifty years, effective 2004.\n  (6)  It is located at 1800 West Grand Parkway North.\n\nDocument ID: context-1\nTitle: Madison Country Day School\n  (0) Madison Country Day School is a nonsectarian, private day school in Dane County, Wisconsin for grades PreK through 12.\n  (1)  The school has an enrollment of about 400 students.\n  (2)  It is accredited by the Independent Schools Association of the Central States (ISACS), and is a member of the National Association of Independent Schools (NAIS).\n  (3)  It is an International Baccalaureate (IB) World School that offers the IB Diploma Program to high school students.\n  (4)  Madison Country Day School is informally known as \"MCDS\", and \"Country Day\".\n\nDocument ID: context-2\nTitle: Merchant Taylors' School, Northwood\n  (0) Merchant Taylors' School (MTS) is a British independent private day school for boys, originally located in the City of London.\n  (1)  Since 1933 it has been located on 285 acre of grounds at Sandy Lodge in the Three Rivers district of Hertfordshire.\n\nDocument ID: context-3\nTitle: La Martiniere Calcutta\n  (0) \"La Martini\u00e8re\" Calcutta (informally known as LMC) is an independent private day school located in Kolkata (Calcutta), West Bengal.\n  (1)  It comprises two single-sex boys and girls school.\n  (2)  It was established in 1836 in accordance with the will of the French soldier of fortune and philanthropist, Major General Claude Martin.\n  (3)  They are both Christian schools, controlled by the Protestant Church of North India and independent from the Government, with English as the primary language of instruction.\n\nDocument ID: context-4\nTitle: Canterbury School (Fort Wayne, Indiana)\n  (0) Canterbury School is an independent, college preparatory day school for students age 2 through Grade 12.\n  (1)  The school is located in Fort Wayne, Indiana, USA.\n  (2)  The school was ranked the best private day school in Indiana by Niche in 2017.\n\nDocument ID: context-5\nTitle: St. Xavier's Collegiate School\n  (0) St. Xavier's Collegiate School (informally SXCS) is an independent private day school for boys located in Kolkata, West Bengal, India.\n  (1)  It was founded in 1860 by the Jesuits, and it is named after Francis Xavier, a 16th century Jesuit missionary to India.\n  (2)  The school completed its sesquicentennial year in 2010.\n\nDocument ID: context-6\nTitle: Renbrook School\n  (0) Renbrook School is an independent, private day school in West Hartford, Connecticut Renbrook School prepares your Preschool to Grade 8 child for success at secondary school and beyond.\n  (1)  Founded in 1935, Renbrook is an independent day school for students in two divisions, Lower School for preschool-grade 5 and Upper School for grades 6-8.\n  (2)  With about 200 students in each of the Lower and Upper Schools, class sizes of 10\u201315 are typical.\n  (3)  The building where it is located was the house of Frederick Rentschler.\n\nDocument ID: context-7\nTitle: Almaden Country Day School (San Jose, California)\n  (0) Almaden Country Day School (formerly known as Almaden Country School) is an independent, nonsectarian, coeducational private day school founded in 1982 by Mrs. Nan Hunter.\n\nDocument ID: context-8\nTitle: Charles Saunders (bishop)\n  (0) Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938.\n  (1)  He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford.\n  (2)  Ordained in 1912 he emigrated to India where he worked as a missionary with the SPG.\n  (3)  From 1921 to 1925 he was Staff Chaplain at the headquarters of the Indian Army followed by another three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate.\n  (4)  On returning to England he was Vicar of Uckfield, and an Assistant Bishop within the Chichester Diocese.\n  (5)  His last post was an honorary one in retirement at Bristol where he died on 16 October 1973.\n\nDocument ID: context-9\nTitle: Hamden Hall Country Day School\n  (0) Hamden Hall Country Day School is a coeducational private day school in Hamden, Connecticut, educating students in preschool through grade 12.\n  (1)  Hamden Hall was founded in 1912 as a country day school for boys by Dr. John P. Cushing, its first headmaster.\n  (2)  It was the nation\u2019s fourth country day school.\n  (3)  The school has been coeducational since 1927 and expanded to include classes through grade 12 in 1934.\n  (4)  Now split into three separate divisions, Hamden Hall enrolls the majority of its nearly 600 students in the upper and middle schools (Grades 7\u201312) and the remainder in the lower school (preschool through grade 6).\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "single_prompt"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "single_prompt"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "single_prompt",
+            "label": "Single prompt",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Which British independent private day school for boys did Charles John Godfrey Saunders attend?",
+            "rendered_prompt": "Question: Which British independent private day school for boys did Charles John Godfrey Saunders attend?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Saint John XXIII High School\n  (0) Saint John XXIII College Preparatory, formerly Pope John XXIII High School, is a Catholic independent, non-profit, coeducational, private day school in unincorporated Harris County, Texas, United States, near Katy.\n  (1)  The school serves grades 9-12.\n  (2)  The academic year consists of two semesters extending from approximately August to December and January to May.\n  (3)  Student leadership development through the Works of Ministries program is a distinct characteristic of the school, and leadership principles are integrated into every course at Saint John XXIII.\n  (4)  'SJ' is accredited by/a member of the Roman Catholic Archdiocese of Galveston-Houston (RCAGH), led by Archbishop Daniel DiNardo.\n  (5)  SJ is also the newest private day school in the Katy area for over fifty years, effective 2004.\n  (6)  It is located at 1800 West Grand Parkway North.\n\nDocument ID: context-1\nTitle: Madison Country Day School\n  (0) Madison Country Day School is a nonsectarian, private day school in Dane County, Wisconsin for grades PreK through 12.\n  (1)  The school has an enrollment of about 400 students.\n  (2)  It is accredited by the Independent Schools Association of the Central States (ISACS), and is a member of the National Association of Independent Schools (NAIS).\n  (3)  It is an International Baccalaureate (IB) World School that offers the IB Diploma Program to high school students.\n  (4)  Madison Country Day School is informally known as \"MCDS\", and \"Country Day\".\n\nDocument ID: context-2\nTitle: Merchant Taylors' School, Northwood\n  (0) Merchant Taylors' School (MTS) is a British independent private day school for boys, originally located in the City of London.\n  (1)  Since 1933 it has been located on 285 acre of grounds at Sandy Lodge in the Three Rivers district of Hertfordshire.\n\nDocument ID: context-3\nTitle: La Martiniere Calcutta\n  (0) \"La Martini\u00e8re\" Calcutta (informally known as LMC) is an independent private day school located in Kolkata (Calcutta), West Bengal.\n  (1)  It comprises two single-sex boys and girls school.\n  (2)  It was established in 1836 in accordance with the will of the French soldier of fortune and philanthropist, Major General Claude Martin.\n  (3)  They are both Christian schools, controlled by the Protestant Church of North India and independent from the Government, with English as the primary language of instruction.\n\nDocument ID: context-4\nTitle: Canterbury School (Fort Wayne, Indiana)\n  (0) Canterbury School is an independent, college preparatory day school for students age 2 through Grade 12.\n  (1)  The school is located in Fort Wayne, Indiana, USA.\n  (2)  The school was ranked the best private day school in Indiana by Niche in 2017.\n\nDocument ID: context-5\nTitle: St. Xavier's Collegiate School\n  (0) St. Xavier's Collegiate School (informally SXCS) is an independent private day school for boys located in Kolkata, West Bengal, India.\n  (1)  It was founded in 1860 by the Jesuits, and it is named after Francis Xavier, a 16th century Jesuit missionary to India.\n  (2)  The school completed its sesquicentennial year in 2010.\n\nDocument ID: context-6\nTitle: Renbrook School\n  (0) Renbrook School is an independent, private day school in West Hartford, Connecticut Renbrook School prepares your Preschool to Grade 8 child for success at secondary school and beyond.\n  (1)  Founded in 1935, Renbrook is an independent day school for students in two divisions, Lower School for preschool-grade 5 and Upper School for grades 6-8.\n  (2)  With about 200 students in each of the Lower and Upper Schools, class sizes of 10\u201315 are typical.\n  (3)  The building where it is located was the house of Frederick Rentschler.\n\nDocument ID: context-7\nTitle: Almaden Country Day School (San Jose, California)\n  (0) Almaden Country Day School (formerly known as Almaden Country School) is an independent, nonsectarian, coeducational private day school founded in 1982 by Mrs. Nan Hunter.\n\nDocument ID: context-8\nTitle: Charles Saunders (bishop)\n  (0) Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938.\n  (1)  He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford.\n  (2)  Ordained in 1912 he emigrated to India where he worked as a missionary with the SPG.\n  (3)  From 1921 to 1925 he was Staff Chaplain at the headquarters of the Indian Army followed by another three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate.\n  (4)  On returning to England he was Vicar of Uckfield, and an Assistant Bishop within the Chichester Diocese.\n  (5)  His last post was an honorary one in retirement at Bristol where he died on 16 October 1973.\n\nDocument ID: context-9\nTitle: Hamden Hall Country Day School\n  (0) Hamden Hall Country Day School is a coeducational private day school in Hamden, Connecticut, educating students in preschool through grade 12.\n  (1)  Hamden Hall was founded in 1912 as a country day school for boys by Dr. John P. Cushing, its first headmaster.\n  (2)  It was the nation\u2019s fourth country day school.\n  (3)  The school has been coeducational since 1927 and expanded to include classes through grade 12 in 1934.\n  (4)  Now split into three separate divisions, Hamden Hall enrolls the majority of its nearly 600 students in the upper and middle schools (Grades 7\u201312) and the remainder in the lower school (preschool through grade 6).\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer.",
+            "raw_response": "{\"answer\": \"Merchant Taylors' School\", \"_evidence_citations\": [{\"document_id\": \"context-8\", \"title\": \"Charles Saunders (bishop)\", \"sentence_indices\": [1], \"fact\": \"He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford.\"}, {\"document_id\": \"context-2\", \"title\": \"Merchant Taylors' School, Northwood\", \"sentence_indices\": [0], \"fact\": \"Merchant Taylors' School (MTS) is a British independent private day school for boys, originally located in the City of London.\"}]}",
+            "parsed_output": {
+              "answer": "Merchant Taylors' School",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-8",
+                  "title": "Charles Saunders (bishop)",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford."
+                },
+                {
+                  "document_id": "context-2",
+                  "title": "Merchant Taylors' School, Northwood",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Merchant Taylors' School (MTS) is a British independent private day school for boys, originally located in the City of London."
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "Merchant Taylors' School"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Saint John XXIII High School",
+                  "text": "Saint John XXIII College Preparatory, formerly Pope John XXIII High School, is a Catholic independent, non-profit, coeducational, private day school in unincorporated Harris County, Texas, United States, near Katy. The school serves grades 9-12. The academic year consists of two semesters extending from approximately August to December and January to May. Student leadership development through the Works of Ministries program is a distinct characteristic of the school, and leadership principles are integrated into every course at Saint John XXIII. 'SJ' is accredited by/a member of the Roman Catholic Archdiocese of Galveston-Houston (RCAGH), led by Archbishop Daniel DiNardo. SJ is also the newest private day school in the Katy area for over fifty years, effective 2004. It is located at 1800 West Grand Parkway North.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Saint John XXIII College Preparatory, formerly Pope John XXIII High School, is a Catholic independent, non-profit, coeducational, private day school in unincorporated Harris County, Texas, United States, near Katy.",
+                      " The school serves grades 9-12.",
+                      " The academic year consists of two semesters extending from approximately August to December and January to May.",
+                      " Student leadership development through the Works of Ministries program is a distinct characteristic of the school, and leadership principles are integrated into every course at Saint John XXIII.",
+                      " 'SJ' is accredited by/a member of the Roman Catholic Archdiocese of Galveston-Houston (RCAGH), led by Archbishop Daniel DiNardo.",
+                      " SJ is also the newest private day school in the Katy area for over fifty years, effective 2004.",
+                      " It is located at 1800 West Grand Parkway North."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Madison Country Day School",
+                  "text": "Madison Country Day School is a nonsectarian, private day school in Dane County, Wisconsin for grades PreK through 12. The school has an enrollment of about 400 students. It is accredited by the Independent Schools Association of the Central States (ISACS), and is a member of the National Association of Independent Schools (NAIS). It is an International Baccalaureate (IB) World School that offers the IB Diploma Program to high school students. Madison Country Day School is informally known as \"MCDS\", and \"Country Day\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Madison Country Day School is a nonsectarian, private day school in Dane County, Wisconsin for grades PreK through 12.",
+                      " The school has an enrollment of about 400 students.",
+                      " It is accredited by the Independent Schools Association of the Central States (ISACS), and is a member of the National Association of Independent Schools (NAIS).",
+                      " It is an International Baccalaureate (IB) World School that offers the IB Diploma Program to high school students.",
+                      " Madison Country Day School is informally known as \"MCDS\", and \"Country Day\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Merchant Taylors' School, Northwood",
+                  "text": "Merchant Taylors' School (MTS) is a British independent private day school for boys, originally located in the City of London. Since 1933 it has been located on 285 acre of grounds at Sandy Lodge in the Three Rivers district of Hertfordshire.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "Merchant Taylors' School (MTS) is a British independent private day school for boys, originally located in the City of London.",
+                      " Since 1933 it has been located on 285 acre of grounds at Sandy Lodge in the Three Rivers district of Hertfordshire."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "La Martiniere Calcutta",
+                  "text": "\"La Martini\u00e8re\" Calcutta (informally known as LMC) is an independent private day school located in Kolkata (Calcutta), West Bengal. It comprises two single-sex boys and girls school. It was established in 1836 in accordance with the will of the French soldier of fortune and philanthropist, Major General Claude Martin. They are both Christian schools, controlled by the Protestant Church of North India and independent from the Government, with English as the primary language of instruction.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "\"La Martini\u00e8re\" Calcutta (informally known as LMC) is an independent private day school located in Kolkata (Calcutta), West Bengal.",
+                      " It comprises two single-sex boys and girls school.",
+                      " It was established in 1836 in accordance with the will of the French soldier of fortune and philanthropist, Major General Claude Martin.",
+                      " They are both Christian schools, controlled by the Protestant Church of North India and independent from the Government, with English as the primary language of instruction."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Canterbury School (Fort Wayne, Indiana)",
+                  "text": "Canterbury School is an independent, college preparatory day school for students age 2 through Grade 12. The school is located in Fort Wayne, Indiana, USA. The school was ranked the best private day school in Indiana by Niche in 2017.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Canterbury School is an independent, college preparatory day school for students age 2 through Grade 12.",
+                      " The school is located in Fort Wayne, Indiana, USA.",
+                      " The school was ranked the best private day school in Indiana by Niche in 2017."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "St. Xavier's Collegiate School",
+                  "text": "St. Xavier's Collegiate School (informally SXCS) is an independent private day school for boys located in Kolkata, West Bengal, India. It was founded in 1860 by the Jesuits, and it is named after Francis Xavier, a 16th century Jesuit missionary to India. The school completed its sesquicentennial year in 2010.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "St. Xavier's Collegiate School (informally SXCS) is an independent private day school for boys located in Kolkata, West Bengal, India.",
+                      " It was founded in 1860 by the Jesuits, and it is named after Francis Xavier, a 16th century Jesuit missionary to India.",
+                      " The school completed its sesquicentennial year in 2010."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Renbrook School",
+                  "text": "Renbrook School is an independent, private day school in West Hartford, Connecticut Renbrook School prepares your Preschool to Grade 8 child for success at secondary school and beyond. Founded in 1935, Renbrook is an independent day school for students in two divisions, Lower School for preschool-grade 5 and Upper School for grades 6-8. With about 200 students in each of the Lower and Upper Schools, class sizes of 10\u201315 are typical. The building where it is located was the house of Frederick Rentschler.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Renbrook School is an independent, private day school in West Hartford, Connecticut Renbrook School prepares your Preschool to Grade 8 child for success at secondary school and beyond.",
+                      " Founded in 1935, Renbrook is an independent day school for students in two divisions, Lower School for preschool-grade 5 and Upper School for grades 6-8.",
+                      " With about 200 students in each of the Lower and Upper Schools, class sizes of 10\u201315 are typical.",
+                      " The building where it is located was the house of Frederick Rentschler."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Almaden Country Day School (San Jose, California)",
+                  "text": "Almaden Country Day School (formerly known as Almaden Country School) is an independent, nonsectarian, coeducational private day school founded in 1982 by Mrs. Nan Hunter.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Almaden Country Day School (formerly known as Almaden Country School) is an independent, nonsectarian, coeducational private day school founded in 1982 by Mrs. Nan Hunter."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Charles Saunders (bishop)",
+                  "text": "Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938. He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford. Ordained in 1912 he emigrated to India where he worked as a missionary with the SPG. From 1921 to 1925 he was Staff Chaplain at the headquarters of the Indian Army followed by another three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate. On returning to England he was Vicar of Uckfield, and an Assistant Bishop within the Chichester Diocese. His last post was an honorary one in retirement at Bristol where he died on 16 October 1973.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Charles John Godfrey Saunders (1884 \u2013 16 October 1973) was the Bishop of Lucknow from 1928 until 1938.",
+                      " He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford.",
+                      " Ordained in 1912 he emigrated to India where he worked as a missionary with the SPG.",
+                      " From 1921 to 1925 he was Staff Chaplain at the headquarters of the Indian Army followed by another three years in a similar post serving the Metropolitan of Calcutta before his elevation to the Episcopate.",
+                      " On returning to England he was Vicar of Uckfield, and an Assistant Bishop within the Chichester Diocese.",
+                      " His last post was an honorary one in retirement at Bristol where he died on 16 October 1973."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Hamden Hall Country Day School",
+                  "text": "Hamden Hall Country Day School is a coeducational private day school in Hamden, Connecticut, educating students in preschool through grade 12. Hamden Hall was founded in 1912 as a country day school for boys by Dr. John P. Cushing, its first headmaster. It was the nation\u2019s fourth country day school. The school has been coeducational since 1927 and expanded to include classes through grade 12 in 1934. Now split into three separate divisions, Hamden Hall enrolls the majority of its nearly 600 students in the upper and middle schools (Grades 7\u201312) and the remainder in the lower school (preschool through grade 6).",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Hamden Hall Country Day School is a coeducational private day school in Hamden, Connecticut, educating students in preschool through grade 12.",
+                      " Hamden Hall was founded in 1912 as a country day school for boys by Dr. John P. Cushing, its first headmaster.",
+                      " It was the nation\u2019s fourth country day school.",
+                      " The school has been coeducational since 1927 and expanded to include classes through grade 12 in 1934.",
+                      " Now split into three separate divisions, Hamden Hall enrolls the majority of its nearly 600 students in the upper and middle schools (Grades 7\u201312) and the remainder in the lower school (preschool through grade 6)."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-8",
+                "title": "Charles Saunders (bishop)",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford."
+              },
+              {
+                "document_id": "context-2",
+                "title": "Merchant Taylors' School, Northwood",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Merchant Taylors' School (MTS) is a British independent private day school for boys, originally located in the City of London."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-8",
+                  "title": "Charles Saunders (bishop)",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "He was born in 1884 and educated at Merchant Taylors' School and St John\u2019s College, Oxford."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Charles Saunders (bishop)",
+                    "sentence_index": 1
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-2",
+                  "title": "Merchant Taylors' School, Northwood",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Merchant Taylors' School (MTS) is a British independent private day school for boys, originally located in the City of London."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Merchant Taylors' School, Northwood",
+                    "sentence_index": 0
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": 5026.36601300037,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Merchant Taylors' School"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 5026.408121999339,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 120.0,
+            "max_retries": 2,
+            "retry_initial_delay_seconds": 0.5,
+            "retry_max_delay_seconds": 8.0
+          },
+          "planner": {
+            "max_nodes": 4,
+            "max_depth": 2,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  single_prompt[\"single_prompt: Single prompt\\nsynthesis\\nsucceeded\"]\n  click single_prompt dagqaSelectGraphNode"
+      },
+      "error": null
+    },
+    {
+      "id": "5a820897554299676cceb1f4",
+      "question": "Which founding member drew critical acclaim as a bass guitarist with melodic basslines  on Murmur?",
+      "gold_answer": "Mike\" Mills",
+      "prediction": "Mike Mills",
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 0.9027859568595886,
+      "latency_ms": 4868.570603999615,
+      "llm_call_count": 1,
+      "llm_retry_count": 0,
+      "node_count": 1,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Murmur (album)",
+          "sentence_index": 1
+        },
+        {
+          "title": "Mike Mills",
+          "sentence_index": 0
+        }
+      ],
+      "evidence_citation_count": 1,
+      "correct_evidence_citation_count": 1,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 0.5,
+      "run_trace": {
+        "run_id": "64a61138-f1d0-42c8-8a30-a8c9e7529e3e",
+        "question": "Which founding member drew critical acclaim as a bass guitarist with melodic basslines  on Murmur?",
+        "plan": {
+          "question": "Which founding member drew critical acclaim as a bass guitarist with melodic basslines  on Murmur?",
+          "nodes": [
+            {
+              "id": "single_prompt",
+              "label": "Single prompt",
+              "task_type": "synthesis",
+              "question": "Which founding member drew critical acclaim as a bass guitarist with melodic basslines  on Murmur?",
+              "operation": "answer",
+              "depends_on": [],
+              "prompt": {
+                "system": "Answer the question concisely using only the supplied sources.",
+                "user_template": "Question: Which founding member drew critical acclaim as a bass guitarist with melodic basslines  on Murmur?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Construct (album)\n  (0) Construct is the tenth full-length studio album by Swedish melodic death metal band Dark Tranquillity.\n  (1)  It was released on 27 May 2013 through Century Media Records.\n  (2)  A music video for \"Uniformity\", directed by Patric Ullaeus, was released on 10 May 2013.\n  (3)  The album was written during what the band described as their \"darkest period\" and drew critical praise for its melodrama and darkness.\n  (4)  Construct would be the band's last studio album with founding member guitarist Martin Henriksson as he left the band in early 2016 due to loss of passion for playing music.\n\nDocument ID: context-1\nTitle: Hope Clarke\n  (0) Hope Clarke (born March 23, 1941) is an American actress, dancer, vocalist, choreographer, and director.\n  (1)  Clarke performed as principal dancer with the Katherine Dunham Company and the Alvin Ailey American Dance Theater, 1960s; actress on stage, film, and television, 1970s\u20131980s; choreographer and director, 1980s--.\n  (2)  Clarke served on the Tony Awards Nominating Committee for the 2011\u201312 Broadway season.\n  (3)  Clarke made history in 1995 when she became the first African American, as well as the first African-American woman, to direct and choreograph a major staging of the opera-musical \"Porgy and Bess\".\n  (4)  Clarke's production of the George Gershwin classic was staged in celebration of the work's 60h anniversary, and it toured not only major American cities but Japan and Europe as well.\n  (5)  Clarke drew critical acclaim for her commitment to staging the show as a monument to African-American community and pride, giving a more hopeful, positive aura to a story that has been criticized for its stereotypes.\n  (6)  As for the director herself, the success of \"Porgy and Bess\" is just the latest accolade in a long career devoted to dance and drama.\n\nDocument ID: context-2\nTitle: The Deep Dark Woods\n  (0) The Deep Dark Woods are a Canadian alternative country band from Saskatoon, currently signed to Sugar Hill Records in the United States and Six Shooter Records in Canada.\n  (1)  First established in 2005, the band consisted of singer and guitarist Ryan Boldt, bass guitarist Chris Mason, guitarist Burke Barlow and drummer Lucas Goetz.\n  (2)  Pianist and organist Geoff Hilhorst joined the group in 2009 after the release of their breakout album \"Winter Hours\".\n  (3)  Founding member Burke Barlow played guitar until 2012 when he left the group and was replaced by Clayton Linthicum.\n  (4)  Founding Member Lucas Goetz left the group in late 2014, after which the band went on hiatus.\n  (5)  In 2017 Chris Mason officially left the group.\n\nDocument ID: context-3\nTitle: Murmur (album)\n  (0) Murmur is the debut studio album by the American alternative rock band R.E.M., released on April 12, 1983 by I.R.S. Records.\n  (1)  \"Murmur\" drew critical acclaim upon its release for its unusual sound, defined by lead singer Michael Stipe's cryptic lyrics, guitarist Peter Buck's jangly guitar style, and bass guitarist Mike Mills' melodic basslines.\n\nDocument ID: context-4\nTitle: Mike Mills\n  (0) Michael Edward \"Mike\" Mills (born December 17, 1958) is an American multi-instrumentalist, singer, and composer who was a founding member of the alternative rock band R.E.M. Though known primarily as a bass guitarist, backing vocalist, and pianist, his musical repertoire also includes keyboards, guitar, and percussion instruments.\n  (1)  He contributed to a majority of the band's musical compositions.\n\nDocument ID: context-5\nTitle: Mathieu Amalric\n  (0) Mathieu Amalric (] ; born 25 October 1965) is a French actor and filmmaker.\n  (1)  Amalric is perhaps best known internationally for his performance as the lead villain in Bond film \"Quantum of Solace\", his performance in Steven Spielberg's \"Munich\", and for his role in \"The Diving Bell and the Butterfly\", for which he drew critical acclaim.\n  (2)  He has also won the C\u00e9sar Award and the Lumi\u00e8res Award.\n\nDocument ID: context-6\nTitle: Roster McCabe\n  (0) Roster McCabe was an American rock band noted for its tight, high energy dance shows, exploration of music across genres and devoted fan base.\n  (1)  Named by Billboard Magazine as one of \"five up-and-coming jam bands that could draw audiences to the festivals of tomorrow\", Roster has toured nationally and played over 550 gigs in the last four years.\n  (2)  The band's music blends elements of a wide variety of genres, including reggae, rock, funk, and jazz, although the band describes its sound as \"Funky Reggae Dance Rock\".\n  (3)  After the departure of founding member Drew Preiner, the band renamed themselves \"Night Phoenix.\"\n  (4)  Night Phoenix (Steele, Mullenburg, Peterson, and Daum) played a handful of shows in the winter of 2013\u20132014, before breaking up in early-mid 2014.\n  (5)  Their final show was performed on May 10, 2014, and was held at The Popcorn in La Crosse, Wisconsin.\n\nDocument ID: context-7\nTitle: R.E.M.\n  (0) R.E.M. was an American rock band that formed in Athens, Georgia, in 1980 by lead singer Michael Stipe, guitarist Peter Buck, bassist/backing vocalist Mike Mills, and drummer Bill Berry.\n  (1)  One of the first alternative rock bands, R.E.M. was noted for Stipe's particular vocal quality and obscure lyrics, Buck's ringing, arpeggiated guitar style, and Mills' melodic basslines and backing vocals.\n  (2)  R.E.M. released its first single\u2014\"Radio Free Europe\"\u2014in 1981 on the independent record label Hib-Tone.\n  (3)  The single was followed by the \"Chronic Town\" EP in 1982, the band's first release on I.R.S. Records.\n  (4)  In 1983, the group released its critically acclaimed debut album, \"Murmur\", and built its reputation over the next few years through subsequent releases, constant touring, and the support of college radio.\n  (5)  Following years of underground success, R.E.M. achieved a mainstream hit in 1987 with the single \"The One I Love\".\n  (6)  The group signed to Warner Bros.\n  (7)  Records in 1988, and began to espouse political and environmental concerns while playing large arenas worldwide.\n\nDocument ID: context-8\nTitle: Stardust (video game)\n  (0) Stardust is a shoot 'em up computer game for the Amiga, released by the Finnish company Bloodhouse in 1993.\n  (1)  The game is essentially an \"Asteroids\" clone with enhancements, such as power-ups, shields, a high-energy techno module soundtrack, vivid use of colors and the occasional tunnel section that revolves around a sphere.\n  (2)  The game's graphics drew critical acclaim for the aforementioned tunnels and the liberal use of ray-tracing.\n  (3)  The company has since merged with Terramarque to form Housemarque.\n\nDocument ID: context-9\nTitle: Peter Hofmann\n  (0) Peter Hofmann (22 August 1944 \u2013 30 November 2010) was a German tenor who had a successful performance career within the fields of opera, rock, pop, and musical theatre.\n  (1)  He first rose to prominence in 1976 as a heldentenor at the Bayreuth festival's \"Jahrhundertring\" (\"Centenary Ring\") in 1976, where he drew critical acclaim for his performance of Siegmund in Richard Wagner's \"Die Walk\u00fcre\".\n  (2)  He was active as one of the world's leading Wagnerian tenors over the next decade, performing roles like Lohengrin, Parsifal, Siegfried, and Tristan at major opera houses and festivals internationally.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "single_prompt"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "single_prompt"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "single_prompt",
+            "label": "Single prompt",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Which founding member drew critical acclaim as a bass guitarist with melodic basslines  on Murmur?",
+            "rendered_prompt": "Question: Which founding member drew critical acclaim as a bass guitarist with melodic basslines  on Murmur?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below.\n\nDocument ID: context-0\nTitle: Construct (album)\n  (0) Construct is the tenth full-length studio album by Swedish melodic death metal band Dark Tranquillity.\n  (1)  It was released on 27 May 2013 through Century Media Records.\n  (2)  A music video for \"Uniformity\", directed by Patric Ullaeus, was released on 10 May 2013.\n  (3)  The album was written during what the band described as their \"darkest period\" and drew critical praise for its melodrama and darkness.\n  (4)  Construct would be the band's last studio album with founding member guitarist Martin Henriksson as he left the band in early 2016 due to loss of passion for playing music.\n\nDocument ID: context-1\nTitle: Hope Clarke\n  (0) Hope Clarke (born March 23, 1941) is an American actress, dancer, vocalist, choreographer, and director.\n  (1)  Clarke performed as principal dancer with the Katherine Dunham Company and the Alvin Ailey American Dance Theater, 1960s; actress on stage, film, and television, 1970s\u20131980s; choreographer and director, 1980s--.\n  (2)  Clarke served on the Tony Awards Nominating Committee for the 2011\u201312 Broadway season.\n  (3)  Clarke made history in 1995 when she became the first African American, as well as the first African-American woman, to direct and choreograph a major staging of the opera-musical \"Porgy and Bess\".\n  (4)  Clarke's production of the George Gershwin classic was staged in celebration of the work's 60h anniversary, and it toured not only major American cities but Japan and Europe as well.\n  (5)  Clarke drew critical acclaim for her commitment to staging the show as a monument to African-American community and pride, giving a more hopeful, positive aura to a story that has been criticized for its stereotypes.\n  (6)  As for the director herself, the success of \"Porgy and Bess\" is just the latest accolade in a long career devoted to dance and drama.\n\nDocument ID: context-2\nTitle: The Deep Dark Woods\n  (0) The Deep Dark Woods are a Canadian alternative country band from Saskatoon, currently signed to Sugar Hill Records in the United States and Six Shooter Records in Canada.\n  (1)  First established in 2005, the band consisted of singer and guitarist Ryan Boldt, bass guitarist Chris Mason, guitarist Burke Barlow and drummer Lucas Goetz.\n  (2)  Pianist and organist Geoff Hilhorst joined the group in 2009 after the release of their breakout album \"Winter Hours\".\n  (3)  Founding member Burke Barlow played guitar until 2012 when he left the group and was replaced by Clayton Linthicum.\n  (4)  Founding Member Lucas Goetz left the group in late 2014, after which the band went on hiatus.\n  (5)  In 2017 Chris Mason officially left the group.\n\nDocument ID: context-3\nTitle: Murmur (album)\n  (0) Murmur is the debut studio album by the American alternative rock band R.E.M., released on April 12, 1983 by I.R.S. Records.\n  (1)  \"Murmur\" drew critical acclaim upon its release for its unusual sound, defined by lead singer Michael Stipe's cryptic lyrics, guitarist Peter Buck's jangly guitar style, and bass guitarist Mike Mills' melodic basslines.\n\nDocument ID: context-4\nTitle: Mike Mills\n  (0) Michael Edward \"Mike\" Mills (born December 17, 1958) is an American multi-instrumentalist, singer, and composer who was a founding member of the alternative rock band R.E.M. Though known primarily as a bass guitarist, backing vocalist, and pianist, his musical repertoire also includes keyboards, guitar, and percussion instruments.\n  (1)  He contributed to a majority of the band's musical compositions.\n\nDocument ID: context-5\nTitle: Mathieu Amalric\n  (0) Mathieu Amalric (] ; born 25 October 1965) is a French actor and filmmaker.\n  (1)  Amalric is perhaps best known internationally for his performance as the lead villain in Bond film \"Quantum of Solace\", his performance in Steven Spielberg's \"Munich\", and for his role in \"The Diving Bell and the Butterfly\", for which he drew critical acclaim.\n  (2)  He has also won the C\u00e9sar Award and the Lumi\u00e8res Award.\n\nDocument ID: context-6\nTitle: Roster McCabe\n  (0) Roster McCabe was an American rock band noted for its tight, high energy dance shows, exploration of music across genres and devoted fan base.\n  (1)  Named by Billboard Magazine as one of \"five up-and-coming jam bands that could draw audiences to the festivals of tomorrow\", Roster has toured nationally and played over 550 gigs in the last four years.\n  (2)  The band's music blends elements of a wide variety of genres, including reggae, rock, funk, and jazz, although the band describes its sound as \"Funky Reggae Dance Rock\".\n  (3)  After the departure of founding member Drew Preiner, the band renamed themselves \"Night Phoenix.\"\n  (4)  Night Phoenix (Steele, Mullenburg, Peterson, and Daum) played a handful of shows in the winter of 2013\u20132014, before breaking up in early-mid 2014.\n  (5)  Their final show was performed on May 10, 2014, and was held at The Popcorn in La Crosse, Wisconsin.\n\nDocument ID: context-7\nTitle: R.E.M.\n  (0) R.E.M. was an American rock band that formed in Athens, Georgia, in 1980 by lead singer Michael Stipe, guitarist Peter Buck, bassist/backing vocalist Mike Mills, and drummer Bill Berry.\n  (1)  One of the first alternative rock bands, R.E.M. was noted for Stipe's particular vocal quality and obscure lyrics, Buck's ringing, arpeggiated guitar style, and Mills' melodic basslines and backing vocals.\n  (2)  R.E.M. released its first single\u2014\"Radio Free Europe\"\u2014in 1981 on the independent record label Hib-Tone.\n  (3)  The single was followed by the \"Chronic Town\" EP in 1982, the band's first release on I.R.S. Records.\n  (4)  In 1983, the group released its critically acclaimed debut album, \"Murmur\", and built its reputation over the next few years through subsequent releases, constant touring, and the support of college radio.\n  (5)  Following years of underground success, R.E.M. achieved a mainstream hit in 1987 with the single \"The One I Love\".\n  (6)  The group signed to Warner Bros.\n  (7)  Records in 1988, and began to espouse political and environmental concerns while playing large arenas worldwide.\n\nDocument ID: context-8\nTitle: Stardust (video game)\n  (0) Stardust is a shoot 'em up computer game for the Amiga, released by the Finnish company Bloodhouse in 1993.\n  (1)  The game is essentially an \"Asteroids\" clone with enhancements, such as power-ups, shields, a high-energy techno module soundtrack, vivid use of colors and the occasional tunnel section that revolves around a sphere.\n  (2)  The game's graphics drew critical acclaim for the aforementioned tunnels and the liberal use of ray-tracing.\n  (3)  The company has since merged with Terramarque to form Housemarque.\n\nDocument ID: context-9\nTitle: Peter Hofmann\n  (0) Peter Hofmann (22 August 1944 \u2013 30 November 2010) was a German tenor who had a successful performance career within the fields of opera, rock, pop, and musical theatre.\n  (1)  He first rose to prominence in 1976 as a heldentenor at the Bayreuth festival's \"Jahrhundertring\" (\"Centenary Ring\") in 1976, where he drew critical acclaim for his performance of Siegmund in Richard Wagner's \"Die Walk\u00fcre\".\n  (2)  He was active as one of the world's leading Wagnerian tenors over the next decade, performing roles like Lohengrin, Parsifal, Siegfried, and Tristan at major opera houses and festivals internationally.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer.",
+            "raw_response": "{\"answer\": \"Mike Mills\", \"_evidence_citations\": [{\"document_id\": \"context-3\", \"title\": \"Murmur (album)\", \"sentence_indices\": [1], \"fact\": \"\\\"Murmur\\\" drew critical acclaim upon its release for its unusual sound, defined by lead singer Michael Stipe's cryptic lyrics, guitarist Peter Buck's jangly guitar style, and bass guitarist Mike Mills' melodic basslines.\"}]}",
+            "parsed_output": {
+              "answer": "Mike Mills",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-3",
+                  "title": "Murmur (album)",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "\"Murmur\" drew critical acclaim upon its release for its unusual sound, defined by lead singer Michael Stipe's cryptic lyrics, guitarist Peter Buck's jangly guitar style, and bass guitarist Mike Mills' melodic basslines."
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "Mike Mills"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Construct (album)",
+                  "text": "Construct is the tenth full-length studio album by Swedish melodic death metal band Dark Tranquillity. It was released on 27 May 2013 through Century Media Records. A music video for \"Uniformity\", directed by Patric Ullaeus, was released on 10 May 2013. The album was written during what the band described as their \"darkest period\" and drew critical praise for its melodrama and darkness. Construct would be the band's last studio album with founding member guitarist Martin Henriksson as he left the band in early 2016 due to loss of passion for playing music.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Construct is the tenth full-length studio album by Swedish melodic death metal band Dark Tranquillity.",
+                      " It was released on 27 May 2013 through Century Media Records.",
+                      " A music video for \"Uniformity\", directed by Patric Ullaeus, was released on 10 May 2013.",
+                      " The album was written during what the band described as their \"darkest period\" and drew critical praise for its melodrama and darkness.",
+                      " Construct would be the band's last studio album with founding member guitarist Martin Henriksson as he left the band in early 2016 due to loss of passion for playing music."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Hope Clarke",
+                  "text": "Hope Clarke (born March 23, 1941) is an American actress, dancer, vocalist, choreographer, and director. Clarke performed as principal dancer with the Katherine Dunham Company and the Alvin Ailey American Dance Theater, 1960s; actress on stage, film, and television, 1970s\u20131980s; choreographer and director, 1980s--. Clarke served on the Tony Awards Nominating Committee for the 2011\u201312 Broadway season. Clarke made history in 1995 when she became the first African American, as well as the first African-American woman, to direct and choreograph a major staging of the opera-musical \"Porgy and Bess\". Clarke's production of the George Gershwin classic was staged in celebration of the work's 60h anniversary, and it toured not only major American cities but Japan and Europe as well. Clarke drew critical acclaim for her commitment to staging the show as a monument to African-American community and pride, giving a more hopeful, positive aura to a story that has been criticized for its stereotypes. As for the director herself, the success of \"Porgy and Bess\" is just the latest accolade in a long career devoted to dance and drama.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Hope Clarke (born March 23, 1941) is an American actress, dancer, vocalist, choreographer, and director.",
+                      " Clarke performed as principal dancer with the Katherine Dunham Company and the Alvin Ailey American Dance Theater, 1960s; actress on stage, film, and television, 1970s\u20131980s; choreographer and director, 1980s--.",
+                      " Clarke served on the Tony Awards Nominating Committee for the 2011\u201312 Broadway season.",
+                      " Clarke made history in 1995 when she became the first African American, as well as the first African-American woman, to direct and choreograph a major staging of the opera-musical \"Porgy and Bess\".",
+                      " Clarke's production of the George Gershwin classic was staged in celebration of the work's 60h anniversary, and it toured not only major American cities but Japan and Europe as well.",
+                      " Clarke drew critical acclaim for her commitment to staging the show as a monument to African-American community and pride, giving a more hopeful, positive aura to a story that has been criticized for its stereotypes.",
+                      " As for the director herself, the success of \"Porgy and Bess\" is just the latest accolade in a long career devoted to dance and drama."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "The Deep Dark Woods",
+                  "text": "The Deep Dark Woods are a Canadian alternative country band from Saskatoon, currently signed to Sugar Hill Records in the United States and Six Shooter Records in Canada. First established in 2005, the band consisted of singer and guitarist Ryan Boldt, bass guitarist Chris Mason, guitarist Burke Barlow and drummer Lucas Goetz. Pianist and organist Geoff Hilhorst joined the group in 2009 after the release of their breakout album \"Winter Hours\". Founding member Burke Barlow played guitar until 2012 when he left the group and was replaced by Clayton Linthicum. Founding Member Lucas Goetz left the group in late 2014, after which the band went on hiatus. In 2017 Chris Mason officially left the group.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "The Deep Dark Woods are a Canadian alternative country band from Saskatoon, currently signed to Sugar Hill Records in the United States and Six Shooter Records in Canada.",
+                      " First established in 2005, the band consisted of singer and guitarist Ryan Boldt, bass guitarist Chris Mason, guitarist Burke Barlow and drummer Lucas Goetz.",
+                      " Pianist and organist Geoff Hilhorst joined the group in 2009 after the release of their breakout album \"Winter Hours\".",
+                      " Founding member Burke Barlow played guitar until 2012 when he left the group and was replaced by Clayton Linthicum.",
+                      " Founding Member Lucas Goetz left the group in late 2014, after which the band went on hiatus.",
+                      " In 2017 Chris Mason officially left the group."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Murmur (album)",
+                  "text": "Murmur is the debut studio album by the American alternative rock band R.E.M., released on April 12, 1983 by I.R.S. Records. \"Murmur\" drew critical acclaim upon its release for its unusual sound, defined by lead singer Michael Stipe's cryptic lyrics, guitarist Peter Buck's jangly guitar style, and bass guitarist Mike Mills' melodic basslines.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Murmur is the debut studio album by the American alternative rock band R.E.M., released on April 12, 1983 by I.R.S. Records.",
+                      " \"Murmur\" drew critical acclaim upon its release for its unusual sound, defined by lead singer Michael Stipe's cryptic lyrics, guitarist Peter Buck's jangly guitar style, and bass guitarist Mike Mills' melodic basslines."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Mike Mills",
+                  "text": "Michael Edward \"Mike\" Mills (born December 17, 1958) is an American multi-instrumentalist, singer, and composer who was a founding member of the alternative rock band R.E.M. Though known primarily as a bass guitarist, backing vocalist, and pianist, his musical repertoire also includes keyboards, guitar, and percussion instruments. He contributed to a majority of the band's musical compositions.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Michael Edward \"Mike\" Mills (born December 17, 1958) is an American multi-instrumentalist, singer, and composer who was a founding member of the alternative rock band R.E.M. Though known primarily as a bass guitarist, backing vocalist, and pianist, his musical repertoire also includes keyboards, guitar, and percussion instruments.",
+                      " He contributed to a majority of the band's musical compositions."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Mathieu Amalric",
+                  "text": "Mathieu Amalric (] ; born 25 October 1965) is a French actor and filmmaker. Amalric is perhaps best known internationally for his performance as the lead villain in Bond film \"Quantum of Solace\", his performance in Steven Spielberg's \"Munich\", and for his role in \"The Diving Bell and the Butterfly\", for which he drew critical acclaim. He has also won the C\u00e9sar Award and the Lumi\u00e8res Award.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Mathieu Amalric (] ; born 25 October 1965) is a French actor and filmmaker.",
+                      " Amalric is perhaps best known internationally for his performance as the lead villain in Bond film \"Quantum of Solace\", his performance in Steven Spielberg's \"Munich\", and for his role in \"The Diving Bell and the Butterfly\", for which he drew critical acclaim.",
+                      " He has also won the C\u00e9sar Award and the Lumi\u00e8res Award."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Roster McCabe",
+                  "text": "Roster McCabe was an American rock band noted for its tight, high energy dance shows, exploration of music across genres and devoted fan base. Named by Billboard Magazine as one of \"five up-and-coming jam bands that could draw audiences to the festivals of tomorrow\", Roster has toured nationally and played over 550 gigs in the last four years. The band's music blends elements of a wide variety of genres, including reggae, rock, funk, and jazz, although the band describes its sound as \"Funky Reggae Dance Rock\". After the departure of founding member Drew Preiner, the band renamed themselves \"Night Phoenix.\" Night Phoenix (Steele, Mullenburg, Peterson, and Daum) played a handful of shows in the winter of 2013\u20132014, before breaking up in early-mid 2014. Their final show was performed on May 10, 2014, and was held at The Popcorn in La Crosse, Wisconsin.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Roster McCabe was an American rock band noted for its tight, high energy dance shows, exploration of music across genres and devoted fan base.",
+                      " Named by Billboard Magazine as one of \"five up-and-coming jam bands that could draw audiences to the festivals of tomorrow\", Roster has toured nationally and played over 550 gigs in the last four years.",
+                      " The band's music blends elements of a wide variety of genres, including reggae, rock, funk, and jazz, although the band describes its sound as \"Funky Reggae Dance Rock\".",
+                      " After the departure of founding member Drew Preiner, the band renamed themselves \"Night Phoenix.\"",
+                      " Night Phoenix (Steele, Mullenburg, Peterson, and Daum) played a handful of shows in the winter of 2013\u20132014, before breaking up in early-mid 2014.",
+                      " Their final show was performed on May 10, 2014, and was held at The Popcorn in La Crosse, Wisconsin."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "R.E.M.",
+                  "text": "R.E.M. was an American rock band that formed in Athens, Georgia, in 1980 by lead singer Michael Stipe, guitarist Peter Buck, bassist/backing vocalist Mike Mills, and drummer Bill Berry. One of the first alternative rock bands, R.E.M. was noted for Stipe's particular vocal quality and obscure lyrics, Buck's ringing, arpeggiated guitar style, and Mills' melodic basslines and backing vocals. R.E.M. released its first single\u2014\"Radio Free Europe\"\u2014in 1981 on the independent record label Hib-Tone. The single was followed by the \"Chronic Town\" EP in 1982, the band's first release on I.R.S. Records. In 1983, the group released its critically acclaimed debut album, \"Murmur\", and built its reputation over the next few years through subsequent releases, constant touring, and the support of college radio. Following years of underground success, R.E.M. achieved a mainstream hit in 1987 with the single \"The One I Love\". The group signed to Warner Bros. Records in 1988, and began to espouse political and environmental concerns while playing large arenas worldwide.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "R.E.M. was an American rock band that formed in Athens, Georgia, in 1980 by lead singer Michael Stipe, guitarist Peter Buck, bassist/backing vocalist Mike Mills, and drummer Bill Berry.",
+                      " One of the first alternative rock bands, R.E.M. was noted for Stipe's particular vocal quality and obscure lyrics, Buck's ringing, arpeggiated guitar style, and Mills' melodic basslines and backing vocals.",
+                      " R.E.M. released its first single\u2014\"Radio Free Europe\"\u2014in 1981 on the independent record label Hib-Tone.",
+                      " The single was followed by the \"Chronic Town\" EP in 1982, the band's first release on I.R.S. Records.",
+                      " In 1983, the group released its critically acclaimed debut album, \"Murmur\", and built its reputation over the next few years through subsequent releases, constant touring, and the support of college radio.",
+                      " Following years of underground success, R.E.M. achieved a mainstream hit in 1987 with the single \"The One I Love\".",
+                      " The group signed to Warner Bros.",
+                      " Records in 1988, and began to espouse political and environmental concerns while playing large arenas worldwide."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Stardust (video game)",
+                  "text": "Stardust is a shoot 'em up computer game for the Amiga, released by the Finnish company Bloodhouse in 1993. The game is essentially an \"Asteroids\" clone with enhancements, such as power-ups, shields, a high-energy techno module soundtrack, vivid use of colors and the occasional tunnel section that revolves around a sphere. The game's graphics drew critical acclaim for the aforementioned tunnels and the liberal use of ray-tracing. The company has since merged with Terramarque to form Housemarque.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Stardust is a shoot 'em up computer game for the Amiga, released by the Finnish company Bloodhouse in 1993.",
+                      " The game is essentially an \"Asteroids\" clone with enhancements, such as power-ups, shields, a high-energy techno module soundtrack, vivid use of colors and the occasional tunnel section that revolves around a sphere.",
+                      " The game's graphics drew critical acclaim for the aforementioned tunnels and the liberal use of ray-tracing.",
+                      " The company has since merged with Terramarque to form Housemarque."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Peter Hofmann",
+                  "text": "Peter Hofmann (22 August 1944 \u2013 30 November 2010) was a German tenor who had a successful performance career within the fields of opera, rock, pop, and musical theatre. He first rose to prominence in 1976 as a heldentenor at the Bayreuth festival's \"Jahrhundertring\" (\"Centenary Ring\") in 1976, where he drew critical acclaim for his performance of Siegmund in Richard Wagner's \"Die Walk\u00fcre\". He was active as one of the world's leading Wagnerian tenors over the next decade, performing roles like Lohengrin, Parsifal, Siegfried, and Tristan at major opera houses and festivals internationally.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Peter Hofmann (22 August 1944 \u2013 30 November 2010) was a German tenor who had a successful performance career within the fields of opera, rock, pop, and musical theatre.",
+                      " He first rose to prominence in 1976 as a heldentenor at the Bayreuth festival's \"Jahrhundertring\" (\"Centenary Ring\") in 1976, where he drew critical acclaim for his performance of Siegmund in Richard Wagner's \"Die Walk\u00fcre\".",
+                      " He was active as one of the world's leading Wagnerian tenors over the next decade, performing roles like Lohengrin, Parsifal, Siegfried, and Tristan at major opera houses and festivals internationally."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-3",
+                "title": "Murmur (album)",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "\"Murmur\" drew critical acclaim upon its release for its unusual sound, defined by lead singer Michael Stipe's cryptic lyrics, guitarist Peter Buck's jangly guitar style, and bass guitarist Mike Mills' melodic basslines."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-3",
+                  "title": "Murmur (album)",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "\"Murmur\" drew critical acclaim upon its release for its unusual sound, defined by lead singer Michael Stipe's cryptic lyrics, guitarist Peter Buck's jangly guitar style, and bass guitarist Mike Mills' melodic basslines."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Murmur (album)",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": 4414.128576998337,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Mike Mills"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 4414.171344998977,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 120.0,
+            "max_retries": 2,
+            "retry_initial_delay_seconds": 0.5,
+            "retry_max_delay_seconds": 8.0
+          },
+          "planner": {
+            "max_nodes": 4,
+            "max_depth": 2,
+            "repair_rounds": 1
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  single_prompt[\"single_prompt: Single prompt\\nsynthesis\\nsucceeded\"]\n  click single_prompt dagqaSelectGraphNode"
+      },
+      "error": null
+    }
+  ],
+  "metrics": {
+    "example_count": 2.0,
+    "success_count": 2.0,
+    "failure_count": 0.0,
+    "error_count": 0.0,
+    "exact_match": 0.5,
+    "f1": 0.9285714285714286,
+    "cosine_sim": 0.906026303768158,
+    "avg_latency_ms": 4964.675085499948,
+    "p50_latency_ms": 5060.7795670002815,
+    "total_llm_call_count": 2.0,
+    "total_llm_retry_count": 0.0,
+    "avg_llm_retry_count": 0.0,
+    "avg_llm_call_count": 1.0,
+    "avg_node_count": 1.0,
+    "avg_graph_depth": 0.0,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.0,
+    "total_evidence_citation_count": 3.0,
+    "correct_evidence_citation_count": 3.0,
+    "wrong_evidence_citation_count": 0.0,
+    "wrong_supporting_text_rate": 0.0,
+    "avg_gold_supporting_fact_recall": 0.5833333333333333,
+    "total_runtime_ms": 5254.819320000024
+  }
+}

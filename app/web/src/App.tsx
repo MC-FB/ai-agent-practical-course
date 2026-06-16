@@ -994,7 +994,7 @@ function BenchmarkResultView({
             {result.system === "dag_agent" &&
             result.max_nodes != null &&
             result.max_depth != null
-              ? `${result.max_nodes} nodes · depth ${result.max_depth}`
+              ? `max node : ${result.max_nodes}  max depth : ${result.max_depth}`
               : "—"}
           </strong>
         </div>
