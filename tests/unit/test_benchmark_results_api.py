@@ -253,6 +253,67 @@ def test_write_benchmark_result_removes_matching_partial_result(monkeypatch, tmp
     assert len(list(tmp_path.glob("*.json"))) == 1
 
 
+def test_marked_benchmark_rows_persist_outside_result_listing(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
+    row = api.MarkedBenchmarkRow(
+        key="dag-run:direct-run:example-1",
+        record_id="example-1",
+        focus_run_id="dag-run",
+        reference_run_id="direct-run",
+        focus_run_name="DAG run",
+        reference_run_name="Direct run",
+        focus_system="dag_agent",
+        reference_system="direct_llm",
+        model="mistral",
+        created_at="2026-06-16T00:00:00Z",
+        seed=123,
+        question="Who won?",
+        gold_answer="Ada",
+        focus_prediction="Ada",
+        reference_prediction="Grace",
+        focus_cosine_sim=1.0,
+        reference_cosine_sim=0.2,
+        focus_gold_recall=1.0,
+        reference_gold_recall=0.0,
+    )
+
+    saved = api.save_marked_benchmark_row(row)
+    listed = api.list_marked_benchmark_rows()
+    results = api.list_benchmark_results()
+
+    assert saved["rows"] == listed["rows"]
+    assert listed["rows"][0]["question"] == "Who won?"
+    assert (tmp_path / ".marked" / "rows.json").exists()
+    assert results["results"] == []
+
+
+def test_delete_marked_benchmark_row(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
+    row = api.MarkedBenchmarkRow(
+        key="dag-run:direct-run:example-1",
+        record_id="example-1",
+        focus_run_id="dag-run",
+        reference_run_id="direct-run",
+        focus_system="dag_agent",
+        reference_system="direct_llm",
+        model="mistral",
+        created_at="2026-06-16T00:00:00Z",
+        seed=123,
+        question="Who won?",
+        gold_answer="Ada",
+        focus_prediction="Ada",
+        reference_prediction="Grace",
+        focus_cosine_sim=1.0,
+        reference_cosine_sim=0.2,
+    )
+    api.save_marked_benchmark_row(row)
+
+    deleted = api.delete_marked_benchmark_row(row.key)
+
+    assert deleted["rows"] == []
+    assert api.list_marked_benchmark_rows()["rows"] == []
+
+
 def test_get_live_benchmark_marks_orphaned_running_state_stopped(monkeypatch, tmp_path) -> None:
     run_id = "orphaned-run"
     monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)

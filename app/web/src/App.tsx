@@ -2,6 +2,8 @@ import {
   Activity,
   ArrowLeft,
   BarChart3,
+  Bookmark,
+  BookmarkCheck,
   BookOpen,
   CheckCircle2,
   Database,
@@ -18,7 +20,7 @@ import {
   Timer,
 } from "lucide-react";
 import mermaid from "mermaid";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { createRoot } from "react-dom/client";
 import { Badge } from "./components/ui/badge";
 import { Button } from "./components/ui/button";
@@ -29,16 +31,19 @@ import { Label } from "./components/ui/label";
 import { Progress } from "./components/ui/progress";
 import {
   ApiError,
+  deleteMarkedBenchmarkRow,
   getBenchmarkResult,
   getHotpotBenchmarkMeta,
   getLLMModels,
   getLiveBenchmark,
   getLiveAsk,
+  listMarkedBenchmarkRows,
   listBenchmarkResults,
   listLiveBenchmarks,
   preflightBenchmark,
   repairBenchmarkResult,
   resumeLiveBenchmark,
+  saveMarkedBenchmarkRow,
   startLiveBenchmark,
   startLiveAsk,
   stopLiveBenchmark,
@@ -52,6 +57,7 @@ import {
   type LiveRun,
   type LLMModelCatalog,
   type LLMSelection,
+  type MarkedComparisonRow,
   type GoldSupportingFact,
   type NodeTrace,
   type RunTrace,
@@ -75,25 +81,31 @@ const SAMPLE_QUESTIONS = [
 ];
 
 const ACTIVE_BENCHMARK_STORAGE_KEY = "dagqa.activeBenchmarkRunId";
+const LEGACY_MARKED_RECORDS_STORAGE_KEY = "dagqa.markedBenchmarkRecords";
 const LIVE_BENCHMARK_POLL_RETRY_LIMIT = 5;
 const RECORD_TABLE_INITIAL_ROWS = 80;
 const RECORD_TABLE_LOAD_ROWS = 120;
 
-type Tab = "chat" | "dataset" | "results";
+type Tab = "chat" | "dataset" | "results" | "marked";
 type RunPhase = "idle" | "planning" | "executing" | "complete" | "error";
 type AppRoute = {
   tab: Tab;
   runId?: string;
   recordId?: string;
+  source?: "marked";
 };
 
 function parseRoute(): AppRoute {
   const parts = window.location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
-  const tab: Tab = parts[0] === "dataset" || parts[0] === "results" ? parts[0] : "chat";
+  const tab: Tab =
+    parts[0] === "dataset" || parts[0] === "results" || parts[0] === "marked"
+      ? parts[0]
+      : "chat";
   return {
     tab,
     runId: tab === "results" ? parts[1] : undefined,
     recordId: tab === "results" ? parts[2] : tab === "dataset" ? parts[1] : undefined,
+    source: tab === "results" && parts[3] === "marked" ? "marked" : undefined,
   };
 }
 
@@ -101,6 +113,7 @@ function routeHash(route: AppRoute): string {
   const parts: string[] = [route.tab];
   if (route.tab === "results" && route.runId) parts.push(route.runId);
   if (route.recordId) parts.push(route.recordId);
+  if (route.source) parts.push(route.source);
   return `#/${parts.join("/")}`;
 }
 
@@ -1122,6 +1135,90 @@ function average(values: number[]) {
   return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
 }
 
+function markedComparisonKey(focusRunId: string, referenceRunId: string, recordId: string) {
+  return `${focusRunId}:${referenceRunId}:${recordId}`;
+}
+
+function markedComparisonFromRow(
+  focus: HotpotBenchmarkResult,
+  reference: HotpotBenchmarkResult,
+  focusRecord: HotpotBenchmarkRecord,
+  referenceRecord: HotpotBenchmarkRecord,
+): MarkedComparisonRow {
+  return {
+    key: markedComparisonKey(focus.run_id, reference.run_id, focusRecord.id),
+    record_id: focusRecord.id,
+    focus_run_id: focus.run_id,
+    reference_run_id: reference.run_id,
+    focus_run_name: focus.name,
+    reference_run_name: reference.name,
+    focus_system: focus.system,
+    reference_system: reference.system,
+    model: focus.model,
+    created_at: focus.created_at,
+    seed: focus.seed,
+    question: focusRecord.question,
+    gold_answer: focusRecord.gold_answer,
+    focus_prediction: comparisonAnswerText(focusRecord),
+    reference_prediction: comparisonAnswerText(referenceRecord),
+    focus_cosine_sim: focusRecord.cosine_sim,
+    reference_cosine_sim: referenceRecord.cosine_sim,
+    focus_gold_recall: focusRecord.gold_supporting_fact_recall,
+    reference_gold_recall: referenceRecord.gold_supporting_fact_recall,
+  };
+}
+
+function loadLegacyMarkedRows(): MarkedComparisonRow[] {
+  try {
+    const raw = window.localStorage.getItem(LEGACY_MARKED_RECORDS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (item): item is MarkedComparisonRow =>
+        item &&
+        typeof item === "object" &&
+        typeof item.key === "string" &&
+        typeof item.record_id === "string" &&
+        typeof item.focus_run_id === "string" &&
+        typeof item.reference_run_id === "string" &&
+        typeof item.focus_system === "string" &&
+        typeof item.reference_system === "string" &&
+        typeof item.model === "string" &&
+        typeof item.created_at === "string" &&
+        typeof item.seed === "number" &&
+        typeof item.question === "string" &&
+        typeof item.gold_answer === "string" &&
+        typeof item.focus_prediction === "string" &&
+        typeof item.reference_prediction === "string" &&
+        typeof item.focus_cosine_sim === "number" &&
+        typeof item.reference_cosine_sim === "number",
+    );
+  } catch {
+    return [];
+  }
+}
+
+function MarkButton({
+  marked,
+  onToggle,
+}: {
+  marked: boolean;
+  onToggle: (event: MouseEvent<HTMLButtonElement>) => void;
+}) {
+  return (
+    <button
+      aria-label={marked ? "Remove saved row" : "Save row for later"}
+      className={`mark-record-button ${marked ? "marked" : ""}`}
+      onClick={onToggle}
+      title={marked ? "Saved for supervisor review" : "Save for supervisor review"}
+      type="button"
+    >
+      {marked ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}
+    </button>
+  );
+}
+
 function aggregateBenchmarkRecords(records: HotpotBenchmarkRecord[]): Record<string, number> {
   const citationCount = records.reduce(
     (sum, record) => sum + (record.evidence_citation_count ?? 0),
@@ -1149,10 +1246,19 @@ function BenchmarkComparisonView({
   first,
   second,
   onSelectRecord,
+  markedKeys,
+  onToggleMarkedRow,
 }: {
   first: HotpotBenchmarkResult;
   second: HotpotBenchmarkResult;
   onSelectRecord?: (run: HotpotBenchmarkResult, record: HotpotBenchmarkRecord) => void;
+  markedKeys?: Set<string>;
+  onToggleMarkedRow?: (
+    focus: HotpotBenchmarkResult,
+    reference: HotpotBenchmarkResult,
+    focusRecord: HotpotBenchmarkRecord,
+    referenceRecord: HotpotBenchmarkRecord,
+  ) => void;
 }) {
   const mixedSystems = first.system !== second.system;
   const focus = mixedSystems && second.system === "dag_agent" ? second : first;
@@ -1288,6 +1394,7 @@ function BenchmarkComparisonView({
               <tr>
                 <th>Question</th>
                 <th>Gold</th>
+                {onToggleMarkedRow && <th>Save</th>}
                 <th>{focusLabel}</th>
                 <th>{referenceLabel}</th>
                 <th>{deltaLabel}</th>
@@ -1300,10 +1407,24 @@ function BenchmarkComparisonView({
                 const focusRecall = focusRecord.gold_supporting_fact_recall ?? 0;
                 const referenceRecall = referenceRecord.gold_supporting_fact_recall ?? 0;
                 const recallDelta = focusRecall - referenceRecall;
+                const rowMarked = Boolean(
+                  markedKeys?.has(markedComparisonKey(focus.run_id, reference.run_id, focusRecord.id)),
+                );
                 return (
                 <tr key={focusRecord.id}>
                   <td>{focusRecord.question}</td>
                   <td>{focusRecord.gold_answer}</td>
+                  {onToggleMarkedRow && (
+                    <td>
+                      <MarkButton
+                        marked={rowMarked}
+                        onToggle={(event) => {
+                          event.stopPropagation();
+                          onToggleMarkedRow(focus, reference, focusRecord, referenceRecord);
+                        }}
+                      />
+                    </td>
+                  )}
                   <td>
                     <button
                       className={`comparison-answer ${focusRecord.error ? "failed" : ""}`}
@@ -1358,10 +1479,19 @@ function DatasetView({
   recordId,
   onSelectRecord,
   llm,
+  markedKeys,
+  onToggleMarkedRow,
 }: {
   recordId?: string;
   onSelectRecord: (recordId?: string) => void;
   llm: LLMSelection;
+  markedKeys: Set<string>;
+  onToggleMarkedRow: (
+    focus: HotpotBenchmarkResult,
+    reference: HotpotBenchmarkResult,
+    focusRecord: HotpotBenchmarkRecord,
+    referenceRecord: HotpotBenchmarkRecord,
+  ) => void;
 }) {
   const [limit, setLimit] = useState(5);
   const [benchmarkName, setBenchmarkName] = useState("");
@@ -2041,6 +2171,8 @@ function DatasetView({
                   setResult(run);
                   onSelectRecord(record.id);
                 }}
+                markedKeys={markedKeys}
+                onToggleMarkedRow={onToggleMarkedRow}
               />
             ) : (
               <BenchmarkResultView
@@ -2123,6 +2255,12 @@ function BenchmarkRecordDetail({
             <label>Prediction</label>
             <strong>{record.prediction || "-"}</strong>
           </div>
+          {record.raw_prediction && record.raw_prediction !== record.prediction && (
+            <div className="metric">
+              <label>Raw Prediction</label>
+              <strong>{record.raw_prediction}</strong>
+            </div>
+          )}
           <div className="metric">
             <label>F1</label>
             <strong>{formatPercent(record.f1)}</strong>
@@ -2223,11 +2361,22 @@ function BenchmarkRecordDetail({
 function ResultsView({
   runId,
   recordId,
+  source,
   onNavigate,
+  markedKeys,
+  onToggleMarkedRow,
 }: {
   runId?: string;
   recordId?: string;
+  source?: "marked";
   onNavigate: (runId?: string, recordId?: string) => void;
+  markedKeys: Set<string>;
+  onToggleMarkedRow: (
+    focus: HotpotBenchmarkResult,
+    reference: HotpotBenchmarkResult,
+    focusRecord: HotpotBenchmarkRecord,
+    referenceRecord: HotpotBenchmarkRecord,
+  ) => void;
 }) {
   const [items, setItems] = useState<SavedBenchmarkSummary[]>([]);
   const [selectedRunId, setSelectedRunId] = useState(runId ?? "");
@@ -2287,7 +2436,14 @@ function ResultsView({
 
   const detailRecord = selectedResult?.records.find((record) => record.id === recordId);
   if (detailRecord) {
-    return <BenchmarkRecordDetail record={detailRecord} onBack={() => onNavigate(selectedRunId)} />;
+    return (
+      <BenchmarkRecordDetail
+        record={detailRecord}
+        onBack={() =>
+          source === "marked" ? navigate({ tab: "marked" }) : onNavigate(selectedRunId)
+        }
+      />
+    );
   }
 
   return (
@@ -2360,12 +2516,142 @@ function ResultsView({
                 first={selectedResult}
                 second={comparisonResult}
                 onSelectRecord={(run, record) => onNavigate(run.run_id, record.id)}
+                markedKeys={markedKeys}
+                onToggleMarkedRow={onToggleMarkedRow}
               />
             ) : (
               <BenchmarkResultView
                 result={selectedResult}
                 onSelectRecord={(record) => onNavigate(selectedRunId, record.id)}
               />
+            )}
+          </div>
+        </section>
+      </section>
+    </main>
+  );
+}
+
+function MarkedRowsView({
+  rows,
+  error,
+  onOpenRecord,
+  onRemoveRow,
+}: {
+  rows: MarkedComparisonRow[];
+  error: string;
+  onOpenRecord: (runId: string, recordId: string) => void;
+  onRemoveRow: (key: string) => void;
+}) {
+  return (
+    <main className="dataset-workspace">
+      <section className="dataset-panel">
+        <div className="chat-header">
+          <div>
+            <h1>Marked</h1>
+            <p>Saved benchmark comparison rows for later review.</p>
+          </div>
+          <BookmarkCheck size={22} />
+        </div>
+
+        {error && <div className="error-box">{error}</div>}
+
+        <section className="answer-panel">
+          <div className="section-header">
+            <div>
+              <h2>Saved Rows</h2>
+              <span>{formatNumber(rows.length)} comparison rows</span>
+            </div>
+            <BarChart3 size={18} />
+          </div>
+          <div className="answer-body benchmark-output">
+            {rows.length === 0 ? (
+              <div className="empty">
+                Mark rows from a Results comparison table to keep them here.
+              </div>
+            ) : (
+              <div className="record-table-wrap">
+                <table className="record-table comparison-table">
+                  <thead>
+                    <tr>
+                      <th>Question</th>
+                      <th>Gold</th>
+                      <th>Saved</th>
+                      <th>Multi-node DAG</th>
+                      <th>Single-node prompt</th>
+                      <th>Multi-node impact</th>
+                      <th>Gold recall impact</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((row) => {
+                      const focusLabel = runTypeLabel(row.focus_system);
+                      const referenceLabel = runTypeLabel(row.reference_system);
+                      const cosineDelta = row.focus_cosine_sim - row.reference_cosine_sim;
+                      const focusRecall = row.focus_gold_recall ?? 0;
+                      const referenceRecall = row.reference_gold_recall ?? 0;
+                      const recallDelta = focusRecall - referenceRecall;
+                      return (
+                        <tr key={row.key}>
+                          <td>
+                            <div className="marked-question">
+                              <strong>{row.question}</strong>
+                              <small>
+                                {row.focus_run_name || row.reference_run_name || "Saved run"} ·{" "}
+                                {row.model} · seed {row.seed}
+                              </small>
+                            </div>
+                          </td>
+                          <td>{row.gold_answer}</td>
+                          <td>
+                            <MarkButton
+                              marked
+                              onToggle={(event) => {
+                                event.stopPropagation();
+                                onRemoveRow(row.key);
+                              }}
+                            />
+                          </td>
+                          <td>
+                            <button
+                              className="comparison-answer"
+                              onClick={() => onOpenRecord(row.focus_run_id, row.record_id)}
+                              title={`Open ${focusLabel} detail`}
+                              type="button"
+                            >
+                              <span>{row.focus_prediction}</span>
+                              <small>Gold recall {formatPercent(focusRecall)}</small>
+                            </button>
+                          </td>
+                          <td>
+                            <button
+                              className="comparison-answer"
+                              onClick={() => onOpenRecord(row.reference_run_id, row.record_id)}
+                              title={`Open ${referenceLabel} detail`}
+                              type="button"
+                            >
+                              <span>{row.reference_prediction}</span>
+                              <small>Gold recall {formatPercent(referenceRecall)}</small>
+                            </button>
+                          </td>
+                          <td>
+                            <span className={`row-delta ${deltaClass(cosineDelta)}`}>
+                              {cosineDelta > 0 ? "+" : ""}
+                              {formatNumber(cosineDelta, 3)}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`row-delta ${deltaClass(recallDelta)}`}>
+                              {recallDelta > 0 ? "+" : ""}
+                              {formatPercent(recallDelta)}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </section>
@@ -2428,9 +2714,12 @@ function App() {
   const [modelCatalog, setModelCatalog] = useState<LLMModelCatalog>();
   const [selectedLLM, setSelectedLLM] = useState<LLMSelection>();
   const [modelError, setModelError] = useState("");
+  const [markedRows, setMarkedRows] = useState<MarkedComparisonRow[]>([]);
+  const [markedRowsError, setMarkedRowsError] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(
     () => window.localStorage.getItem("dagqa-sidebar-collapsed") === "true",
   );
+  const markedKeys = useMemo(() => new Set(markedRows.map((row) => row.key)), [markedRows]);
 
   useEffect(() => {
     const handleHashChange = () => setRoute(parseRoute());
@@ -2448,12 +2737,72 @@ function App() {
       .catch((err) => setModelError(err instanceof Error ? err.message : "Could not load models"));
   }, []);
 
+  useEffect(() => {
+    listMarkedBenchmarkRows()
+      .then(async (response) => {
+        let rows = response.rows;
+        const legacyRows = loadLegacyMarkedRows();
+        const persistedKeys = new Set(rows.map((row) => row.key));
+        const rowsToMigrate = legacyRows.filter((row) => !persistedKeys.has(row.key));
+        for (const row of rowsToMigrate) {
+          const saved = await saveMarkedBenchmarkRow(row);
+          rows = saved.rows;
+        }
+        if (rowsToMigrate.length > 0) {
+          window.localStorage.removeItem(LEGACY_MARKED_RECORDS_STORAGE_KEY);
+        }
+        setMarkedRows(rows);
+        setMarkedRowsError("");
+      })
+      .catch((err) =>
+        setMarkedRowsError(err instanceof Error ? err.message : "Could not load marked rows"),
+      );
+  }, []);
+
   function toggleSidebar() {
     setSidebarCollapsed((current) => {
       const next = !current;
       window.localStorage.setItem("dagqa-sidebar-collapsed", String(next));
       return next;
     });
+  }
+
+  async function toggleMarkedRow(
+    focus: HotpotBenchmarkResult,
+    reference: HotpotBenchmarkResult,
+    focusRecord: HotpotBenchmarkRecord,
+    referenceRecord: HotpotBenchmarkRecord,
+  ) {
+    const row = markedComparisonFromRow(focus, reference, focusRecord, referenceRecord);
+    const previous = markedRows;
+    const isMarked = previous.some((item) => item.key === row.key);
+    const optimisticRows = isMarked
+      ? previous.filter((item) => item.key !== row.key)
+      : [row, ...previous];
+    setMarkedRows(optimisticRows);
+    setMarkedRowsError("");
+    try {
+      const response = isMarked
+        ? await deleteMarkedBenchmarkRow(row.key)
+        : await saveMarkedBenchmarkRow(row);
+      setMarkedRows(response.rows);
+    } catch (err) {
+      setMarkedRows(previous);
+      setMarkedRowsError(err instanceof Error ? err.message : "Could not update marked rows");
+    }
+  }
+
+  async function removeMarkedRow(key: string) {
+    const previous = markedRows;
+    setMarkedRows((current) => current.filter((row) => row.key !== key));
+    setMarkedRowsError("");
+    try {
+      const response = await deleteMarkedBenchmarkRow(key);
+      setMarkedRows(response.rows);
+    } catch (err) {
+      setMarkedRows(previous);
+      setMarkedRowsError(err instanceof Error ? err.message : "Could not update marked rows");
+    }
   }
 
   return (
@@ -2500,6 +2849,14 @@ function App() {
             <History size={18} />
             <span>Results</span>
           </button>
+          <button
+            className={route.tab === "marked" ? "active" : ""}
+            onClick={() => navigate({ tab: "marked" })}
+            title="Marked"
+          >
+            <BookmarkCheck size={18} />
+            <span>Marked</span>
+          </button>
           <a href="http://localhost:8000/docs" target="_blank" rel="noreferrer" title="API Docs">
             <BookOpen size={18} />
             <span>API Docs</span>
@@ -2522,7 +2879,19 @@ function App() {
         <ResultsView
           runId={route.runId}
           recordId={route.recordId}
+          source={route.source}
           onNavigate={(runId, recordId) => navigate({ tab: "results", runId, recordId })}
+          markedKeys={markedKeys}
+          onToggleMarkedRow={toggleMarkedRow}
+        />
+      ) : route.tab === "marked" ? (
+        <MarkedRowsView
+          rows={markedRows}
+          error={markedRowsError}
+          onOpenRecord={(runId, recordId) =>
+            navigate({ tab: "results", runId, recordId, source: "marked" })
+          }
+          onRemoveRow={removeMarkedRow}
         />
       ) : !selectedLLM ? (
         <ModelRequiredView action={route.tab === "chat" ? "Chat" : "Benchmark actions"} />
@@ -2533,6 +2902,8 @@ function App() {
           recordId={route.recordId}
           onSelectRecord={(recordId) => navigate({ tab: "dataset", recordId })}
           llm={selectedLLM}
+          markedKeys={markedKeys}
+          onToggleMarkedRow={toggleMarkedRow}
         />
       ) : (
         <ModelRequiredView action="This action" />

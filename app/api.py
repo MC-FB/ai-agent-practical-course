@@ -113,6 +113,28 @@ class BenchmarkPreflightResult(BaseModel):
     checks: list[BenchmarkPreflightCheck]
 
 
+class MarkedBenchmarkRow(BaseModel):
+    key: str
+    record_id: str
+    focus_run_id: str
+    reference_run_id: str
+    focus_run_name: str | None = None
+    reference_run_name: str | None = None
+    focus_system: str
+    reference_system: str
+    model: str
+    created_at: str
+    seed: int
+    question: str
+    gold_answer: str
+    focus_prediction: str
+    reference_prediction: str
+    focus_cosine_sim: float
+    reference_cosine_sim: float
+    focus_gold_recall: float | None = None
+    reference_gold_recall: float | None = None
+
+
 def load_config() -> AppConfig:
     path = Path(os.getenv("DAGQA_CONFIG", "configs/local.yaml"))
     config = AppConfig.from_file(path) if path.exists() else AppConfig()
@@ -1262,6 +1284,40 @@ def get_benchmark_result(run_id: str) -> dict[str, Any]:
     return _normalize_benchmark_payload(json.loads(path.read_text()), path)
 
 
+@router.get(
+    "/benchmarks/marked-rows",
+    tags=["Benchmarks"],
+    summary="List marked benchmark comparison rows",
+)
+def list_marked_benchmark_rows() -> dict[str, Any]:
+    return {"rows": [row.model_dump(mode="json") for row in _load_marked_benchmark_rows()]}
+
+
+@router.post(
+    "/benchmarks/marked-rows",
+    tags=["Benchmarks"],
+    summary="Save a marked benchmark comparison row",
+)
+def save_marked_benchmark_row(row: MarkedBenchmarkRow) -> dict[str, Any]:
+    _validate_storage_id(row.key)
+    rows = [existing for existing in _load_marked_benchmark_rows() if existing.key != row.key]
+    rows.insert(0, row)
+    _store_marked_benchmark_rows(rows)
+    return {"rows": [saved.model_dump(mode="json") for saved in rows]}
+
+
+@router.delete(
+    "/benchmarks/marked-rows/{row_key}",
+    tags=["Benchmarks"],
+    summary="Remove a marked benchmark comparison row",
+)
+def delete_marked_benchmark_row(row_key: str) -> dict[str, Any]:
+    _validate_storage_id(row_key)
+    rows = [row for row in _load_marked_benchmark_rows() if row.key != row_key]
+    _store_marked_benchmark_rows(rows)
+    return {"rows": [row.model_dump(mode="json") for row in rows]}
+
+
 @router.post("/benchmarks/results/{run_id}/repair")
 def repair_benchmark_result(run_id: str) -> dict[str, Any]:
     _validate_storage_id(run_id)
@@ -1281,6 +1337,37 @@ def _benchmark_output_dir() -> Path:
 
 def _live_benchmark_dir() -> Path:
     return _benchmark_output_dir() / ".live"
+
+
+def _marked_benchmark_rows_path() -> Path:
+    return _benchmark_output_dir() / ".marked" / "rows.json"
+
+
+def _load_marked_benchmark_rows() -> list[MarkedBenchmarkRow]:
+    path = _marked_benchmark_rows_path()
+    if not path.exists():
+        return []
+    try:
+        payload = json.loads(path.read_text())
+    except Exception:
+        return []
+    raw_rows = payload.get("rows") if isinstance(payload, dict) else payload
+    if not isinstance(raw_rows, list):
+        return []
+    rows = []
+    for raw_row in raw_rows:
+        try:
+            rows.append(MarkedBenchmarkRow.model_validate(raw_row))
+        except Exception:
+            continue
+    return rows
+
+
+def _store_marked_benchmark_rows(rows: list[MarkedBenchmarkRow]) -> None:
+    _atomic_write_json(
+        _marked_benchmark_rows_path(),
+        {"rows": [row.model_dump(mode="json") for row in rows]},
+    )
 
 
 def _save_benchmark_result(result: BenchmarkResult) -> Path:
@@ -1546,6 +1633,7 @@ def _normalize_benchmark_record(record: dict[str, Any]) -> dict[str, Any]:
         "question": record.get("question") or "",
         "gold_answer": record.get("gold_answer") or "",
         "prediction": record.get("prediction") or "",
+        "raw_prediction": record.get("raw_prediction"),
         "exact_match": record.get("exact_match") or 0,
         "f1": record.get("f1") or 0,
         "cosine_sim": record.get("cosine_sim") if record.get("cosine_sim") is not None else 0,

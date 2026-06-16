@@ -1,105 +1,142 @@
 # ai-agent-practical-course
 
-## Development
+DAG QA is a multi-hop question answering prototype for the AI Agents practical
+course. It contains a FastAPI backend, a React/Vite frontend, benchmark tooling
+for HotpotQA-style evaluations, and persistent benchmark result storage under
+`runs/benchmarks`.
 
-Run the backend container and the Vite frontend dev server with hot reload:
+## Requirements
+
+- Python 3.11+
+- `uv`
+- Node.js 20+ and npm
+- Docker Desktop with Docker Compose, if you want to run the containerized setup
+- API credentials in `.env` for live LLM calls
+
+Create your local environment file from the example:
+
+```bash
+cp .example.env .env
+```
+
+For the university chair inference service, configure at least:
+
+```bash
+CLUSTER_API_KEY=...
+CLUSTER_API_BASE=http://atknoll32.air.cit.tum.de:3000/inference
+CLUSTER_MODELS_URL=http://atknoll32.air.cit.tum.de:3000/models
+```
+
+The application can also load the other configs in `configs/`, but current
+benchmark work should use the chair models rather than the older OpenRouter
+configs.
+
+## Start Locally
+
+The local startup script creates or reuses `.venv`, installs Python
+dependencies, installs frontend dependencies, stops the Docker app container if
+it is occupying port `8000`, and starts both development servers with hot reload:
+
+```bash
+./start_locally.sh
+```
+
+After startup:
+
+- Frontend: `http://localhost:5173`
+- API: `http://localhost:8000`
+- API docs: `http://localhost:8000/docs`
+
+Stop both local servers with `Ctrl+C`.
+
+## Start With Docker
+
+For the Docker-backed app, run:
+
+```bash
+./start.sh
+```
+
+This builds the frontend, builds the backend image, and starts the app with
+Docker Compose. The app is served at:
+
+```text
+http://localhost:8000
+```
+
+For development with a separate Vite frontend container:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up dagqa web-dev
 ```
 
-Open the app at `http://localhost:5173/`. The backend container bind-mounts
-`app`, `dagqa`, and `configs`, and runs uvicorn with `--reload`, so Python and
-configuration changes are picked up without rebuilding the backend image. The
-frontend container bind-mounts `app/web`, so React changes hot reload too. The
-API is served by `dagqa` on `http://localhost:8000/`.
+Then open:
 
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.lrz.de/00000000014AA235/ai-agent-practical-course.git
-git branch -M main
-git push -uf origin main
+```text
+http://localhost:5173
 ```
 
-## Integrate with your tools
+Stop the containers with:
 
-* [Set up project integrations](https://gitlab.lrz.de/00000000014AA235/ai-agent-practical-course/-/settings/integrations)
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+```
 
-## Collaborate with your team
+## Tests
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+Run the Python test suite locally:
 
-## Test and Deploy
+```bash
+uv run pytest
+```
 
-Use the built-in continuous integration in GitLab.
+Run focused tests while developing:
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+```bash
+uv run pytest tests/unit/test_answer_postprocess.py tests/unit/test_benchmark_results_api.py
+```
 
-***
+Build the frontend:
 
-# Editing this README
+```bash
+npm --prefix app/web run build
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+Run the Docker test profile:
 
-## Suggestions for a good README
+```bash
+docker compose --profile test run --rm test
+```
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## Benchmarks
 
-## Name
-Choose a self-explaining name for your project.
+Benchmarks are started through the backend so they appear in the frontend
+Results tab. Start the local app first, then run:
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```bash
+DAGQA_API_URL=http://127.0.0.1:8000 ./scripts/start_benchmark.sh 30
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+The script asks for the LLM model, benchmark name, optional seed, and whether to
+run the DAG agent, direct LLM baseline, or both. Results are written to:
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+```text
+runs/benchmarks/
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Saved/marked rows from the frontend are stored persistently in:
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+```text
+runs/benchmarks/.marked/rows.json
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+## Documentation
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Project reports, design notes, benchmark analyses, and research notes live in
+`docs/`. Keep `README.md` as the only Markdown file at the repository root.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+Useful current reports:
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+- `docs/cosine_improvement_research_2026-06-16.md`
+- `docs/cosine_improvement_failure_analysis_consistency_v2_2026-06-16.md`
+- `docs/failed_experiments_2026-06-15.md`

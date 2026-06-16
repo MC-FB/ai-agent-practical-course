@@ -193,6 +193,7 @@ export type HotpotBenchmarkRecord = {
   question: string;
   gold_answer: string;
   prediction: string;
+  raw_prediction?: string | null;
   exact_match: number;
   f1: number;
   cosine_sim: number;
@@ -320,6 +321,28 @@ export type SavedBenchmarkSummary = {
   path: string;
 };
 
+export type MarkedComparisonRow = {
+  key: string;
+  record_id: string;
+  focus_run_id: string;
+  reference_run_id: string;
+  focus_run_name?: string | null;
+  reference_run_name?: string | null;
+  focus_system: string;
+  reference_system: string;
+  model: string;
+  created_at: string;
+  seed: number;
+  question: string;
+  gold_answer: string;
+  focus_prediction: string;
+  reference_prediction: string;
+  focus_cosine_sim: number;
+  reference_cosine_sim: number;
+  focus_gold_recall?: number | null;
+  reference_gold_recall?: number | null;
+};
+
 export async function getHotpotBenchmarkMeta(
   subset: BenchmarkSubset = "validation",
 ): Promise<HotpotBenchmarkMeta> {
@@ -420,6 +443,32 @@ export async function listBenchmarkResults(): Promise<{ results: SavedBenchmarkS
 
 export async function getBenchmarkResult(runId: string): Promise<HotpotBenchmarkResult> {
   const response = await fetch(`/api/benchmarks/results/${runId}`);
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
+export async function listMarkedBenchmarkRows(): Promise<{ rows: MarkedComparisonRow[] }> {
+  const response = await fetch("/api/benchmarks/marked-rows");
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
+export async function saveMarkedBenchmarkRow(
+  row: MarkedComparisonRow,
+): Promise<{ rows: MarkedComparisonRow[] }> {
+  const response = await fetch("/api/benchmarks/marked-rows", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(row),
+  });
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
+export async function deleteMarkedBenchmarkRow(key: string): Promise<{ rows: MarkedComparisonRow[] }> {
+  const response = await fetch(`/api/benchmarks/marked-rows/${encodeURIComponent(key)}`, {
+    method: "DELETE",
+  });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
 }
