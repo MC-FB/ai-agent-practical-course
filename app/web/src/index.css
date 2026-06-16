@@ -392,6 +392,19 @@ button {
   letter-spacing: 0;
 }
 
+/* The collapsible Tree parameters header is the only focusable section-header
+   (role="button" + tabIndex). Suppress the default UA outline on mouse focus and
+   restore an on-brand ring for keyboard navigation only. */
+.section-header[role="button"] {
+  outline: none;
+}
+
+.section-header[role="button"]:focus-visible {
+  outline: 2px solid #00806f;
+  outline-offset: -2px;
+  border-radius: 8px 8px 0 0;
+}
+
 .section-header span {
   display: block;
   margin-top: 2px;
