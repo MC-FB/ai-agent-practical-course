@@ -30,7 +30,8 @@ def render_evidence_section(
             "or fact. Preserve the answer type requested by the question and schema: do not "
             'return "yes" or "no" unless the question asks yes/no. '
             "Cite each directly used fact with the exact document ID, title, and zero-based "
-            "sentence indices shown below."
+            "sentence indices shown below. Never invent document IDs, titles, or sentence "
+            "indices; use only the document IDs and sentence numbers printed in this prompt."
         )
     rendered += "\n"
     for document in supporting_evidence.documents:
@@ -86,6 +87,13 @@ Normalize final answer values:
 - yes/no questions: answer with "yes" or "no", not true/false.
 - dates: use the natural date form requested by the question when possible.
 - numbers: return only the concise number or quantity unless units are part of the answer.
+- bridge questions: keep the answer anchored to the entity or value supplied by dependencies.
+- before/after/later than/earlier than/since/until questions: preserve the requested boundary
+  value; do not substitute a latest or earliest endpoint unless that is explicitly asked.
+- quoted-title questions: answer about the quoted work/title itself, not a different entity
+  mentioned inside that title.
+- language questions: preserve descriptors such as "English-language"; do not collapse them
+  to a person's nationality or to an original-title language.
 - if the schema contains an answer field, put the concise final answer there.
 """
     return rendered

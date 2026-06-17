@@ -3,7 +3,7 @@ from __future__ import annotations
 from dagqa.planning.normalizer import normalize_plan_dependencies
 from dagqa.planning.parser import parse_plan
 from dagqa.planning.planner import STRUCTURED_PLANNER_SYSTEM, structured_planner_prompt
-from dagqa.planning.prompts import PLANNER_SYSTEM
+from dagqa.planning.prompts import PLANNER_SYSTEM, planner_user_prompt
 from dagqa.planning.validator import graph_depth, scheduler_waves, validate_plan
 from dagqa.schemas import DagNode, DagPlan, Operation, PromptSpec, TaskType
 from tests.fixtures import PARALLEL_PLAN
@@ -33,6 +33,70 @@ def test_structured_planner_prompt_discourages_broad_candidate_enumeration() -> 
     assert "broad candidate-list or exhaustive enumeration nodes" in STRUCTURED_PLANNER_SYSTEM
     assert "Prefer targeted lookup nodes over broad candidate-list nodes" in prompt
     assert "do not ask for all James Bond actors" in prompt
+
+
+def test_planner_prompts_require_input_map_to_consume_dependencies() -> None:
+    prompt = structured_planner_prompt(
+        "Which show did the journalist host?",
+        max_nodes=5,
+        max_depth=3,
+    )
+
+    assert "input_map must consume every node listed in depends_on" in PLANNER_SYSTEM
+    assert "Every node listed in depends_on must be consumed" in prompt
+    assert "Do not declare unused dependencies" in STRUCTURED_PLANNER_SYSTEM
+
+
+def test_planner_prompts_preserve_bridge_entity_anchoring() -> None:
+    prompt = planner_user_prompt(
+        "Before composing music for the game which contains Chocobos and Moogles, "
+        "what cover band was he involved in?",
+        max_nodes=5,
+        max_depth=3,
+    )
+
+    assert "preserve the bridge entity across hops" in PLANNER_SYSTEM
+    assert "Preserve bridge entities" in prompt
+    assert "resolved bridge value" in structured_planner_prompt(
+        "Before composing music for the game which contains Chocobos and Moogles, "
+        "what cover band was he involved in?",
+        max_nodes=5,
+        max_depth=3,
+    )
+
+
+def test_planner_prompts_preserve_temporal_boundary_wording() -> None:
+    prompt = planner_user_prompt(
+        "A sparse image is used by FileVault in versions later than which?",
+        max_nodes=5,
+        max_depth=3,
+    )
+    structured_prompt = structured_planner_prompt(
+        "A sparse image is used by FileVault in versions later than which?",
+        max_nodes=5,
+        max_depth=3,
+    )
+
+    assert "later than" in PLANNER_SYSTEM
+    assert "boundary" in prompt
+    assert "boundary/threshold" in structured_prompt
+
+
+def test_planner_prompts_preserve_quoted_title_targets() -> None:
+    prompt = planner_user_prompt(
+        'Which German philosopher wrote "The opera Lulu"?',
+        max_nodes=5,
+        max_depth=3,
+    )
+    structured_prompt = structured_planner_prompt(
+        'Which German philosopher wrote "The opera Lulu"?',
+        max_nodes=5,
+        max_depth=3,
+    )
+
+    assert "Preserve quoted title wording" in PLANNER_SYSTEM
+    assert "Preserve quoted titles" in prompt
+    assert "Preserve quoted titles as answer targets" in structured_prompt
 
 
 def test_parse_accepts_bare_node_list() -> None:

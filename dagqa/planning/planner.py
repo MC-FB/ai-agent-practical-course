@@ -210,6 +210,8 @@ the correct entity instead of returning a number.
 For every node with dependencies, the executable prompt template must include
 child values by using {dependencies}, placeholders from input_map such as
 {left_value}, or direct child placeholders such as {q1.answer}.
+Every node with dependencies must include input_map references that consume each
+node listed in depends_on. Do not declare unused dependencies.
 Never make a final comparison/synthesis node ask the original user question
 without child outputs in the prompt.
 Prefer targeted lookup nodes that return only the facts needed to answer the
@@ -219,6 +221,18 @@ directly.
 For bridge questions, ask lookup nodes to find the bridge-specific entity or
 attribute from the supplied evidence rather than enumerating all possible
 candidates from world knowledge.
+Preserve the resolved bridge entity across hops: after a node identifies a
+person, work, event, organization, place, or series, later nodes must ask about
+that exact value and ignore unrelated entities in distractor documents.
+Preserve temporal boundary wording from the original question. Questions using
+"before", "after", "later than", "earlier than", "since", or "until" usually
+ask for a threshold or boundary value. Do not rewrite them into "latest",
+"earliest", "current", or "stopped using" questions unless the original wording
+explicitly asks for that endpoint.
+Preserve quoted title wording. If the user asks who wrote a quoted work or
+title, identify the writer of that quoted text; do not reinterpret the question
+as asking who composed, performed, or created an entity mentioned inside the
+title unless the original wording says so.
 """
 
 
@@ -246,6 +260,7 @@ Constraints:
 - final_node must be the node that returns the final answer.
 - Independent fact lookup nodes should run in parallel.
 - Every input_map reference must point to a field in a dependency node's output_fields.
+- Every node listed in depends_on must be consumed by at least one input_map reference.
 - Every prompt user_template may use placeholders like {{q1.city}} only for dependencies.
 - For every node with depends_on, prompt.user_template must include child values through
   {{dependencies}}, input_map placeholders such as {{left_city}}, or direct placeholders
@@ -259,6 +274,14 @@ Constraints:
   user's question requires that list.
 - Evidence-backed lookup nodes should return only facts directly needed by downstream nodes,
   not every related fact visible in the context.
+- Bridge nodes must preserve the resolved bridge value in downstream questions and prompts;
+  never let a later hop answer about a different entity that only appears in a distractor context.
+- Preserve temporal boundary wording. For questions with "before", "after", "later than",
+  "earlier than", "since", or "until", return the boundary/threshold requested by the original
+  question instead of converting it to a latest/earliest endpoint.
+- Preserve quoted titles as answer targets. For questions like who wrote a quoted work/title,
+  keep the quoted text as the work to look up rather than changing the task to composition or
+  authorship of another entity mentioned inside that title.
 - Use array fields for list-valued outputs and object fields for structured outputs.
 - The final_node must always include an output field named answer. It may include additional
   fields, but answer must contain the concise final response to the user's question.

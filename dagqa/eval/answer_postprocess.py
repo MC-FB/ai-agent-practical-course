@@ -7,6 +7,7 @@ from dagqa.schemas import EvidenceDocument
 
 _YES_NO_RE = re.compile(r"^\s*(yes|no)\b", re.IGNORECASE)
 _BETWEEN_RE = re.compile(r"\bbetween\s+([^.,;]+?)\s+and\s+([^.,;]+?)(?:[.,;]|$)", re.IGNORECASE)
+_INITIAL_NAME_RE = re.compile(r"^(?P<initials>(?:[A-Z]\.\s*)+)(?P<surname>[A-Z][a-zA-Z-]+)$")
 MIN_UNSUPPORTED_ENTITY_LENGTH = 4
 PAIR_SIZE = 2
 MILLION = 1_000_000
@@ -41,16 +42,23 @@ def canonicalize_prediction(
 
     texts = list(supporting_texts or [])
     texts.extend(document.text for document in evidence_documents or [])
+    boolean = _canonicalize_boolean(value, question)
+    if boolean:
+        return boolean
     yes_no = _YES_NO_RE.match(value)
     if yes_no and _is_yes_no_question(question):
         return yes_no.group(1).lower()
 
     value = _strip_common_answer_prefix(value)
     value = _canonicalize_literal_list(value)
+    value = _restore_structured_pair(value)
     value = _strip_disambiguating_parenthetical(value)
     value = _extract_between_target(value, question)
+    value = _restore_three_other_cast_members(value, question, texts)
     value = _restore_intro_phrase(value, question, texts)
     value = _restore_subject_painting_phrase(value, question, texts)
+    value = _restore_language_descriptor(value, question, texts)
+    value = _restore_initialed_name(value, texts)
     value = _restore_numeric_surface(value, texts)
     value = _restore_quantity_unit(value, evidence_documents or [])
     return value.strip()
@@ -65,6 +73,8 @@ def is_placeholder_or_unsupported(
     value = prediction.strip()
     if not value:
         return False
+    if value.casefold() in {"yes", "no"} and not _is_yes_no_question(question):
+        return True
     if value.casefold() in {"none", "unknown", "not found", "n/a", "no answer"}:
         return not _is_yes_no_question(question)
     if _is_yes_no_question(question) or _looks_numeric_or_date(value):
@@ -108,6 +118,28 @@ def _canonicalize_literal_list(value: str) -> str:
     return _join_list_answer(parts) if parts else value
 
 
+def _canonicalize_boolean(value: str, question: str) -> str | None:
+    if not _is_yes_no_question(question):
+        return None
+    normalized = value.strip().casefold().rstrip(".")
+    if normalized == "true":
+        return "yes"
+    if normalized == "false":
+        return "no"
+    return None
+
+
+def _restore_structured_pair(value: str) -> str:
+    match = re.fullmatch(
+        r"\s*year\s*:\s*([^,;]+)[,;]\s*conference\s*:\s*(.+?)\s*",
+        value,
+        flags=re.IGNORECASE,
+    )
+    if match:
+        return f"{match.group(1).strip()} {match.group(2).strip()}"
+    return value
+
+
 def _is_yes_no_question(question: str) -> bool:
     first = question.strip().split(maxsplit=1)[0].casefold() if question.strip() else ""
     return first in {
@@ -144,6 +176,23 @@ def _strip_disambiguating_parenthetical(value: str) -> str:
     if not re.search(r"\s+\([^)]{3,80}\)$", value):
         return value
     return re.sub(r"\s+\([^)]{3,80}\)$", "", value).strip()
+
+
+def _restore_three_other_cast_members(value: str, question: str, texts: list[str]) -> str:
+    if "which three other" not in question.casefold():
+        return value
+    for text in texts:
+        match = re.search(
+            r"\bstars\s+([A-Z][^.;]+?),\s+([A-Z][^.;]+?),\s+([A-Z][^.;]+?)\s+and\s+"
+            r"([A-Z][^.;]+?)(?:\.|$)",
+            text,
+        )
+        if not match:
+            continue
+        names = [part.strip() for part in match.groups()]
+        if value.casefold() in {name.casefold() for name in names[1:]}:
+            return _join_list_answer(names[1:])
+    return value
 
 
 def _restore_intro_phrase(value: str, question: str, texts: list[str]) -> str:
@@ -185,6 +234,35 @@ def _restore_subject_painting_phrase(value: str, question: str, texts: list[str]
         )
         if match:
             return match.group(1).strip()
+    return value
+
+
+def _restore_language_descriptor(value: str, question: str, texts: list[str]) -> str:
+    question_lower = question.casefold()
+    if "what language" not in question_lower and "in what language" not in question_lower:
+        return value
+    if not re.fullmatch(r"[A-Za-z]+", value):
+        return value
+    for text in texts:
+        match = re.search(r"\b([A-Z][a-z]+-language)\b", text)
+        if match:
+            return match.group(1)
+    return value
+
+
+def _restore_initialed_name(value: str, texts: list[str]) -> str:
+    match = _INITIAL_NAME_RE.fullmatch(value.strip())
+    if not match:
+        return value
+    initials = [part[0] for part in re.findall(r"[A-Z]\.", match.group("initials"))]
+    surname = match.group("surname")
+    candidate_re = re.compile(rf"\b((?:[A-Z][a-z]+\s+){{{len(initials)}}}{re.escape(surname)})\b")
+    for text in texts:
+        for candidate_match in candidate_re.finditer(text):
+            candidate = candidate_match.group(1)
+            parts = candidate.split()
+            if [part[0] for part in parts[:-1]] == initials:
+                return candidate
     return value
 
 

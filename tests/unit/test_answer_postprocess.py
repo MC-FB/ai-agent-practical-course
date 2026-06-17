@@ -98,6 +98,61 @@ def test_canonicalize_prediction_restores_subject_painting_phrase_from_citation(
     )
 
 
+def test_canonicalize_prediction_restores_language_descriptor_from_citation() -> None:
+    assert (
+        canonicalize_prediction(
+            "Italian",
+            question="The Best Offer was written and directed in what language?",
+            supporting_texts=[
+                "The Best Offer is a 2013 Italian English-language romantic mystery film "
+                "written and directed by Giuseppe Tornatore."
+            ],
+        )
+        == "English-language"
+    )
+
+
+def test_canonicalize_prediction_normalizes_boolean_yes_no() -> None:
+    assert canonicalize_prediction("True", question="Are both films documentaries?") == "yes"
+
+
+def test_canonicalize_prediction_restores_initialed_name_from_evidence() -> None:
+    assert (
+        canonicalize_prediction(
+            "L. M. Montgomery",
+            question="Which children's novelist wrote about Anne Shirley?",
+            supporting_texts=[
+                "Lucy Maud Montgomery was a Canadian author best known for Anne of Green Gables."
+            ],
+        )
+        == "Lucy Maud Montgomery"
+    )
+
+
+def test_canonicalize_prediction_formats_structured_year_conference_pair() -> None:
+    assert (
+        canonicalize_prediction(
+            "year: 2009, conference: Big 12 Conference",
+            question="Which year and which conference?",
+        )
+        == "2009 Big 12 Conference"
+    )
+
+
+def test_canonicalize_prediction_restores_three_other_cast_members() -> None:
+    assert (
+        canonicalize_prediction(
+            "Yu Shaoqun",
+            question=(
+                "The Chinese actress also known as Crystal Liu stars in Night Peacock "
+                "with which three other actresses?"
+            ),
+            supporting_texts=["It stars Liu Yifei, Liu Ye, Yu Shaoqun and Leon Lai."],
+        )
+        == "Liu Ye, Yu Shaoqun and Leon Lai"
+    )
+
+
 def test_canonicalize_prediction_normalizes_yes_no() -> None:
     assert (
         canonicalize_prediction("Yes.", question="Are Ian Brown and Dee Snider both actors?")
@@ -147,5 +202,13 @@ def test_none_triggers_repair_for_factoid_question() -> None:
     assert is_placeholder_or_unsupported(
         "none",
         question="Which actor/director directed the film?",
+        evidence_documents=[],
+    )
+
+
+def test_yes_no_triggers_repair_for_non_yes_no_question() -> None:
+    assert is_placeholder_or_unsupported(
+        "no",
+        question="Which children's novelist wrote about Anne Shirley?",
         evidence_documents=[],
     )
