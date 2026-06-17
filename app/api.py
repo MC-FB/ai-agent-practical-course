@@ -73,8 +73,12 @@ class PlannerSelection(BaseModel):
     Bounds mirror the frontend slider ranges and reject out-of-range values.
     """
 
-    max_nodes: int | None = Field(default=None, ge=1, le=30)
-    max_depth: int | None = Field(default=None, ge=1, le=8)
+    max_nodes: int | None = Field(
+        default_factory=lambda: load_config().planner.max_nodes, ge=1, le=30
+    )
+    max_depth: int | None = Field(
+        default_factory=lambda: load_config().planner.max_depth, ge=1, le=8
+    )
 
 
 class AskRequest(BaseModel):
