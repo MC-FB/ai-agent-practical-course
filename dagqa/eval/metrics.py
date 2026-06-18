@@ -47,11 +47,11 @@ def normalize_answer(text: str) -> str:
     return white_space_fix(remove_articles(remove_punc(text.lower())))
 
 
-def exact_match(prediction: str, ground_truth: str) -> float:
+def exact_match(prediction: str, ground_truth: str, _question: str) -> float:
     return float(normalize_answer(prediction) == normalize_answer(ground_truth))
 
 
-def answer_f1(prediction: str, ground_truth: str) -> float:
+def answer_f1(prediction: str, ground_truth: str, _question: str) -> float:
     pred_tokens = normalize_answer(prediction).split()
     gold_tokens = normalize_answer(ground_truth).split()
     common = Counter(pred_tokens) & Counter(gold_tokens)
@@ -65,7 +65,7 @@ def answer_f1(prediction: str, ground_truth: str) -> float:
     return 2 * precision * recall / (precision + recall)
 
 
-def cosine_sim(prediction: str, ground_truth: str) -> float:
+def cosine_sim(prediction: str, ground_truth: str, _question: str) -> float:
     if prediction == ground_truth:
         return 1.0
 
@@ -120,7 +120,7 @@ class Metric:
     """
 
     name: str  # output key, e.g. "f1"
-    score: Callable[[str, str], float]  # (prediction, ground_truth) -> float
+    score: Callable[[str, str, str], float]  # (prediction, ground_truth, question) -> float
     aggregate: Callable[[Sequence[MetricSample]], float] = _mean
     error_default: float = 0.0  # per-record value stored when an example errors
 
