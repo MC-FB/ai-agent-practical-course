@@ -123,7 +123,7 @@ class Metric:
     """
 
     name: str  # output key, e.g. "f1"
-    score: Callable[[str, str], float]  # (prediction, ground_truth) -> float
+    score: Callable[[str, str, str], float]  # (prediction, ground_truth, question) -> float
     aggregate: Callable[[Sequence[MetricSample]], float] = _mean
     error_default: float = 0.0  # per-record value stored when an example errors
 
