@@ -12,7 +12,11 @@ from dagqa.graph.substitution import (
     resolve_question,
 )
 from dagqa.llm.base import LanguageModel
-from dagqa.nodes.output_validation import parse_node_output, validate_node_output
+from dagqa.nodes.output_validation import (
+    parse_node_output,
+    validate_evidence_citations,
+    validate_node_output,
+)
 from dagqa.nodes.prompts import node_output_schema, render_node_prompt, render_repair_prompt
 from dagqa.schemas import (
     DagNode,
@@ -117,6 +121,11 @@ class NodeRunner:
                 last_validation = ValidationResult(valid=False, errors=[str(exc)])
             else:
                 last_validation = validate_node_output(last_output, schema)
+                if last_validation.valid:
+                    last_validation = validate_evidence_citations(
+                        last_output,
+                        supporting_evidence,
+                    )
                 if last_validation.valid:
                     return last_output, last_validation
 

@@ -23,6 +23,7 @@ Use placeholders like {q1.answer} only when q1 is in depends_on.
 
 For every node with depends_on:
 - input_map must contain the child values the node needs.
+- input_map must consume every node listed in depends_on; do not leave a dependency unused.
 - prompt.user_template must explicitly include those child values using {dependencies},
   input_map placeholders such as {left_date}, or direct placeholders such as {q1.answer}.
 - The node must use child outputs to answer. Do not make a final comparison or synthesis
@@ -36,6 +37,19 @@ a later node needs the composer name and birth year separately.
 Prefer targeted lookup nodes that return only facts needed to answer the question. Do not create
 broad candidate-list or exhaustive enumeration nodes when a more specific lookup can identify the
 required entity or relationship directly.
+
+For bridge questions, preserve the bridge entity across hops. Once a node resolves an entity,
+person, work, event, organization, or series, downstream lookup nodes must ask about that resolved
+bridge value and must not switch to another entity that merely appears in a distractor document.
+
+Preserve temporal and comparator wording from the original question. Questions containing
+"before", "after", "later than", "earlier than", "since", or "until" usually ask for a boundary
+or threshold value. Do not rewrite them into "latest", "earliest", "current", or "stopped using"
+questions unless the original question explicitly asks for that endpoint.
+
+Preserve quoted title wording. If the user asks who wrote a quoted work/title, identify the
+writer of that quoted work or text; do not reinterpret it as asking who composed, performed, or
+created the entity mentioned inside the title unless the original question says so.
 
 Use array fields for list-valued facts. The final node must always return an answer field
 with the concise final answer, even when it also returns supporting fields.
@@ -55,6 +69,10 @@ Constraints:
 - Prefer parallel branches when parts are independent.
 - Dependent nodes must be executable from their child outputs. Prepare prompt templates with
   placeholders for the values returned by child nodes.
+- Preserve bridge entities and temporal boundary wording from the original question; do not
+  rewrite boundary questions into latest/earliest endpoint questions.
+- Preserve quoted titles as answer targets; do not reinterpret "who wrote '<title>'" as
+  composition or authorship of a different entity mentioned inside the title.
 """
 
 
