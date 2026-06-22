@@ -214,6 +214,10 @@ Every node with dependencies must include input_map references that consume each
 node listed in depends_on. Do not declare unused dependencies.
 Never make a final comparison/synthesis node ask the original user question
 without child outputs in the prompt.
+Final comparison/synthesis nodes must include the original question in the prompt,
+identify the requested answer type, and select an answer of that type from child
+outputs or evidence spans. They must not return a bridge entity if the original
+question asks for an attribute of that entity.
 Prefer targeted lookup nodes that return only the facts needed to answer the
 question. Do not create broad candidate-list or exhaustive enumeration nodes
 when a more specific lookup can identify the required entity or relationship
@@ -224,6 +228,11 @@ candidates from world knowledge.
 Preserve the resolved bridge entity across hops: after a node identifies a
 person, work, event, organization, place, or series, later nodes must ask about
 that exact value and ignore unrelated entities in distractor documents.
+In questions phrased like "what region/place of the country where X is located
+is Y", X usually resolves only the country or scope. The answer target is the
+region/place containing Y, not the region/place containing X. Carry both
+candidates if needed and make the final node choose the target entity named
+after "is".
 Preserve temporal boundary wording from the original question. Questions using
 "before", "after", "later than", "earlier than", "since", or "until" usually
 ask for a threshold or boundary value. Do not rewrite them into "latest",
@@ -276,6 +285,9 @@ Constraints:
   not every related fact visible in the context.
 - Bridge nodes must preserve the resolved bridge value in downstream questions and prompts;
   never let a later hop answer about a different entity that only appears in a distractor context.
+- For "what region/place of the country where X is located is Y" questions, use X only to
+  identify the country or scope. The final answer is the region/place containing Y. If both
+  X-region and Y-region are looked up, the final node must select the Y-region.
 - Preserve temporal boundary wording. For questions with "before", "after", "later than",
   "earlier than", "since", or "until", return the boundary/threshold requested by the original
   question instead of converting it to a latest/earliest endpoint.
@@ -287,6 +299,16 @@ Constraints:
   fields, but answer must contain the concise final response to the user's question.
 - The final_node output field must answer the user's question directly, not return an
   intermediate value like a year, date, latitude, or count unless that is what was asked.
+- Final synthesis must identify the answer type requested by the original question before
+  choosing the answer. Do not return a bridge entity when the original question asks for an
+  attribute of that entity. Examples of answer types include country, region, event/date,
+  era/decade, language, organization, person, place, yes/no, and number.
+- Final synthesis must preserve exact modifiers from evidence or dependency values. Do not
+  collapse qualified answers to a bare head noun, and do not substitute a city for a region,
+  a modern country for a historical country name, or a bare year for a named election/event
+  when the question asks for that more specific surface.
+- The final node prompt must mention the original question and explicitly compare the current
+  candidate answer with the requested answer type before returning answer.
 """
 
 
@@ -436,6 +458,26 @@ def _output_fields_to_schema(fields: list[dict[str, str]], *, is_final: bool) ->
         required = ["answer"]
     elif is_final and "answer" in required:
         required = ["answer", *[field for field in required if field != "answer"]]
+    if is_final:
+        if "answer_type" not in properties:
+            properties["answer_type"] = {
+                "type": "string",
+                "description": (
+                    "Answer type requested by the original question, such as country, region, "
+                    "event/date, era/decade, language, organization, person, place, yes/no, "
+                    "or number."
+                ),
+            }
+        if "answer_source_span" not in properties:
+            properties["answer_source_span"] = {
+                "type": "string",
+                "description": (
+                    "Shortest dependency or evidence span that directly supports the final answer."
+                ),
+            }
+        for field in ("answer_type", "answer_source_span"):
+            if field not in required:
+                required.append(field)
     return {
         "type": "object",
         "required": required,

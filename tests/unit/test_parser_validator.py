@@ -148,6 +148,20 @@ def test_normalizer_repairs_missing_final_node_to_last_node(app_config) -> None:
     assert result.valid
 
 
+def test_normalizer_adds_final_answer_contract(app_config) -> None:
+    plan = parse_plan(PARALLEL_PLAN)
+
+    normalized = normalize_plan_dependencies(plan)
+    final = next(node for node in normalized.nodes if node.id == normalized.final_node)
+    result = validate_plan(normalized, app_config.planner)
+
+    assert final.output_schema["properties"]["answer"]["type"] == "string"
+    assert final.output_schema["properties"]["answer_type"]["type"] == "string"
+    assert final.output_schema["properties"]["answer_source_span"]["type"] == "string"
+    assert {"answer", "answer_type", "answer_source_span"} <= set(final.output_schema["required"])
+    assert result.valid
+
+
 def test_rejects_dependent_node_that_does_not_prompt_with_child_values(app_config) -> None:
     plan = DagPlan(
         question="Which mountain is taller?",

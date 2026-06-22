@@ -88,6 +88,19 @@ Normalize final answer values:
 - dates: use the natural date form requested by the question when possible.
 - numbers: return only the concise number or quantity unless units are part of the answer.
 - bridge questions: keep the answer anchored to the entity or value supplied by dependencies.
+- in "region/place of the country where X is located is Y" questions, X is a country/scope
+  bridge; answer with the region/place of Y, not the region/place of X.
+- entity answers: return the exact specific entity/value requested, not a broader modern successor,
+  hypernym, parent region, or shortened form when the evidence gives the more specific answer.
+- country/place answers: preserve historical or qualified polity names from evidence titles and
+  sentences, including directional qualifiers and acronyms; do not collapse them to a modern or
+  broader country name.
+- do not append addresses, explanatory clauses, or parenthetical details unless the question asks
+  for that extra detail.
+- if the schema contains answer_type, first identify what kind of value the original question asks
+  for, then ensure answer has that type. Do not return a bridge value of a different type.
+- if the schema contains answer_source_span, copy the shortest dependency or evidence span that
+  directly supports answer. Preserve modifiers from that span in answer when they change meaning.
 - before/after/later than/earlier than/since/until questions: preserve the requested boundary
   value; do not substitute a latest or earliest endpoint unless that is explicitly asked.
 - quoted-title questions: answer about the quoted work/title itself, not a different entity

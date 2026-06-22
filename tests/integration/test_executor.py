@@ -21,7 +21,10 @@ async def test_executor_runs_parallel_dependencies_then_parent(app_config) -> No
                 '[{"document_id": "context-1", "title": "Alan Turing", '
                 '"sentence_indices": [0], "fact": "Turing was born in 1912."}]}'
             ),
-            '{"answer": "Ada Lovelace", "reasoning": "1815 is earlier than 1912."}',
+            (
+                '{"answer": "Ada Lovelace", "reasoning": "1815 is earlier than 1912.", '
+                '"answer_type": "person", "answer_source_span": "Ada Lovelace: 10 December 1815"}'
+            ),
         ]
     )
     run = await DagExecutor(llm, app_config).execute(parse_plan(PARALLEL_PLAN))
@@ -31,6 +34,8 @@ async def test_executor_runs_parallel_dependencies_then_parent(app_config) -> No
     assert run.final_answer == {
         "answer": "Ada Lovelace",
         "reasoning": "1815 is earlier than 1912.",
+        "answer_type": "person",
+        "answer_source_span": "Ada Lovelace: 10 December 1815",
     }
     assert len(llm.requests) == expected_call_count
     assert "10 December 1815" in llm.requests[2].prompt
@@ -49,7 +54,10 @@ async def test_executor_injects_and_persists_evidence_for_factual_nodes(app_conf
                 '[{"document_id": "context-1", "title": "Alan Turing", '
                 '"sentence_indices": [0], "fact": "Turing was born in 1912."}]}'
             ),
-            '{"answer": "Ada Lovelace", "reasoning": "1815 is earlier than 1912."}',
+            (
+                '{"answer": "Ada Lovelace", "reasoning": "1815 is earlier than 1912.", '
+                '"answer_type": "person", "answer_source_span": "Ada Lovelace: 10 December 1815"}'
+            ),
         ]
     )
     documents = [

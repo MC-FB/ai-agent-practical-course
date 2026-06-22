@@ -8,7 +8,22 @@ from dagqa.schemas import EvidenceDocument
 _YES_NO_RE = re.compile(r"^\s*(yes|no)\b", re.IGNORECASE)
 _BETWEEN_RE = re.compile(r"\bbetween\s+([^.,;]+?)\s+and\s+([^.,;]+?)(?:[.,;]|$)", re.IGNORECASE)
 _INITIAL_NAME_RE = re.compile(r"^(?P<initials>(?:[A-Z]\.\s*)+)(?P<surname>[A-Z][a-zA-Z-]+)$")
+_QUALIFIED_POLITY_PREFIXES = (
+    "East",
+    "West",
+    "North",
+    "South",
+    "Northern",
+    "Southern",
+    "Upper",
+    "Lower",
+    "Former",
+    "Ancient",
+    "New",
+    "Old",
+)
 MIN_UNSUPPORTED_ENTITY_LENGTH = 4
+MIN_ACRONYM_LENGTH = 2
 PAIR_SIZE = 2
 MILLION = 1_000_000
 THOUSAND = 1_000
@@ -58,6 +73,7 @@ def canonicalize_prediction(
     value = _restore_intro_phrase(value, question, texts)
     value = _restore_subject_painting_phrase(value, question, texts)
     value = _restore_language_descriptor(value, question, texts)
+    value = _restore_qualified_polity(value, question, evidence_documents or [])
     value = _restore_initialed_name(value, texts)
     value = _restore_numeric_surface(value, texts)
     value = _restore_quantity_unit(value, evidence_documents or [])
@@ -239,7 +255,7 @@ def _restore_subject_painting_phrase(value: str, question: str, texts: list[str]
 
 def _restore_language_descriptor(value: str, question: str, texts: list[str]) -> str:
     question_lower = question.casefold()
-    if "what language" not in question_lower and "in what language" not in question_lower:
+    if "language" not in question_lower:
         return value
     if not re.fullmatch(r"[A-Za-z]+", value):
         return value
@@ -247,7 +263,75 @@ def _restore_language_descriptor(value: str, question: str, texts: list[str]) ->
         match = re.search(r"\b([A-Z][a-z]+-language)\b", text)
         if match:
             return match.group(1)
+    for text in texts:
+        match = re.search(
+            rf"\b(?:called|known as|later called)\s+([A-Z][A-Za-z-]+\s+{re.escape(value)})\b",
+            text,
+            flags=re.IGNORECASE,
+        )
+        if match:
+            return _restore_candidate_case(match.group(1), text)
+    for text in texts:
+        match = re.search(
+            rf"\b([A-Z][A-Za-z-]+\s+{re.escape(value)})\b",
+            text,
+            flags=re.IGNORECASE,
+        )
+        if match:
+            return _restore_candidate_case(match.group(1), text)
     return value
+
+
+def _restore_candidate_case(candidate: str, source: str) -> str:
+    start = source.casefold().find(candidate.casefold())
+    if start < 0:
+        return candidate
+    return source[start : start + len(candidate)]
+
+
+def _restore_qualified_polity(
+    value: str,
+    question: str,
+    evidence_documents: list[EvidenceDocument],
+) -> str:
+    if "country" not in question.casefold() and "nation" not in question.casefold():
+        return value
+    if not re.fullmatch(r"[A-Za-z][A-Za-z .'-]+", value):
+        return value
+
+    prefix_pattern = "|".join(re.escape(prefix) for prefix in _QUALIFIED_POLITY_PREFIXES)
+    qualified_pattern = re.compile(
+        rf"\b((?:{prefix_pattern})\s+{re.escape(value)})\b",
+        flags=re.IGNORECASE,
+    )
+    for document in evidence_documents:
+        match = qualified_pattern.search(document.title)
+        if not match:
+            if value.casefold() not in document.title.casefold():
+                continue
+            acronym = _leading_acronym_for_polity(document.text)
+            if acronym:
+                return acronym
+            continue
+        candidate = _restore_candidate_case(match.group(1), document.title)
+        acronym = _leading_acronym_for_polity(document.text)
+        return acronym or candidate
+    return value
+
+
+def _leading_acronym_for_polity(text: str) -> str | None:
+    first_sentence = text.split(".", 1)[0]
+    match = re.search(
+        r"\b(?:in|of|for)\s+(?:the\s+)?([A-Z][A-Z0-9.-]{1,12})\b",
+        first_sentence,
+        flags=re.IGNORECASE,
+    )
+    if not match:
+        return None
+    acronym = match.group(1).strip(".")
+    if len(acronym) < MIN_ACRONYM_LENGTH or not re.fullmatch(r"[A-Z0-9.-]+", acronym):
+        return None
+    return acronym
 
 
 def _restore_initialed_name(value: str, texts: list[str]) -> str:

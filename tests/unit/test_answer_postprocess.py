@@ -112,6 +112,58 @@ def test_canonicalize_prediction_restores_language_descriptor_from_citation() ->
     )
 
 
+def test_canonicalize_prediction_restores_qualified_language_from_citation() -> None:
+    assert (
+        canonicalize_prediction(
+            "Latin",
+            question=(
+                "What was the language from which the last name Sylvester originated during "
+                "the era of the person crowned emperor of the west in 800 CE later known as?"
+            ),
+            supporting_texts=[
+                "By the reign of Charlemagne, the language had so diverged from the classical "
+                "that it was later called Medieval Latin."
+            ],
+        )
+        == "Medieval Latin"
+    )
+
+
+def test_canonicalize_prediction_preserves_qualified_historical_country() -> None:
+    docs = [
+        EvidenceDocument(
+            id="context-1",
+            title="Women's football in East Germany",
+            text=(
+                "In the GDR women's football clubs existed since the late 1960s. "
+                "While local leagues existed since 1970 a national championship was first held "
+                "in 1979."
+            ),
+            score=1.0,
+            metadata={},
+        )
+    ]
+    assert (
+        canonicalize_prediction(
+            "Germany",
+            question=(
+                "In what country is women's football played in the country where a chancellor "
+                "held citizenship?"
+            ),
+            evidence_documents=docs,
+        )
+        == "GDR"
+    )
+    assert (
+        canonicalize_prediction(
+            "East Germany",
+            question="In what country is women's football played?",
+            evidence_documents=docs,
+        )
+        == "GDR"
+    )
+
+
 def test_canonicalize_prediction_normalizes_boolean_yes_no() -> None:
     assert canonicalize_prediction("True", question="Are both films documentaries?") == "yes"
 

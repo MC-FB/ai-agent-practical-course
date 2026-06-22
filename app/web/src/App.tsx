@@ -32,8 +32,8 @@ import { Progress } from "./components/ui/progress";
 import {
   ApiError,
   deleteMarkedBenchmarkRow,
+  getBenchmarkMeta,
   getBenchmarkResult,
-  getHotpotBenchmarkMeta,
   getLLMModels,
   getLiveBenchmark,
   getLiveAsk,
@@ -49,7 +49,7 @@ import {
   stopLiveBenchmark,
   type BenchmarkSubset,
   type DagNode,
-  type HotpotBenchmarkMeta,
+  type BenchmarkMeta,
   type HotpotBenchmarkRecord,
   type HotpotBenchmarkResult,
   type LiveBenchmark,
@@ -1097,6 +1097,7 @@ function benchmarkOptionLabel(item: SavedBenchmarkSummary | HotpotBenchmarkResul
   const parts = [
     item.name?.trim(),
     "partial" in item && item.partial ? "partial" : undefined,
+    item.dataset_label ?? item.dataset,
     formatSavedDateTime(item.created_at),
     item.subset_label ?? item.subset,
     runTypeLabel(item.system),
@@ -1495,10 +1496,11 @@ function DatasetView({
 }) {
   const [limit, setLimit] = useState(5);
   const [benchmarkName, setBenchmarkName] = useState("");
+  const [benchmarkDataset, setBenchmarkDataset] = useState("hotpotqa");
   const [benchmarkSubset, setBenchmarkSubset] = useState<BenchmarkSubset>("validation");
   const [systems, setSystems] = useState<string[]>(["dag_agent", "direct_llm"]);
   const [seedInput, setSeedInput] = useState("");
-  const [meta, setMeta] = useState<HotpotBenchmarkMeta>();
+  const [meta, setMeta] = useState<BenchmarkMeta>();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<HotpotBenchmarkResult>();
   const [comparisonResults, setComparisonResults] = useState<HotpotBenchmarkResult[]>([]);
@@ -1626,13 +1628,23 @@ function DatasetView({
   }
 
   useEffect(() => {
-    getHotpotBenchmarkMeta(benchmarkSubset)
+    getBenchmarkMeta(benchmarkDataset, benchmarkSubset)
       .then((nextMeta) => {
         setMeta(nextMeta);
+        if (nextMeta.subset !== benchmarkSubset) {
+          setBenchmarkSubset(nextMeta.subset);
+        }
         setLimit(Math.min(nextMeta.default_limit, nextMeta.total_examples));
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Could not load benchmark metadata"));
-  }, [benchmarkSubset]);
+  }, [benchmarkDataset, benchmarkSubset]);
+
+  function changeBenchmarkDataset(dataset: string) {
+    setBenchmarkDataset(dataset);
+    const defaultSubset =
+      meta?.datasets.find((option) => option.id === dataset)?.default_subset ?? "validation";
+    setBenchmarkSubset(defaultSubset);
+  }
 
   useEffect(() => {
     listBenchmarkResults()
@@ -1713,6 +1725,7 @@ function DatasetView({
     setComparisonResults(started.comparison_results ?? []);
     setSeedInput(String(started.seed));
     setBenchmarkName(started.name ?? "");
+    setBenchmarkDataset(started.dataset ?? "hotpotqa");
     setBenchmarkSubset((started.subset as BenchmarkSubset | undefined) ?? "validation");
     window.localStorage.setItem(ACTIVE_BENCHMARK_STORAGE_KEY, started.run_id);
     setSelectedLiveRunId(started.run_id);
@@ -1774,6 +1787,7 @@ function DatasetView({
         parsedSeed,
         name,
         benchmarkSubset,
+        benchmarkDataset,
       );
       if (!preflight.ok) {
         const failed = preflight.checks.filter((check) => !check.ok);
@@ -1786,6 +1800,7 @@ function DatasetView({
         parsedSeed,
         name,
         benchmarkSubset,
+        benchmarkDataset,
       );
       await refreshUnfinishedLiveRuns();
       await watchBenchmark(started);
@@ -1836,6 +1851,7 @@ function DatasetView({
       setComparisonResults(selected.comparison_results ?? []);
       setSeedInput(String(selected.seed));
       setBenchmarkName(selected.name ?? "");
+      setBenchmarkDataset(selected.dataset ?? "hotpotqa");
       setBenchmarkSubset((selected.subset as BenchmarkSubset | undefined) ?? "validation");
       setSystems(
         selected.systems?.filter((system) => system === "dag_agent" || system === "direct_llm") ??
@@ -1863,7 +1879,7 @@ function DatasetView({
         <div className="chat-header">
           <div>
             <h1>Dataset</h1>
-            <p>Run a seeded HotpotQA validation sample against one or both systems.</p>
+            <p>Run a seeded benchmark sample against one or both systems.</p>
           </div>
           <Database size={22} />
         </div>
@@ -1883,14 +1899,32 @@ function DatasetView({
             <div className="grid gap-4 xl:grid-cols-[minmax(260px,0.9fr)_minmax(320px,1fr)_minmax(300px,0.9fr)]">
               <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
                 <div className="grid gap-2">
-                  <Label htmlFor="benchmark-subset">Dataset</Label>
+                  <Label htmlFor="benchmark-dataset">Dataset</Label>
+                  <select
+                    className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 shadow-sm"
+                    id="benchmark-dataset"
+                    value={benchmarkDataset}
+                    onChange={(event) => changeBenchmarkDataset(event.target.value)}
+                  >
+                    {(meta?.datasets ?? [
+                      { id: "hotpotqa", label: "HotpotQA", default_subset: "validation" },
+                      { id: "musique", label: "MuSiQue", default_subset: "validation_3hop_plus" },
+                    ]).map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="benchmark-subset">Subset</Label>
                   <select
                     className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 shadow-sm"
                     id="benchmark-subset"
                     value={benchmarkSubset}
-                    onChange={(event) => setBenchmarkSubset(event.target.value as BenchmarkSubset)}
+                    onChange={(event) => setBenchmarkSubset(event.target.value)}
                   >
-                    {(meta?.subsets ?? [{ id: "validation" as BenchmarkSubset, label: "Full HotpotQA validation" }]).map(
+                    {(meta?.subsets ?? [{ id: "validation", label: "Full HotpotQA validation" }]).map(
                       (option) => (
                         <option key={option.id} value={option.id}>
                           {option.label}
@@ -2383,6 +2417,7 @@ function ResultsView({
   const [comparisonRunId, setComparisonRunId] = useState("");
   const [selectedResult, setSelectedResult] = useState<HotpotBenchmarkResult>();
   const [comparisonResult, setComparisonResult] = useState<HotpotBenchmarkResult>();
+  const [datasetFilter, setDatasetFilter] = useState("all");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -2434,6 +2469,32 @@ function ResultsView({
     setComparisonResult(runId ? await getBenchmarkResult(runId) : undefined);
   }
 
+  const datasetOptions = useMemo(() => {
+    const options = new Map<string, string>();
+    for (const item of items) {
+      if (!item.dataset) continue;
+      options.set(item.dataset, item.dataset_label ?? item.dataset);
+    }
+    return [...options.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  }, [items]);
+  const filteredItems = useMemo(
+    () =>
+      datasetFilter === "all"
+        ? items
+        : items.filter((item) => (item.dataset ?? "hotpotqa") === datasetFilter),
+    [datasetFilter, items],
+  );
+
+  useEffect(() => {
+    if (datasetFilter === "all") return;
+    if (selectedRunId && !filteredItems.some((item) => item.run_id === selectedRunId)) {
+      setSelectedRunId("");
+      setSelectedResult(undefined);
+      setComparisonRunId("");
+      setComparisonResult(undefined);
+    }
+  }, [datasetFilter, filteredItems, selectedRunId]);
+
   const detailRecord = selectedResult?.records.find((record) => record.id === recordId);
   if (detailRecord) {
     return (
@@ -2452,12 +2513,23 @@ function ResultsView({
         <div className="chat-header">
           <div>
             <h1>Results</h1>
-            <p>Open previously saved HotpotQA benchmark runs.</p>
+            <p>Open previously saved benchmark runs.</p>
           </div>
           <History size={22} />
         </div>
 
         <div className="results-browser">
+          <label>
+            Dataset
+            <select value={datasetFilter} onChange={(event) => setDatasetFilter(event.target.value)}>
+              <option value="all">All datasets</option>
+              {datasetOptions.map(([id, label]) => (
+                <option key={id} value={id}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
           <label>
             Run A
             <select
@@ -2467,7 +2539,7 @@ function ResultsView({
               <option value="" disabled>
                 Select a run
               </option>
-              {items.map((item) => (
+              {filteredItems.map((item) => (
                 <option key={item.run_id} value={item.run_id}>
                   {benchmarkOptionLabel(item)}
                 </option>
@@ -2481,7 +2553,7 @@ function ResultsView({
               onChange={(event) => void selectComparison(event.target.value)}
             >
               <option value="">None</option>
-              {items.filter((item) => item.run_id !== selectedRunId).map((item) => (
+              {filteredItems.filter((item) => item.run_id !== selectedRunId).map((item) => (
                 <option key={item.run_id} value={item.run_id}>
                   {benchmarkOptionLabel(item)}
                 </option>
@@ -2505,7 +2577,7 @@ function ResultsView({
               ? `${selectedResult.dataset} ${selectedResult.split}, seed ${selectedResult.seed}`
               : busy
                 ? "Loading saved runs"
-                : `${formatNumber(items.length)} saved runs`}
+                : `${formatNumber(filteredItems.length)} saved runs`}
               </span>
             </div>
             <BarChart3 size={18} />

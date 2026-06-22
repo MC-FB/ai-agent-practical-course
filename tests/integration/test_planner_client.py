@@ -21,7 +21,10 @@ async def test_client_ask_uses_planner_then_executor(app_config) -> None:
                 '[{"document_id": "context-0", "title": "Birth dates", '
                 '"sentence_indices": [0], "fact": "Turing was born in 1912."}]}'
             ),
-            '{"answer": "Ada Lovelace", "reasoning": "1815 is earlier than 1912."}',
+            (
+                '{"answer": "Ada Lovelace", "reasoning": "1815 is earlier than 1912.", '
+                '"answer_type": "person", "answer_source_span": "Ada Lovelace: 10 December 1815"}'
+            ),
         ]
     )
 
@@ -45,7 +48,10 @@ async def test_client_ask_passes_evidence_to_executor(app_config) -> None:
                 '[{"document_id": "context-0", "title": "Birth dates", '
                 '"sentence_indices": [0], "fact": "Turing was born in 1912."}]}'
             ),
-            '{"answer": "Ada Lovelace", "reasoning": "1815 is earlier than 1912."}',
+            (
+                '{"answer": "Ada Lovelace", "reasoning": "1815 is earlier than 1912.", '
+                '"answer_type": "person", "answer_source_span": "Ada Lovelace: 10 December 1815"}'
+            ),
         ]
     )
     documents = [

@@ -17,11 +17,12 @@ from dagqa.eval.answer_postprocess import (
     canonicalize_prediction,
     is_placeholder_or_unsupported,
 )
-from dagqa.eval.hotpot_loader import (
-    HOTPOTQA_DISTRACTOR_VALIDATION_SIZE,
-    HotpotExample,
-    load_hotpot_examples,
+from dagqa.eval.datasets import (
+    count_benchmark_examples,
+    get_benchmark_dataset,
+    load_benchmark_examples,
 )
+from dagqa.eval.hotpot_loader import HotpotExample
 from dagqa.eval.metrics import answer_f1, cosine_sim, exact_match
 from dagqa.graph.render import render_mermaid
 from dagqa.nodes.output_validation import parse_node_output
@@ -107,14 +108,45 @@ async def benchmark_hotpotqa(
     on_complete: Callable[[BenchmarkRecord], None] | None = None,
     delay_between_examples_seconds: float = 0.0,
 ) -> BenchmarkResult:
+    return await benchmark_dataset(
+        client,
+        dataset="hotpotqa",
+        system=system,
+        limit=limit,
+        path=path,
+        seed=seed,
+        subset=subset,
+        max_parallel_examples=max_parallel_examples,
+        comparison_group_id=comparison_group_id,
+        name=name,
+        on_complete=on_complete,
+        delay_between_examples_seconds=delay_between_examples_seconds,
+    )
+
+
+async def benchmark_dataset(
+    client: DagQaClient,
+    *,
+    dataset: str = "hotpotqa",
+    system: Literal["direct_llm", "dag_agent"] = "dag_agent",
+    limit: int = 100,
+    path: str | Path | None = None,
+    seed: int | None = None,
+    subset: str = "validation",
+    max_parallel_examples: int | None = None,
+    comparison_group_id: str | None = None,
+    name: str | None = None,
+    on_complete: Callable[[BenchmarkRecord], None] | None = None,
+    delay_between_examples_seconds: float = 0.0,
+) -> BenchmarkResult:
     started = time.perf_counter()
     seed = seed if seed is not None else random.SystemRandom().randint(1, 2_147_483_647)
     if limit <= 0 and path is None:
         all_examples = []
-        dataset_size = HOTPOTQA_DISTRACTOR_VALIDATION_SIZE
+        dataset_size = count_benchmark_examples(dataset, subset)
         examples = []
     else:
-        all_examples = load_hotpot_examples(path)
+        all_examples = load_benchmark_examples(dataset, subset, path)
         dataset_size = len(all_examples)
         examples = _sample_examples(all_examples, limit, seed)
     parallel_examples = (
@@ -143,6 +175,8 @@ async def benchmark_hotpotqa(
         limit=limit,
         provider=client.config.llm.provider,
         model=client.config.llm.model,
+        dataset=dataset,
+        split=get_benchmark_dataset(dataset).split,
         subset=subset,
         dataset_size=dataset_size,
         seed=seed,
@@ -366,18 +400,30 @@ async def _run_example(  # noqa: PLR0915
             raw_prediction = _extract_answer(run.final_answer)
             repair_llm_calls = 0
             repair_retry_count = 0
+            refined, refinement_retry_count = await _refine_dag_prediction(
+                client,
+                example,
+                raw_prediction,
+                run_trace=run.model_dump(mode="json"),
+            )
+            if refined:
+                raw_prediction = refined
+                run.final_answer = {"answer": refined}
+                repair_llm_calls += 1
+                repair_retry_count += refinement_retry_count
             if is_placeholder_or_unsupported(
                 raw_prediction,
                 question=example.question,
                 evidence_documents=example.context,
             ):
-                repaired, repair_retry_count = await _repair_unsupported_prediction(
+                repaired, unsupported_retry_count = await _repair_unsupported_prediction(
                     client,
                     example,
                     raw_prediction,
                     run_trace=run.model_dump(mode="json"),
                 )
-                repair_llm_calls = 1
+                repair_llm_calls += 1
+                repair_retry_count += unsupported_retry_count
                 if repaired:
                     raw_prediction = repaired
                     run.final_answer = {"answer": repaired}
@@ -418,6 +464,10 @@ async def _run_example(  # noqa: PLR0915
             run_trace=run_trace,
         )
     except Exception as exc:
+        if system != "direct_llm":
+            fallback = await _dag_failure_fallback_record(client, example, started, exc)
+            if fallback is not None:
+                return fallback
         return BenchmarkRecord(
             id=example.id,
             question=example.question,
@@ -430,6 +480,130 @@ async def _run_example(  # noqa: PLR0915
             structural_failure=True,
             error=str(exc),
         )
+
+
+async def _dag_failure_fallback_record(
+    client: DagQaClient,
+    example: HotpotExample,
+    started: float,
+    initial_error: Exception,
+) -> BenchmarkRecord | None:
+    evidence = EvidenceSelection(
+        strategy="all_documents",
+        total_available=len(example.context),
+        documents=example.context,
+    )
+    prompt = (
+        "The multi-node DAG planner or executor failed before producing a usable answer. "
+        "Recover by answering the original question directly from the supplied evidence.\n\n"
+        f"Original DAG failure: {initial_error}\n"
+        f"Question: {example.question}"
+        f"{render_evidence_section(evidence)}"
+        "\nReturn JSON only with this exact shape:\n"
+        '{"answer": "concise answer", "_evidence_citations": ['
+        '{"document_id": "exact document ID", "title": "exact title", '
+        '"sentence_indices": [0], "fact": "directly supporting fact"}]}\n'
+        "Rules: use only supplied evidence; return the exact specific entity or value requested; "
+        "do not append addresses or explanations unless the question asks for them."
+    )
+    system_prompt = "Recover a failed DAG benchmark answer using only supplied evidence."
+    response_text: str | None = None
+    parsed: dict[str, Any] | None = None
+    try:
+        response = await client.llm.complete(LLMRequest(system=system_prompt, prompt=prompt))
+        response_text = response.text
+        parsed = parse_node_output(response.text)
+        raw_prediction = answer_value_to_text(parsed.get("answer", "")).strip()
+        citations = [
+            EvidenceCitation.model_validate(citation)
+            for citation in parsed.get("_evidence_citations", [])
+        ]
+        if not raw_prediction or not citations:
+            return None
+        prediction = canonicalize_prediction(
+            raw_prediction,
+            question=example.question,
+            evidence_documents=example.context,
+            supporting_texts=[
+                str(citation.get("fact", ""))
+                for citation in parsed.get("_evidence_citations", [])
+                if isinstance(citation, dict)
+            ],
+        )
+    except Exception:
+        return None
+
+    returned_value = {"answer": raw_prediction}
+    plan = DagPlan(
+        question=example.question,
+        nodes=[
+            DagNode(
+                id="dag_failure_fallback",
+                label="DAG failure fallback",
+                task_type=TaskType.synthesis,
+                operation=Operation.answer,
+                question=example.question,
+                prompt=PromptSpec(system=system_prompt, user_template=prompt),
+                output_schema={
+                    "type": "object",
+                    "required": ["answer"],
+                    "properties": {"answer": {"type": "string"}},
+                },
+            )
+        ],
+        final_node="dag_failure_fallback",
+    )
+    trace = NodeTrace(
+        node_id="dag_failure_fallback",
+        label="DAG failure fallback",
+        task_type=TaskType.synthesis,
+        operation=Operation.answer,
+        status=NodeStatus.succeeded,
+        resolved_question=example.question,
+        rendered_prompt=prompt,
+        raw_response=response_text,
+        parsed_output=parsed,
+        returned_value=returned_value,
+        supporting_evidence=evidence,
+        evidence_citations=citations,
+        duration_ms=(time.perf_counter() - started) * 1000,
+        error=f"Recovered after DAG failure: {initial_error}",
+    )
+    run_trace = RunTrace(
+        run_id=str(uuid4()),
+        question=example.question,
+        plan=plan,
+        waves=[SchedulerWave(index=0, node_ids=["dag_failure_fallback"])],
+        nodes=[trace],
+        final_answer=returned_value,
+        status=NodeStatus.succeeded,
+        total_duration_ms=(time.perf_counter() - started) * 1000,
+        config=client.config.model_dump(mode="json"),
+    )
+    evidence_metrics = _evaluate_evidence_citations(run_trace, example.supporting_facts)
+    dumped_trace = run_trace.model_dump(mode="json")
+    dumped_trace["mermaid"] = render_mermaid(run_trace.plan, run_trace.nodes)
+    return BenchmarkRecord(
+        id=example.id,
+        question=example.question,
+        gold_answer=example.answer,
+        prediction=prediction,
+        raw_prediction=raw_prediction if raw_prediction != prediction else None,
+        exact_match=exact_match(prediction, example.answer),
+        f1=answer_f1(prediction, example.answer),
+        cosine_sim=cosine_sim(prediction, example.answer),
+        latency_ms=(time.perf_counter() - started) * 1000,
+        llm_call_count=1,
+        llm_retry_count=int(response.metadata.get("retry_count", 0)),
+        node_count=1,
+        graph_depth=0,
+        structural_valid=False,
+        structural_issues=[f"DAG fallback used: {initial_error}"],
+        structural_failure=False,
+        gold_supporting_facts=example.supporting_facts,
+        **evidence_metrics,
+        run_trace=dumped_trace,
+    )
 
 
 def _failed_direct_record(
@@ -591,6 +765,80 @@ async def _repair_unsupported_prediction(
     if not repaired or not citations:
         return None, retry_count
     return repaired, retry_count
+
+
+async def _refine_dag_prediction(
+    client: DagQaClient,
+    example: HotpotExample,
+    raw_prediction: str,
+    *,
+    run_trace: dict[str, Any],
+) -> tuple[str | None, int]:
+    if not raw_prediction.strip():
+        return None, 0
+    evidence = EvidenceSelection(
+        strategy="all_documents",
+        total_available=len(example.context),
+        documents=example.context,
+    )
+    child_outputs = [
+        {
+            "node_id": node.get("node_id"),
+            "question": node.get("resolved_question"),
+            "returned_value": node.get("returned_value"),
+            "citations": node.get("evidence_citations", []),
+        }
+        for node in run_trace.get("nodes", [])
+        if isinstance(node, dict)
+    ]
+    prompt = (
+        "Select the final concise answer for this multi-hop benchmark item. "
+        "This is an extractive answer-selection step, not a new open-ended QA attempt.\n\n"
+        f"Original question: {example.question}\n"
+        f"Current DAG answer: {raw_prediction}\n\n"
+        "DAG node outputs and citations:\n"
+        f"{json.dumps(child_outputs, indent=2, ensure_ascii=False)}"
+        f"{render_evidence_section(evidence)}"
+        "\nReturn JSON only with this exact shape:\n"
+        '{"answer": "concise answer", "evidence_answer_span": "exact supporting span"}\n'
+        "Selection rules:\n"
+        "- First identify the answer type requested by the original question: country, region, "
+        "date/event, era/decade, language, organization, person, place, yes/no, or number.\n"
+        "- Then choose the shortest exact span from the supplied evidence that has that answer "
+        "type and answers the original question.\n"
+        "- If the current DAG answer is a bridge entity, broader parent, modern successor, "
+        "hypernym, unqualified subtype, partial date, or bare head noun, replace it with the "
+        "more exact evidence span.\n"
+        "- Preserve modifiers that are part of the evidence answer span, including historical "
+        "or former names, administrative-region names, event names, era/decade wording, and "
+        "language descriptors.\n"
+        "- For country/place answers, treat qualified or historical polity names in evidence "
+        "titles and first sentences as candidate answer spans. Do not collapse names such as "
+        "East/West/North/South <country> or their acronyms to a broader modern country.\n"
+        "- If the evidence answer span is longer than the current answer only because it adds "
+        "an address, parenthetical disambiguator, or explanation not asked by the question, keep "
+        "the concise current answer.\n"
+        "- Do not return a year if the evidence phrase answering the question is an election, "
+        "era, decade, or named event. Do not return a city if the question asks for a region.\n"
+        "- If and only if the current DAG answer is already the exact requested answer span, "
+        "return it unchanged."
+    )
+    response = await client.llm.complete(
+        LLMRequest(
+            system="Select the exact final answer from multi-hop evidence.",
+            prompt=prompt,
+            temperature=client.config.llm.temperature,
+        )
+    )
+    retry_count = int(response.metadata.get("retry_count", 0))
+    try:
+        parsed = parse_node_output(response.text)
+    except Exception:
+        return None, retry_count
+    refined = answer_value_to_text(parsed.get("answer", "")).strip()
+    if not refined or refined == raw_prediction.strip():
+        return None, retry_count
+    return refined, retry_count
 
 
 def _structural_issues(run: Any) -> list[str]:

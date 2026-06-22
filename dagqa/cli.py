@@ -9,7 +9,8 @@ import typer
 
 from dagqa.client import DagQaClient
 from dagqa.config import AppConfig
-from dagqa.eval.benchmark import benchmark_hotpotqa
+from dagqa.eval.benchmark import benchmark_dataset
+from dagqa.eval.datasets import get_benchmark_dataset
 from dagqa.planning.parser import parse_plan
 
 app = typer.Typer(no_args_is_help=True)
@@ -61,14 +62,18 @@ def benchmark(
     limit: int = 100,
     system: str = "dag_agent",
     seed: int | None = None,
+    subset: Annotated[str | None, typer.Option("--subset")] = None,
     max_parallel_examples: Annotated[int | None, typer.Option("--max-parallel-examples")] = None,
     delay_seconds: Annotated[float, typer.Option("--delay-seconds")] = 0.0,
     data_path: Annotated[Path | None, typer.Option("--data-path")] = None,
     output: Annotated[Path | None, typer.Option("--output")] = None,
     config: Annotated[Path, typer.Option("--config")] = Path("configs/local.yaml"),
 ) -> None:
-    if dataset != "hotpotqa":
-        raise typer.BadParameter("Only hotpotqa is supported.")
+    try:
+        dataset_info = get_benchmark_dataset(dataset)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    subset = subset or dataset_info.default_subset
 
     completed = 0
     output_handle = None
@@ -93,12 +98,14 @@ def benchmark(
 
     try:
         result = asyncio.run(
-            benchmark_hotpotqa(
+            benchmark_dataset(
                 _client(config),
+                dataset=dataset,
                 system=system,
                 limit=limit,
                 seed=seed,
                 path=data_path,
+                subset=subset,
                 max_parallel_examples=max_parallel_examples,
                 on_complete=on_complete,
                 delay_between_examples_seconds=delay_seconds,
