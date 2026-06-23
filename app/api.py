@@ -57,7 +57,7 @@ CLUSTER_MODEL_MAX_PARALLEL_EXAMPLES = {
     "google/gemma-4-31B-it": 2,
 }
 PAIRED_SYSTEM_COUNT = 2
-MUSIQUE_BENCHMARK_MAX_DEPTH = 5
+MUSIQUE_BENCHMARK_MAX_DEPTH = 6
 BenchmarkDatasetId = Literal["hotpotqa", "musique"]
 
 
@@ -1253,6 +1253,8 @@ def list_benchmark_results() -> dict[str, Any]:
             data = json.loads(path.read_text())
         except Exception:
             continue
+        if not isinstance(data, dict):
+            continue
         normalized = _normalize_benchmark_payload(data, path)
         completed = normalized.get("metrics", {}).get("example_count") or len(
             normalized.get("records", [])
@@ -1449,6 +1451,8 @@ def _cleanup_partial_benchmark_results(result: BenchmarkResult, output_path: Pat
             data = json.loads(path.read_text())
         except Exception:
             continue
+        if not isinstance(data, dict):
+            continue
         if not _is_superseded_partial_benchmark_result(data, result):
             continue
         try:
@@ -1632,6 +1636,8 @@ def _validate_storage_id(value: str) -> None:
 
 
 def _normalize_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, Any]:
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=404, detail="Benchmark result not found.")
     metrics = data.get("metrics") or data.get("summary") or {}
     records = [_normalize_benchmark_record(record) for record in data.get("records", [])]
     dataset_size = data.get("dataset_size") or data.get("total_examples")

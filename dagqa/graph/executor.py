@@ -63,16 +63,25 @@ class DagExecutor:
                     trace = result
                 traces.append(trace)
                 if trace.status == NodeStatus.succeeded and trace.returned_value is not None:
-                    outputs[trace.node_id] = trace.returned_value
+                    outputs[trace.node_id] = self._internal_output(trace)
                 else:
                     status = NodeStatus.failed
                     if self.config.execution.fail_fast:
                         return self._run_trace(run_id, plan, waves, traces, None, status, started)
 
-        final_answer = outputs.get(plan.final_node)
+        final_trace = next((trace for trace in traces if trace.node_id == plan.final_node), None)
+        final_answer = final_trace.returned_value if final_trace else None
         if final_answer is None:
             status = NodeStatus.failed
         return self._run_trace(run_id, plan, waves, traces, final_answer, status, started)
+
+    def _internal_output(self, trace: NodeTrace) -> dict[str, Any]:
+        output = dict(trace.returned_value or {})
+        if trace.evidence_citations:
+            output["_evidence_citations"] = [
+                citation.model_dump(mode="json") for citation in trace.evidence_citations
+            ]
+        return output
 
     def _run_trace(
         self,

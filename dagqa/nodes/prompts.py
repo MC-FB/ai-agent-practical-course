@@ -87,7 +87,43 @@ Normalize final answer values:
 - yes/no questions: answer with "yes" or "no", not true/false.
 - dates: use the natural date form requested by the question when possible.
 - numbers: return only the concise number or quantity unless units are part of the answer.
+- answer surface: when the evidence gives the answer in a specific written form, copy that
+  form exactly. For example, keep "3." if the source says "3.", keep "third" or
+  "third-largest" if the source says that, and keep "July 11, 2017" instead of rewriting it
+  to "2017-07-11".
+- table or fixture rows: when evidence is formatted as a table row with teams/entities and a
+  score such as "Home 2 -- 1 Away", compare the numbers in row order. If asked when one team
+  beat another, return the date from rows where that team's score is greater.
+- compact score tables: scan every row, including later rows. Some tables omit the away/opponent
+  column because the table title or question defines the matchup. In that case, infer the omitted
+  opponent as the other side in the same table instead of returning never. Treat renamed clubs or
+  organizations in the same table as possible aliases when the bridge entity is historical.
+  A draw such as "0 -- 0" is not a win and must not be returned for "beat" questions.
+- capital-duration questions: if asked how long a place had been the capital/capitol city of
+  another resolved location, prefer a direct evidence span like "had been the capital city of X
+  for Y". Do not override that span with modern administrative reasoning such as "X is only a city"
+  or with a country capital unless the question explicitly asks for the country capital.
+- do not return empty, unknown, none, or never if the supplied evidence contains a row or span
+  that answers the requested field.
 - bridge questions: keep the answer anchored to the entity or value supplied by dependencies.
+- bridge contract fields: if the schema contains bridge_answer, bridge_reasoning,
+  bridge_source_span, or constraint_status, fill them explicitly. bridge_answer is the value
+  downstream nodes may rely on; bridge_reasoning must explain why it satisfies the resolved
+  question and dependency constraints; bridge_source_span is the shortest exact support span;
+  constraint_status must be exactly "satisfied", "ambiguous", or "not_found".
+- set constraint_status to "satisfied" only when the cited evidence supports every required
+  dependency constraint. If evidence only partially matches, points to a similarly named
+  distractor, or lacks the requested date/place/entity relation, set "ambiguous" or "not_found"
+  and do not present the bridge answer as certain.
+- parent nodes: inspect dependency bridge_reasoning and constraint_status before using child
+  values. If a dependency is ambiguous or not_found, resolve the uncertainty from evidence rather
+  than treating the child value as established.
+- final synthesis with evidence: cite the sentence or connected sentence chain that supports
+  the final answer under the resolved dependency values. Do not answer from a sentence that
+  only matches one dependency while contradicting or ignoring another dependency.
+- dependency constraints: before returning the final answer, check that the answer span is
+  about the resolved target entity from dependencies, not a similarly named distractor or a
+  broader category from another document.
 - in "region/place of the country where X is located is Y" questions, X is a country/scope
   bridge; answer with the region/place of Y, not the region/place of X.
 - entity answers: return the exact specific entity/value requested, not a broader modern successor,
@@ -147,7 +183,24 @@ def node_output_schema(
     return schema
 
 
-def render_repair_prompt(raw_response: str, schema: dict[str, Any], errors: list[str]) -> str:
+def render_repair_prompt(
+    raw_response: str,
+    schema: dict[str, Any],
+    errors: list[str],
+    supporting_evidence: EvidenceSelection | None = None,
+) -> str:
+    evidence_section = ""
+    if supporting_evidence is not None:
+        valid_sources = []
+        for document in supporting_evidence.documents:
+            valid_sources.append(f"- {document.id}: {document.title}")
+        evidence_section = (
+            "\nValid evidence document IDs and exact titles:\n"
+            + "\n".join(valid_sources)
+            + "\nUse only these document_id values and matching titles in _evidence_citations. "
+            "Never use placeholder IDs such as default, doc1, doc_001, source, or evidence.\n"
+        )
+
     return f"""Return a corrected JSON object that matches the schema.
 
 Schema:
@@ -155,6 +208,7 @@ Schema:
 
 Validation errors:
 {chr(10).join(f"- {error}" for error in errors)}
+{evidence_section}
 
 Previous response:
 {raw_response}

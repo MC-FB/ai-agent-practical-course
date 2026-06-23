@@ -1110,6 +1110,12 @@ function benchmarkOptionLabel(item: SavedBenchmarkSummary | HotpotBenchmarkResul
   return parts.join(" · ");
 }
 
+function truncateMiddle(value: string, maxLength = 110) {
+  if (value.length <= maxLength) return value;
+  const keep = Math.floor((maxLength - 3) / 2);
+  return `${value.slice(0, keep)}...${value.slice(value.length - keep)}`;
+}
+
 function comparisonValue(value: number | undefined, format: string) {
   if (format === "percent") return formatPercent(value);
   if (format === "duration") return formatDuration(value);
@@ -2541,7 +2547,7 @@ function ResultsView({
               </option>
               {filteredItems.map((item) => (
                 <option key={item.run_id} value={item.run_id}>
-                  {benchmarkOptionLabel(item)}
+                  {truncateMiddle(benchmarkOptionLabel(item))}
                 </option>
               ))}
             </select>
@@ -2555,7 +2561,7 @@ function ResultsView({
               <option value="">None</option>
               {filteredItems.filter((item) => item.run_id !== selectedRunId).map((item) => (
                 <option key={item.run_id} value={item.run_id}>
-                  {benchmarkOptionLabel(item)}
+                  {truncateMiddle(benchmarkOptionLabel(item))}
                 </option>
               ))}
             </select>

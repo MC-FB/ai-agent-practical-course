@@ -59,6 +59,36 @@ def validate_node_output(output: dict[str, Any], schema: dict[str, Any]) -> Vali
     return ValidationResult(valid=not errors, errors=[error.message for error in errors])
 
 
+def coerce_output_to_schema(output: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
+    properties = schema.get("properties", {})
+    if not isinstance(properties, dict):
+        return output
+    coerced = dict(output)
+    for key, property_schema in properties.items():
+        if key not in coerced or not isinstance(property_schema, dict):
+            continue
+        if property_schema.get("type") == "string" and not isinstance(coerced[key], str):
+            coerced[key] = _value_to_text(coerced[key])
+    return coerced
+
+
+def _value_to_text(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, list | tuple):
+        parts = [_value_to_text(item).strip() for item in value]
+        cleaned = [part for part in parts if part]
+        if len(cleaned) <= 1:
+            return cleaned[0] if cleaned else ""
+        return ", ".join(cleaned[:-1]) + f" and {cleaned[-1]}"
+    if isinstance(value, dict):
+        answer = value.get("answer")
+        if answer is not None:
+            return _value_to_text(answer)
+        return json.dumps(value, ensure_ascii=False)
+    return str(value).strip()
+
+
 def validate_evidence_citations(
     output: dict[str, Any],
     supporting_evidence: EvidenceSelection | None,

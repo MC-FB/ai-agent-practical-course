@@ -13,6 +13,7 @@ from dagqa.graph.substitution import (
 )
 from dagqa.llm.base import LanguageModel
 from dagqa.nodes.output_validation import (
+    coerce_output_to_schema,
     parse_node_output,
     validate_evidence_citations,
     validate_node_output,
@@ -60,7 +61,7 @@ class NodeRunner:
         try:
             dependency_values = resolve_input_map(node.input_map, outputs)
             resolved_question = resolve_question(node.question, outputs)
-            supporting_evidence = select_evidence(node, evidence_documents)
+            supporting_evidence = select_evidence(node, evidence_documents, outputs)
             prompt = render_node_prompt(
                 node,
                 resolved_question,
@@ -120,6 +121,7 @@ class NodeRunner:
             except Exception as exc:
                 last_validation = ValidationResult(valid=False, errors=[str(exc)])
             else:
+                last_output = coerce_output_to_schema(last_output, schema)
                 last_validation = validate_node_output(last_output, schema)
                 if last_validation.valid:
                     last_validation = validate_evidence_citations(
@@ -132,7 +134,12 @@ class NodeRunner:
             if attempt < self.execution.node_repair_rounds:
                 current_raw, retry_count = await self._call_llm(
                     "Repair malformed node output.",
-                    render_repair_prompt(current_raw, schema, last_validation.errors),
+                    render_repair_prompt(
+                        current_raw,
+                        schema,
+                        last_validation.errors,
+                        supporting_evidence,
+                    ),
                 )
                 trace.llm_retry_count += retry_count
 

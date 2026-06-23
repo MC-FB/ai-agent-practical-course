@@ -750,6 +750,9 @@ button {
   background: #fbfcfc;
   color: #1e2a30;
   padding: 0 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .results-browser select:focus {
@@ -1319,7 +1322,7 @@ button {
 
 .results-browser {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1.4fr) minmax(0, 1.4fr) auto;
   gap: 12px;
   align-items: end;
   border: 1px solid #d7e1e4;
@@ -1331,6 +1334,12 @@ button {
 .results-browser label,
 .results-browser select {
   min-width: 0;
+}
+
+@media (max-width: 980px) {
+  .results-browser {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .empty {

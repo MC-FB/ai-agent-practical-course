@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from app import api
-from dagqa.config import AppConfig
+from dagqa.config import AppConfig, PlannerConfig
 from dagqa.eval.benchmark import BenchmarkRecord
 from dagqa.eval.hotpot_loader import HOTPOTQA_DISTRACTOR_VALIDATION_SIZE, HotpotExample
 from dagqa.schemas import (
@@ -20,6 +20,15 @@ from dagqa.schemas import (
 
 EXPECTED_FACT_RETRIEVAL_SUBSET_COUNT = 19
 EXPECTED_MUSIQUE_META_COUNT = 17
+EXPECTED_MUSIQUE_PLANNER_DEPTH = 6
+
+
+def test_musique_benchmark_raises_planner_depth_to_six() -> None:
+    cfg = AppConfig(planner=PlannerConfig(max_depth=3))
+
+    result = api._config_for_benchmark_dataset(cfg, "musique")
+
+    assert result.planner.max_depth == EXPECTED_MUSIQUE_PLANNER_DEPTH
 
 
 def _single_node_run_trace() -> dict:
@@ -114,8 +123,10 @@ def test_normalize_saved_benchmark_payload_preserves_provider_and_model(monkeypa
 def test_list_benchmark_results_sorts_by_created_at_newest_first(monkeypatch, tmp_path) -> None:
     older = tmp_path / "newer-file-mtime.json"
     newer = tmp_path / "older-file-mtime.json"
+    subset_file = tmp_path / "musique_failed_subset.json"
     older.write_text(json.dumps({"run_id": "older", "created_at": "2026-01-01T00:00:00Z"}))
     newer.write_text(json.dumps({"run_id": "newer", "created_at": "2026-02-01T00:00:00Z"}))
+    subset_file.write_text(json.dumps([{"id": "dataset-row"}]))
     older.touch()
 
     monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)

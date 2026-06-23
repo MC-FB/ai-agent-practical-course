@@ -22,11 +22,65 @@ _QUALIFIED_POLITY_PREFIXES = (
     "New",
     "Old",
 )
+_MONTHS = (
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+)
+_ORDINAL_WORDS = {
+    "1": "first",
+    "2": "second",
+    "3": "third",
+    "4": "fourth",
+    "5": "fifth",
+    "6": "sixth",
+    "7": "seventh",
+    "8": "eighth",
+    "9": "ninth",
+    "10": "tenth",
+}
+_NUMBER_WORDS = {
+    "1": "one",
+    "2": "two",
+    "3": "three",
+    "4": "four",
+    "5": "five",
+    "6": "six",
+    "7": "seven",
+    "8": "eight",
+    "9": "nine",
+    "10": "ten",
+}
 MIN_UNSUPPORTED_ENTITY_LENGTH = 4
 MIN_ACRONYM_LENGTH = 2
 PAIR_SIZE = 2
 MILLION = 1_000_000
 THOUSAND = 1_000
+_BAD_QUANTITY_UNITS = {
+    "and",
+    "at",
+    "by",
+    "for",
+    "from",
+    "in",
+    "of",
+    "on",
+    "than",
+    "the",
+    "to",
+    "was",
+    "were",
+    "with",
+}
 
 
 def answer_value_to_text(value: Any) -> str:
@@ -75,6 +129,9 @@ def canonicalize_prediction(
     value = _restore_language_descriptor(value, question, texts)
     value = _restore_qualified_polity(value, question, evidence_documents or [])
     value = _restore_initialed_name(value, texts)
+    value = _restore_date_surface(value, texts)
+    value = _restore_ordinal_surface(value, question, texts)
+    value = _restore_number_word_surface(value, texts)
     value = _restore_numeric_surface(value, texts)
     value = _restore_quantity_unit(value, evidence_documents or [])
     return value.strip()
@@ -91,7 +148,15 @@ def is_placeholder_or_unsupported(
         return False
     if value.casefold() in {"yes", "no"} and not _is_yes_no_question(question):
         return True
-    if value.casefold() in {"none", "unknown", "not found", "n/a", "no answer"}:
+    if value.casefold() in {
+        "none",
+        "unknown",
+        "not found",
+        "not_found",
+        "n/a",
+        "no answer",
+        "never",
+    }:
         return not _is_yes_no_question(question)
     if _is_yes_no_question(question) or _looks_numeric_or_date(value):
         return False
@@ -260,10 +325,6 @@ def _restore_language_descriptor(value: str, question: str, texts: list[str]) ->
     if not re.fullmatch(r"[A-Za-z]+", value):
         return value
     for text in texts:
-        match = re.search(r"\b([A-Z][a-z]+-language)\b", text)
-        if match:
-            return match.group(1)
-    for text in texts:
         match = re.search(
             rf"\b(?:called|known as|later called)\s+([A-Z][A-Za-z-]+\s+{re.escape(value)})\b",
             text,
@@ -279,6 +340,10 @@ def _restore_language_descriptor(value: str, question: str, texts: list[str]) ->
         )
         if match:
             return _restore_candidate_case(match.group(1), text)
+    for text in texts:
+        match = re.search(r"\b([A-Z][a-z]+-language)\b", text)
+        if match:
+            return match.group(1)
     return value
 
 
@@ -350,6 +415,54 @@ def _restore_initialed_name(value: str, texts: list[str]) -> str:
     return value
 
 
+def _restore_date_surface(value: str, texts: list[str]) -> str:
+    match = re.fullmatch(r"(\d{4})-(\d{2})-(\d{2})", value.strip())
+    if not match:
+        return value
+    year, month_number, day_number = match.groups()
+    month = _MONTHS[int(month_number) - 1]
+    day = str(int(day_number))
+    pattern = re.compile(rf"\b{month}\s+0?{day},\s+{year}\b", re.IGNORECASE)
+    for text in texts:
+        surface_match = pattern.search(text)
+        if surface_match:
+            return _restore_candidate_case(surface_match.group(0), text)
+    return value
+
+
+def _restore_ordinal_surface(value: str, question: str, texts: list[str]) -> str:
+    normalized = value.strip().rstrip(".")
+    ordinal = _ORDINAL_WORDS.get(normalized)
+    if ordinal is None:
+        return value
+    question_lower = question.casefold()
+    if not any(term in question_lower for term in ("rank", "largest", "smallest", "number")):
+        return value
+    patterns = [
+        re.compile(rf"\b{ordinal}(?:-[A-Za-z]+)?\b", re.IGNORECASE),
+        re.compile(rf"\b{re.escape(normalized)}\.\b"),
+    ]
+    for text in texts:
+        for pattern in patterns:
+            match = pattern.search(text)
+            if match:
+                return _restore_candidate_case(match.group(0), text)
+    return value
+
+
+def _restore_number_word_surface(value: str, texts: list[str]) -> str:
+    normalized = value.strip().rstrip(".")
+    word = _NUMBER_WORDS.get(normalized)
+    if word is None:
+        return value
+    pattern = re.compile(rf"\b{word}\b", re.IGNORECASE)
+    for text in texts:
+        match = pattern.search(text)
+        if match:
+            return _restore_candidate_case(match.group(0), text)
+    return value
+
+
 def _restore_numeric_surface(value: str, texts: list[str]) -> str:
     if not re.fullmatch(r"\d{4,}", value):
         return value
@@ -380,8 +493,10 @@ def _restore_quantity_unit(value: str, evidence_documents: list[EvidenceDocument
             re.IGNORECASE,
         )
         match = pattern.search(haystack)
-        if match:
+        if match and match.group(1).casefold() not in _BAD_QUANTITY_UNITS:
             return f"{candidate} {match.group(1)}"
+        if re.search(rf"\b{re.escape(candidate)}\b", haystack, flags=re.IGNORECASE):
+            return candidate
     return value
 
 
