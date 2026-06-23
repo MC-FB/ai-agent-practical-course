@@ -12,7 +12,7 @@ EXPECTED_GRAPH_CONSTRUCTION_COUNT = 6
 
 
 def test_fact_retrieval_subset_contains_curated_semantic_failures() -> None:
-    data = json.loads(FACT_RETRIEVAL_PATH.read_text())
+    data = json.loads(FACT_RETRIEVAL_PATH.read_text(encoding="utf-8"))
     examples = data["data"]
     ids = [example["_id"] for example in examples]
 
@@ -26,8 +26,11 @@ def test_fact_retrieval_subset_contains_curated_semantic_failures() -> None:
 
 
 def test_graph_construction_subset_is_separate_from_fact_retrieval_subset() -> None:
-    fact_ids = {example["_id"] for example in json.loads(FACT_RETRIEVAL_PATH.read_text())["data"]}
-    data = json.loads(GRAPH_CONSTRUCTION_PATH.read_text())
+    fact_ids = {
+        example["_id"]
+        for example in json.loads(FACT_RETRIEVAL_PATH.read_text(encoding="utf-8"))["data"]
+    }
+    data = json.loads(GRAPH_CONSTRUCTION_PATH.read_text(encoding="utf-8"))
     graph_ids = [example["_id"] for example in data["data"]]
 
     assert data["metadata"]["subset_id"] == "mistral_qwen_graph_construction_failures"

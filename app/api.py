@@ -113,6 +113,7 @@ class BenchmarkRequest(BaseModel):
     data_path: str | None = None
     llm: LLMSelection | None = None
     planner: PlannerSelection | None = None
+    planner: PlannerSelection | None = None
 
 
 class BenchmarkResumeRequest(BaseModel):
@@ -201,6 +202,17 @@ def _with_planner_override(cfg: AppConfig, planner: PlannerSelection | None) -> 
     return cfg.model_copy(update={"planner": cfg.planner.model_copy(update=updates)})
 
 
+def _with_model_parallelism(config: AppConfig, model: str) -> AppConfig:
+    max_parallel = CLUSTER_MODEL_MAX_PARALLEL_EXAMPLES.get(model)
+    if max_parallel is None:
+        return config
+    return config.model_copy(
+        update={
+            "benchmark": config.benchmark.model_copy(update={"max_parallel_examples": max_parallel})
+        }
+    )
+
+
 def config_for_selection(
     selection: LLMSelection | None = None,
     planner: PlannerSelection | None = None,
@@ -243,6 +255,45 @@ def client(
     planner: PlannerSelection | None = None,
 ) -> DagQaClient:
     return DagQaClient(config_for_selection(selection, planner))
+
+
+async def validated_config_for_selection(selection: LLMSelection | None = None) -> AppConfig:
+    config = load_config()
+    if selection is None:
+        resolved = _resolved_model(config.llm)
+        if config.llm.provider != "cluster":
+            return config.model_copy(
+                update={"llm": config.llm.model_copy(update={"model": resolved, "model_env": None})}
+            )
+        cluster_models = await _cluster_models()
+        selected_model = (
+            resolved if resolved in cluster_models else _preferred_cluster_model(cluster_models)
+        )
+        selected = config.model_copy(
+            update={
+                "llm": config.llm.model_copy(update={"model": selected_model, "model_env": None})
+            }
+        )
+        return _with_model_parallelism(selected, selected_model)
+
+    if selection.provider != "cluster":
+        return config_for_selection(selection)
+
+    model = selection.model.strip()
+    if not model:
+        raise HTTPException(status_code=422, detail="A model must be selected.")
+    cluster_models = await _cluster_models()
+    if model not in cluster_models:
+        available = ", ".join(cluster_models) if cluster_models else "none"
+        raise HTTPException(
+            status_code=422,
+            detail=f"Selected cluster model is not available. Current cluster models: {available}.",
+        )
+    return config_for_selection(selection)
+
+
+async def validated_client(selection: LLMSelection | None = None) -> DagQaClient:
+    return DagQaClient(await validated_config_for_selection(selection))
 
 
 async def _cluster_models() -> list[str]:
