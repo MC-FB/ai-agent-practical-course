@@ -169,12 +169,20 @@ export async function getLiveAsk(runId: string): Promise<LiveRun> {
   return response.json();
 }
 
-export type HotpotBenchmarkMeta = {
+export type BenchmarkDatasetOption = {
+  id: string;
+  label: string;
+  default_subset: string;
+};
+
+export type BenchmarkMeta = {
   dataset: string;
+  dataset_label?: string | null;
   split: string;
   subset: BenchmarkSubset;
   subset_label: string;
   subsets: Array<{ id: BenchmarkSubset; label: string }>;
+  datasets: BenchmarkDatasetOption[];
   total_examples: number;
   default_limit: number;
   provider?: string | null;
@@ -183,10 +191,9 @@ export type HotpotBenchmarkMeta = {
   baselines: Array<Record<string, unknown>>;
 };
 
-export type BenchmarkSubset =
-  | "validation"
-  | "mistral_qwen_fact_retrieval_failures"
-  | "mistral_qwen_graph_construction_failures";
+export type HotpotBenchmarkMeta = BenchmarkMeta;
+
+export type BenchmarkSubset = string;
 
 export type HotpotBenchmarkRecord = {
   id: string;
@@ -224,6 +231,7 @@ export type HotpotBenchmarkResult = {
   provider?: string | null;
   model: string;
   dataset: string;
+  dataset_label?: string | null;
   split: string;
   subset?: BenchmarkSubset | string;
   subset_label?: string | null;
@@ -286,6 +294,8 @@ export type LiveBenchmarkSummary = {
   seed?: number | null;
   provider?: string | null;
   model?: string | null;
+  dataset?: string | null;
+  dataset_label?: string | null;
   subset?: BenchmarkSubset | string | null;
   subset_label?: string | null;
   created_at?: string | null;
@@ -307,6 +317,7 @@ export type SavedBenchmarkSummary = {
   comparison_group_id?: string | null;
   created_at?: string | null;
   dataset?: string | null;
+  dataset_label?: string | null;
   split?: string | null;
   subset?: BenchmarkSubset | string | null;
   subset_label?: string | null;
@@ -343,13 +354,18 @@ export type MarkedComparisonRow = {
   reference_gold_recall?: number | null;
 };
 
-export async function getHotpotBenchmarkMeta(
+export async function getBenchmarkMeta(
+  dataset = "hotpotqa",
   subset: BenchmarkSubset = "validation",
-): Promise<HotpotBenchmarkMeta> {
-  const response = await fetch(`/api/benchmarks/hotpotqa/meta?subset=${encodeURIComponent(subset)}`);
+): Promise<BenchmarkMeta> {
+  const response = await fetch(
+    `/api/benchmarks/hotpotqa/meta?dataset=${encodeURIComponent(dataset)}&subset=${encodeURIComponent(subset)}`,
+  );
   if (!response.ok) throw new Error(await response.text());
   return response.json();
 }
+
+export const getHotpotBenchmarkMeta = getBenchmarkMeta;
 
 export async function benchmark(
   limit: number,
@@ -358,11 +374,12 @@ export async function benchmark(
   seed?: number,
   name?: string,
   subset: BenchmarkSubset = "validation",
+  dataset = "hotpotqa",
 ): Promise<HotpotBenchmarkResult> {
   const response = await fetch("/api/benchmarks/hotpotqa", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, system, seed, name, llm, subset }),
+    body: JSON.stringify({ limit, system, seed, name, llm, subset, dataset }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
@@ -375,11 +392,12 @@ export async function startLiveBenchmark(
   seed?: number,
   name?: string,
   subset: BenchmarkSubset = "validation",
+  dataset = "hotpotqa",
 ): Promise<LiveBenchmark> {
   const response = await fetch("/api/benchmarks/hotpotqa/live", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, systems, seed, name, llm, subset }),
+    body: JSON.stringify({ limit, systems, seed, name, llm, subset, dataset }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
@@ -392,11 +410,12 @@ export async function preflightBenchmark(
   seed?: number,
   name?: string,
   subset: BenchmarkSubset = "validation",
+  dataset = "hotpotqa",
 ): Promise<BenchmarkPreflightResult> {
   const response = await fetch("/api/benchmarks/hotpotqa/preflight", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, systems, seed, name, llm, subset }),
+    body: JSON.stringify({ limit, systems, seed, name, llm, subset, dataset }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();

@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from app import api
-from dagqa.config import AppConfig
+from dagqa.config import AppConfig, PlannerConfig
 from dagqa.eval.benchmark import BenchmarkRecord
 from dagqa.eval.hotpot_loader import HOTPOTQA_DISTRACTOR_VALIDATION_SIZE, HotpotExample
 from dagqa.schemas import (
@@ -19,6 +19,16 @@ from dagqa.schemas import (
 )
 
 EXPECTED_FACT_RETRIEVAL_SUBSET_COUNT = 19
+EXPECTED_MUSIQUE_META_COUNT = 17
+EXPECTED_MUSIQUE_PLANNER_DEPTH = 6
+
+
+def test_musique_benchmark_raises_planner_depth_to_six() -> None:
+    cfg = AppConfig(planner=PlannerConfig(max_depth=3))
+
+    result = api._config_for_benchmark_dataset(cfg, "musique")
+
+    assert result.planner.max_depth == EXPECTED_MUSIQUE_PLANNER_DEPTH
 
 
 def _single_node_run_trace() -> dict:
@@ -81,8 +91,8 @@ def test_normalize_saved_benchmark_record_rebuilds_missing_mermaid() -> None:
 def test_normalize_saved_benchmark_payload_backfills_dataset_size(monkeypatch) -> None:
     monkeypatch.setattr(
         api,
-        "count_hotpot_examples",
-        lambda data_path=None: HOTPOTQA_DISTRACTOR_VALIDATION_SIZE,
+        "count_benchmark_examples",
+        lambda dataset, subset, path=None: HOTPOTQA_DISTRACTOR_VALIDATION_SIZE,
     )
 
     normalized = api._normalize_benchmark_payload(
@@ -94,7 +104,7 @@ def test_normalize_saved_benchmark_payload_backfills_dataset_size(monkeypatch) -
 
 
 def test_normalize_saved_benchmark_payload_preserves_provider_and_model(monkeypatch) -> None:
-    monkeypatch.setattr(api, "count_hotpot_examples", lambda data_path=None: 1)
+    monkeypatch.setattr(api, "count_benchmark_examples", lambda dataset, subset, path=None: 1)
 
     normalized = api._normalize_benchmark_payload(
         {
@@ -113,12 +123,14 @@ def test_normalize_saved_benchmark_payload_preserves_provider_and_model(monkeypa
 def test_list_benchmark_results_sorts_by_created_at_newest_first(monkeypatch, tmp_path) -> None:
     older = tmp_path / "newer-file-mtime.json"
     newer = tmp_path / "older-file-mtime.json"
+    subset_file = tmp_path / "musique_failed_subset.json"
     older.write_text(json.dumps({"run_id": "older", "created_at": "2026-01-01T00:00:00Z"}))
     newer.write_text(json.dumps({"run_id": "newer", "created_at": "2026-02-01T00:00:00Z"}))
+    subset_file.write_text(json.dumps([{"id": "dataset-row"}]))
     older.touch()
 
     monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
-    monkeypatch.setattr(api, "count_hotpot_examples", lambda data_path=None: 2)
+    monkeypatch.setattr(api, "count_benchmark_examples", lambda dataset, subset, path=None: 2)
 
     result = api.list_benchmark_results()
 
@@ -139,7 +151,7 @@ def test_list_benchmark_results_includes_benchmark_name(monkeypatch, tmp_path) -
     )
 
     monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
-    monkeypatch.setattr(api, "count_hotpot_examples", lambda data_path=None: 2)
+    monkeypatch.setattr(api, "count_benchmark_examples", lambda dataset, subset, path=None: 2)
 
     result = api.list_benchmark_results()
 
@@ -160,7 +172,7 @@ def test_list_benchmark_results_marks_partial_runs(monkeypatch, tmp_path) -> Non
     )
 
     monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
-    monkeypatch.setattr(api, "count_hotpot_examples", lambda data_path=None: 10)
+    monkeypatch.setattr(api, "count_benchmark_examples", lambda dataset, subset, path=None: 10)
 
     result = api.list_benchmark_results()
 
@@ -199,7 +211,7 @@ def test_list_benchmark_results_hides_superseded_partial_runs(monkeypatch, tmp_p
     )
 
     monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
-    monkeypatch.setattr(api, "count_hotpot_examples", lambda data_path=None: 10)
+    monkeypatch.setattr(api, "count_benchmark_examples", lambda dataset, subset, path=None: 10)
 
     result = api.list_benchmark_results()
 
@@ -434,6 +446,23 @@ def test_hotpotqa_meta_reports_selected_failure_subset() -> None:
     }
 
 
+def test_benchmark_meta_reports_musique_dataset(monkeypatch) -> None:
+    monkeypatch.setattr(
+        api,
+        "count_benchmark_examples",
+        lambda dataset, subset, path=None: EXPECTED_MUSIQUE_META_COUNT,
+    )
+
+    meta = api.hotpotqa_meta(dataset="musique", subset="validation_3hop_plus")
+
+    assert meta["dataset"] == "musique"
+    assert meta["dataset_label"] == "MuSiQue"
+    assert meta["subset"] == "validation_3hop_plus"
+    assert meta["subset_label"] == "MuSiQue validation, 3+ hops"
+    assert meta["total_examples"] == EXPECTED_MUSIQUE_META_COUNT
+    assert {dataset["id"] for dataset in meta["datasets"]} >= {"hotpotqa", "musique"}
+
+
 async def test_paired_live_benchmark_reuses_sample_and_saves_two_results(
     monkeypatch,
     tmp_path,
@@ -463,7 +492,11 @@ async def test_paired_live_benchmark_reuses_sample_and_saves_two_results(
             on_complete(record)
         return records
 
-    monkeypatch.setattr(api, "load_hotpot_examples", lambda path=None: examples)
+    monkeypatch.setattr(
+        api,
+        "load_benchmark_examples",
+        lambda dataset, subset, path=None: examples,
+    )
     monkeypatch.setattr(api, "_run_examples", run_examples)
     monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
     cfg = AppConfig()
@@ -525,11 +558,11 @@ async def test_live_benchmark_persists_selected_subset(monkeypatch, tmp_path) ->
             on_complete(record)
         return records
 
-    def load_examples(path=None):  # noqa: ANN001, ANN202
+    def load_examples(dataset, subset, path=None):  # noqa: ANN001, ANN202
         seen_paths.append(path)
         return examples
 
-    monkeypatch.setattr(api, "load_hotpot_examples", load_examples)
+    monkeypatch.setattr(api, "load_benchmark_examples", load_examples)
     monkeypatch.setattr(api, "_run_examples", run_examples)
     monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
     cfg = AppConfig()
@@ -624,7 +657,11 @@ async def test_live_benchmark_stop_saves_partial_result(monkeypatch, tmp_path) -
         stop_event.set()
         return [record]
 
-    monkeypatch.setattr(api, "load_hotpot_examples", lambda path=None: examples)
+    monkeypatch.setattr(
+        api,
+        "load_benchmark_examples",
+        lambda dataset, subset, path=None: examples,
+    )
     monkeypatch.setattr(api, "_run_examples", run_examples)
     monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
     cfg = AppConfig()
@@ -676,7 +713,11 @@ async def test_live_benchmark_resume_skips_completed_records(monkeypatch, tmp_pa
             on_complete(record)
         return records
 
-    monkeypatch.setattr(api, "load_hotpot_examples", lambda path=None: examples)
+    monkeypatch.setattr(
+        api,
+        "load_benchmark_examples",
+        lambda dataset, subset, path=None: examples,
+    )
     monkeypatch.setattr(api, "_run_examples", run_examples)
     monkeypatch.setattr(api, "_benchmark_output_dir", lambda: tmp_path)
     cfg = AppConfig()

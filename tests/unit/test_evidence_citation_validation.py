@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from dagqa.nodes.output_validation import validate_evidence_citations
+from dagqa.nodes.output_validation import coerce_output_to_schema, validate_evidence_citations
+from dagqa.nodes.prompts import render_repair_prompt
 from dagqa.schemas import EvidenceDocument, EvidenceSelection
 
 
@@ -102,3 +103,33 @@ def test_out_of_range_sentence_index_fails() -> None:
 
     assert not result.valid
     assert "only has sentence indices 0 through 1" in result.errors[0]
+
+
+def test_repair_prompt_lists_valid_evidence_ids() -> None:
+    prompt = render_repair_prompt(
+        '{"answer": "Nobuo Uematsu", "_evidence_citations": [{"document_id": "default"}]}',
+        {"type": "object"},
+        [
+            "_evidence_citations[0].document_id 'default' is not one of the supplied evidence "
+            "document IDs."
+        ],
+        _evidence(),
+    )
+
+    assert "context-0: Final Fantasy" in prompt
+    assert "Never use placeholder IDs" in prompt
+
+
+def test_coerce_output_to_schema_turns_list_answer_into_text() -> None:
+    output = coerce_output_to_schema(
+        {"answer": [1982, 1980, 1983], "confidence": 0.7},
+        {
+            "type": "object",
+            "properties": {
+                "answer": {"type": "string"},
+                "confidence": {"type": "number"},
+            },
+        },
+    )
+
+    assert output == {"answer": "1982, 1980 and 1983", "confidence": 0.7}

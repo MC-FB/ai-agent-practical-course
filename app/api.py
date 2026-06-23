@@ -22,9 +22,14 @@ from dagqa.eval.benchmark import (
     _aggregate,
     _run_examples,
     _sample_examples,
-    benchmark_hotpotqa,
+    benchmark_dataset,
 )
-from dagqa.eval.hotpot_loader import count_hotpot_examples, load_hotpot_examples
+from dagqa.eval.datasets import (
+    DATASETS,
+    count_benchmark_examples,
+    get_benchmark_dataset,
+    load_benchmark_examples,
+)
 from dagqa.eval.metrics import cosine_sim
 from dagqa.graph.render import render_mermaid
 from dagqa.graph.scheduler import Scheduler
@@ -52,25 +57,8 @@ CLUSTER_MODEL_MAX_PARALLEL_EXAMPLES = {
     "google/gemma-4-31B-it": 2,
 }
 PAIRED_SYSTEM_COUNT = 2
-BenchmarkSubset = Literal[
-    "validation",
-    "mistral_qwen_fact_retrieval_failures",
-    "mistral_qwen_graph_construction_failures",
-]
-BENCHMARK_SUBSETS: dict[str, dict[str, str | None]] = {
-    "validation": {
-        "label": "Full HotpotQA validation",
-        "path": None,
-    },
-    "mistral_qwen_fact_retrieval_failures": {
-        "label": "Mistral + Qwen fact-retrieval failures",
-        "path": "data/hotpotqa/mini_mistral_qwen_fact_retrieval_failures.json",
-    },
-    "mistral_qwen_graph_construction_failures": {
-        "label": "Mistral + Qwen graph-construction failures",
-        "path": "data/hotpotqa/mini_mistral_qwen_graph_construction_failures.json",
-    },
-}
+MUSIQUE_BENCHMARK_MAX_DEPTH = 6
+BenchmarkDatasetId = Literal["hotpotqa", "musique"]
 
 
 class LLMSelection(BaseModel):
@@ -93,7 +81,8 @@ class BenchmarkRequest(BaseModel):
     systems: list[Literal["dag_agent", "direct_llm"]] | None = None
     limit: int = 10
     seed: int | None = None
-    subset: BenchmarkSubset = "validation"
+    dataset: BenchmarkDatasetId = "hotpotqa"
+    subset: str = "validation"
     data_path: str | None = None
     llm: LLMSelection | None = None
 
@@ -158,17 +147,25 @@ def _azure_llm_config() -> LLMConfig:
 def _benchmark_subset_path(request: BenchmarkRequest) -> str | None:
     if request.data_path:
         return request.data_path
-    subset = BENCHMARK_SUBSETS[request.subset]
-    return subset["path"]
+    return get_benchmark_dataset(request.dataset).subset(request.subset).path
 
 
-def _benchmark_subset_label(subset: str) -> str:
-    return str(BENCHMARK_SUBSETS.get(subset, {}).get("label") or subset)
+def _benchmark_subset_label(subset: str, dataset: str = "hotpotqa") -> str:
+    try:
+        return get_benchmark_dataset(dataset).subset(subset).label
+    except ValueError:
+        return subset
 
 
-def _benchmark_default_limit(config: AppConfig, subset: str, data_path: str | None = None) -> int:
-    if data_path is not None or subset != "validation":
-        return count_hotpot_examples(data_path or str(BENCHMARK_SUBSETS[subset]["path"]))
+def _benchmark_default_limit(
+    config: AppConfig,
+    dataset: str,
+    subset: str,
+    data_path: str | None = None,
+) -> int:
+    dataset_info = get_benchmark_dataset(dataset)
+    if data_path is not None or subset != dataset_info.default_subset:
+        return count_benchmark_examples(dataset, subset, data_path)
     return config.benchmark.default_limit
 
 
@@ -257,6 +254,16 @@ async def validated_config_for_selection(selection: LLMSelection | None = None) 
 
 async def validated_client(selection: LLMSelection | None = None) -> DagQaClient:
     return DagQaClient(await validated_config_for_selection(selection))
+
+
+def _config_for_benchmark_dataset(config: AppConfig, dataset: str) -> AppConfig:
+    if dataset != "musique" or config.planner.max_depth >= MUSIQUE_BENCHMARK_MAX_DEPTH:
+        return config
+    return config.model_copy(
+        update={
+            "planner": config.planner.model_copy(update={"max_depth": MUSIQUE_BENCHMARK_MAX_DEPTH})
+        }
+    )
 
 
 async def _cluster_models() -> list[str]:
@@ -508,10 +515,15 @@ async def hotpotqa(request: BenchmarkRequest) -> BenchmarkResult:
     systems = _benchmark_systems(request)
     if len(systems) != 1:
         raise HTTPException(status_code=422, detail="Use the live endpoint for paired benchmarks.")
-    dag_client = await validated_client(request.llm)
+    cfg = _config_for_benchmark_dataset(
+        await validated_config_for_selection(request.llm),
+        request.dataset,
+    )
+    dag_client = DagQaClient(cfg)
     data_path = _benchmark_subset_path(request)
-    result = await benchmark_hotpotqa(
+    result = await benchmark_dataset(
         dag_client,
+        dataset=request.dataset,
         system=systems[0],
         limit=request.limit,
         seed=request.seed,
@@ -530,9 +542,10 @@ async def hotpotqa(request: BenchmarkRequest) -> BenchmarkResult:
 )
 def hotpotqa_info(
     data_path: str | None = None,
-    subset: BenchmarkSubset = "validation",
+    subset: str = "validation",
+    dataset: BenchmarkDatasetId = "hotpotqa",
 ) -> dict[str, Any]:
-    return hotpotqa_meta(data_path, subset)
+    return hotpotqa_meta(data_path, subset, dataset)
 
 
 @router.post(
@@ -544,11 +557,15 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
     run_id = str(uuid4())
     systems = _benchmark_systems(request)
     comparison_group_id = str(uuid4()) if len(systems) == PAIRED_SYSTEM_COUNT else None
-    cfg = await validated_config_for_selection(request.llm)
+    cfg = _config_for_benchmark_dataset(
+        await validated_config_for_selection(request.llm),
+        request.dataset,
+    )
     dag_client = DagQaClient(cfg)
     seed = request.seed if request.seed is not None else int(time.time_ns() % 2_147_483_647)
     data_path = _benchmark_subset_path(request)
-    dataset_size = count_hotpot_examples(data_path)
+    dataset_info = get_benchmark_dataset(request.dataset)
+    dataset_size = count_benchmark_examples(request.dataset, request.subset, data_path)
     state = {
         "run_id": run_id,
         "name": _benchmark_name(request),
@@ -563,10 +580,11 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
         "limit": request.limit,
         "seed": seed,
         "max_parallel_examples": cfg.benchmark.max_parallel_examples,
-        "dataset": "hotpotqa",
-        "split": cfg.benchmark.split,
+        "dataset": dataset_info.id,
+        "dataset_label": dataset_info.label,
+        "split": dataset_info.split,
         "subset": request.subset,
-        "subset_label": _benchmark_subset_label(request.subset),
+        "subset_label": _benchmark_subset_label(request.subset, request.dataset),
         "dataset_size": dataset_size,
         "provider": cfg.llm.provider,
         "model": cfg.llm.model,
@@ -654,7 +672,12 @@ async def hotpotqa_preflight(request: BenchmarkRequest) -> BenchmarkPreflightRes
 
     try:
         data_path = _benchmark_subset_path(request)
-        dataset_size = await asyncio.to_thread(count_hotpot_examples, data_path)
+        dataset_size = await asyncio.to_thread(
+            count_benchmark_examples,
+            request.dataset,
+            request.subset,
+            data_path,
+        )
         if request.limit > dataset_size:
             add(
                 "dataset",
@@ -662,18 +685,23 @@ async def hotpotqa_preflight(request: BenchmarkRequest) -> BenchmarkPreflightRes
                 f"Requested {request.limit} examples but dataset has {dataset_size}.",
             )
         else:
-            add("dataset", True, f"Dataset is readable with {dataset_size} examples.")
+            dataset_label = get_benchmark_dataset(request.dataset).label
+            add("dataset", True, f"{dataset_label} is readable with {dataset_size} examples.")
     except Exception as exc:
         add("dataset", False, f"Dataset could not be loaded: {exc}")
 
     try:
-        cfg = await validated_config_for_selection(request.llm)
+        cfg = _config_for_benchmark_dataset(
+            await validated_config_for_selection(request.llm),
+            request.dataset,
+        )
         add(
             "configuration",
             True,
             (
                 f"{cfg.llm.provider}/{cfg.llm.model}, timeout "
-                f"{cfg.llm.request_timeout_seconds:g}s, retries {cfg.llm.max_retries}."
+                f"{cfg.llm.request_timeout_seconds:g}s, retries {cfg.llm.max_retries}, "
+                f"planner depth {cfg.planner.max_depth}."
             ),
         )
     except Exception as exc:
@@ -790,7 +818,10 @@ async def resume_live_benchmark(
     if request is not None and request.llm is not None:
         benchmark_request.llm = request.llm
     systems = _benchmark_systems(benchmark_request)
-    cfg = await validated_config_for_selection(benchmark_request.llm)
+    cfg = _config_for_benchmark_dataset(
+        await validated_config_for_selection(benchmark_request.llm),
+        benchmark_request.dataset,
+    )
     dag_client = DagQaClient(cfg)
     stop_event = asyncio.Event()
     LIVE_BENCHMARK_STOPS[run_id] = stop_event
@@ -844,6 +875,7 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
     total_examples = request.limit * len(systems)
     dataset_size = 0
     data_path = _benchmark_subset_path(request)
+    dataset_info = get_benchmark_dataset(request.dataset)
     last_record_completed_at = prior_state.get("last_record_completed_at")
 
     def update(
@@ -883,10 +915,11 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
             "limit": request.limit,
             "seed": seed,
             "max_parallel_examples": cfg.benchmark.max_parallel_examples,
-            "dataset": "hotpotqa",
-            "split": cfg.benchmark.split,
+            "dataset": dataset_info.id,
+            "dataset_label": dataset_info.label,
+            "split": dataset_info.split,
             "subset": request.subset,
-            "subset_label": _benchmark_subset_label(request.subset),
+            "subset_label": _benchmark_subset_label(request.subset, request.dataset),
             "dataset_size": dataset_size or None,
             "provider": dag_client.config.llm.provider,
             "model": dag_client.config.llm.model,
@@ -912,10 +945,15 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
 
     try:
         if request.limit <= 0 and data_path is None:
-            dataset_size = count_hotpot_examples()
+            dataset_size = count_benchmark_examples(request.dataset, request.subset)
             all_examples = []
         else:
-            all_examples = await asyncio.to_thread(load_hotpot_examples, data_path)
+            all_examples = await asyncio.to_thread(
+                load_benchmark_examples,
+                request.dataset,
+                request.subset,
+                data_path,
+            )
             dataset_size = len(all_examples)
         sampled_examples = _sample_examples(all_examples, request.limit, seed)
         per_system_total = len(sampled_examples)
@@ -1013,8 +1051,8 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
                 limit=request.limit,
                 provider=dag_client.config.llm.provider,
                 model=dag_client.config.llm.model,
-                dataset="hotpotqa",
-                split=cfg.benchmark.split,
+                dataset=dataset_info.id,
+                split=dataset_info.split,
                 subset=request.subset,
                 dataset_size=dataset_size,
                 seed=seed,
@@ -1066,20 +1104,31 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
 )
 def hotpotqa_meta(
     data_path: str | None = None,
-    subset: BenchmarkSubset = "validation",
+    subset: str = "validation",
+    dataset: BenchmarkDatasetId = "hotpotqa",
 ) -> dict[str, Any]:
     cfg = load_config()
-    resolved_path = data_path or BENCHMARK_SUBSETS[subset]["path"]
-    total_examples = count_hotpot_examples(resolved_path)
-    default_limit = _benchmark_default_limit(cfg, subset, data_path)
+    dataset_info = get_benchmark_dataset(dataset)
+    resolved_path = data_path or dataset_info.subset(subset).path
+    total_examples = count_benchmark_examples(dataset, subset, resolved_path)
+    default_limit = _benchmark_default_limit(cfg, dataset, subset, data_path)
     return {
-        "dataset": "hotpotqa",
-        "split": cfg.benchmark.split,
+        "dataset": dataset_info.id,
+        "dataset_label": dataset_info.label,
+        "split": dataset_info.split,
         "subset": subset,
-        "subset_label": _benchmark_subset_label(subset),
+        "subset_label": _benchmark_subset_label(subset, dataset),
         "subsets": [
-            {"id": subset_id, "label": str(details["label"])}
-            for subset_id, details in BENCHMARK_SUBSETS.items()
+            {"id": subset_id, "label": details.label}
+            for subset_id, details in dataset_info.subsets.items()
+        ],
+        "datasets": [
+            {
+                "id": item.id,
+                "label": item.label,
+                "default_subset": item.default_subset,
+            }
+            for item in DATASETS.values()
         ],
         "total_examples": total_examples,
         "default_limit": default_limit,
@@ -1088,14 +1137,10 @@ def hotpotqa_meta(
         "system": "dag_agent",
         "baselines": [
             {
-                "label": _benchmark_subset_label(subset),
+                "label": _benchmark_subset_label(subset, dataset),
                 "metric": "examples",
                 "value": total_examples,
-                "source": (
-                    "Hugging Face hotpotqa/hotpot_qa dataset card"
-                    if resolved_path is None
-                    else str(resolved_path)
-                ),
+                "source": dataset_info.source if resolved_path is None else str(resolved_path),
             }
         ],
     }
@@ -1208,6 +1253,8 @@ def list_benchmark_results() -> dict[str, Any]:
             data = json.loads(path.read_text())
         except Exception:
             continue
+        if not isinstance(data, dict):
+            continue
         normalized = _normalize_benchmark_payload(data, path)
         completed = normalized.get("metrics", {}).get("example_count") or len(
             normalized.get("records", [])
@@ -1219,9 +1266,13 @@ def list_benchmark_results() -> dict[str, Any]:
             "comparison_group_id": normalized.get("comparison_group_id"),
             "created_at": normalized.get("created_at"),
             "dataset": normalized.get("dataset"),
+            "dataset_label": normalized.get("dataset_label"),
             "split": normalized.get("split"),
             "subset": normalized.get("subset") or "validation",
-            "subset_label": _benchmark_subset_label(normalized.get("subset") or "validation"),
+            "subset_label": _benchmark_subset_label(
+                normalized.get("subset") or "validation",
+                normalized.get("dataset") or "hotpotqa",
+            ),
             "system": normalized.get("system"),
             "provider": normalized.get("provider"),
             "model": normalized.get("model"),
@@ -1265,6 +1316,7 @@ def _result_completion_key(item: dict[str, Any]) -> tuple[Any, ...] | None:
         item.get("seed"),
         item.get("model"),
         item.get("limit"),
+        item.get("dataset") or "hotpotqa",
         item.get("subset") or "validation",
     )
 
@@ -1374,7 +1426,8 @@ def _save_benchmark_result(result: BenchmarkResult) -> Path:
     output_dir = _benchmark_output_dir()
     output_dir.mkdir(parents=True, exist_ok=True)
     timestamp = result.created_at.replace(":", "").replace("-", "")
-    filename = f"hotpotqa-{timestamp}-{result.run_id}.json"
+    prefix = get_benchmark_dataset(result.dataset).result_prefix
+    filename = f"{prefix}-{timestamp}-{result.run_id}.json"
     return output_dir / filename
 
 
@@ -1398,24 +1451,32 @@ def _cleanup_partial_benchmark_results(result: BenchmarkResult, output_path: Pat
             data = json.loads(path.read_text())
         except Exception:
             continue
-        if data.get("system") != result.system:
+        if not isinstance(data, dict):
             continue
-        if data.get("comparison_group_id") != result.comparison_group_id:
-            continue
-        if data.get("seed") != result.seed:
-            continue
-        if data.get("model") != result.model:
-            continue
-        if data.get("limit") != result.limit:
-            continue
-        if (data.get("subset") or "validation") != result.subset:
-            continue
-        if len(data.get("records", [])) >= result.limit:
+        if not _is_superseded_partial_benchmark_result(data, result):
             continue
         try:
             path.unlink()
         except OSError:
             continue
+
+
+def _is_superseded_partial_benchmark_result(
+    data: dict[str, Any],
+    result: BenchmarkResult,
+) -> bool:
+    return all(
+        [
+            data.get("system") == result.system,
+            data.get("comparison_group_id") == result.comparison_group_id,
+            data.get("seed") == result.seed,
+            data.get("model") == result.model,
+            data.get("limit") == result.limit,
+            (data.get("dataset") or "hotpotqa") == result.dataset,
+            (data.get("subset") or "validation") == result.subset,
+            len(data.get("records", [])) < result.limit,
+        ]
+    )
 
 
 def _live_benchmark_summary(state: dict[str, Any]) -> dict[str, Any]:
@@ -1433,9 +1494,14 @@ def _live_benchmark_summary(state: dict[str, Any]) -> dict[str, Any]:
         "seed": state.get("seed"),
         "provider": state.get("provider"),
         "model": state.get("model"),
+        "dataset": state.get("dataset") or "hotpotqa",
+        "dataset_label": state.get("dataset_label"),
         "subset": state.get("subset") or "validation",
         "subset_label": state.get("subset_label")
-        or _benchmark_subset_label(state.get("subset") or "validation"),
+        or _benchmark_subset_label(
+            state.get("subset") or "validation",
+            state.get("dataset") or "hotpotqa",
+        ),
         "created_at": state.get("created_at"),
         "total_runtime_ms": state.get("total_runtime_ms") or 0,
         "estimate": state.get("estimate"),
@@ -1570,20 +1636,25 @@ def _validate_storage_id(value: str) -> None:
 
 
 def _normalize_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, Any]:
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=404, detail="Benchmark result not found.")
     metrics = data.get("metrics") or data.get("summary") or {}
     records = [_normalize_benchmark_record(record) for record in data.get("records", [])]
     dataset_size = data.get("dataset_size") or data.get("total_examples")
+    dataset = data.get("dataset") or "hotpotqa"
+    subset = data.get("subset") or "validation"
     if dataset_size is None:
         try:
-            dataset_size = count_hotpot_examples()
+            dataset_size = count_benchmark_examples(dataset, subset)
         except Exception:
             dataset_size = len(records)
     return {
         **data,
         "run_id": data.get("run_id") or path.stem,
-        "dataset": data.get("dataset") or "hotpotqa",
+        "dataset": dataset,
+        "dataset_label": data.get("dataset_label") or get_benchmark_dataset(dataset).label,
         "split": data.get("split") or "validation",
-        "subset": data.get("subset") or "validation",
+        "subset": subset,
         "dataset_size": dataset_size,
         "system": data.get("system") or "dag_agent",
         "provider": data.get("provider"),

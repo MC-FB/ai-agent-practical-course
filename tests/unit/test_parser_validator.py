@@ -99,6 +99,31 @@ def test_planner_prompts_preserve_quoted_title_targets() -> None:
     assert "Preserve quoted titles as answer targets" in structured_prompt
 
 
+def test_planner_prompts_preserve_score_table_operations() -> None:
+    structured_prompt = structured_planner_prompt(
+        "When was the last time a team beat the cup winner?",
+        max_nodes=10,
+        max_depth=6,
+    )
+
+    assert "Preserve table operations" in structured_prompt
+    assert "scan" in structured_prompt
+    assert "all table rows" in structured_prompt
+    assert "omitted opponents" in structured_prompt
+
+
+def test_planner_prompts_preserve_capital_duration_spans() -> None:
+    structured_prompt = structured_planner_prompt(
+        "How long had one headquarters location been the capitol city of another?",
+        max_nodes=10,
+        max_depth=6,
+    )
+
+    assert "Preserve capital/capitol duration spans" in structured_prompt
+    assert "had been the capital city" in structured_prompt
+    assert "modern city/province/country reasoning" in structured_prompt
+
+
 def test_parse_accepts_bare_node_list() -> None:
     plan = parse_plan(
         """
@@ -138,6 +163,25 @@ def test_normalizer_adds_referenced_nodes_to_dependencies(app_config) -> None:
     assert result.valid
 
 
+def test_normalizer_adds_bridge_reasoning_contract_to_nonfinal_bridge_nodes() -> None:
+    plan = normalize_plan_dependencies(parse_plan(PARALLEL_PLAN))
+    first_child_schema = plan.nodes[0].output_schema
+    final_schema = plan.nodes[2].output_schema
+
+    assert {
+        "bridge_answer",
+        "bridge_reasoning",
+        "bridge_source_span",
+        "constraint_status",
+    } <= set(first_child_schema["required"])
+    assert first_child_schema["properties"]["constraint_status"]["enum"] == [
+        "satisfied",
+        "ambiguous",
+        "not_found",
+    ]
+    assert "bridge_answer" not in final_schema["properties"]
+
+
 def test_normalizer_repairs_missing_final_node_to_last_node(app_config) -> None:
     plan = parse_plan(PARALLEL_PLAN.replace("final_node: q3", "final_node: missing"))
 
@@ -145,6 +189,20 @@ def test_normalizer_repairs_missing_final_node_to_last_node(app_config) -> None:
     result = validate_plan(normalized, app_config.planner)
 
     assert normalized.final_node == "q3"
+    assert result.valid
+
+
+def test_normalizer_adds_final_answer_contract(app_config) -> None:
+    plan = parse_plan(PARALLEL_PLAN)
+
+    normalized = normalize_plan_dependencies(plan)
+    final = next(node for node in normalized.nodes if node.id == normalized.final_node)
+    result = validate_plan(normalized, app_config.planner)
+
+    assert final.output_schema["properties"]["answer"]["type"] == "string"
+    assert final.output_schema["properties"]["answer_type"]["type"] == "string"
+    assert final.output_schema["properties"]["answer_source_span"]["type"] == "string"
+    assert {"answer", "answer_type", "answer_source_span"} <= set(final.output_schema["required"])
     assert result.valid
 
 

@@ -5,13 +5,14 @@ from dagqa.nodes.prompts import render_node_prompt
 from dagqa.schemas import DagNode, EvidenceDocument, Operation, PromptSpec, TaskType
 
 
-def _node(task_type: TaskType) -> DagNode:
+def _node(task_type: TaskType, depends_on: list[str] | None = None) -> DagNode:
     return DagNode(
         id="q1",
         label="Find fact",
         task_type=task_type,
         operation=Operation.answer,
         question="Where was Ada born?",
+        depends_on=depends_on or [],
         prompt=PromptSpec(
             system="Return JSON only.",
             user_template="Question: {resolved_question}",
@@ -41,8 +42,33 @@ def test_select_evidence_returns_all_documents_for_fact_nodes() -> None:
     assert [document.id for document in selection.documents] == ["context-0", "context-1"]
 
 
-def test_select_evidence_skips_reasoning_only_nodes() -> None:
-    assert select_evidence(_node(TaskType.synthesis), _documents()) is None
+def test_select_evidence_returns_documents_for_synthesis_nodes() -> None:
+    selection = select_evidence(_node(TaskType.synthesis), _documents())
+
+    assert selection is not None
+    assert [document.id for document in selection.documents] == ["context-0", "context-1"]
+
+
+def test_select_evidence_limits_synthesis_nodes_to_dependency_citations() -> None:
+    selection = select_evidence(
+        _node(TaskType.synthesis, depends_on=["q0"]),
+        _documents(),
+        {"q0": {"_evidence_citations": [{"document_id": "context-0"}]}},
+    )
+
+    assert selection is not None
+    assert selection.strategy == "dependency_cited_documents"
+    assert [document.id for document in selection.documents] == ["context-0"]
+
+
+def test_select_evidence_skips_dependent_synthesis_without_citations() -> None:
+    selection = select_evidence(
+        _node(TaskType.synthesis, depends_on=["q0"]),
+        _documents(),
+        {"q0": {"answer": "Ada"}},
+    )
+
+    assert selection is None
 
 
 def test_render_prompt_includes_all_evidence_and_distractor_instruction() -> None:
@@ -57,6 +83,8 @@ def test_render_prompt_includes_all_evidence_and_distractor_instruction() -> Non
     assert "Every returned field value must be directly supported" in rendered
     assert "Do not fill broad lists from partial evidence" in rendered
     assert 'do not return "yes" or "no" unless the question asks yes/no' in rendered
+    assert "bridge_reasoning" in rendered
+    assert "constraint_status" in rendered
     assert "Document ID: context-0" in rendered
     assert "Title: Ada" in rendered
     assert "Ada was born in London." in rendered

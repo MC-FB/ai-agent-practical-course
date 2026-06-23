@@ -214,6 +214,10 @@ Every node with dependencies must include input_map references that consume each
 node listed in depends_on. Do not declare unused dependencies.
 Never make a final comparison/synthesis node ask the original user question
 without child outputs in the prompt.
+Final comparison/synthesis nodes must include the original question in the prompt,
+identify the requested answer type, and select an answer of that type from child
+outputs or evidence spans. They must not return a bridge entity if the original
+question asks for an attribute of that entity.
 Prefer targeted lookup nodes that return only the facts needed to answer the
 question. Do not create broad candidate-list or exhaustive enumeration nodes
 when a more specific lookup can identify the required entity or relationship
@@ -224,11 +228,44 @@ candidates from world knowledge.
 Preserve the resolved bridge entity across hops: after a node identifies a
 person, work, event, organization, place, or series, later nodes must ask about
 that exact value and ignore unrelated entities in distractor documents.
+Bridge lookup nodes that feed later nodes must explain their selection. Include
+bridge_answer, bridge_reasoning, bridge_source_span, and constraint_status in
+their output fields. constraint_status must be "satisfied" only when the cited
+evidence supports the subquestion under all dependency constraints; use
+"ambiguous" or "not_found" instead of returning a confident distractor.
+Parent nodes must read child bridge_reasoning and constraint_status from
+{dependencies}. If a child status is not "satisfied", the parent must avoid
+treating that child value as a confirmed bridge fact and should resolve the
+ambiguity from evidence before answering.
+For multi-hop questions with several relative clauses ("the X that...", "where...",
+"which...", "from which...", "during...", "containing..."), do not collapse the
+plan to a single lookup or direct-answer node. Create an explicit bridge chain:
+one targeted node per resolved entity/attribute, followed by a final node that
+uses those resolved values to answer the original requested attribute.
+If a bridge chain would exceed max_depth, merge the final synthesis into the
+last lookup prompt instead of adding an extra synthesis-only node; do not drop
+an intermediate bridge hop and do not fall back to answering the question in one
+open-ended prompt.
+In questions phrased like "what region/place of the country where X is located
+is Y", X usually resolves only the country or scope. The answer target is the
+region/place containing Y, not the region/place containing X. Carry both
+candidates if needed and make the final node choose the target entity named
+after "is".
 Preserve temporal boundary wording from the original question. Questions using
 "before", "after", "later than", "earlier than", "since", or "until" usually
 ask for a threshold or boundary value. Do not rewrite them into "latest",
 "earliest", "current", or "stopped using" questions unless the original wording
 explicitly asks for that endpoint.
+For table or fixture questions, preserve the table operation in the plan. If
+the question asks when one entity beat another, create a node that scans all
+rows, compares the score columns in row order, handles compact tables where the
+opponent column is omitted, and returns the latest matching date. Do not plan a
+lookup that can stop after inspecting only the first rows.
+For capital/capitol duration questions, preserve the historical-location span.
+If evidence can contain text like "had been the capital city of X for Y", create
+a node that extracts that span and duration directly. Do not convert the task
+into modern administrative reasoning or a national-capital lookup unless the
+question explicitly asks for a country capital.
 Preserve quoted title wording. If the user asks who wrote a quoted work or
 title, identify the writer of that quoted text; do not reinterpret the question
 as asking who composed, performed, or created an entity mentioned inside the
@@ -276,9 +313,32 @@ Constraints:
   not every related fact visible in the context.
 - Bridge nodes must preserve the resolved bridge value in downstream questions and prompts;
   never let a later hop answer about a different entity that only appears in a distractor context.
+- Non-final bridge lookup nodes that feed another node must include output fields named
+  bridge_answer, bridge_reasoning, bridge_source_span, and constraint_status. Use
+  constraint_status="satisfied" only when the cited span satisfies every dependency constraint;
+  use "ambiguous" or "not_found" rather than guessing from a partial or distractor match.
+- Parent nodes must use child bridge_reasoning and constraint_status through {{dependencies}};
+  if a child is ambiguous or not_found, resolve that uncertainty from evidence instead of
+  treating the child answer as confirmed.
+- For multi-hop questions with chained relative clauses ("the X that...", "where...",
+  "which...", "from which...", "during...", "containing..."), create a multi-node bridge
+  chain rather than a single generic answer node. A one-node plan is only acceptable when
+  the question itself is a single-hop lookup.
+- If the natural bridge chain is near max_depth, combine final answer selection into the
+  last lookup node. Keep every intermediate bridge value in that node's prompt and input_map
+  so the last node answers the original target attribute, not a bridge entity.
+- For "what region/place of the country where X is located is Y" questions, use X only to
+  identify the country or scope. The final answer is the region/place containing Y. If both
+  X-region and Y-region are looked up, the final node must select the Y-region.
 - Preserve temporal boundary wording. For questions with "before", "after", "later than",
   "earlier than", "since", or "until", return the boundary/threshold requested by the original
   question instead of converting it to a latest/earliest endpoint.
+- Preserve table operations. For "when did X beat Y" questions over score rows, make the node scan
+  all table rows, compare score columns in row order, infer omitted opponents from the table scope,
+  and return the latest row where X's score is greater than Y's.
+- Preserve capital/capitol duration spans. For "how long had X been the capital/capitol city of Y"
+  questions, make the node search for direct spans like "had been the capital city of Y for Z" and
+  return Z. Do not replace this with modern city/province/country reasoning unless explicitly asked.
 - Preserve quoted titles as answer targets. For questions like who wrote a quoted work/title,
   keep the quoted text as the work to look up rather than changing the task to composition or
   authorship of another entity mentioned inside that title.
@@ -287,6 +347,16 @@ Constraints:
   fields, but answer must contain the concise final response to the user's question.
 - The final_node output field must answer the user's question directly, not return an
   intermediate value like a year, date, latitude, or count unless that is what was asked.
+- Final synthesis must identify the answer type requested by the original question before
+  choosing the answer. Do not return a bridge entity when the original question asks for an
+  attribute of that entity. Examples of answer types include country, region, event/date,
+  era/decade, language, organization, person, place, yes/no, and number.
+- Final synthesis must preserve exact modifiers from evidence or dependency values. Do not
+  collapse qualified answers to a bare head noun, and do not substitute a city for a region,
+  a modern country for a historical country name, or a bare year for a named election/event
+  when the question asks for that more specific surface.
+- The final node prompt must mention the original question and explicitly compare the current
+  candidate answer with the requested answer type before returning answer.
 """
 
 
@@ -436,6 +506,26 @@ def _output_fields_to_schema(fields: list[dict[str, str]], *, is_final: bool) ->
         required = ["answer"]
     elif is_final and "answer" in required:
         required = ["answer", *[field for field in required if field != "answer"]]
+    if is_final:
+        if "answer_type" not in properties:
+            properties["answer_type"] = {
+                "type": "string",
+                "description": (
+                    "Answer type requested by the original question, such as country, region, "
+                    "event/date, era/decade, language, organization, person, place, yes/no, "
+                    "or number."
+                ),
+            }
+        if "answer_source_span" not in properties:
+            properties["answer_source_span"] = {
+                "type": "string",
+                "description": (
+                    "Shortest dependency or evidence span that directly supports the final answer."
+                ),
+            }
+        for field in ("answer_type", "answer_source_span"):
+            if field not in required:
+                required.append(field)
     return {
         "type": "object",
         "required": required,

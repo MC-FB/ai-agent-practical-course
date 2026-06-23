@@ -54,6 +54,36 @@ def test_canonicalize_prediction_restores_quantity_unit_from_evidence() -> None:
     )
 
 
+def test_canonicalize_prediction_keeps_standalone_million_surface_from_evidence() -> None:
+    evidence = [
+        EvidenceDocument(
+            id="context-0",
+            title="Nanjing",
+            text="The total population of Nanjing reached 8.005 million in 2010.",
+        )
+    ]
+
+    assert (
+        canonicalize_prediction(
+            "8005000",
+            question="What was the population in 2010?",
+            evidence_documents=evidence,
+        )
+        == "8.005 million"
+    )
+
+
+def test_canonicalize_prediction_restores_small_number_word_from_evidence() -> None:
+    assert (
+        canonicalize_prediction(
+            "5",
+            question="What was Nintendo's limit on games per developer per year?",
+            supporting_texts=["Nintendo limited developers to five games per year."],
+        )
+        == "five"
+    )
+
+
 def test_canonicalize_prediction_restores_comma_number_surface_from_evidence() -> None:
     evidence = [
         EvidenceDocument(
@@ -109,6 +139,73 @@ def test_canonicalize_prediction_restores_language_descriptor_from_citation() ->
             ],
         )
         == "English-language"
+    )
+
+
+def test_canonicalize_prediction_restores_qualified_language_from_citation() -> None:
+    assert (
+        canonicalize_prediction(
+            "Latin",
+            question=(
+                "What was the language from which the last name Sylvester originated during "
+                "the era of the person crowned emperor of the west in 800 CE later known as?"
+            ),
+            supporting_texts=[
+                "By the reign of Charlemagne, the language had so diverged from the classical "
+                "that it was later called Medieval Latin."
+            ],
+        )
+        == "Medieval Latin"
+    )
+
+
+def test_canonicalize_prediction_prefers_qualified_answer_language_over_other_surface() -> None:
+    assert (
+        canonicalize_prediction(
+            "Latin",
+            question="What was the language Auctor comes from during the era?",
+            supporting_texts=[
+                "The Best Offer is an Italian English-language film.",
+                "By the reign of Charlemagne, the language had so diverged from the classical "
+                "that it was later called Medieval Latin.",
+            ],
+        )
+        == "Medieval Latin"
+    )
+
+
+def test_canonicalize_prediction_preserves_qualified_historical_country() -> None:
+    docs = [
+        EvidenceDocument(
+            id="context-1",
+            title="Women's football in East Germany",
+            text=(
+                "In the GDR women's football clubs existed since the late 1960s. "
+                "While local leagues existed since 1970 a national championship was first held "
+                "in 1979."
+            ),
+            score=1.0,
+            metadata={},
+        )
+    ]
+    assert (
+        canonicalize_prediction(
+            "Germany",
+            question=(
+                "In what country is women's football played in the country where a chancellor "
+                "held citizenship?"
+            ),
+            evidence_documents=docs,
+        )
+        == "GDR"
+    )
+    assert (
+        canonicalize_prediction(
+            "East Germany",
+            question="In what country is women's football played?",
+            evidence_documents=docs,
+        )
+        == "GDR"
     )
 
 
@@ -170,6 +267,30 @@ def test_canonicalize_prediction_strips_disambiguating_parenthetical() -> None:
     )
 
 
+def test_canonicalize_prediction_restores_source_date_surface() -> None:
+    assert (
+        canonicalize_prediction(
+            "2017-07-11",
+            question="When is the all-star game?",
+            supporting_texts=[
+                "The 2017 Major League Baseball All-Star Game was played on July 11, 2017."
+            ],
+        )
+        == "July 11, 2017"
+    )
+
+
+def test_canonicalize_prediction_restores_source_ordinal_surface() -> None:
+    assert (
+        canonicalize_prediction(
+            "3",
+            question="What rank is the region by population?",
+            supporting_texts=["The region is the third-largest by population."],
+        )
+        == "third-largest"
+    )
+
+
 def test_unsupported_placeholder_triggers_for_uncited_entity() -> None:
     evidence = [
         EvidenceDocument(
@@ -202,6 +323,14 @@ def test_none_triggers_repair_for_factoid_question() -> None:
     assert is_placeholder_or_unsupported(
         "none",
         question="Which actor/director directed the film?",
+        evidence_documents=[],
+    )
+
+
+def test_never_triggers_repair_for_factoid_question() -> None:
+    assert is_placeholder_or_unsupported(
+        "never",
+        question="When did the team beat its opponent?",
         evidence_documents=[],
     )
 

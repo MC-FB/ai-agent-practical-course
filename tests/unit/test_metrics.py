@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from types import SimpleNamespace
 
 import dagqa.eval.benchmark as benchmark_module
 from dagqa.config import AppConfig, BenchmarkConfig
@@ -9,6 +10,7 @@ from dagqa.eval.benchmark import (
     _aggregate,
     _evaluate_evidence_citations,
     _extract_answer,
+    _recover_evidence_pattern_answer,
     _run_example,
     _run_examples,
     _sample_examples,
@@ -135,6 +137,76 @@ async def test_run_examples_retries_empty_predictions(monkeypatch) -> None:
 
 def test_extract_answer_accepts_single_named_answer_field() -> None:
     assert _extract_answer({"earlier_person": "Ada Lovelace"}) == "Ada Lovelace"
+
+
+def test_extract_answer_prefers_concise_source_span_for_bare_number() -> None:
+    assert _extract_answer({"answer": 8.11, "answer_source_span": "8.11 million"}) == "8.11 million"
+
+
+def test_extract_answer_keeps_answer_when_source_span_is_explanatory() -> None:
+    assert (
+        _extract_answer({"answer": "Ada Lovelace", "answer_source_span": "Ada Lovelace: 1815"})
+        == "Ada Lovelace"
+    )
+
+
+def test_recover_evidence_pattern_answer_finds_capital_duration_from_trace_location() -> None:
+    run = SimpleNamespace(
+        nodes=[
+            SimpleNamespace(returned_value={"city": "Yangzhou"}),
+            SimpleNamespace(returned_value={"answer": "0"}),
+        ]
+    )
+    documents = [
+        EvidenceDocument(
+            id="context-0",
+            title="Nanjing",
+            text="Nanjing had been the capital city of Yangzhou for about 400 years.",
+        )
+    ]
+
+    assert (
+        _recover_evidence_pattern_answer(
+            "How long had X been the capitol city of Y's headquarters location?",
+            "0",
+            run,
+            documents,
+        )
+        == "about 400 years"
+    )
+
+
+def test_recover_evidence_pattern_answer_finds_latest_table_win_against_opponent() -> None:
+    run = SimpleNamespace(
+        nodes=[
+            SimpleNamespace(
+                label="Identify cup winner",
+                returned_value={"team": "Aston Villa", "bridge_answer": "Aston Villa"},
+            )
+        ]
+    )
+    documents = [
+        EvidenceDocument(
+            id="context-0",
+            title="Second City derby",
+            text=(
+                "Date Venue Home team Score Competition "
+                "23 March 1901 Muntz Street Small Heath 0 -- 0 FA Cup "
+                "1 December 2010 St Andrew's Birmingham City 2 -- 1 League Cup "
+                "22 September 2015 Villa Park Aston Villa 1 -- 0 League Cup"
+            ),
+        )
+    ]
+
+    assert (
+        _recover_evidence_pattern_answer(
+            "When was the last time George Hollis's team beat the 1894-95 FA Cup winner?",
+            "never",
+            run,
+            documents,
+        )
+        == "1 December 2010"
+    )
 
 
 async def test_benchmark_passes_hotpot_context_to_dag_agent() -> None:
