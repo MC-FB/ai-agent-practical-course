@@ -73,12 +73,8 @@ class PlannerSelection(BaseModel):
     Bounds mirror the frontend slider ranges and reject out-of-range values.
     """
 
-    max_nodes: int | None = Field(
-        default_factory=lambda: load_config().planner.max_nodes, ge=1, le=30
-    )
-    max_depth: int | None = Field(
-        default_factory=lambda: load_config().planner.max_depth, ge=1, le=8
-    )
+    max_nodes: int | None = Field(default=None, ge=1, le=30)
+    max_depth: int | None = Field(default=None, ge=1, le=8)
 
 
 class AskRequest(BaseModel):
@@ -164,8 +160,10 @@ def _azure_llm_config() -> LLMConfig:
 def _benchmark_subset_path(request: BenchmarkRequest) -> str | None:
     if request.data_path:
         return request.data_path
-    subset = BENCHMARK_SUBSETS[request.subset]
-    return subset["path"]
+    try:
+        return get_benchmark_dataset(request.dataset).subset(request.subset).path
+    except ValueError:
+        return None
 
 
 def _benchmark_subset_label(subset: str, dataset: str = "hotpotqa") -> str:
@@ -237,21 +235,37 @@ def config_for_selection(
     return _with_planner_override(cfg, planner)
 
 
+def _config_for_benchmark_dataset(cfg: AppConfig, dataset: str) -> AppConfig:
+    if dataset == "musique" and cfg.planner.max_depth < MUSIQUE_BENCHMARK_MAX_DEPTH:
+        return cfg.model_copy(
+            update={
+                "planner": cfg.planner.model_copy(update={"max_depth": MUSIQUE_BENCHMARK_MAX_DEPTH})
+            }
+        )
+    return cfg
+
+
+async def validated_config_for_selection(
+    selection: LLMSelection | None = None,
+    planner: PlannerSelection | None = None,
+) -> AppConfig:
+    cfg = config_for_selection(selection, planner)
+    if selection is not None and selection.provider == "cluster":
+        available = await _cluster_models()
+        if selection.model not in available:
+            raise HTTPException(
+                status_code=422,
+                detail=f"""Model '{selection.model}' is not available.
+                Available models: {", ".join(available)}""",
+            )
+    return cfg
+
+
 def client(
     selection: LLMSelection | None = None,
     planner: PlannerSelection | None = None,
 ) -> DagQaClient:
     return DagQaClient(config_for_selection(selection, planner))
-
-
-def _config_for_benchmark_dataset(config: AppConfig, dataset: str) -> AppConfig:
-    if dataset != "musique" or config.planner.max_depth >= MUSIQUE_BENCHMARK_MAX_DEPTH:
-        return config
-    return config.model_copy(
-        update={
-            "planner": config.planner.model_copy(update={"max_depth": MUSIQUE_BENCHMARK_MAX_DEPTH})
-        }
-    )
 
 
 async def _cluster_models() -> list[str]:
@@ -334,7 +348,7 @@ async def plan(request: AskRequest) -> dict[str, Any]:
 
 @router.post("/execute")
 async def execute(request: ExecuteRequest) -> dict[str, Any]:
-    run = await (await validated_client()).execute(parse_plan(request.plan_yaml))
+    run = await client().execute(parse_plan(request.plan_yaml))
     RUNS[run.run_id] = run
     payload = run.model_dump(mode="json")
     payload["mermaid"] = render_mermaid(run.plan, run.nodes)
@@ -503,7 +517,7 @@ async def hotpotqa(request: BenchmarkRequest) -> BenchmarkResult:
     systems = _benchmark_systems(request)
     if len(systems) != 1:
         raise HTTPException(status_code=422, detail="Use the live endpoint for paired benchmarks.")
-    dag_client = await validated_client(request.llm)
+    dag_client = client(request.llm, request.planner)
     data_path = _benchmark_subset_path(request)
     result = await benchmark_dataset(
         dag_client,
@@ -541,7 +555,7 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
     run_id = str(uuid4())
     systems = _benchmark_systems(request)
     comparison_group_id = str(uuid4()) if len(systems) == PAIRED_SYSTEM_COUNT else None
-    cfg = await validated_config_for_selection(request.llm)
+    cfg = config_for_selection(request.llm, request.planner)
     dag_client = DagQaClient(cfg)
     seed = request.seed if request.seed is not None else int(time.time_ns() % 2_147_483_647)
     data_path = _benchmark_subset_path(request)
@@ -672,7 +686,7 @@ async def hotpotqa_preflight(request: BenchmarkRequest) -> BenchmarkPreflightRes
         add("dataset", False, f"Dataset could not be loaded: {exc}")
 
     try:
-        cfg = await validated_config_for_selection(request.llm)
+        cfg = config_for_selection(request.llm, request.planner)
         add(
             "configuration",
             True,
@@ -796,7 +810,7 @@ async def resume_live_benchmark(
     if request is not None and request.llm is not None:
         benchmark_request.llm = request.llm
     systems = _benchmark_systems(benchmark_request)
-    cfg = await validated_config_for_selection(benchmark_request.llm)
+    cfg = config_for_selection(benchmark_request.llm, benchmark_request.planner)
     dag_client = DagQaClient(cfg)
     stop_event = asyncio.Event()
     LIVE_BENCHMARK_STOPS[run_id] = stop_event

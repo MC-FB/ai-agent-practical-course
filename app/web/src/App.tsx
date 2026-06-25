@@ -203,25 +203,23 @@ function TreeParametersControl({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <section className="panel-section">
-      <div
-        className="section-header cursor-pointer select-none"
+    <div className="rounded-lg border border-slate-200 bg-slate-50/70">
+      <button
+        className="flex w-full items-center justify-between gap-3 p-3 text-left"
         onClick={() => setOpen((value) => !value)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setOpen((v) => !v); }}
-        role="button"
-        tabIndex={0}
+        type="button"
       >
-        <div>
-          <h2>Tree parameters</h2>
-          <span>{maxNodes} nodes · depth {maxDepth}</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <GitBranch size={18} />
+        <span className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+          <GitBranch size={16} />
+          Tree parameters
+        </span>
+        <span className="flex items-center gap-2 text-xs font-medium text-slate-500">
+          {maxNodes} nodes · depth {maxDepth}
           <ChevronDown className={`transition-transform ${open ? "rotate-180" : ""}`} size={16} />
-        </div>
-      </div>
+        </span>
+      </button>
       {open && (
-        <div className="grid gap-4 p-3">
+        <div className="grid gap-4 border-t border-slate-200 p-3">
           <TreeParamSlider
             label="Max nodes"
             max={TREE_PARAM_BOUNDS.max_nodes.max}
@@ -238,7 +236,7 @@ function TreeParametersControl({
           />
         </div>
       )}
-    </section>
+    </div>
   );
 }
 const RECORD_TABLE_INITIAL_ROWS = 80;
