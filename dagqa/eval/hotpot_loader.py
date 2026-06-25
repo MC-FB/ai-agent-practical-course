@@ -42,7 +42,7 @@ def count_hotpot_examples(path: str | Path | None = None) -> int:
 
 
 def _load_from_json(path: str | Path) -> Iterator[HotpotExample]:
-    data = json.loads(Path(path).read_text())
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
     records: list[dict[str, Any]]
     if isinstance(data, list):
         records = data
