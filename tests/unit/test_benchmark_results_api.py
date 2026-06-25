@@ -88,6 +88,39 @@ def test_normalize_saved_benchmark_record_rebuilds_missing_mermaid() -> None:
     assert "click answer dagqaSelectGraphNode" in run_trace["mermaid"]
 
 
+def test_repair_benchmark_payload_upgrades_legacy_records_to_metric_scores(tmp_path) -> None:
+    path = tmp_path / "legacy.json"
+    payload = {
+        "records": [
+            {
+                "id": "1",
+                "question": "q",
+                "gold_answer": "Paris",
+                "prediction": "Paris",
+                "exact_match": 1.0,
+                "f1": 1.0,
+                "latency_ms": 1,
+            }
+        ],
+        "metrics": {"exact_match": 1.0, "f1": 1.0},
+    }
+    path.write_text(json.dumps(payload))
+
+    repaired = api._repair_benchmark_payload(json.loads(path.read_text()), path)
+
+    record = repaired["records"][0]
+    assert record["metric_scores"]["exact_match"] == 1.0
+    assert record["metric_scores"]["f1"] == 1.0
+    # cosine_sim is backfilled (Paris == Paris -> 1.0) and folded into metric_scores
+    assert record["metric_scores"]["cosine_sim"] == 1.0
+    assert "cosine_sim" in repaired["metrics"]
+    # Legacy top-level keys are kept for the frontend/scripts
+    assert record["exact_match"] == 1.0
+    # The upgraded format is persisted back to disk
+    on_disk = json.loads(path.read_text())
+    assert "metric_scores" in on_disk["records"][0]
+
+
 def test_normalize_saved_benchmark_payload_backfills_dataset_size(monkeypatch) -> None:
     monkeypatch.setattr(
         api,
