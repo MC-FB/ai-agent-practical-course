@@ -106,22 +106,6 @@ export async function getAppConfig(): Promise<AppConfigResponse> {
   return response.json();
 }
 
-export type PlannerSelection = {
-  max_nodes?: number;
-  max_depth?: number;
-};
-
-export type AppConfigResponse = {
-  planner: { max_nodes: number; max_depth: number };
-  [key: string]: unknown;
-};
-
-export async function getAppConfig(): Promise<AppConfigResponse> {
-  const response = await fetch("/api/config");
-  if (!response.ok) throw new Error(await response.text());
-  return response.json();
-}
-
 export class ApiError extends Error {
   status: number;
 
@@ -168,11 +152,6 @@ export async function ask(
   llm: LLMSelection,
   planner?: PlannerSelection,
 ): Promise<RunTrace> {
-export async function ask(
-  question: string,
-  llm: LLMSelection,
-  planner?: PlannerSelection,
-): Promise<RunTrace> {
   const response = await fetch("/api/ask", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -182,17 +161,13 @@ export async function ask(
   return response.json();
 }
 
+
 export async function getLLMModels(): Promise<LLMModelCatalog> {
   const response = await fetch("/api/llm/models");
   if (!response.ok) throw new Error(await response.text());
   return response.json();
 }
 
-export async function startLiveAsk(
-  question: string,
-  llm: LLMSelection,
-  planner?: PlannerSelection,
-): Promise<LiveRun> {
 export async function startLiveAsk(
   question: string,
   llm: LLMSelection,
