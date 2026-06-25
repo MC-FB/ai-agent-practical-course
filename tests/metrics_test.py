@@ -27,35 +27,35 @@ from dagqa.eval.metrics import answer_f1, cosine_sim, exact_match
 class TestExactMatch:
     def test_identical_strings(self):
         """Identical input → perfect match."""
-        assert exact_match("Paris", "Paris") == 1.0
+        assert exact_match("Paris", "Paris", "") == 1.0
 
     def test_completely_different(self):
         """No similarity at all → no match."""
-        assert exact_match("Paris", "London") == 0.0
+        assert exact_match("Paris", "London", "") == 0.0
 
     def test_case_insensitive(self):
         """Normalisation lowercases before comparing."""
-        assert exact_match("Paris", "paris") == 1.0
+        assert exact_match("Paris", "paris", "") == 1.0
 
     def test_leading_trailing_whitespace(self):
         """Extra whitespace is collapsed by the normaliser."""
-        assert exact_match("  Paris  ", "Paris") == 1.0
+        assert exact_match("  Paris  ", "Paris", "") == 1.0
 
     def test_article_stripped(self):
         """'a', 'an', 'the' are removed before comparing."""
-        assert exact_match("The Eiffel Tower", "Eiffel Tower") == 1.0
+        assert exact_match("The Eiffel Tower", "Eiffel Tower", "") == 1.0
 
     def test_punctuation_stripped(self):
         """Punctuation is removed before comparing."""
-        assert exact_match("hello!", "hello") == 1.0
+        assert exact_match("hello!", "hello", "") == 1.0
 
     def test_both_empty_strings(self):
         """Two empty strings are equal."""
-        assert exact_match("", "") == 1.0
+        assert exact_match("", "", "") == 1.0
 
     def test_one_empty_string(self):
         """Empty prediction vs non-empty ground truth → no match."""
-        assert exact_match("", "Paris") == 0.0
+        assert exact_match("", "Paris", "") == 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -66,23 +66,23 @@ class TestExactMatch:
 class TestAnswerF1:
     def test_identical_sentences(self):
         """Perfect token overlap → F1 of 1.0."""
-        assert answer_f1("cat sat mat", "cat sat mat") == 1.0
+        assert answer_f1("cat sat mat", "cat sat mat", "") == 1.0
 
     def test_no_token_overlap(self):
         """Zero tokens in common → F1 of 0.0."""
-        assert answer_f1("cat", "dog") == 0.0
+        assert answer_f1("cat", "dog", "") == 0.0
 
     def test_both_empty(self):
         """Both empty → treated as equal (special branch in implementation)."""
-        assert answer_f1("", "") == 1.0
+        assert answer_f1("", "", "") == 1.0
 
     def test_prediction_empty(self):
         """Empty prediction, non-empty ground truth → F1 of 0.0."""
-        assert answer_f1("", "cat") == 0.0
+        assert answer_f1("", "cat", "") == 0.0
 
     def test_ground_truth_empty(self):
         """Non-empty prediction, empty ground truth → F1 of 0.0."""
-        assert answer_f1("cat", "") == 0.0
+        assert answer_f1("cat", "", "") == 0.0
 
     def test_partial_overlap(self):
         """Prediction is a strict subset of ground truth.
@@ -94,11 +94,11 @@ class TestAnswerF1:
         recall    = 2/3
         F1        = 2 * 1.0 * (2/3) / (1.0 + 2/3) = 0.8
         """
-        assert answer_f1("cat sat", "cat sat mat") == pytest.approx(0.8)
+        assert answer_f1("cat sat", "cat sat mat", "") == pytest.approx(0.8)
 
     def test_same_words_different_order(self):
         """F1 is bag-of-words — word order does not matter."""
-        assert answer_f1("A B C", "C B A") == 1.0
+        assert answer_f1("A B C", "C B A", "") == 1.0
 
     def test_repeated_tokens_in_prediction(self):
         """Counter intersection handles duplicates correctly.
@@ -110,7 +110,7 @@ class TestAnswerF1:
         recall    = 1/1 = 1.0
         F1        = 2 * 0.5 * 1.0 / (0.5 + 1.0) = 2/3 ≈ 0.6667
         """
-        assert answer_f1("cat cat", "cat") == pytest.approx(2 / 3)
+        assert answer_f1("cat cat", "cat", "") == pytest.approx(2 / 3)
 
 
 # ---------------------------------------------------------------------------
@@ -130,19 +130,19 @@ class TestCosineSim:
 
     def test_identical_strings_fast_path(self):
         """Identical strings short-circuit to 1.0 immediately."""
-        assert cosine_sim("hello", "hello") == 1.0
+        assert cosine_sim("hello", "hello", "") == 1.0
 
     def test_empty_prediction_fast_path(self):
         """Empty prediction short-circuits to 0.0 immediately."""
-        assert cosine_sim("", "hello") == 0.0
+        assert cosine_sim("", "hello", "") == 0.0
 
     def test_empty_ground_truth_fast_path(self):
         """Empty ground truth short-circuits to 0.0 immediately."""
-        assert cosine_sim("hello", "") == 0.0
+        assert cosine_sim("hello", "", "") == 0.0
 
     def test_both_empty_fast_path(self):
         """Both empty — the '' == '' branch fires first, returning 1.0."""
-        assert cosine_sim("", "") == 1.0
+        assert cosine_sim("", "", "") == 1.0
 
     # --- math cases (mock the model) ----------------------------------------
 
@@ -163,7 +163,7 @@ class TestCosineSim:
         fake_model = self._make_mock(embeddings)
 
         with patch("dagqa.eval.metrics._sentence_transformer", return_value=fake_model):
-            result = cosine_sim("anything", "something else")
+            result = cosine_sim("anything", "something else", "")
 
         assert result == pytest.approx(1 / np.sqrt(2), abs=1e-5)
 
@@ -177,7 +177,7 @@ class TestCosineSim:
         fake_model = self._make_mock(embeddings)
 
         with patch("dagqa.eval.metrics._sentence_transformer", return_value=fake_model):
-            result = cosine_sim("anything", "something else")
+            result = cosine_sim("anything", "something else", "")
 
         assert result == pytest.approx(0.0, abs=1e-5)
 
@@ -192,6 +192,6 @@ class TestCosineSim:
         fake_model = self._make_mock(embeddings)
 
         with patch("dagqa.eval.metrics._sentence_transformer", return_value=fake_model):
-            result = cosine_sim("anything", "something else")
+            result = cosine_sim("anything", "something else", "")
 
         assert result == pytest.approx(1.0, abs=1e-5)
