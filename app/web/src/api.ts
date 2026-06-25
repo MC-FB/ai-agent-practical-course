@@ -223,6 +223,7 @@ export type HotpotBenchmarkRecord = {
   exact_match: number;
   f1: number;
   cosine_sim: number;
+  metric_scores?: Record<string, number>;
   latency_ms: number;
   llm_call_count?: number | null;
   llm_retry_count?: number | null;
