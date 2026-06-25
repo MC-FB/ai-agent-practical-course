@@ -161,6 +161,7 @@ export async function ask(
   return response.json();
 }
 
+
 export async function getLLMModels(): Promise<LLMModelCatalog> {
   const response = await fetch("/api/llm/models");
   if (!response.ok) throw new Error(await response.text());
