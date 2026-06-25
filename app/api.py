@@ -85,6 +85,7 @@ class AskRequest(BaseModel):
     question: str
     llm: LLMSelection | None = None
     planner: PlannerSelection | None = None
+    planner: PlannerSelection | None = None
 
 
 class ExecuteRequest(BaseModel):
@@ -202,6 +203,19 @@ def _with_planner_override(cfg: AppConfig, planner: PlannerSelection | None) -> 
     return cfg.model_copy(update={"planner": cfg.planner.model_copy(update=updates)})
 
 
+def _with_planner_override(cfg: AppConfig, planner: PlannerSelection | None) -> AppConfig:
+    if planner is None:
+        return cfg
+    updates = {
+        key: value
+        for key, value in (("max_nodes", planner.max_nodes), ("max_depth", planner.max_depth))
+        if value is not None
+    }
+    if not updates:
+        return cfg
+    return cfg.model_copy(update={"planner": cfg.planner.model_copy(update=updates)})
+
+
 def config_for_selection(
     selection: LLMSelection | None = None,
     planner: PlannerSelection | None = None,
@@ -212,6 +226,7 @@ def config_for_selection(
         cfg = config.model_copy(
             update={"llm": config.llm.model_copy(update={"model": resolved, "model_env": None})}
         )
+        return _with_planner_override(cfg, planner)
         return _with_planner_override(cfg, planner)
 
     model = selection.model.strip()
