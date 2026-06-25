@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field, model_validator
 
 from dagqa.client import DagQaClient
 from dagqa.eval.answer_postprocess import (
@@ -25,7 +25,7 @@ from dagqa.eval.datasets import (
     load_benchmark_examples,
 )
 from dagqa.eval.hotpot_loader import HotpotExample
-from dagqa.eval.metrics import answer_f1, cosine_sim, exact_match
+from dagqa.eval.metrics import ANSWER_METRICS, MetricSample
 from dagqa.graph.render import render_mermaid
 from dagqa.nodes.output_validation import parse_node_output
 from dagqa.nodes.prompts import render_evidence_section
@@ -69,9 +69,7 @@ class BenchmarkRecord(BaseModel):
     gold_answer: str
     prediction: str
     raw_prediction: str | None = None
-    exact_match: float
-    f1: float
-    cosine_sim: float = 0.0
+    metric_scores: dict[str, float] = Field(default_factory=dict)
     latency_ms: float
     llm_call_count: int | None = None
     llm_retry_count: int | None = None
@@ -88,6 +86,40 @@ class BenchmarkRecord(BaseModel):
     gold_supporting_fact_recall: float | None = None
     run_trace: dict[str, Any] | None = None
     error: str | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_metric_scores(cls, data: Any) -> Any:
+        """Fold legacy top-level metric keys into ``metric_scores``.
+
+        Keeps old JSON payloads and call sites that still pass ``exact_match=`` /
+        ``f1=`` / ``cosine_sim=`` working after the switch to a dynamic metric dict.
+        """
+        if not isinstance(data, dict) or data.get("metric_scores"):
+            return data
+        scores = {
+            metric.name: data[metric.name]
+            for metric in ANSWER_METRICS
+            if data.get(metric.name) is not None
+        }
+        if scores:
+            data = {**data, "metric_scores": scores}
+        return data
+
+    @computed_field
+    @property
+    def exact_match(self) -> float:
+        return self.metric_scores.get("exact_match", 0.0)
+
+    @computed_field
+    @property
+    def f1(self) -> float:
+        return self.metric_scores.get("f1", 0.0)
+
+    @computed_field
+    @property
+    def cosine_sim(self) -> float:
+        return self.metric_scores.get("cosine_sim", 0.0)
 
 
 class BenchmarkResult(BaseModel):
@@ -478,9 +510,9 @@ async def _run_example(  # noqa: PLR0912, PLR0915
             gold_answer=example.answer,
             prediction=prediction,
             raw_prediction=raw_prediction if raw_prediction != prediction else None,
-            exact_match=exact_match(prediction, example.answer),
-            f1=answer_f1(prediction, example.answer),
-            cosine_sim=cosine_sim(prediction, example.answer),
+            metric_scores={
+                metric.name: metric.score(prediction, example.answer) for metric in ANSWER_METRICS
+            },
             latency_ms=(time.perf_counter() - started) * 1000,
             llm_call_count=llm_call_count,
             llm_retry_count=llm_retry_count,
@@ -503,9 +535,7 @@ async def _run_example(  # noqa: PLR0912, PLR0915
             question=example.question,
             gold_answer=example.answer,
             prediction="",
-            exact_match=0.0,
-            f1=0.0,
-            cosine_sim=-1.5,
+            metric_scores={metric.name: metric.error_default for metric in ANSWER_METRICS},
             latency_ms=(time.perf_counter() - started) * 1000,
             structural_failure=True,
             error=str(exc),
@@ -619,9 +649,9 @@ async def _dag_failure_fallback_record(
         gold_answer=example.answer,
         prediction=prediction,
         raw_prediction=raw_prediction if raw_prediction != prediction else None,
-        exact_match=exact_match(prediction, example.answer),
-        f1=answer_f1(prediction, example.answer),
-        cosine_sim=cosine_sim(prediction, example.answer),
+        metric_scores={
+            metric.name: metric.score(prediction, example.answer) for metric in ANSWER_METRICS
+        },
         latency_ms=(time.perf_counter() - started) * 1000,
         llm_call_count=1,
         llm_retry_count=int(response.metadata.get("retry_count", 0)),
@@ -703,9 +733,7 @@ def _failed_direct_record(
         question=example.question,
         gold_answer=example.answer,
         prediction="",
-        exact_match=0.0,
-        f1=0.0,
-        cosine_sim=-1.5,
+        metric_scores={metric.name: metric.error_default for metric in ANSWER_METRICS},
         latency_ms=duration_ms,
         llm_call_count=1,
         node_count=1,
@@ -1236,19 +1264,23 @@ def _aggregate(records: list[BenchmarkRecord]) -> dict[str, float]:
     ]
     sorted_latencies = sorted(record.latency_ms for record in records)
     p50_latency_ms = sorted_latencies[len(sorted_latencies) // 2]
-    cosine_values = [
-        cosine_sim(record.prediction, record.gold_answer)
-        for record in records
-        if record.prediction or record.gold_answer
-    ]
+    metric_aggregates = {}
+    for metric in ANSWER_METRICS:
+        samples = [
+            MetricSample(
+                record.metric_scores.get(metric.name, 0.0),
+                record.prediction,
+                record.gold_answer,
+            )
+            for record in records
+        ]
+        metric_aggregates[metric.name] = metric.aggregate(samples)
     return {
         "example_count": float(len(records)),
         "success_count": float(success_count),
         "failure_count": float(failure_count),
         "error_count": float(error_count),
-        "exact_match": sum(record.exact_match for record in records) / len(records),
-        "f1": sum(record.f1 for record in records) / len(records),
-        "cosine_sim": sum(cosine_values) / len(cosine_values) if cosine_values else 0.0,
+        **metric_aggregates,
         "avg_latency_ms": sum(record.latency_ms for record in records) / len(records),
         "p50_latency_ms": p50_latency_ms,
         "total_llm_call_count": float(sum(llm_call_records)),
