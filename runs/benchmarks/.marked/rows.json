@@ -22,27 +22,6 @@
       "reference_gold_recall": 0.5
     },
     {
-      "key": "66bf2f2e-b4c8-4e48-96e2-673f78d48c40:7b362159-b3fd-4385-9d83-5317606dfe9c:3hop1__379315_160713_77246",
-      "record_id": "3hop1__379315_160713_77246",
-      "focus_run_id": "66bf2f2e-b4c8-4e48-96e2-673f78d48c40",
-      "reference_run_id": "7b362159-b3fd-4385-9d83-5317606dfe9c",
-      "focus_run_name": "bigger_run",
-      "reference_run_name": "bigger_run",
-      "focus_system": "dag_agent",
-      "reference_system": "direct_llm",
-      "model": "mistralai/Mistral-Medium-3.5-128B",
-      "created_at": "2026-06-22T08:01:25Z",
-      "seed": 1713121241,
-      "question": "What is the Arabic dictionary meaning of the word referring to the majority religion in the area of British India, that became India when the country containing Barawal was formed?",
-      "gold_answer": "the country of India",
-      "focus_prediction": "failed",
-      "reference_prediction": "Hindu",
-      "focus_cosine_sim": 0.0,
-      "reference_cosine_sim": 0.46815407276153564,
-      "focus_gold_recall": 0.6666666666666666,
-      "reference_gold_recall": 0.3333333333333333
-    },
-    {
       "key": "66bf2f2e-b4c8-4e48-96e2-673f78d48c40:7b362159-b3fd-4385-9d83-5317606dfe9c:4hop3__661103_698586_91248_54362",
       "record_id": "4hop3__661103_698586_91248_54362",
       "focus_run_id": "66bf2f2e-b4c8-4e48-96e2-673f78d48c40",

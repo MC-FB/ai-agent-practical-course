@@ -33,6 +33,10 @@ def _sentence_transformer() -> SentenceTransformer:
     return SentenceTransformer("sentence-transformers/all-mpnet-base-v2", device=get_device())
 
 
+def mini_l6_sentence_transformer() -> SentenceTransformer:
+    return SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", device=get_device())
+
+
 def normalize_answer(text: str) -> str:
     def remove_articles(value: str) -> str:
         return re.sub(r"\b(a|an|the)\b", " ", value)
@@ -73,6 +77,60 @@ def cosine_sim(prediction: str, ground_truth: str, _question: str) -> float:
         return 0.0
 
     model = _sentence_transformer()
+    pred_embedding, gt_embedding = model.encode([prediction, ground_truth])
+
+    pred_mag = np.linalg.norm(pred_embedding)
+    gt_mag = np.linalg.norm(gt_embedding)
+
+    if pred_mag == 0.0 or gt_mag == 0.0:
+        return 0.0
+
+    norm_pred_embedding = pred_embedding / pred_mag
+    norm_gt_embedding = gt_embedding / gt_mag
+
+    metric = np.dot(norm_pred_embedding, norm_gt_embedding)
+    return float(metric)
+
+
+def context_cosine_sim(prediction: str, ground_truth: str, question: str) -> float:
+    if prediction == ground_truth:
+        return 1.0
+
+    if prediction == "" or ground_truth == "":
+        return 0.0
+
+    context_prediction = question + prediction
+    context_ground_truth = question + ground_truth
+
+    model = _sentence_transformer()
+    context_pred_embedding, context_gt_embedding, que_embedding = model.encode(
+        [context_prediction, context_ground_truth, question]
+    )
+
+    pred_embedding = context_pred_embedding - que_embedding
+    gt_embedding = context_gt_embedding - que_embedding
+
+    pred_mag = np.linalg.norm(pred_embedding)
+    gt_mag = np.linalg.norm(gt_embedding)
+
+    if pred_mag == 0.0 or gt_mag == 0.0:
+        return 0.0
+
+    norm_pred_embedding = pred_embedding / pred_mag
+    norm_gt_embedding = gt_embedding / gt_mag
+
+    metric = np.dot(norm_pred_embedding, norm_gt_embedding)
+    return float(metric)
+
+
+def mini_l6_cosine_sim(prediction: str, ground_truth: str, _question: str) -> float:
+    if prediction == ground_truth:
+        return 1.0
+
+    if prediction == "" or ground_truth == "":
+        return 0.0
+
+    model = mini_l6_sentence_transformer()
     pred_embedding, gt_embedding = model.encode([prediction, ground_truth])
 
     pred_mag = np.linalg.norm(pred_embedding)
@@ -129,4 +187,5 @@ ANSWER_METRICS: list[Metric] = [
     Metric("exact_match", exact_match),
     Metric("f1", answer_f1),
     Metric("cosine_sim", cosine_sim, aggregate=_cosine_mean),
+    Metric("context_cosine_sim", context_cosine_sim),
 ]

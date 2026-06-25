@@ -651,7 +651,8 @@ async def _dag_failure_fallback_record(
         prediction=prediction,
         raw_prediction=raw_prediction if raw_prediction != prediction else None,
         metric_scores={
-            metric.name: metric.score(prediction, example.answer) for metric in ANSWER_METRICS
+            metric.name: metric.score(prediction, example.answer, example.question)
+            for metric in ANSWER_METRICS
         },
         latency_ms=(time.perf_counter() - started) * 1000,
         llm_call_count=1,

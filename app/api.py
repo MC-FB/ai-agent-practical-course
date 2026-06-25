@@ -1730,6 +1730,14 @@ def _normalize_benchmark_record(record: dict[str, Any]) -> dict[str, Any]:
         "exact_match": record.get("exact_match") or 0,
         "f1": record.get("f1") or 0,
         "cosine_sim": record.get("cosine_sim") if record.get("cosine_sim") is not None else 0,
+        # Carry the dynamic metric registry through so newly added metrics survive normalization.
+        # Fall back to the legacy named fields (never an empty dict) for pre-metric_scores runs.
+        "metric_scores": record.get("metric_scores")
+        or {
+            name: value
+            for name in ("exact_match", "f1", "cosine_sim")
+            if (value := record.get(name)) is not None
+        },
         "latency_ms": record.get("latency_ms") or 0,
         "llm_call_count": record.get("llm_call_count"),
         "llm_retry_count": record.get("llm_retry_count"),
