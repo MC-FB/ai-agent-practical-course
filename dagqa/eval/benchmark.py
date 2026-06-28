@@ -494,10 +494,6 @@ async def _run_example(  # noqa: PLR0912, PLR0915
             run_trace=run_trace,
         )
     except Exception as exc:
-        if system != "direct_llm":
-            fallback = await _dag_failure_fallback_record(client, example, started, exc)
-            if fallback is not None:
-                return fallback
         return BenchmarkRecord(
             id=example.id,
             question=example.question,

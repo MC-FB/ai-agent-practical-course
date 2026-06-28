@@ -115,6 +115,11 @@ DATASETS: dict[str, BenchmarkDataset] = {
                 label="MuSiQue validation, 3+ hops",
                 path=None,
             ),
+            "marked_failures_2026_06_28": BenchmarkSubsetInfo(
+                id="marked_failures_2026_06_28",
+                label="Marked MuSiQue failures, 2026-06-28",
+                path="data/musique/marked_failures_2026_06_28.json",
+            ),
         },
         load=_load_musique_subset,
         count=_count_musique_subset,

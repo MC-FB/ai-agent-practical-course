@@ -16,6 +16,7 @@ from dagqa.nodes.output_validation import (
     coerce_output_to_schema,
     parse_node_output,
     validate_evidence_citations,
+    validate_factual_output_grounding,
     validate_node_output,
 )
 from dagqa.nodes.prompts import node_output_schema, render_node_prompt, render_repair_prompt
@@ -47,6 +48,9 @@ class NodeRunner:
         node: DagNode,
         outputs: dict[str, dict[str, Any]],
         evidence_documents: list[EvidenceDocument] | None = None,
+        original_question: str | None = None,
+        *,
+        is_final: bool = False,
     ) -> NodeTrace:
         started_perf = time.perf_counter()
         started_at = datetime.now(UTC).isoformat()
@@ -68,6 +72,7 @@ class NodeRunner:
                 dependency_values,
                 outputs,
                 supporting_evidence,
+                original_question=original_question,
             )
             trace.dependency_values = dependency_values
             trace.resolved_question = resolved_question
@@ -81,6 +86,7 @@ class NodeRunner:
                 raw_response,
                 supporting_evidence,
                 trace,
+                is_final=is_final,
             )
             trace.parsed_output = parsed
             if parsed is not None:
@@ -109,11 +115,13 @@ class NodeRunner:
         raw_response: str,
         supporting_evidence: EvidenceSelection | None,
         trace: NodeTrace,
+        *,
+        is_final: bool = False,
     ) -> tuple[dict[str, Any] | None, ValidationResult]:
         current_raw = raw_response
         last_output: dict[str, Any] | None = None
         last_validation = ValidationResult(valid=False, errors=["No validation attempted."])
-        schema = node_output_schema(node, supporting_evidence)
+        schema = node_output_schema(node, supporting_evidence, is_final=is_final)
 
         for attempt in range(self.execution.node_repair_rounds + 1):
             try:
@@ -123,10 +131,16 @@ class NodeRunner:
             else:
                 last_output = coerce_output_to_schema(last_output, schema)
                 last_validation = validate_node_output(last_output, schema)
-                if last_validation.valid:
+                if last_validation.valid and is_final:
                     last_validation = validate_evidence_citations(
                         last_output,
                         supporting_evidence,
+                    )
+                if last_validation.valid and is_final:
+                    last_validation = validate_factual_output_grounding(
+                        last_output,
+                        supporting_evidence,
+                        node.task_type,
                     )
                 if last_validation.valid:
                     return last_output, last_validation

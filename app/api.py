@@ -1121,7 +1121,7 @@ def hotpotqa_meta(
     dataset_info = get_benchmark_dataset(dataset)
     resolved_path = data_path or dataset_info.subset(subset).path
     total_examples = count_benchmark_examples(dataset, subset, resolved_path)
-    default_limit = _benchmark_default_limit(cfg, dataset, subset, data_path)
+    default_limit = _benchmark_default_limit(cfg, dataset, subset, resolved_path)
     return {
         "dataset": dataset_info.id,
         "dataset_label": dataset_info.label,

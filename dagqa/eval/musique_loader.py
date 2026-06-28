@@ -66,7 +66,7 @@ def _filter_rows(rows: Iterable[dict[str, Any]], subset: str) -> Iterator[dict[s
     for row in rows:
         if subset == "validation_3hop_plus" and _decomposition_length(row) < MUSIQUE_MIN_HARD_HOPS:
             continue
-        if subset not in {"validation", "validation_3hop_plus"}:
+        if subset not in {"validation", "validation_3hop_plus", "marked_failures_2026_06_28"}:
             raise ValueError(f"Unknown MuSiQue subset: {subset}")
         yield row
 

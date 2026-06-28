@@ -95,9 +95,9 @@ async def test_cluster_planner_uses_structured_json_schema(monkeypatch) -> None:
     monkeypatch.setenv("CLUSTER_API_KEY", "secret")
     monkeypatch.setattr(planner, "AsyncOpenAI", Client)
 
-    result = await planner.Planner(StubLLM([]), PlannerConfig(), llm_config).plan(
-        "Which person was born earlier?"
-    )
+    result = await planner.Planner(
+        StubLLM([]), PlannerConfig(planner_mode="structured"), llm_config
+    ).plan("Which person was born earlier?")
 
     assert result.final_node == "q3"
     assert captured["client"] == {
@@ -172,9 +172,9 @@ async def test_cluster_planner_retries_structured_request(monkeypatch) -> None:
     monkeypatch.setenv("CLUSTER_API_KEY", "secret")
     monkeypatch.setattr(planner, "AsyncOpenAI", Client)
 
-    result = await planner.Planner(StubLLM([]), PlannerConfig(), llm_config).plan(
-        "Which person was born earlier?"
-    )
+    result = await planner.Planner(
+        StubLLM([]), PlannerConfig(planner_mode="structured"), llm_config
+    ).plan("Which person was born earlier?")
 
     assert result.final_node == "q3"
     assert calls == EXPECTED_RETRY_CALL_COUNT

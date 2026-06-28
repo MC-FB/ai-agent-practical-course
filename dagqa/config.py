@@ -26,10 +26,14 @@ class LLMConfig(BaseModel):
     retry_max_delay_seconds: float = Field(default=8.0, gt=0)
 
 
+PlannerMode = Literal["structured", "simple"]
+
+
 class PlannerConfig(BaseModel):
     max_nodes: int = Field(default=10, ge=1)
     max_depth: int = Field(default=3, ge=1)
     repair_rounds: int = Field(default=1, ge=0)
+    planner_mode: PlannerMode = "simple"
 
 
 class ExecutionConfig(BaseModel):

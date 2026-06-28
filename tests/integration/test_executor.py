@@ -20,18 +20,7 @@ def _bridge_birth_response(
     return json.dumps(
         {
             "answer": answer,
-            "bridge_answer": answer,
-            "bridge_reasoning": f"{person} is the requested person and the cited span states it.",
-            "bridge_source_span": fact,
-            "constraint_status": "satisfied",
-            "bridge_candidates": [
-                {
-                    "candidate": answer,
-                    "status": "selected",
-                    "supporting_span": fact,
-                    "constraint_match": f"{person} birth date",
-                }
-            ],
+            "reasoning": f"{person} birth date found in evidence: {fact}",
             "_evidence_citations": [
                 {
                     "document_id": document_id,
@@ -52,21 +41,21 @@ async def test_executor_runs_parallel_dependencies_then_parent(app_config) -> No
                 answer="10 December 1815",
                 title="Ada Lovelace",
                 document_id="context-0",
-                fact="Ada was born in 1815.",
+                fact="Ada was born on 10 December 1815.",
                 person="Ada Lovelace",
             ),
             _bridge_birth_response(
                 answer="23 June 1912",
                 title="Alan Turing",
                 document_id="context-1",
-                fact="Turing was born in 1912.",
+                fact="Turing was born on 23 June 1912.",
                 person="Alan Turing",
             ),
             (
                 '{"answer": "Ada Lovelace", "reasoning": "1815 is earlier than 1912.", '
                 '"answer_type": "person", "answer_source_span": "Ada Lovelace: 10 December 1815", '
                 '"_evidence_citations": [{"document_id": "context-0", "title": "Ada Lovelace", '
-                '"sentence_indices": [0], "fact": "Ada was born in 1815."}]}'
+                '"sentence_indices": [0], "fact": "Ada was born on 10 December 1815."}]}'
             ),
         ]
     )
@@ -91,27 +80,35 @@ async def test_executor_injects_and_persists_evidence_for_factual_nodes(app_conf
                 answer="10 December 1815",
                 title="Ada Lovelace",
                 document_id="context-0",
-                fact="Ada was born in 1815.",
+                fact="Ada was born on 10 December 1815.",
                 person="Ada Lovelace",
             ),
             _bridge_birth_response(
                 answer="23 June 1912",
                 title="Alan Turing",
                 document_id="context-1",
-                fact="Turing was born in 1912.",
+                fact="Turing was born on 23 June 1912.",
                 person="Alan Turing",
             ),
             (
                 '{"answer": "Ada Lovelace", "reasoning": "1815 is earlier than 1912.", '
                 '"answer_type": "person", "answer_source_span": "Ada Lovelace: 10 December 1815", '
                 '"_evidence_citations": [{"document_id": "context-0", "title": "Ada Lovelace", '
-                '"sentence_indices": [0], "fact": "Ada was born in 1815."}]}'
+                '"sentence_indices": [0], "fact": "Ada was born on 10 December 1815."}]}'
             ),
         ]
     )
     documents = [
-        EvidenceDocument(id="context-0", title="Ada Lovelace", text="Ada was born in 1815."),
-        EvidenceDocument(id="context-1", title="Alan Turing", text="Turing was born in 1912."),
+        EvidenceDocument(
+            id="context-0",
+            title="Ada Lovelace",
+            text="Ada was born on 10 December 1815.",
+        ),
+        EvidenceDocument(
+            id="context-1",
+            title="Alan Turing",
+            text="Turing was born on 23 June 1912.",
+        ),
     ]
 
     run = await DagExecutor(llm, app_config).execute(
@@ -130,6 +127,6 @@ async def test_executor_injects_and_persists_evidence_for_factual_nodes(app_conf
     assert run.nodes[0].evidence_citations[0].document_id == "context-0"
     assert "_evidence_citations" not in run.nodes[0].returned_value
     assert "_evidence_citations" not in run.final_answer
-    assert "Ada was born in 1815." in llm.requests[0].prompt
-    assert "Turing was born in 1912." in llm.requests[1].prompt
+    assert "Ada was born on 10 December 1815." in llm.requests[0].prompt
+    assert "Turing was born on 23 June 1912." in llm.requests[1].prompt
     assert "Supporting evidence documents:" in llm.requests[2].prompt

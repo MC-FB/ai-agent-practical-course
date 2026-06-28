@@ -106,22 +106,6 @@ export async function getAppConfig(): Promise<AppConfigResponse> {
   return response.json();
 }
 
-export type PlannerSelection = {
-  max_nodes?: number;
-  max_depth?: number;
-};
-
-export type AppConfigResponse = {
-  planner: { max_nodes: number; max_depth: number };
-  [key: string]: unknown;
-};
-
-export async function getAppConfig(): Promise<AppConfigResponse> {
-  const response = await fetch("/api/config");
-  if (!response.ok) throw new Error(await response.text());
-  return response.json();
-}
-
 export class ApiError extends Error {
   status: number;
 
@@ -168,11 +152,6 @@ export async function ask(
   llm: LLMSelection,
   planner?: PlannerSelection,
 ): Promise<RunTrace> {
-export async function ask(
-  question: string,
-  llm: LLMSelection,
-  planner?: PlannerSelection,
-): Promise<RunTrace> {
   const response = await fetch("/api/ask", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -188,11 +167,6 @@ export async function getLLMModels(): Promise<LLMModelCatalog> {
   return response.json();
 }
 
-export async function startLiveAsk(
-  question: string,
-  llm: LLMSelection,
-  planner?: PlannerSelection,
-): Promise<LiveRun> {
 export async function startLiveAsk(
   question: string,
   llm: LLMSelection,
@@ -425,7 +399,7 @@ export async function benchmark(
   const response = await fetch("/api/benchmarks/hotpotqa", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, system, seed, name, llm, subset, dataset }),
+    body: JSON.stringify(benchmarkRequestBody({ limit, system, seed, name, llm, subset, dataset })),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
@@ -444,7 +418,9 @@ export async function startLiveBenchmark(
   const response = await fetch("/api/benchmarks/hotpotqa/live", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, systems, seed, name, llm, planner, subset, dataset }),
+    body: JSON.stringify(
+      benchmarkRequestBody({ limit, systems, seed, name, llm, planner, subset, dataset }),
+    ),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
@@ -463,10 +439,20 @@ export async function preflightBenchmark(
   const response = await fetch("/api/benchmarks/hotpotqa/preflight", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, systems, seed, name, llm, planner, subset, dataset }),
+    body: JSON.stringify(
+      benchmarkRequestBody({ limit, systems, seed, name, llm, planner, subset, dataset }),
+    ),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
+}
+
+function benchmarkRequestBody<T extends { seed?: number | null }>(body: T): Omit<T, "seed"> & { seed?: number } {
+  const { seed, ...rest } = body;
+  if (typeof seed === "number" && Number.isFinite(seed)) {
+    return { ...rest, seed };
+  }
+  return rest;
 }
 
 export async function getLiveBenchmark(runId: string): Promise<LiveBenchmark> {

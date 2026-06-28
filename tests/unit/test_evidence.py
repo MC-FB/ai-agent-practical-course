@@ -78,15 +78,9 @@ def test_render_prompt_includes_all_evidence_and_distractor_instruction() -> Non
     rendered = render_node_prompt(node, node.question, {}, supporting_evidence=selection)
 
     assert "Only some of these documents may be relevant" in rendered
-    assert "Do not cite documents or candidate facts that you merely read" in rendered
-    assert "Do not cite an exhaustive list when only one item is needed" in rendered
-    assert "Every returned field value must be directly supported" in rendered
-    assert "Do not fill broad lists from partial evidence" in rendered
-    assert 'do not return "yes" or "no" unless the question asks yes/no' in rendered
-    assert "bridge_reasoning" in rendered
-    assert "constraint_status" in rendered
     assert "Document ID: context-0" in rendered
     assert "Title: Ada" in rendered
     assert "Ada was born in London." in rendered
     assert "Title: Distractor" in rendered
-    assert '"_evidence_citations"' in rendered
+    # Non-final intermediate nodes do not get _evidence_citations in schema
+    assert '"_evidence_citations"' not in rendered

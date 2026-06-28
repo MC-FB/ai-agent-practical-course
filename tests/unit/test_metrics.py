@@ -181,7 +181,7 @@ def test_recover_evidence_pattern_answer_finds_latest_table_win_against_opponent
         nodes=[
             SimpleNamespace(
                 label="Identify cup winner",
-                returned_value={"team": "Aston Villa", "bridge_answer": "Aston Villa"},
+                returned_value={"team": "Aston Villa", "answer": "Aston Villa"},
             )
         ]
     )
@@ -234,6 +234,9 @@ async def test_benchmark_passes_hotpot_context_to_dag_agent() -> None:
 
     assert client.evidence_documents == documents
     assert record.error == "stop after recording"
+    assert record.prediction == ""
+    assert record.structural_failure
+    assert record.run_trace is None
 
 
 async def test_direct_baseline_sends_all_sources_and_stores_cited_trace() -> None:

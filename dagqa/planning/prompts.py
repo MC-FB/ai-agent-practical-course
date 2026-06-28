@@ -42,6 +42,11 @@ For bridge questions, preserve the bridge entity across hops. Once a node resolv
 person, work, event, organization, or series, downstream lookup nodes must ask about that resolved
 bridge value and must not switch to another entity that merely appears in a distractor document.
 
+Preserve scoped superlatives and comparatives. If the question asks for the largest, smallest,
+oldest, first, last, most, or least X where/in/from a resolved bridge scope, downstream nodes
+must ask for that superlative inside the resolved scope. Do not rewrite it into a global lookup
+such as "largest U.S. state" when the original means "largest state in New England".
+
 Preserve temporal and comparator wording from the original question. Questions containing
 "before", "after", "later than", "earlier than", "since", or "until" usually ask for a boundary
 or threshold value. Do not rewrite them into "latest", "earliest", "current", or "stopped using"
@@ -71,6 +76,8 @@ Constraints:
   placeholders for the values returned by child nodes.
 - Preserve bridge entities and temporal boundary wording from the original question; do not
   rewrite boundary questions into latest/earliest endpoint questions.
+- Preserve scoped superlatives and comparatives. For example, if a bridge resolves a setting to
+  New England, ask for the largest state in New England, not the largest U.S. state globally.
 - Preserve quoted titles as answer targets; do not reinterpret "who wrote '<title>'" as
   composition or authorship of a different entity mentioned inside the title.
 """

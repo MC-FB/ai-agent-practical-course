@@ -33,7 +33,6 @@ import { Progress } from "./components/ui/progress";
 import {
   ApiError,
   getAppConfig,
-  getAppConfig,
   deleteMarkedBenchmarkRow,
   getBenchmarkMeta,
   getBenchmarkResult,
@@ -88,314 +87,22 @@ const ACTIVE_BENCHMARK_STORAGE_KEY = "dagqa.activeBenchmarkRunId";
 const LEGACY_MARKED_RECORDS_STORAGE_KEY = "dagqa.markedBenchmarkRecords";
 const LIVE_BENCHMARK_POLL_RETRY_LIMIT = 5;
 
-const TREE_PARAM_BOUNDS = {
-  max_nodes: { min: 1, max: 30 },
-  max_depth: { min: 1, max: 8 },
-};
-// Shown until GET /api/config resolves; mirrors the PlannerConfig field defaults.
-const TREE_PARAM_FALLBACK = { max_nodes: 10, max_depth: 3 };
-
-type PlannerDefaults = { max_nodes: number; max_depth: number };
-
-// Only send the fields the user changed; unchanged fields fall back to server config.
-function buildPlannerOverride(
-  current: PlannerDefaults,
-  defaults: PlannerDefaults | undefined,
-): PlannerSelection | undefined {
-  if (!defaults) return undefined;
-  const override: PlannerSelection = {};
-  if (current.max_nodes !== defaults.max_nodes) override.max_nodes = current.max_nodes;
-  if (current.max_depth !== defaults.max_depth) override.max_depth = current.max_depth;
-  return Object.keys(override).length ? override : undefined;
-}
-
-// Fetches the active planner config, seeds the sliders from it, and derives the
-// override payload to send (undefined when sliders match the server defaults).
-function usePlannerSettings() {
-  const [defaults, setDefaults] = useState<PlannerDefaults>();
-  const [maxNodes, setMaxNodes] = useState(TREE_PARAM_FALLBACK.max_nodes);
-  const [maxDepth, setMaxDepth] = useState(TREE_PARAM_FALLBACK.max_depth);
-
-  useEffect(() => {
-    let cancelled = false;
-    getAppConfig()
-      .then((config) => {
-        if (cancelled) return;
-        const next = {
-          max_nodes: config.planner.max_nodes,
-          max_depth: config.planner.max_depth,
-        };
-        setDefaults(next);
-        setMaxNodes(next.max_nodes);
-        setMaxDepth(next.max_depth);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const override = useMemo(
-    () => buildPlannerOverride({ max_nodes: maxNodes, max_depth: maxDepth }, defaults),
-    [maxNodes, maxDepth, defaults],
-  );
-
-  return { maxNodes, setMaxNodes, maxDepth, setMaxDepth, override };
-}
-
-function TreeParamSlider({
-  label,
-  value,
-  min,
-  max,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  onChange: (value: number) => void;
-}) {
-  function update(next: number) {
-    if (!Number.isFinite(next)) return;
-    onChange(Math.min(Math.max(Math.trunc(next), min), max));
+function parseOptionalInteger(value: string): number | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.toLowerCase() === "random") return undefined;
+  if (!/^-?\d+$/.test(trimmed)) {
+    return undefined;
   }
-  return (
-    <div className="grid gap-2">
-      <div className="flex items-center justify-between gap-3">
-        <Label>{label}</Label>
-        <Input
-          aria-label={label}
-          className="h-9 w-20 bg-white text-right"
-          min={min}
-          max={max}
-          type="number"
-          value={value}
-          onChange={(event) => update(Number(event.target.value))}
-        />
-      </div>
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 text-xs font-medium text-slate-500">
-        <span>{min}</span>
-        <input
-          className="h-7 w-full accent-emerald-800"
-          min={min}
-          max={max}
-          type="range"
-          value={value}
-          onChange={(event) => update(Number(event.target.value))}
-        />
-        <span>{max}</span>
-      </div>
-    </div>
-  );
-}
-
-// Collapsible "dropdown" box exposing the planner's max_nodes / max_depth sliders.
-function TreeParametersControl({
-  maxNodes,
-  maxDepth,
-  onMaxNodesChange,
-  onMaxDepthChange,
-}: {
-  maxNodes: number;
-  maxDepth: number;
-  onMaxNodesChange: (value: number) => void;
-  onMaxDepthChange: (value: number) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <section className="panel-section">
-      <div
-        className="section-header cursor-pointer select-none"
-        onClick={() => setOpen((value) => !value)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setOpen((v) => !v); }}
-        role="button"
-        tabIndex={0}
-      >
-        <div>
-          <h2>Tree parameters</h2>
-          <span>{maxNodes} nodes · depth {maxDepth}</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <GitBranch size={18} />
-          <ChevronDown className={`transition-transform ${open ? "rotate-180" : ""}`} size={16} />
-        </div>
-      </div>
-      {open && (
-        <div className="grid gap-4 p-3">
-          <TreeParamSlider
-            label="Max nodes"
-            max={TREE_PARAM_BOUNDS.max_nodes.max}
-            min={TREE_PARAM_BOUNDS.max_nodes.min}
-            onChange={onMaxNodesChange}
-            value={maxNodes}
-          />
-          <TreeParamSlider
-            label="Max depth"
-            max={TREE_PARAM_BOUNDS.max_depth.max}
-            min={TREE_PARAM_BOUNDS.max_depth.min}
-            onChange={onMaxDepthChange}
-            value={maxDepth}
-          />
-        </div>
-      )}
-    </section>
-  );
-}
-
-const TREE_PARAM_BOUNDS = {
-  max_nodes: { min: 1, max: 30 },
-  max_depth: { min: 1, max: 8 },
-};
-// Shown until GET /api/config resolves; mirrors the PlannerConfig field defaults.
-const TREE_PARAM_FALLBACK = { max_nodes: 10, max_depth: 3 };
-
-type PlannerDefaults = { max_nodes: number; max_depth: number };
-
-// Only send the fields the user changed; unchanged fields fall back to server config.
-function buildPlannerOverride(
-  current: PlannerDefaults,
-  defaults: PlannerDefaults | undefined,
-): PlannerSelection | undefined {
-  if (!defaults) return undefined;
-  const override: PlannerSelection = {};
-  if (current.max_nodes !== defaults.max_nodes) override.max_nodes = current.max_nodes;
-  if (current.max_depth !== defaults.max_depth) override.max_depth = current.max_depth;
-  return Object.keys(override).length ? override : undefined;
-}
-
-// Fetches the active planner config, seeds the sliders from it, and derives the
-// override payload to send (undefined when sliders match the server defaults).
-function usePlannerSettings() {
-  const [defaults, setDefaults] = useState<PlannerDefaults>();
-  const [maxNodes, setMaxNodes] = useState(TREE_PARAM_FALLBACK.max_nodes);
-  const [maxDepth, setMaxDepth] = useState(TREE_PARAM_FALLBACK.max_depth);
-
-  useEffect(() => {
-    let cancelled = false;
-    getAppConfig()
-      .then((config) => {
-        if (cancelled) return;
-        const next = {
-          max_nodes: config.planner.max_nodes,
-          max_depth: config.planner.max_depth,
-        };
-        setDefaults(next);
-        setMaxNodes(next.max_nodes);
-        setMaxDepth(next.max_depth);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const override = useMemo(
-    () => buildPlannerOverride({ max_nodes: maxNodes, max_depth: maxDepth }, defaults),
-    [maxNodes, maxDepth, defaults],
-  );
-
-  return { maxNodes, setMaxNodes, maxDepth, setMaxDepth, override };
-}
-
-function TreeParamSlider({
-  label,
-  value,
-  min,
-  max,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  onChange: (value: number) => void;
-}) {
-  function update(next: number) {
-    if (!Number.isFinite(next)) return;
-    onChange(Math.min(Math.max(Math.trunc(next), min), max));
+  const parsed = Number(trimmed);
+  if (!Number.isSafeInteger(parsed)) {
+    return undefined;
   }
-  return (
-    <div className="grid gap-2">
-      <div className="flex items-center justify-between gap-3">
-        <Label>{label}</Label>
-        <Input
-          aria-label={label}
-          className="h-9 w-20 bg-white text-right"
-          min={min}
-          max={max}
-          type="number"
-          value={value}
-          onChange={(event) => update(Number(event.target.value))}
-        />
-      </div>
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 text-xs font-medium text-slate-500">
-        <span>{min}</span>
-        <input
-          className="h-7 w-full accent-emerald-800"
-          min={min}
-          max={max}
-          type="range"
-          value={value}
-          onChange={(event) => update(Number(event.target.value))}
-        />
-        <span>{max}</span>
-      </div>
-    </div>
-  );
+  return parsed;
 }
 
-// Collapsible "dropdown" box exposing the planner's max_nodes / max_depth sliders.
-function TreeParametersControl({
-  maxNodes,
-  maxDepth,
-  onMaxNodesChange,
-  onMaxDepthChange,
-}: {
-  maxNodes: number;
-  maxDepth: number;
-  onMaxNodesChange: (value: number) => void;
-  onMaxDepthChange: (value: number) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <section className="panel-section">
-      <div
-        className="section-header cursor-pointer select-none"
-        onClick={() => setOpen((value) => !value)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setOpen((v) => !v); }}
-        role="button"
-        tabIndex={0}
-      >
-        <div>
-          <h2>Tree parameters</h2>
-          <span>{maxNodes} nodes · depth {maxDepth}</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <GitBranch size={18} />
-          <ChevronDown className={`transition-transform ${open ? "rotate-180" : ""}`} size={16} />
-        </div>
-      </div>
-      {open && (
-        <div className="grid gap-4 p-3">
-          <TreeParamSlider
-            label="Max nodes"
-            max={TREE_PARAM_BOUNDS.max_nodes.max}
-            min={TREE_PARAM_BOUNDS.max_nodes.min}
-            onChange={onMaxNodesChange}
-            value={maxNodes}
-          />
-          <TreeParamSlider
-            label="Max depth"
-            max={TREE_PARAM_BOUNDS.max_depth.max}
-            min={TREE_PARAM_BOUNDS.max_depth.min}
-            onChange={onMaxDepthChange}
-            value={maxDepth}
-          />
-        </div>
-      )}
-    </section>
-  );
+function formatSeedInput(seed: number | null | undefined): string {
+  return typeof seed === "number" && Number.isSafeInteger(seed) ? String(seed) : "";
 }
 
 const TREE_PARAM_BOUNDS = {
@@ -2003,6 +1710,8 @@ function DatasetView({
   const [selectedLiveRunId, setSelectedLiveRunId] = useState("");
   const [liveRun, setLiveRun] = useState<LiveBenchmark>();
   const [error, setError] = useState("");
+  const { maxNodes, setMaxNodes, maxDepth, setMaxDepth, override: plannerOverride } =
+    usePlannerSettings();
   const maxExamples = meta?.total_examples && meta.total_examples > 1 ? meta.total_examples : 7405;
   const resolvedLimit = Math.min(limit, maxExamples);
   const progressPercent = liveRun?.total ? (liveRun.completed / liveRun.total) * 100 : 0;
@@ -2217,7 +1926,7 @@ function DatasetView({
     setLiveRun(started);
     setResult(started.comparison_results?.[0] ?? started);
     setComparisonResults(started.comparison_results ?? []);
-    setSeedInput(String(started.seed));
+    setSeedInput(formatSeedInput(started.seed));
     setBenchmarkName(started.name ?? "");
     setBenchmarkDataset(started.dataset ?? "hotpotqa");
     setBenchmarkSubset((started.subset as BenchmarkSubset | undefined) ?? "validation");
@@ -2266,10 +1975,7 @@ function DatasetView({
     setComparisonResults([]);
     onSelectRecord(undefined);
     try {
-      const parsedSeed = seedInput.trim() ? Number(seedInput) : undefined;
-      if (parsedSeed !== undefined && !Number.isInteger(parsedSeed)) {
-        throw new Error("Seed must be an integer.");
-      }
+      const parsedSeed = parseOptionalInteger(seedInput);
       if (!systems.length) {
         throw new Error("Select at least one system.");
       }
@@ -2345,7 +2051,7 @@ function DatasetView({
       setLiveRun(selected);
       setResult(selected.comparison_results?.[0] ?? selected);
       setComparisonResults(selected.comparison_results ?? []);
-      setSeedInput(String(selected.seed));
+      setSeedInput(formatSeedInput(selected.seed));
       setBenchmarkName(selected.name ?? "");
       setBenchmarkDataset(selected.dataset ?? "hotpotqa");
       setBenchmarkSubset((selected.subset as BenchmarkSubset | undefined) ?? "validation");
@@ -2442,11 +2148,13 @@ function DatasetView({
                 <div className="grid gap-2">
                   <Label htmlFor="benchmark-seed">Seed</Label>
                   <Input
+                    autoComplete="off"
                     className="h-9 bg-white"
                     id="benchmark-seed"
                     inputMode="numeric"
+                    pattern="-?[0-9]*"
                     placeholder="Random"
-                    type="number"
+                    type="text"
                     value={seedInput}
                     onChange={(event) => setSeedInput(event.target.value)}
                   />

@@ -37,4 +37,10 @@ class DagQaClient:
         evidence_documents: list[EvidenceDocument] | None = None,
     ) -> RunTrace:
         plan = await self.plan(question)
+        if (
+            evidence_documents
+            and self.config.planner.planner_mode == "simple"
+            and len(plan.nodes) > 1
+        ):
+            return await self.executor.execute_least_to_most(plan, evidence_documents)
         return await self.execute(plan, evidence_documents)

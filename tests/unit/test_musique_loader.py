@@ -96,6 +96,12 @@ def test_dataset_registry_exposes_hotpotqa_and_musique(tmp_path) -> None:
     )
 
     assert get_benchmark_dataset("hotpotqa").default_subset == "validation"
-    assert get_benchmark_dataset("musique").default_subset == "validation_3hop_plus"
+    musique = get_benchmark_dataset("musique")
+    assert musique.default_subset == "validation_3hop_plus"
+    assert (
+        musique.subset("marked_failures_2026_06_28").path
+        == "data/musique/marked_failures_2026_06_28.json"
+    )
     assert count_benchmark_examples("musique", "validation_3hop_plus", path) == 1
     assert load_benchmark_examples("musique", "validation_3hop_plus", path)[0].id == "example"
+    assert count_benchmark_examples("musique", "marked_failures_2026_06_28", path) == 1
