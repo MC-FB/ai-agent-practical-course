@@ -16,6 +16,7 @@ from dagqa.planning.normalizer import normalize_plan_dependencies
 from dagqa.planning.validator import validate_plan
 from dagqa.schemas import (
     DagPlan,
+    EvidenceCitation,
     EvidenceDocument,
     EvidenceSelection,
     LLMRequest,
@@ -28,6 +29,22 @@ from dagqa.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _parse_citations(parsed: dict) -> list[EvidenceCitation]:
+    """Extract evidence citations from a parsed LLM response."""
+    raw = parsed.get("_evidence_citations", [])
+    if not isinstance(raw, list):
+        return []
+    citations = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        try:
+            citations.append(EvidenceCitation.model_validate(item))
+        except Exception:
+            continue
+    return citations
 
 
 class ExecutionError(RuntimeError):
@@ -208,7 +225,7 @@ class DagExecutor:
             total_available=len(evidence_documents),
             documents=evidence_documents,
         )
-        evidence_section = render_evidence_section(evidence, require_citations=False)
+        evidence_section = render_evidence_section(evidence, require_citations=True)
 
         sub_q_block = "\n".join(f"  Step {i + 1}: {q}" for i, q in enumerate(ordered_questions))
 
@@ -229,7 +246,10 @@ class DagExecutor:
             f"- Never return 'not determinable' or 'unsupported' — always return "
             f"a concrete answer.\n\n"
             f'Return JSON: {{"steps": "Step 1: ... Step 2: ...", '
-            f'"answer": "short final answer"}}\n'
+            f'"answer": "short final answer", '
+            f'"_evidence_citations": '
+            f'[{{"document_id": "...", "title": "...", '
+            f'"sentence_indices": [0], "fact": "..."}}]}}\n'
             f"Return JSON only."
         )
 
@@ -239,6 +259,7 @@ class DagExecutor:
             task_type=TaskType.synthesis,
             operation=Operation.synthesize,
             status=NodeStatus.running,
+            supporting_evidence=evidence,
         )
         trace.rendered_prompt = prompt
 
@@ -269,6 +290,8 @@ class DagExecutor:
                 trace.status = NodeStatus.succeeded
             else:
                 trace.status = NodeStatus.failed
+            # Parse evidence citations
+            trace.evidence_citations = _parse_citations(parsed)
         except Exception as exc:
             trace.status = NodeStatus.failed
             trace.error = str(exc)
