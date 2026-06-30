@@ -1,7 +1,7 @@
 {
   "run_id": "e6f596f7-96c1-4654-9702-d0ec1972cffe",
   "name": "Single-prompt baseline",
-  "comparison_group_id": null,
+  "comparison_group_id": "f2b87cde-7088-45a6-9974-c7965a9d9638",
   "system": "direct_llm",
   "limit": 50,
   "provider": "cluster",
