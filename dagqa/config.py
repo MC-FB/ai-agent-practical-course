@@ -11,11 +11,11 @@ load_dotenv()
 
 
 class LLMConfig(BaseModel):
-    provider: Literal["gemini", "openrouter", "azure_openai", "cluster", "dspy"] = "gemini"
-    model: str = "gemini/gemini-2.0-flash"
+    provider: Literal["azure_openai", "cluster"] = "cluster"
+    model: str = "mistralai/Mistral-Medium-3.5-128B"
     model_env: str | None = None
     temperature: float = 0.0
-    api_key_env: str | None = "GEMINI_API_KEY"
+    api_key_env: str | None = "CLUSTER_API_KEY"
     api_base: str | None = None
     api_base_env: str | None = None
     api_version: str | None = None

@@ -13,8 +13,7 @@ from dagqa.config import LLMConfig, PlannerConfig
 from dagqa.llm.base import LanguageModel
 from dagqa.llm.retry import retry_llm_call
 from dagqa.planning.normalizer import normalize_plan_dependencies
-from dagqa.planning.parser import PlanParseError, parse_plan
-from dagqa.planning.prompts import PLANNER_SYSTEM, plan_repair_prompt, planner_user_prompt
+from dagqa.planning.parser import parse_plan
 from dagqa.planning.validator import validate_plan
 from dagqa.schemas import DagNode, DagPlan, LLMRequest, Operation, PromptSpec, TaskType
 
@@ -39,38 +38,55 @@ class Planner:
     async def plan(self, question: str) -> DagPlan:
         if self.llm_config and self.llm_config.provider == "azure_openai":
             return await self._plan_structured_azure(question)
-        if self.llm_config and self.llm_config.provider == "cluster":
+        # Use cluster JSON schema planner when API credentials are available
+        api_key = os.getenv(self.llm_config.api_key_env or "") if self.llm_config else None
+        api_base = (
+            (os.getenv(self.llm_config.api_base_env) if self.llm_config.api_base_env else None)
+            or self.llm_config.api_base
+            if self.llm_config
+            else None
+        )
+        if api_key and api_base:
             if self.config.planner_mode == "simple":
                 return await self._plan_simple_cluster(question)
             return await self._plan_structured_cluster(question)
+        # Fallback: use the injected LLM with YAML planner (tests, local dev)
+        return await self._plan_yaml_fallback(question)
 
-        request = LLMRequest(
-            system=PLANNER_SYSTEM,
-            prompt=planner_user_prompt(question, self.config.max_nodes, self.config.max_depth),
+    async def _plan_yaml_fallback(self, question: str) -> DagPlan:
+        """Fallback planner that uses the injected LLM with YAML output."""
+        from dagqa.planning.prompts import (  # noqa: PLC0415
+            PLANNER_SYSTEM,
+            plan_repair_prompt,
+            planner_user_prompt,
         )
 
-        logger.debug("Starting planner request")
-        response = await self.llm.complete(request)
+        response = await self.llm.complete(
+            LLMRequest(
+                system=PLANNER_SYSTEM,
+                prompt=planner_user_prompt(question, self.config.max_nodes, self.config.max_depth),
+            )
+        )
         raw = response.text
         last_errors: list[str] = []
-
         for attempt in range(self.config.repair_rounds + 1):
             try:
                 plan = normalize_plan_dependencies(parse_plan(raw))
-            except PlanParseError as exc:
+            except Exception as exc:
                 last_errors = [str(exc)]
             else:
                 validation = validate_plan(plan, self.config)
                 if validation.valid:
                     return plan
                 last_errors = validation.errors
-
             if attempt < self.config.repair_rounds:
                 repair = await self.llm.complete(
-                    LLMRequest(system=PLANNER_SYSTEM, prompt=plan_repair_prompt(raw, last_errors))
+                    LLMRequest(
+                        system=PLANNER_SYSTEM,
+                        prompt=plan_repair_prompt(raw, last_errors),
+                    )
                 )
                 raw = repair.text
-
         raise PlannerError("Planner produced invalid DAG: " + "; ".join(last_errors))
 
     async def _plan_structured_azure(self, question: str) -> DagPlan:

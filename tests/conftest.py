@@ -26,7 +26,7 @@ class StubLLM(LanguageModel):
 def app_config() -> AppConfig:
     return AppConfig.model_validate(
         {
-            "llm": {"provider": "gemini", "model": "gemini/gemini-2.0-flash"},
+            "llm": {"provider": "cluster", "model": "mistralai/Mistral-Medium-3.5-128B"},
             "planner": {"max_nodes": 10, "max_depth": 4, "repair_rounds": 1},
             "execution": {
                 "max_parallel_nodes": 4,
