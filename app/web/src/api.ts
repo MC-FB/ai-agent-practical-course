@@ -295,6 +295,8 @@ export type LiveBenchmark = HotpotBenchmarkResult & {
   error?: string | null;
   systems?: string[];
   current_system?: string;
+  models?: LLMSelection[];
+  current_model?: string;
   comparison_run_ids?: string[];
   comparison_results?: HotpotBenchmarkResult[];
   features?: Record<string, unknown>;
@@ -414,13 +416,16 @@ export async function startLiveBenchmark(
   planner?: PlannerSelection,
   subset: BenchmarkSubset = "validation",
   dataset = "hotpotqa",
+  models?: LLMSelection[],
 ): Promise<LiveBenchmark> {
+  const body: Record<string, unknown> = { limit, systems, seed, name, llm, planner, subset, dataset };
+  if (models && models.length > 0) {
+    body.models = models;
+  }
   const response = await fetch("/api/benchmarks/hotpotqa/live", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(
-      benchmarkRequestBody({ limit, systems, seed, name, llm, planner, subset, dataset }),
-    ),
+    body: JSON.stringify(benchmarkRequestBody(body as { seed?: number | null })),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
@@ -435,13 +440,16 @@ export async function preflightBenchmark(
   planner?: PlannerSelection,
   subset: BenchmarkSubset = "validation",
   dataset = "hotpotqa",
+  models?: LLMSelection[],
 ): Promise<BenchmarkPreflightResult> {
+  const body: Record<string, unknown> = { limit, systems, seed, name, llm, planner, subset, dataset };
+  if (models && models.length > 0) {
+    body.models = models;
+  }
   const response = await fetch("/api/benchmarks/hotpotqa/preflight", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(
-      benchmarkRequestBody({ limit, systems, seed, name, llm, planner, subset, dataset }),
-    ),
+    body: JSON.stringify(benchmarkRequestBody(body as { seed?: number | null })),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();

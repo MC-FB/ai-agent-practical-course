@@ -102,6 +102,7 @@ class BenchmarkRequest(BaseModel):
     subset: str = "validation"
     data_path: str | None = None
     llm: LLMSelection | None = None
+    models: list[LLMSelection] | None = None
     planner: PlannerSelection | None = None
 
 
@@ -573,13 +574,17 @@ def hotpotqa_info(
 async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
     run_id = str(uuid4())
     systems = _benchmark_systems(request)
-    comparison_group_id = str(uuid4()) if len(systems) == PAIRED_SYSTEM_COUNT else None
+    model_selections = _benchmark_models(request)
+    multi_model = len(model_selections) > 1
+    needs_comparison = len(systems) == PAIRED_SYSTEM_COUNT or multi_model
+    comparison_group_id = str(uuid4()) if needs_comparison else None
     cfg = config_for_selection(request.llm, request.planner)
     dag_client = DagQaClient(cfg)
     seed = request.seed if request.seed is not None else int(time.time_ns() % 2_147_483_647)
     data_path = _benchmark_subset_path(request)
     dataset_info = get_benchmark_dataset(request.dataset)
     dataset_size = count_benchmark_examples(request.dataset, request.subset, data_path)
+    total_runs = len(systems) * len(model_selections)
     state = {
         "run_id": run_id,
         "name": _benchmark_name(request),
@@ -591,6 +596,8 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
         "comparison_group_id": comparison_group_id,
         "comparison_run_ids": [],
         "comparison_results": [],
+        "models": [sel.model_dump(mode="json") for sel in model_selections],
+        "current_model": model_selections[0].model,
         "limit": request.limit,
         "seed": seed,
         "max_parallel_examples": cfg.benchmark.max_parallel_examples,
@@ -604,7 +611,7 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
         "model": cfg.llm.model,
         "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "completed": 0,
-        "total": request.limit * len(systems),
+        "total": request.limit * total_runs,
         "current_question": None,
         "total_runtime_ms": 0,
         "metrics": {},
@@ -629,6 +636,7 @@ async def hotpotqa_live(request: BenchmarkRequest) -> dict[str, Any]:
             systems,
             comparison_group_id,
             stop_event,
+            model_selections=model_selections,
         )
     )
     return LIVE_BENCHMARKS[run_id]
@@ -866,12 +874,15 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
     systems: list[Literal["dag_agent", "direct_llm"]] | None = None,
     comparison_group_id: str | None = None,
     stop_event: asyncio.Event | None = None,
+    model_selections: list[LLMSelection] | None = None,
 ) -> None:
     prior_state = LIVE_BENCHMARKS.get(run_id) or _load_live_benchmark(run_id) or {}
     elapsed_before_ms = float(prior_state.get("total_runtime_ms") or 0)
     started = time.perf_counter()
     records: list[BenchmarkRecord] = []
     systems = systems or _benchmark_systems(request)
+    if model_selections is None:
+        model_selections = _benchmark_models(request)
     completed_results: list[BenchmarkResult] = [
         BenchmarkResult.model_validate(result)
         for result in prior_state.get("completed_result_payloads", [])
@@ -880,7 +891,7 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
     current_system = systems[0]
     created_at = prior_state.get("created_at") or LIVE_BENCHMARKS[run_id]["created_at"]
     benchmark_name = _benchmark_name(request)
-    total_examples = request.limit * len(systems)
+    total_examples = request.limit * len(systems) * len(model_selections)
     dataset_size = 0
     data_path = _benchmark_subset_path(request)
     dataset_info = get_benchmark_dataset(request.dataset)
@@ -965,130 +976,159 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
             dataset_size = len(all_examples)
         sampled_examples = _sample_examples(all_examples, request.limit, seed)
         per_system_total = len(sampled_examples)
-        total_examples = per_system_total * len(systems)
+        total_examples = per_system_total * len(systems) * len(model_selections)
 
-        for system_index, system in enumerate(systems):
-            if stop_event is not None and stop_event.is_set():
-                break
-            prior_result = next(
-                (result for result in completed_results if result.system == system),
-                None,
-            )
-            if prior_result is not None and len(prior_result.records) >= per_system_total:
-                continue
-            system_started = time.perf_counter()
-            current_system = system
-            if prior_result is not None:
-                records = list(prior_result.records)
-            elif prior_state.get("current_system") == system:
-                records = [
-                    BenchmarkRecord.model_validate(record)
-                    for record in prior_state.get("records", [])
-                    if isinstance(record, dict)
-                ]
+        for model_index, model_selection in enumerate(model_selections):
+            if len(model_selections) > 1:
+                model_cfg = config_for_selection(model_selection, request.planner)
+                model_cfg = _config_for_benchmark_dataset(model_cfg, request.dataset)
+                dag_client = DagQaClient(model_cfg)
             else:
-                records = []
-            completed_ids = {record.id for record in records}
-            remaining_examples = [
-                example for example in sampled_examples if example.id not in completed_ids
-            ]
-            update(
-                current_question=(
-                    f"Running {system.replace('_', ' ')} with up to "
-                    f"{min(cfg.benchmark.max_parallel_examples, len(remaining_examples))} examples "
-                    "in parallel."
-                    if remaining_examples
-                    else None
-                )
-            )
-
-            def record_completed(
-                record: BenchmarkRecord,
-                records_ref: list[BenchmarkRecord] = records,
-                system_name: str = system,
-            ) -> None:
-                nonlocal last_record_completed_at
-                records_ref.append(record)
-                last_record_completed_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
-                _append_live_record(run_id, system_name, record)
-                remaining = per_system_total - len(records_ref)
-                stopping = stop_event is not None and stop_event.is_set()
+                model_cfg = cfg
+            if len(model_selections) > 1:
                 update(
-                    phase="stopping" if stopping else "running",
-                    status="stopping" if stopping else "running",
                     current_question=(
-                        f"{remaining} {system_name.replace('_', ' ')} examples remaining."
-                        if remaining
-                        else None
+                        f"Starting model {model_index + 1}/{len(model_selections)}: "
+                        f"{model_selection.model}"
+                    )
+                )
+
+            for system_index, system in enumerate(systems):
+                if stop_event is not None and stop_event.is_set():
+                    break
+                prior_result = next(
+                    (
+                        result
+                        for result in completed_results
+                        if result.system == system and result.model == model_selection.model
                     ),
+                    None,
                 )
-
-            if stop_event is None:
-                new_records = await _run_examples(
-                    dag_client,
-                    remaining_examples,
-                    system,
-                    cfg.benchmark.max_parallel_examples,
-                    record_completed,
-                )
-            else:
-                new_records = await _run_examples(
-                    dag_client,
-                    remaining_examples,
-                    system,
-                    cfg.benchmark.max_parallel_examples,
-                    record_completed,
-                    stop_event.is_set,
-                )
-            records_by_id = {record.id: record for record in records}
-            records_by_id.update({record.id: record for record in new_records})
-            records = [
-                records_by_id[example.id]
-                for example in sampled_examples
-                if example.id in records_by_id
-            ]
-
-            system_runtime_ms = (time.perf_counter() - system_started) * 1000
-            metrics = _aggregate(records)
-            metrics["total_runtime_ms"] = system_runtime_ms
-            result = BenchmarkResult(
-                run_id=run_id if len(systems) == 1 else str(uuid4()),
-                name=benchmark_name,
-                comparison_group_id=comparison_group_id,
-                system=system,
-                limit=request.limit,
-                provider=dag_client.config.llm.provider,
-                model=dag_client.config.llm.model,
-                dataset=dataset_info.id,
-                split=dataset_info.split,
-                subset=request.subset,
-                dataset_size=dataset_size,
-                seed=seed,
-                max_parallel_examples=cfg.benchmark.max_parallel_examples,
-                max_nodes=cfg.planner.max_nodes,
-                max_depth=cfg.planner.max_depth,
-                created_at=created_at,
-                total_runtime_ms=system_runtime_ms,
-                records=records,
-                metrics=metrics,
-            )
-            result = _write_benchmark_result(result)
-            completed_results = [
-                existing for existing in completed_results if existing.system != system
-            ]
-            completed_results.append(result)
-            records = []
-            if len(result.records) < per_system_total:
+                if prior_result is not None and len(prior_result.records) >= per_system_total:
+                    continue
+                system_started = time.perf_counter()
+                current_system = system
+                if prior_result is not None:
+                    records = list(prior_result.records)
+                elif prior_state.get("current_system") == system:
+                    records = [
+                        BenchmarkRecord.model_validate(record)
+                        for record in prior_state.get("records", [])
+                        if isinstance(record, dict)
+                    ]
+                else:
+                    records = []
+                completed_ids = {record.id for record in records}
+                remaining_examples = [
+                    example for example in sampled_examples if example.id not in completed_ids
+                ]
+                model_label = model_selection.model.rsplit("/", 1)[-1]
                 update(
-                    "stopped",
-                    status="stopped",
-                    output_path=result.output_path,
-                    current_question="Benchmark stopped. Partial results were saved.",
+                    current_question=(
+                        f"[{model_label}] Running {system.replace('_', ' ')} with up to "
+                        f"{min(model_cfg.benchmark.max_parallel_examples, len(remaining_examples))}"
+                        " examples in parallel."
+                        if remaining_examples
+                        else None
+                    )
                 )
-                return
-            if system_index + 1 < len(systems):
-                current_system = systems[system_index + 1]
-                update(current_question=f"Starting {current_system.replace('_', ' ')}.")
+
+                def record_completed(
+                    record: BenchmarkRecord,
+                    records_ref: list[BenchmarkRecord] = records,
+                    system_name: str = system,
+                    _model_label: str = model_label,
+                ) -> None:
+                    nonlocal last_record_completed_at
+                    records_ref.append(record)
+                    last_record_completed_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+                    _append_live_record(run_id, system_name, record)
+                    remaining = per_system_total - len(records_ref)
+                    stopping = stop_event is not None and stop_event.is_set()
+                    update(
+                        phase="stopping" if stopping else "running",
+                        status="stopping" if stopping else "running",
+                        current_question=(
+                            f"[{_model_label}] {remaining} {system_name.replace('_', ' ')} "
+                            "examples remaining."
+                            if remaining
+                            else None
+                        ),
+                    )
+
+                if stop_event is None:
+                    new_records = await _run_examples(
+                        dag_client,
+                        remaining_examples,
+                        system,
+                        model_cfg.benchmark.max_parallel_examples,
+                        record_completed,
+                    )
+                else:
+                    new_records = await _run_examples(
+                        dag_client,
+                        remaining_examples,
+                        system,
+                        model_cfg.benchmark.max_parallel_examples,
+                        record_completed,
+                        stop_event.is_set,
+                    )
+                records_by_id = {record.id: record for record in records}
+                records_by_id.update({record.id: record for record in new_records})
+                records = [
+                    records_by_id[example.id]
+                    for example in sampled_examples
+                    if example.id in records_by_id
+                ]
+
+                system_runtime_ms = (time.perf_counter() - system_started) * 1000
+                metrics = _aggregate(records)
+                metrics["total_runtime_ms"] = system_runtime_ms
+                always_unique = len(systems) > 1 or len(model_selections) > 1
+                result = BenchmarkResult(
+                    run_id=run_id if not always_unique else str(uuid4()),
+                    name=benchmark_name,
+                    comparison_group_id=comparison_group_id,
+                    system=system,
+                    limit=request.limit,
+                    provider=dag_client.config.llm.provider,
+                    model=dag_client.config.llm.model,
+                    dataset=dataset_info.id,
+                    split=dataset_info.split,
+                    subset=request.subset,
+                    dataset_size=dataset_size,
+                    seed=seed,
+                    max_parallel_examples=model_cfg.benchmark.max_parallel_examples,
+                    max_nodes=model_cfg.planner.max_nodes,
+                    max_depth=model_cfg.planner.max_depth,
+                    created_at=created_at,
+                    total_runtime_ms=system_runtime_ms,
+                    records=records,
+                    metrics=metrics,
+                )
+                result = _write_benchmark_result(result)
+                completed_results = [
+                    existing
+                    for existing in completed_results
+                    if not (existing.system == system and existing.model == model_selection.model)
+                ]
+                completed_results.append(result)
+                records = []
+                if len(result.records) < per_system_total:
+                    update(
+                        "stopped",
+                        status="stopped",
+                        output_path=result.output_path,
+                        current_question="Benchmark stopped. Partial results were saved.",
+                    )
+                    return
+                if system_index + 1 < len(systems):
+                    current_system = systems[system_index + 1]
+                    update(
+                        current_question=(
+                            f"[{model_label}] Starting {current_system.replace('_', ' ')}."
+                        )
+                    )
 
         update(
             "complete",
@@ -1246,6 +1286,16 @@ def _benchmark_systems(
     if not resolved:
         raise HTTPException(status_code=422, detail="Select at least one benchmark system.")
     return resolved
+
+
+def _benchmark_models(request: BenchmarkRequest) -> list[LLMSelection]:
+    """Return the list of models to benchmark. Falls back to the single llm selection."""
+    if request.models:
+        return list(request.models)
+    if request.llm:
+        return [request.llm]
+    cfg = load_config()
+    return [LLMSelection(provider=cfg.llm.provider, model=cfg.llm.model)]
 
 
 def _benchmark_name(request: BenchmarkRequest) -> str | None:

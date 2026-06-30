@@ -1444,6 +1444,129 @@ function aggregateBenchmarkRecords(records: HotpotBenchmarkRecord[]): Record<str
   };
 }
 
+function MultiModelComparisonView({
+  results,
+  onSelectResult,
+}: {
+  results: HotpotBenchmarkResult[];
+  onSelectResult: (run: HotpotBenchmarkResult) => void;
+}) {
+  const rows = results.map((r) => ({
+    result: r,
+    model: r.model?.split("/").pop() ?? r.model ?? "unknown",
+    system: r.system === "dag_agent" ? "DAG agent" : "Single prompt",
+    cosine: r.metrics.cosine_sim ?? 0,
+    em: (r.metrics.exact_match ?? 0) * 100,
+    f1: (r.metrics.f1 ?? 0) * 100,
+    goldRecall: (r.metrics.avg_gold_supporting_fact_recall ?? 0) * 100,
+    latency: (r.metrics.avg_latency_ms ?? 0) / 1000,
+    records: r.records.length,
+  }));
+
+  const bestCosine = Math.max(...rows.map((r) => r.cosine));
+  const bestEM = Math.max(...rows.map((r) => r.em));
+  const bestF1 = Math.max(...rows.map((r) => r.f1));
+
+  // Group by model to show DAG advantage
+  const modelGroups = new Map<string, typeof rows>();
+  for (const row of rows) {
+    const group = modelGroups.get(row.model) ?? [];
+    group.push(row);
+    modelGroups.set(row.model, group);
+  }
+
+  return (
+    <div className="grid gap-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-bold text-slate-900">
+          Multi-model comparison · {results[0]?.records.length ?? 0} examples · seed{" "}
+          {results[0]?.seed}
+        </h3>
+        <span className="text-xs text-slate-500">{results.length} runs</span>
+      </div>
+      <div className="overflow-x-auto rounded-lg border border-slate-200">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
+              <th className="px-4 py-2">Model</th>
+              <th className="px-4 py-2">System</th>
+              <th className="px-4 py-2 text-right">Cosine</th>
+              <th className="px-4 py-2 text-right">EM</th>
+              <th className="px-4 py-2 text-right">F1</th>
+              <th className="px-4 py-2 text-right">Gold Recall</th>
+              <th className="px-4 py-2 text-right">Latency</th>
+              <th className="px-4 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...modelGroups.entries()].map(([model, group]) =>
+              group.map((row, index) => {
+                const dagRow = group.find((r) => r.result.system === "dag_agent");
+                const spRow = group.find((r) => r.result.system === "direct_llm");
+                const dagWins = dagRow && spRow && dagRow.cosine > spRow.cosine;
+                return (
+                  <tr
+                    key={row.result.run_id}
+                    className={[
+                      "border-b border-slate-100 transition-colors hover:bg-slate-50 cursor-pointer",
+                      row.result.system === "dag_agent" && dagWins
+                        ? "bg-emerald-50/50"
+                        : "",
+                      index === 0 && modelGroups.size > 1
+                        ? "border-t-2 border-t-slate-300"
+                        : "",
+                    ].join(" ")}
+                    onClick={() => onSelectResult(row.result)}
+                  >
+                    <td className="px-4 py-2 font-medium text-slate-900">
+                      {index === 0 ? model : ""}
+                    </td>
+                    <td className="px-4 py-2 text-slate-600">{row.system}</td>
+                    <td
+                      className={`px-4 py-2 text-right font-mono ${
+                        row.cosine === bestCosine ? "font-bold text-emerald-700" : ""
+                      }`}
+                    >
+                      {row.cosine.toFixed(3)}
+                    </td>
+                    <td
+                      className={`px-4 py-2 text-right font-mono ${
+                        row.em === bestEM ? "font-bold text-emerald-700" : ""
+                      }`}
+                    >
+                      {row.em.toFixed(0)}%
+                    </td>
+                    <td
+                      className={`px-4 py-2 text-right font-mono ${
+                        row.f1 === bestF1 ? "font-bold text-emerald-700" : ""
+                      }`}
+                    >
+                      {row.f1.toFixed(1)}%
+                    </td>
+                    <td className="px-4 py-2 text-right font-mono">
+                      {row.goldRecall.toFixed(0)}%
+                    </td>
+                    <td className="px-4 py-2 text-right font-mono text-slate-500">
+                      {row.latency.toFixed(1)}s
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      {row.result.system === "dag_agent" && dagWins && (
+                        <span className="inline-block rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                          DAG wins
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              }),
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function BenchmarkComparisonView({
   first,
   second,
@@ -1681,12 +1804,14 @@ function DatasetView({
   recordId,
   onSelectRecord,
   llm,
+  modelCatalog,
   markedKeys,
   onToggleMarkedRow,
 }: {
   recordId?: string;
   onSelectRecord: (recordId?: string) => void;
   llm: LLMSelection;
+  modelCatalog?: LLMModelCatalog;
   markedKeys: Set<string>;
   onToggleMarkedRow: (
     focus: HotpotBenchmarkResult,
@@ -1701,6 +1826,11 @@ function DatasetView({
   const [benchmarkSubset, setBenchmarkSubset] = useState<BenchmarkSubset>("validation");
   const [systems, setSystems] = useState<string[]>(["dag_agent", "direct_llm"]);
   const [seedInput, setSeedInput] = useState("");
+  const clusterModels = useMemo(
+    () => (modelCatalog?.models ?? []).filter((m) => m.provider === "cluster"),
+    [modelCatalog],
+  );
+  const [selectedModels, setSelectedModels] = useState<LLMSelection[]>([]);
   const [meta, setMeta] = useState<BenchmarkMeta>();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<HotpotBenchmarkResult>();
@@ -1712,6 +1842,14 @@ function DatasetView({
   const [error, setError] = useState("");
   const { maxNodes, setMaxNodes, maxDepth, setMaxDepth, override: plannerOverride } =
     usePlannerSettings();
+  const multiModel = selectedModels.length > 1;
+
+  useEffect(() => {
+    if (clusterModels.length > 0 && selectedModels.length === 0) {
+      setSelectedModels(clusterModels.map((m) => ({ provider: m.provider, model: m.model })));
+    }
+  }, [clusterModels, selectedModels.length]);
+
   const maxExamples = meta?.total_examples && meta.total_examples > 1 ? meta.total_examples : 7405;
   const resolvedLimit = Math.min(limit, maxExamples);
   const progressPercent = liveRun?.total ? (liveRun.completed / liveRun.total) * 100 : 0;
@@ -1980,6 +2118,7 @@ function DatasetView({
         throw new Error("Select at least one system.");
       }
       const name = benchmarkName.trim() || undefined;
+      const modelsToRun = multiModel ? selectedModels : undefined;
       const preflight = await preflightBenchmark(
         resolvedLimit,
         systems,
@@ -1989,6 +2128,7 @@ function DatasetView({
         plannerOverride,
         benchmarkSubset,
         benchmarkDataset,
+        modelsToRun,
       );
       if (!preflight.ok) {
         const failed = preflight.checks.filter((check) => !check.ok);
@@ -2003,6 +2143,7 @@ function DatasetView({
         plannerOverride,
         benchmarkSubset,
         benchmarkDataset,
+        modelsToRun,
       );
       await refreshUnfinishedLiveRuns();
       await watchBenchmark(started);
@@ -2195,6 +2336,44 @@ function DatasetView({
                   ))}
                 </div>
               </div>
+
+              {clusterModels.length > 1 && (
+              <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <Label>Models</Label>
+                  <span className="text-xs font-semibold text-slate-500">
+                    {selectedModels.length} selected
+                  </span>
+                </div>
+                <div className="grid gap-2">
+                  {clusterModels.map((option) => (
+                    <label
+                      className="flex items-center gap-3 rounded-md border border-slate-200 bg-white p-3 shadow-sm transition-colors hover:border-emerald-200 hover:bg-emerald-50/40"
+                      key={`${option.provider}:${option.model}`}
+                    >
+                      <Checkbox
+                        checked={selectedModels.some(
+                          (sel) => sel.provider === option.provider && sel.model === option.model,
+                        )}
+                        onCheckedChange={(checked) =>
+                          setSelectedModels((current) =>
+                            checked
+                              ? [...current, { provider: option.provider, model: option.model }]
+                              : current.filter(
+                                  (sel) =>
+                                    !(sel.provider === option.provider && sel.model === option.model),
+                                ),
+                          )
+                        }
+                      />
+                      <span className="text-sm font-semibold text-slate-900">
+                        {option.label}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              )}
 
               <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
                 <div className="flex items-center justify-between gap-3">
@@ -2408,7 +2587,15 @@ function DatasetView({
             <BarChart3 size={18} />
           </div>
           <div className="answer-body benchmark-output">
-            {comparisonResults.length === 2 ? (
+            {comparisonResults.length > 2 ? (
+              <MultiModelComparisonView
+                results={comparisonResults}
+                onSelectResult={(run) => {
+                  setResult(run);
+                  setComparisonResults([]);
+                }}
+              />
+            ) : comparisonResults.length === 2 ? (
               <BenchmarkComparisonView
                 first={comparisonResults[0]}
                 second={comparisonResults[1]}
@@ -2628,6 +2815,7 @@ function ResultsView({
   const [comparisonRunId, setComparisonRunId] = useState("");
   const [selectedResult, setSelectedResult] = useState<HotpotBenchmarkResult>();
   const [comparisonResult, setComparisonResult] = useState<HotpotBenchmarkResult>();
+  const [multiModelResults, setMultiModelResults] = useState<HotpotBenchmarkResult[]>([]);
   const [datasetFilter, setDatasetFilter] = useState("all");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -2642,19 +2830,24 @@ function ResultsView({
       if (targetRunId) {
         const loaded = await getBenchmarkResult(targetRunId);
         setSelectedResult(loaded);
-        const paired = response.results.find(
+        const groupMembers = response.results.filter(
           (item) =>
             !item.partial &&
             item.run_id !== targetRunId &&
             item.comparison_group_id &&
             item.comparison_group_id === loaded.comparison_group_id,
         );
-        if (paired) {
-          setComparisonRunId(paired.run_id);
-          setComparisonResult(await getBenchmarkResult(paired.run_id));
+        if (groupMembers.length > 0) {
+          const allGroupResults = await Promise.all(
+            groupMembers.map((item) => getBenchmarkResult(item.run_id)),
+          );
+          setComparisonRunId(groupMembers[0].run_id);
+          setComparisonResult(allGroupResults[0]);
+          setMultiModelResults([loaded, ...allGroupResults]);
         } else {
           setComparisonRunId("");
           setComparisonResult(undefined);
+          setMultiModelResults([]);
         }
       } else {
         setSelectedResult(undefined);
@@ -2794,7 +2987,15 @@ function ResultsView({
             <BarChart3 size={18} />
           </div>
           <div className="answer-body benchmark-output">
-            {selectedResult && comparisonResult ? (
+            {multiModelResults.length > 2 ? (
+              <MultiModelComparisonView
+                results={multiModelResults}
+                onSelectResult={(run) => {
+                  setMultiModelResults([]);
+                  onNavigate(run.run_id);
+                }}
+              />
+            ) : selectedResult && comparisonResult ? (
               <BenchmarkComparisonView
                 first={selectedResult}
                 second={comparisonResult}
@@ -3185,6 +3386,7 @@ function App() {
           recordId={route.recordId}
           onSelectRecord={(recordId) => navigate({ tab: "dataset", recordId })}
           llm={selectedLLM}
+          modelCatalog={modelCatalog}
           markedKeys={markedKeys}
           onToggleMarkedRow={toggleMarkedRow}
         />
