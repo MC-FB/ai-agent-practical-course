@@ -2816,6 +2816,7 @@ function ResultsView({
   const [selectedResult, setSelectedResult] = useState<HotpotBenchmarkResult>();
   const [comparisonResult, setComparisonResult] = useState<HotpotBenchmarkResult>();
   const [multiModelResults, setMultiModelResults] = useState<HotpotBenchmarkResult[]>([]);
+  const [showMultiModel, setShowMultiModel] = useState(true);
   const [datasetFilter, setDatasetFilter] = useState("all");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -2848,6 +2849,7 @@ function ResultsView({
           setComparisonRunId("");
           setComparisonResult(undefined);
           setMultiModelResults([]);
+          setShowMultiModel(false);
         }
       } else {
         setSelectedResult(undefined);
@@ -2987,12 +2989,21 @@ function ResultsView({
             <BarChart3 size={18} />
           </div>
           <div className="answer-body benchmark-output">
-            {multiModelResults.length > 2 ? (
+            {multiModelResults.length > 2 && !showMultiModel && (
+              <button
+                className="mb-3 inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+                onClick={() => setShowMultiModel(true)}
+              >
+                ← Back to cross-model comparison
+              </button>
+            )}
+            {multiModelResults.length > 2 && showMultiModel ? (
               <MultiModelComparisonView
                 results={multiModelResults}
                 onSelectResult={(run) => {
-                  setMultiModelResults([]);
-                  onNavigate(run.run_id);
+                  setSelectedResult(run);
+                  setSelectedRunId(run.run_id);
+                  setShowMultiModel(false);
                 }}
               />
             ) : selectedResult && comparisonResult ? (
