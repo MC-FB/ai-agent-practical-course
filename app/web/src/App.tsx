@@ -2319,7 +2319,6 @@ function DatasetView({
                     ["direct_llm", "Single prompt", "One LLM call with all evidence"],
                     ["dag_multi_hop", "Multi-hop DAG", "Plan then execute nodes independently"],
                     ["dag_least_to_most", "Least-to-Most", "Plan then answer all steps in one call"],
-                    ["dag_agent", "Combined (LtM+DAG)", "Least-to-Most with DAG fallback"],
                   ].map(([value, label, description]) => (
                     <label
                       className="flex min-h-16 items-start gap-3 rounded-md border border-slate-200 bg-white p-3 shadow-sm transition-colors hover:border-emerald-200 hover:bg-emerald-50/40"
