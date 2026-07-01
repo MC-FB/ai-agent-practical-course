@@ -144,6 +144,15 @@ class DagExecutor:
             config=self.config.model_dump(mode="json"),
         )
 
+    async def execute_least_to_most_only(
+        self,
+        plan: DagPlan,
+        evidence_documents: list[EvidenceDocument],
+    ) -> RunTrace:
+        """Pure Least-to-Most execution without DAG fallback."""
+        plan = normalize_plan_dependencies(plan)
+        return await self._run_least_to_most(plan, evidence_documents)
+
     async def execute_least_to_most(
         self,
         plan: DagPlan,

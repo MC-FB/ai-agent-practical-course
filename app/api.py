@@ -59,6 +59,13 @@ CLUSTER_MODEL_MAX_PARALLEL_EXAMPLES = {
 PAIRED_SYSTEM_COUNT = 2
 MUSIQUE_BENCHMARK_MAX_DEPTH = 6
 BenchmarkDatasetId = Literal["hotpotqa", "musique"]
+BenchmarkSystem = Literal["direct_llm", "dag_agent", "dag_multi_hop", "dag_least_to_most"]
+_ALL_SYSTEMS: tuple[str, ...] = (
+    "direct_llm",
+    "dag_multi_hop",
+    "dag_least_to_most",
+    "dag_agent",
+)
 
 
 class LLMSelection(BaseModel):
@@ -94,8 +101,8 @@ class ExecuteRequest(BaseModel):
 
 class BenchmarkRequest(BaseModel):
     name: str | None = None
-    system: Literal["dag_agent", "direct_llm"] = "dag_agent"
-    systems: list[Literal["dag_agent", "direct_llm"]] | None = None
+    system: BenchmarkSystem = "dag_agent"
+    systems: list[BenchmarkSystem] | None = None
     limit: int = 10
     seed: int | None = None
     dataset: BenchmarkDatasetId = "hotpotqa"
@@ -871,7 +878,7 @@ async def _run_live_benchmark(  # noqa: PLR0912, PLR0915
     seed: int,
     dag_client: DagQaClient,
     cfg: AppConfig,
-    systems: list[Literal["dag_agent", "direct_llm"]] | None = None,
+    systems: list[BenchmarkSystem] | None = None,
     comparison_group_id: str | None = None,
     stop_event: asyncio.Event | None = None,
     model_selections: list[LLMSelection] | None = None,
@@ -1198,8 +1205,8 @@ def hotpotqa_meta(
 
 def _live_benchmark_estimate(
     *,
-    systems: list[Literal["dag_agent", "direct_llm"]],
-    current_system: Literal["dag_agent", "direct_llm"],
+    systems: list[BenchmarkSystem],
+    current_system: str,
     per_system_total: int,
     current_records: list[BenchmarkRecord],
     completed_results: list[BenchmarkResult],
@@ -1278,11 +1285,9 @@ def _live_benchmark_estimate(
     }
 
 
-def _benchmark_systems(
-    request: BenchmarkRequest,
-) -> list[Literal["dag_agent", "direct_llm"]]:
+def _benchmark_systems(request: BenchmarkRequest) -> list[BenchmarkSystem]:
     systems = request.systems or [request.system]
-    resolved = [system for system in ("dag_agent", "direct_llm") if system in systems]
+    resolved: list[BenchmarkSystem] = [s for s in _ALL_SYSTEMS if s in systems]
     if not resolved:
         raise HTTPException(status_code=422, detail="Select at least one benchmark system.")
     return resolved
