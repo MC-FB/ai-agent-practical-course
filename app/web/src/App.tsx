@@ -33,7 +33,6 @@ import { Progress } from "./components/ui/progress";
 import {
   ApiError,
   getAppConfig,
-  getAppConfig,
   deleteMarkedBenchmarkRow,
   getBenchmarkMeta,
   getBenchmarkResult,
@@ -88,314 +87,22 @@ const ACTIVE_BENCHMARK_STORAGE_KEY = "dagqa.activeBenchmarkRunId";
 const LEGACY_MARKED_RECORDS_STORAGE_KEY = "dagqa.markedBenchmarkRecords";
 const LIVE_BENCHMARK_POLL_RETRY_LIMIT = 5;
 
-const TREE_PARAM_BOUNDS = {
-  max_nodes: { min: 1, max: 30 },
-  max_depth: { min: 1, max: 8 },
-};
-// Shown until GET /api/config resolves; mirrors the PlannerConfig field defaults.
-const TREE_PARAM_FALLBACK = { max_nodes: 10, max_depth: 3 };
-
-type PlannerDefaults = { max_nodes: number; max_depth: number };
-
-// Only send the fields the user changed; unchanged fields fall back to server config.
-function buildPlannerOverride(
-  current: PlannerDefaults,
-  defaults: PlannerDefaults | undefined,
-): PlannerSelection | undefined {
-  if (!defaults) return undefined;
-  const override: PlannerSelection = {};
-  if (current.max_nodes !== defaults.max_nodes) override.max_nodes = current.max_nodes;
-  if (current.max_depth !== defaults.max_depth) override.max_depth = current.max_depth;
-  return Object.keys(override).length ? override : undefined;
-}
-
-// Fetches the active planner config, seeds the sliders from it, and derives the
-// override payload to send (undefined when sliders match the server defaults).
-function usePlannerSettings() {
-  const [defaults, setDefaults] = useState<PlannerDefaults>();
-  const [maxNodes, setMaxNodes] = useState(TREE_PARAM_FALLBACK.max_nodes);
-  const [maxDepth, setMaxDepth] = useState(TREE_PARAM_FALLBACK.max_depth);
-
-  useEffect(() => {
-    let cancelled = false;
-    getAppConfig()
-      .then((config) => {
-        if (cancelled) return;
-        const next = {
-          max_nodes: config.planner.max_nodes,
-          max_depth: config.planner.max_depth,
-        };
-        setDefaults(next);
-        setMaxNodes(next.max_nodes);
-        setMaxDepth(next.max_depth);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const override = useMemo(
-    () => buildPlannerOverride({ max_nodes: maxNodes, max_depth: maxDepth }, defaults),
-    [maxNodes, maxDepth, defaults],
-  );
-
-  return { maxNodes, setMaxNodes, maxDepth, setMaxDepth, override };
-}
-
-function TreeParamSlider({
-  label,
-  value,
-  min,
-  max,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  onChange: (value: number) => void;
-}) {
-  function update(next: number) {
-    if (!Number.isFinite(next)) return;
-    onChange(Math.min(Math.max(Math.trunc(next), min), max));
+function parseOptionalInteger(value: string): number | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.toLowerCase() === "random") return undefined;
+  if (!/^-?\d+$/.test(trimmed)) {
+    return undefined;
   }
-  return (
-    <div className="grid gap-2">
-      <div className="flex items-center justify-between gap-3">
-        <Label>{label}</Label>
-        <Input
-          aria-label={label}
-          className="h-9 w-20 bg-white text-right"
-          min={min}
-          max={max}
-          type="number"
-          value={value}
-          onChange={(event) => update(Number(event.target.value))}
-        />
-      </div>
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 text-xs font-medium text-slate-500">
-        <span>{min}</span>
-        <input
-          className="h-7 w-full accent-emerald-800"
-          min={min}
-          max={max}
-          type="range"
-          value={value}
-          onChange={(event) => update(Number(event.target.value))}
-        />
-        <span>{max}</span>
-      </div>
-    </div>
-  );
-}
-
-// Collapsible "dropdown" box exposing the planner's max_nodes / max_depth sliders.
-function TreeParametersControl({
-  maxNodes,
-  maxDepth,
-  onMaxNodesChange,
-  onMaxDepthChange,
-}: {
-  maxNodes: number;
-  maxDepth: number;
-  onMaxNodesChange: (value: number) => void;
-  onMaxDepthChange: (value: number) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <section className="panel-section">
-      <div
-        className="section-header cursor-pointer select-none"
-        onClick={() => setOpen((value) => !value)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setOpen((v) => !v); }}
-        role="button"
-        tabIndex={0}
-      >
-        <div>
-          <h2>Tree parameters</h2>
-          <span>{maxNodes} nodes · depth {maxDepth}</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <GitBranch size={18} />
-          <ChevronDown className={`transition-transform ${open ? "rotate-180" : ""}`} size={16} />
-        </div>
-      </div>
-      {open && (
-        <div className="grid gap-4 p-3">
-          <TreeParamSlider
-            label="Max nodes"
-            max={TREE_PARAM_BOUNDS.max_nodes.max}
-            min={TREE_PARAM_BOUNDS.max_nodes.min}
-            onChange={onMaxNodesChange}
-            value={maxNodes}
-          />
-          <TreeParamSlider
-            label="Max depth"
-            max={TREE_PARAM_BOUNDS.max_depth.max}
-            min={TREE_PARAM_BOUNDS.max_depth.min}
-            onChange={onMaxDepthChange}
-            value={maxDepth}
-          />
-        </div>
-      )}
-    </section>
-  );
-}
-
-const TREE_PARAM_BOUNDS = {
-  max_nodes: { min: 1, max: 30 },
-  max_depth: { min: 1, max: 8 },
-};
-// Shown until GET /api/config resolves; mirrors the PlannerConfig field defaults.
-const TREE_PARAM_FALLBACK = { max_nodes: 10, max_depth: 3 };
-
-type PlannerDefaults = { max_nodes: number; max_depth: number };
-
-// Only send the fields the user changed; unchanged fields fall back to server config.
-function buildPlannerOverride(
-  current: PlannerDefaults,
-  defaults: PlannerDefaults | undefined,
-): PlannerSelection | undefined {
-  if (!defaults) return undefined;
-  const override: PlannerSelection = {};
-  if (current.max_nodes !== defaults.max_nodes) override.max_nodes = current.max_nodes;
-  if (current.max_depth !== defaults.max_depth) override.max_depth = current.max_depth;
-  return Object.keys(override).length ? override : undefined;
-}
-
-// Fetches the active planner config, seeds the sliders from it, and derives the
-// override payload to send (undefined when sliders match the server defaults).
-function usePlannerSettings() {
-  const [defaults, setDefaults] = useState<PlannerDefaults>();
-  const [maxNodes, setMaxNodes] = useState(TREE_PARAM_FALLBACK.max_nodes);
-  const [maxDepth, setMaxDepth] = useState(TREE_PARAM_FALLBACK.max_depth);
-
-  useEffect(() => {
-    let cancelled = false;
-    getAppConfig()
-      .then((config) => {
-        if (cancelled) return;
-        const next = {
-          max_nodes: config.planner.max_nodes,
-          max_depth: config.planner.max_depth,
-        };
-        setDefaults(next);
-        setMaxNodes(next.max_nodes);
-        setMaxDepth(next.max_depth);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const override = useMemo(
-    () => buildPlannerOverride({ max_nodes: maxNodes, max_depth: maxDepth }, defaults),
-    [maxNodes, maxDepth, defaults],
-  );
-
-  return { maxNodes, setMaxNodes, maxDepth, setMaxDepth, override };
-}
-
-function TreeParamSlider({
-  label,
-  value,
-  min,
-  max,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  onChange: (value: number) => void;
-}) {
-  function update(next: number) {
-    if (!Number.isFinite(next)) return;
-    onChange(Math.min(Math.max(Math.trunc(next), min), max));
+  const parsed = Number(trimmed);
+  if (!Number.isSafeInteger(parsed)) {
+    return undefined;
   }
-  return (
-    <div className="grid gap-2">
-      <div className="flex items-center justify-between gap-3">
-        <Label>{label}</Label>
-        <Input
-          aria-label={label}
-          className="h-9 w-20 bg-white text-right"
-          min={min}
-          max={max}
-          type="number"
-          value={value}
-          onChange={(event) => update(Number(event.target.value))}
-        />
-      </div>
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 text-xs font-medium text-slate-500">
-        <span>{min}</span>
-        <input
-          className="h-7 w-full accent-emerald-800"
-          min={min}
-          max={max}
-          type="range"
-          value={value}
-          onChange={(event) => update(Number(event.target.value))}
-        />
-        <span>{max}</span>
-      </div>
-    </div>
-  );
+  return parsed;
 }
 
-// Collapsible "dropdown" box exposing the planner's max_nodes / max_depth sliders.
-function TreeParametersControl({
-  maxNodes,
-  maxDepth,
-  onMaxNodesChange,
-  onMaxDepthChange,
-}: {
-  maxNodes: number;
-  maxDepth: number;
-  onMaxNodesChange: (value: number) => void;
-  onMaxDepthChange: (value: number) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <section className="panel-section">
-      <div
-        className="section-header cursor-pointer select-none"
-        onClick={() => setOpen((value) => !value)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setOpen((v) => !v); }}
-        role="button"
-        tabIndex={0}
-      >
-        <div>
-          <h2>Tree parameters</h2>
-          <span>{maxNodes} nodes · depth {maxDepth}</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <GitBranch size={18} />
-          <ChevronDown className={`transition-transform ${open ? "rotate-180" : ""}`} size={16} />
-        </div>
-      </div>
-      {open && (
-        <div className="grid gap-4 p-3">
-          <TreeParamSlider
-            label="Max nodes"
-            max={TREE_PARAM_BOUNDS.max_nodes.max}
-            min={TREE_PARAM_BOUNDS.max_nodes.min}
-            onChange={onMaxNodesChange}
-            value={maxNodes}
-          />
-          <TreeParamSlider
-            label="Max depth"
-            max={TREE_PARAM_BOUNDS.max_depth.max}
-            min={TREE_PARAM_BOUNDS.max_depth.min}
-            onChange={onMaxDepthChange}
-            value={maxDepth}
-          />
-        </div>
-      )}
-    </section>
-  );
+function formatSeedInput(seed: number | null | undefined): string {
+  return typeof seed === "number" && Number.isSafeInteger(seed) ? String(seed) : "";
 }
 
 const TREE_PARAM_BOUNDS = {
@@ -1737,6 +1444,129 @@ function aggregateBenchmarkRecords(records: HotpotBenchmarkRecord[]): Record<str
   };
 }
 
+function MultiModelComparisonView({
+  results,
+  onSelectResult,
+}: {
+  results: HotpotBenchmarkResult[];
+  onSelectResult: (run: HotpotBenchmarkResult) => void;
+}) {
+  const rows = results.map((r) => ({
+    result: r,
+    model: r.model?.split("/").pop() ?? r.model ?? "unknown",
+    system: r.system === "dag_agent" ? "DAG agent" : "Single prompt",
+    cosine: r.metrics.cosine_sim ?? 0,
+    em: (r.metrics.exact_match ?? 0) * 100,
+    f1: (r.metrics.f1 ?? 0) * 100,
+    goldRecall: (r.metrics.avg_gold_supporting_fact_recall ?? 0) * 100,
+    latency: (r.metrics.avg_latency_ms ?? 0) / 1000,
+    records: r.records.length,
+  }));
+
+  const bestCosine = Math.max(...rows.map((r) => r.cosine));
+  const bestEM = Math.max(...rows.map((r) => r.em));
+  const bestF1 = Math.max(...rows.map((r) => r.f1));
+
+  // Group by model to show DAG advantage
+  const modelGroups = new Map<string, typeof rows>();
+  for (const row of rows) {
+    const group = modelGroups.get(row.model) ?? [];
+    group.push(row);
+    modelGroups.set(row.model, group);
+  }
+
+  return (
+    <div className="grid gap-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-bold text-slate-900">
+          Multi-model comparison · {results[0]?.records.length ?? 0} examples · seed{" "}
+          {results[0]?.seed}
+        </h3>
+        <span className="text-xs text-slate-500">{results.length} runs</span>
+      </div>
+      <div className="overflow-x-auto rounded-lg border border-slate-200">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
+              <th className="px-4 py-2">Model</th>
+              <th className="px-4 py-2">System</th>
+              <th className="px-4 py-2 text-right">Cosine</th>
+              <th className="px-4 py-2 text-right">EM</th>
+              <th className="px-4 py-2 text-right">F1</th>
+              <th className="px-4 py-2 text-right">Gold Recall</th>
+              <th className="px-4 py-2 text-right">Latency</th>
+              <th className="px-4 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...modelGroups.entries()].map(([model, group]) =>
+              group.map((row, index) => {
+                const dagRow = group.find((r) => r.result.system === "dag_agent");
+                const spRow = group.find((r) => r.result.system === "direct_llm");
+                const dagWins = dagRow && spRow && dagRow.cosine > spRow.cosine;
+                return (
+                  <tr
+                    key={row.result.run_id}
+                    className={[
+                      "border-b border-slate-100 transition-colors hover:bg-slate-50 cursor-pointer",
+                      row.result.system === "dag_agent" && dagWins
+                        ? "bg-emerald-50/50"
+                        : "",
+                      index === 0 && modelGroups.size > 1
+                        ? "border-t-2 border-t-slate-300"
+                        : "",
+                    ].join(" ")}
+                    onClick={() => onSelectResult(row.result)}
+                  >
+                    <td className="px-4 py-2 font-medium text-slate-900">
+                      {index === 0 ? model : ""}
+                    </td>
+                    <td className="px-4 py-2 text-slate-600">{row.system}</td>
+                    <td
+                      className={`px-4 py-2 text-right font-mono ${
+                        row.cosine === bestCosine ? "font-bold text-emerald-700" : ""
+                      }`}
+                    >
+                      {row.cosine.toFixed(3)}
+                    </td>
+                    <td
+                      className={`px-4 py-2 text-right font-mono ${
+                        row.em === bestEM ? "font-bold text-emerald-700" : ""
+                      }`}
+                    >
+                      {row.em.toFixed(0)}%
+                    </td>
+                    <td
+                      className={`px-4 py-2 text-right font-mono ${
+                        row.f1 === bestF1 ? "font-bold text-emerald-700" : ""
+                      }`}
+                    >
+                      {row.f1.toFixed(1)}%
+                    </td>
+                    <td className="px-4 py-2 text-right font-mono">
+                      {row.goldRecall.toFixed(0)}%
+                    </td>
+                    <td className="px-4 py-2 text-right font-mono text-slate-500">
+                      {row.latency.toFixed(1)}s
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      {row.result.system === "dag_agent" && dagWins && (
+                        <span className="inline-block rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                          DAG wins
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              }),
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function BenchmarkComparisonView({
   first,
   second,
@@ -1974,12 +1804,14 @@ function DatasetView({
   recordId,
   onSelectRecord,
   llm,
+  modelCatalog,
   markedKeys,
   onToggleMarkedRow,
 }: {
   recordId?: string;
   onSelectRecord: (recordId?: string) => void;
   llm: LLMSelection;
+  modelCatalog?: LLMModelCatalog;
   markedKeys: Set<string>;
   onToggleMarkedRow: (
     focus: HotpotBenchmarkResult,
@@ -1994,6 +1826,11 @@ function DatasetView({
   const [benchmarkSubset, setBenchmarkSubset] = useState<BenchmarkSubset>("validation");
   const [systems, setSystems] = useState<string[]>(["dag_agent", "direct_llm"]);
   const [seedInput, setSeedInput] = useState("");
+  const clusterModels = useMemo(
+    () => (modelCatalog?.models ?? []).filter((m) => m.provider === "cluster"),
+    [modelCatalog],
+  );
+  const [selectedModels, setSelectedModels] = useState<LLMSelection[]>([]);
   const [meta, setMeta] = useState<BenchmarkMeta>();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<HotpotBenchmarkResult>();
@@ -2003,6 +1840,16 @@ function DatasetView({
   const [selectedLiveRunId, setSelectedLiveRunId] = useState("");
   const [liveRun, setLiveRun] = useState<LiveBenchmark>();
   const [error, setError] = useState("");
+  const { maxNodes, setMaxNodes, maxDepth, setMaxDepth, override: plannerOverride } =
+    usePlannerSettings();
+  const multiModel = selectedModels.length > 1;
+
+  useEffect(() => {
+    if (clusterModels.length > 0 && selectedModels.length === 0) {
+      setSelectedModels(clusterModels.map((m) => ({ provider: m.provider, model: m.model })));
+    }
+  }, [clusterModels, selectedModels.length]);
+
   const maxExamples = meta?.total_examples && meta.total_examples > 1 ? meta.total_examples : 7405;
   const resolvedLimit = Math.min(limit, maxExamples);
   const progressPercent = liveRun?.total ? (liveRun.completed / liveRun.total) * 100 : 0;
@@ -2217,7 +2064,7 @@ function DatasetView({
     setLiveRun(started);
     setResult(started.comparison_results?.[0] ?? started);
     setComparisonResults(started.comparison_results ?? []);
-    setSeedInput(String(started.seed));
+    setSeedInput(formatSeedInput(started.seed));
     setBenchmarkName(started.name ?? "");
     setBenchmarkDataset(started.dataset ?? "hotpotqa");
     setBenchmarkSubset((started.subset as BenchmarkSubset | undefined) ?? "validation");
@@ -2266,14 +2113,12 @@ function DatasetView({
     setComparisonResults([]);
     onSelectRecord(undefined);
     try {
-      const parsedSeed = seedInput.trim() ? Number(seedInput) : undefined;
-      if (parsedSeed !== undefined && !Number.isInteger(parsedSeed)) {
-        throw new Error("Seed must be an integer.");
-      }
+      const parsedSeed = parseOptionalInteger(seedInput);
       if (!systems.length) {
         throw new Error("Select at least one system.");
       }
       const name = benchmarkName.trim() || undefined;
+      const modelsToRun = multiModel ? selectedModels : undefined;
       const preflight = await preflightBenchmark(
         resolvedLimit,
         systems,
@@ -2283,6 +2128,7 @@ function DatasetView({
         plannerOverride,
         benchmarkSubset,
         benchmarkDataset,
+        modelsToRun,
       );
       if (!preflight.ok) {
         const failed = preflight.checks.filter((check) => !check.ok);
@@ -2297,6 +2143,7 @@ function DatasetView({
         plannerOverride,
         benchmarkSubset,
         benchmarkDataset,
+        modelsToRun,
       );
       await refreshUnfinishedLiveRuns();
       await watchBenchmark(started);
@@ -2345,7 +2192,7 @@ function DatasetView({
       setLiveRun(selected);
       setResult(selected.comparison_results?.[0] ?? selected);
       setComparisonResults(selected.comparison_results ?? []);
-      setSeedInput(String(selected.seed));
+      setSeedInput(formatSeedInput(selected.seed));
       setBenchmarkName(selected.name ?? "");
       setBenchmarkDataset(selected.dataset ?? "hotpotqa");
       setBenchmarkSubset((selected.subset as BenchmarkSubset | undefined) ?? "validation");
@@ -2442,11 +2289,13 @@ function DatasetView({
                 <div className="grid gap-2">
                   <Label htmlFor="benchmark-seed">Seed</Label>
                   <Input
+                    autoComplete="off"
                     className="h-9 bg-white"
                     id="benchmark-seed"
                     inputMode="numeric"
+                    pattern="-?[0-9]*"
                     placeholder="Random"
-                    type="number"
+                    type="text"
                     value={seedInput}
                     onChange={(event) => setSeedInput(event.target.value)}
                   />
@@ -2487,6 +2336,44 @@ function DatasetView({
                   ))}
                 </div>
               </div>
+
+              {clusterModels.length > 1 && (
+              <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <Label>Models</Label>
+                  <span className="text-xs font-semibold text-slate-500">
+                    {selectedModels.length} selected
+                  </span>
+                </div>
+                <div className="grid gap-2">
+                  {clusterModels.map((option) => (
+                    <label
+                      className="flex items-center gap-3 rounded-md border border-slate-200 bg-white p-3 shadow-sm transition-colors hover:border-emerald-200 hover:bg-emerald-50/40"
+                      key={`${option.provider}:${option.model}`}
+                    >
+                      <Checkbox
+                        checked={selectedModels.some(
+                          (sel) => sel.provider === option.provider && sel.model === option.model,
+                        )}
+                        onCheckedChange={(checked) =>
+                          setSelectedModels((current) =>
+                            checked
+                              ? [...current, { provider: option.provider, model: option.model }]
+                              : current.filter(
+                                  (sel) =>
+                                    !(sel.provider === option.provider && sel.model === option.model),
+                                ),
+                          )
+                        }
+                      />
+                      <span className="text-sm font-semibold text-slate-900">
+                        {option.label}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              )}
 
               <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
                 <div className="flex items-center justify-between gap-3">
@@ -2700,7 +2587,15 @@ function DatasetView({
             <BarChart3 size={18} />
           </div>
           <div className="answer-body benchmark-output">
-            {comparisonResults.length === 2 ? (
+            {comparisonResults.length > 2 ? (
+              <MultiModelComparisonView
+                results={comparisonResults}
+                onSelectResult={(run) => {
+                  setResult(run);
+                  setComparisonResults([]);
+                }}
+              />
+            ) : comparisonResults.length === 2 ? (
               <BenchmarkComparisonView
                 first={comparisonResults[0]}
                 second={comparisonResults[1]}
@@ -2920,6 +2815,8 @@ function ResultsView({
   const [comparisonRunId, setComparisonRunId] = useState("");
   const [selectedResult, setSelectedResult] = useState<HotpotBenchmarkResult>();
   const [comparisonResult, setComparisonResult] = useState<HotpotBenchmarkResult>();
+  const [multiModelResults, setMultiModelResults] = useState<HotpotBenchmarkResult[]>([]);
+  const [showMultiModel, setShowMultiModel] = useState(true);
   const [datasetFilter, setDatasetFilter] = useState("all");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -2934,19 +2831,25 @@ function ResultsView({
       if (targetRunId) {
         const loaded = await getBenchmarkResult(targetRunId);
         setSelectedResult(loaded);
-        const paired = response.results.find(
+        const groupMembers = response.results.filter(
           (item) =>
             !item.partial &&
             item.run_id !== targetRunId &&
             item.comparison_group_id &&
             item.comparison_group_id === loaded.comparison_group_id,
         );
-        if (paired) {
-          setComparisonRunId(paired.run_id);
-          setComparisonResult(await getBenchmarkResult(paired.run_id));
+        if (groupMembers.length > 0) {
+          const allGroupResults = await Promise.all(
+            groupMembers.map((item) => getBenchmarkResult(item.run_id)),
+          );
+          setComparisonRunId(groupMembers[0].run_id);
+          setComparisonResult(allGroupResults[0]);
+          setMultiModelResults([loaded, ...allGroupResults]);
         } else {
           setComparisonRunId("");
           setComparisonResult(undefined);
+          setMultiModelResults([]);
+          setShowMultiModel(false);
         }
       } else {
         setSelectedResult(undefined);
@@ -3086,7 +2989,24 @@ function ResultsView({
             <BarChart3 size={18} />
           </div>
           <div className="answer-body benchmark-output">
-            {selectedResult && comparisonResult ? (
+            {multiModelResults.length > 2 && !showMultiModel && (
+              <button
+                className="mb-3 inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+                onClick={() => setShowMultiModel(true)}
+              >
+                ← Back to cross-model comparison
+              </button>
+            )}
+            {multiModelResults.length > 2 && showMultiModel ? (
+              <MultiModelComparisonView
+                results={multiModelResults}
+                onSelectResult={(run) => {
+                  setSelectedResult(run);
+                  setSelectedRunId(run.run_id);
+                  setShowMultiModel(false);
+                }}
+              />
+            ) : selectedResult && comparisonResult ? (
               <BenchmarkComparisonView
                 first={selectedResult}
                 second={comparisonResult}
@@ -3477,6 +3397,7 @@ function App() {
           recordId={route.recordId}
           onSelectRecord={(recordId) => navigate({ tab: "dataset", recordId })}
           llm={selectedLLM}
+          modelCatalog={modelCatalog}
           markedKeys={markedKeys}
           onToggleMarkedRow={toggleMarkedRow}
         />

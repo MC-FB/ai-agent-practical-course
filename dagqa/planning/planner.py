@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import os
+import re
 from typing import Any
 
 from openai import AsyncOpenAI, AzureOpenAI
@@ -12,8 +13,7 @@ from dagqa.config import LLMConfig, PlannerConfig
 from dagqa.llm.base import LanguageModel
 from dagqa.llm.retry import retry_llm_call
 from dagqa.planning.normalizer import normalize_plan_dependencies
-from dagqa.planning.parser import PlanParseError, parse_plan
-from dagqa.planning.prompts import PLANNER_SYSTEM, plan_repair_prompt, planner_user_prompt
+from dagqa.planning.parser import parse_plan
 from dagqa.planning.validator import validate_plan
 from dagqa.schemas import DagNode, DagPlan, LLMRequest, Operation, PromptSpec, TaskType
 
@@ -38,36 +38,55 @@ class Planner:
     async def plan(self, question: str) -> DagPlan:
         if self.llm_config and self.llm_config.provider == "azure_openai":
             return await self._plan_structured_azure(question)
-        if self.llm_config and self.llm_config.provider == "cluster":
+        # Use cluster JSON schema planner when API credentials are available
+        api_key = os.getenv(self.llm_config.api_key_env or "") if self.llm_config else None
+        api_base = (
+            (os.getenv(self.llm_config.api_base_env) if self.llm_config.api_base_env else None)
+            or self.llm_config.api_base
+            if self.llm_config
+            else None
+        )
+        if api_key and api_base:
+            if self.config.planner_mode == "simple":
+                return await self._plan_simple_cluster(question)
             return await self._plan_structured_cluster(question)
+        # Fallback: use the injected LLM with YAML planner (tests, local dev)
+        return await self._plan_yaml_fallback(question)
 
-        request = LLMRequest(
-            system=PLANNER_SYSTEM,
-            prompt=planner_user_prompt(question, self.config.max_nodes, self.config.max_depth),
+    async def _plan_yaml_fallback(self, question: str) -> DagPlan:
+        """Fallback planner that uses the injected LLM with YAML output."""
+        from dagqa.planning.prompts import (  # noqa: PLC0415
+            PLANNER_SYSTEM,
+            plan_repair_prompt,
+            planner_user_prompt,
         )
 
-        logger.debug("Starting planner request")
-        response = await self.llm.complete(request)
+        response = await self.llm.complete(
+            LLMRequest(
+                system=PLANNER_SYSTEM,
+                prompt=planner_user_prompt(question, self.config.max_nodes, self.config.max_depth),
+            )
+        )
         raw = response.text
         last_errors: list[str] = []
-
         for attempt in range(self.config.repair_rounds + 1):
             try:
                 plan = normalize_plan_dependencies(parse_plan(raw))
-            except PlanParseError as exc:
+            except Exception as exc:
                 last_errors = [str(exc)]
             else:
                 validation = validate_plan(plan, self.config)
                 if validation.valid:
                     return plan
                 last_errors = validation.errors
-
             if attempt < self.config.repair_rounds:
                 repair = await self.llm.complete(
-                    LLMRequest(system=PLANNER_SYSTEM, prompt=plan_repair_prompt(raw, last_errors))
+                    LLMRequest(
+                        system=PLANNER_SYSTEM,
+                        prompt=plan_repair_prompt(raw, last_errors),
+                    )
                 )
                 raw = repair.text
-
         raise PlannerError("Planner produced invalid DAG: " + "; ".join(last_errors))
 
     async def _plan_structured_azure(self, question: str) -> DagPlan:
@@ -126,6 +145,65 @@ class Planner:
                 plan = normalize_plan_dependencies(_structured_data_to_plan(data))
             except Exception as exc:
                 raise PlannerError(f"Structured Azure planner failed: {exc}") from exc
+
+            validation = validate_plan(plan, self.config)
+            if validation.valid:
+                return plan
+            validation_errors = validation.errors
+            if attempt >= self.config.repair_rounds:
+                break
+
+        raise PlannerError("Planner produced invalid DAG: " + "; ".join(validation_errors))
+
+    async def _plan_simple_cluster(self, question: str) -> DagPlan:
+        api_base = _env_or_value(self.llm_config.api_base_env, self.llm_config.api_base)
+        api_key = os.getenv(self.llm_config.api_key_env or "")
+        model = _env_or_value(self.llm_config.model_env, self.llm_config.model)
+        if not api_base or not api_key or not model:
+            raise PlannerError("Cluster planner config is incomplete.")
+        client = AsyncOpenAI(
+            api_key=api_key,
+            base_url=api_base,
+            timeout=self.llm_config.request_timeout_seconds,
+            max_retries=0,
+        )
+        validation_errors: list[str] = []
+
+        for attempt in range(self.config.repair_rounds + 1):
+            try:
+                current_errors = list(validation_errors)
+                response, _retry_count = await retry_llm_call(
+                    lambda errors=current_errors: client.chat.completions.create(
+                        model=model,
+                        temperature=0.0,
+                        messages=[
+                            {"role": "system", "content": SIMPLE_PLANNER_SYSTEM},
+                            {
+                                "role": "user",
+                                "content": simple_planner_prompt(
+                                    question,
+                                    self.config.max_nodes,
+                                    self.config.max_depth,
+                                    errors,
+                                ),
+                            },
+                        ],
+                        response_format={
+                            "type": "json_schema",
+                            "json_schema": {
+                                "name": "simple_plan",
+                                "strict": True,
+                                "schema": SIMPLE_PLAN_SCHEMA,
+                            },
+                        },
+                    ),
+                    self.llm_config,
+                )
+                content = response.choices[0].message.content or "[]"
+                raw_steps = json.loads(content)
+                plan = normalize_plan_dependencies(_simple_steps_to_plan(raw_steps, question))
+            except Exception as exc:
+                raise PlannerError(f"Simple cluster planner failed: {exc}") from exc
 
             validation = validate_plan(plan, self.config)
             if validation.valid:
@@ -225,9 +303,26 @@ directly.
 For bridge questions, ask lookup nodes to find the bridge-specific entity or
 attribute from the supplied evidence rather than enumerating all possible
 candidates from world knowledge.
+Non-final fact lookup nodes should return one selected bridge value in the
+context of the original question. Do not return several peer fields like city
+and country unless the original question explicitly asks for multiple values;
+put the selected downstream value in bridge_answer.
 Preserve the resolved bridge entity across hops: after a node identifies a
 person, work, event, organization, place, or series, later nodes must ask about
 that exact value and ignore unrelated entities in distractor documents.
+Preserve scoped superlatives and comparatives: when the original question asks
+for the largest, smallest, oldest, first, last, most, or least X where/in/from a
+resolved bridge scope, downstream nodes must find that superlative inside the
+resolved scope. Do not rewrite "largest state where a work is set" into a global
+"largest U.S. state" lookup; after resolving the setting to New England, ask
+"largest state in New England".
+Dependent lookup nodes must be rewritten versions of the original user question
+with child bridge_answer values inserted. Preserve unresolved original
+constraints such as dates, events, roles, comparisons, and final answer type.
+For example, after resolving "where Steven Spielberg's grandparents are from"
+to Ukraine, the next lookup should ask "The leader visiting Ukraine met with
+whom on November 22?" rather than "Which leader visited Ukraine?" or "Which
+leader visited Cincinnati, Ukraine?".
 Bridge lookup nodes that feed later nodes must explain their selection. Include
 bridge_answer, bridge_reasoning, bridge_source_span, and constraint_status in
 their output fields. constraint_status must be "satisfied" only when the cited
@@ -311,8 +406,24 @@ Constraints:
   user's question requires that list.
 - Evidence-backed lookup nodes should return only facts directly needed by downstream nodes,
   not every related fact visible in the context.
+- Non-final fact lookup nodes should select one most likely bridge answer in the context of
+  the original question. Do not expose multiple peer answer fields unless the original question
+  asks for a list or comparison; use bridge_answer as the value downstream nodes continue from.
 - Bridge nodes must preserve the resolved bridge value in downstream questions and prompts;
   never let a later hop answer about a different entity that only appears in a distractor context.
+- Preserve scoped superlatives and comparatives. If the original question asks for the largest,
+  smallest, oldest, first, last, most, or least X where/in/from a resolved bridge scope, the
+  dependent node must ask for that superlative within the bridge scope. For example, after
+  resolving a work's setting to New England, ask "What is the largest state in New England?",
+  not "What is the largest U.S. state by area?".
+- Dependent lookup nodes must rewrite the original user question by inserting dependency
+  bridge_answer values while preserving unresolved constraints. For example, if q1 resolves
+  where Steven Spielberg's grandparents are from to Ukraine, the next lookup question should be
+  "The leader visiting {{q1.bridge_answer}} met with whom on November 22?", not "Which leader
+  visited {{q1.city}}, {{q1.country}}?" and not "Which leader visited {{q1.bridge_answer}}?".
+- Dependent lookup nodes must use child bridge_answer values in input_map or direct placeholders.
+  Do not continue a bridge from incidental child fields such as city plus country when a child
+  also provides bridge_answer.
 - Non-final bridge lookup nodes that feed another node must include output fields named
   bridge_answer, bridge_reasoning, bridge_source_span, and constraint_status. Use
   constraint_status="satisfied" only when the cited span satisfies every dependency constraint;
@@ -484,6 +595,156 @@ def _structured_data_to_plan(data: dict[str, Any]) -> DagPlan:
             )
         )
     return DagPlan(question=data["question"], nodes=nodes, final_node=data["final_node"])
+
+
+SIMPLE_PLANNER_SYSTEM = """\
+Decompose this question into sub-questions that can be answered from
+evidence documents. Each sub-question must be self-contained and
+answerable independently once its dependencies are resolved.
+Use {q1.answer} syntax to reference previous answers in later questions.
+Preserve all constraints (dates, names, roles, scoped superlatives)
+from the original question. The last question must answer the original
+question using all previous answers.
+Return a JSON object with a "steps" array of {id, question, depends_on}.
+"""
+
+
+def simple_planner_prompt(
+    question: str,
+    max_nodes: int,
+    max_depth: int,
+    previous_errors: list[str] | None = None,
+) -> str:
+    repair_instruction = ""
+    if previous_errors:
+        repair_instruction = (
+            "\nThe previous plan was invalid. Fix these errors:\n"
+            + "\n".join(f"- {error}" for error in previous_errors)
+            + "\n"
+        )
+    return f"""Question: {question}
+{repair_instruction}
+Constraints:
+- Maximum {max_nodes} sub-questions, maximum chain depth {max_depth}.
+- Independent sub-questions should not depend on each other.
+- Use {{q1.answer}} to reference a previous step's answer.
+- The final step must produce the answer to the original question.
+"""
+
+
+SIMPLE_PLAN_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["steps"],
+    "properties": {
+        "steps": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["id", "question", "depends_on"],
+                "properties": {
+                    "id": {"type": "string"},
+                    "question": {"type": "string"},
+                    "depends_on": {"type": "array", "items": {"type": "string"}},
+                },
+            },
+        }
+    },
+}
+
+_PLACEHOLDER_RE_SIMPLE = re.compile(r"\{([A-Za-z][A-Za-z0-9_-]*)\.answer\}")
+
+
+def _simple_steps_to_plan(data: dict[str, Any], question: str) -> DagPlan:
+    steps = data.get("steps", data if isinstance(data, list) else [])
+    if not steps:
+        raise PlannerError("Simple planner returned no steps.")
+    nodes: list[DagNode] = []
+    step_ids = {step["id"] for step in steps}
+    final_id = steps[-1]["id"]
+
+    for step in steps:
+        step_id = step["id"]
+        step_question = step["question"]
+        depends_on = [dep for dep in step.get("depends_on", []) if dep in step_ids]
+        is_final = step_id == final_id
+
+        # Build input_map from placeholders + ensure all deps are consumed
+        input_map: dict[str, str] = {}
+        for match in _PLACEHOLDER_RE_SIMPLE.finditer(step_question):
+            dep_id = match.group(1)
+            if dep_id in step_ids:
+                input_map[f"{dep_id}_answer"] = f"{dep_id}.answer"
+        # Auto-generate input_map entries for deps not matched by placeholders
+        for dep_id in depends_on:
+            key = f"{dep_id}_answer"
+            if key not in input_map:
+                input_map[key] = f"{dep_id}.answer"
+
+        # Infer task_type
+        if is_final and depends_on:
+            task_type, operation = TaskType.synthesis, Operation.synthesize
+        else:
+            task_type, operation = TaskType.fact_lookup, Operation.answer
+
+        # Build output schema
+        if is_final:
+            output_schema: dict[str, Any] = {
+                "type": "object",
+                "required": ["answer", "answer_type", "answer_source_span"],
+                "properties": {
+                    "answer": {
+                        "type": "string",
+                        "description": "Concise final answer to the original user question.",
+                    },
+                    "answer_type": {
+                        "type": "string",
+                        "description": "Answer type requested by the original question.",
+                    },
+                    "answer_source_span": {
+                        "type": "string",
+                        "description": "Shortest evidence span supporting the final answer.",
+                    },
+                },
+            }
+        else:
+            output_schema = {
+                "type": "object",
+                "required": ["answer", "reasoning"],
+                "properties": {
+                    "answer": {
+                        "type": "string",
+                        "description": "Concise answer to this sub-question.",
+                    },
+                    "reasoning": {
+                        "type": "string",
+                        "description": "Brief explanation of why this answer was selected.",
+                    },
+                },
+            }
+
+        # Build prompt user_template
+        if depends_on:
+            user_template = "Question: {resolved_question}\n{dependencies}"
+        else:
+            user_template = "Question: {resolved_question}"
+
+        nodes.append(
+            DagNode(
+                id=step_id,
+                label=step_question[:60],
+                task_type=task_type,
+                operation=operation,
+                question=step_question,
+                depends_on=depends_on,
+                prompt=PromptSpec(system="Return JSON only.", user_template=user_template),
+                input_map=input_map,
+                output_schema=output_schema,
+            )
+        )
+    return DagPlan(question=question, nodes=nodes, final_node=final_id)
 
 
 def _output_fields_to_schema(fields: list[dict[str, str]], *, is_final: bool) -> dict[str, Any]:

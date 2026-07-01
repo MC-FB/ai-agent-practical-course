@@ -447,20 +447,32 @@ def test_hotpotqa_meta_reports_selected_failure_subset() -> None:
 
 
 def test_benchmark_meta_reports_musique_dataset(monkeypatch) -> None:
+    seen_paths: list[str | None] = []
+
+    def count_examples(dataset, subset, path=None):  # noqa: ANN001, ANN202
+        seen_paths.append(path)
+        return EXPECTED_MUSIQUE_META_COUNT
+
     monkeypatch.setattr(
         api,
         "count_benchmark_examples",
-        lambda dataset, subset, path=None: EXPECTED_MUSIQUE_META_COUNT,
+        count_examples,
     )
 
-    meta = api.hotpotqa_meta(dataset="musique", subset="validation_3hop_plus")
+    meta = api.hotpotqa_meta(dataset="musique", subset="marked_failures_2026_06_28")
 
     assert meta["dataset"] == "musique"
     assert meta["dataset_label"] == "MuSiQue"
-    assert meta["subset"] == "validation_3hop_plus"
-    assert meta["subset_label"] == "MuSiQue validation, 3+ hops"
+    assert meta["subset"] == "marked_failures_2026_06_28"
+    assert meta["subset_label"] == "Marked MuSiQue failures, 2026-06-28"
     assert meta["total_examples"] == EXPECTED_MUSIQUE_META_COUNT
+    assert meta["default_limit"] == EXPECTED_MUSIQUE_META_COUNT
+    assert seen_paths == [
+        "data/musique/marked_failures_2026_06_28.json",
+        "data/musique/marked_failures_2026_06_28.json",
+    ]
     assert {dataset["id"] for dataset in meta["datasets"]} >= {"hotpotqa", "musique"}
+    assert {subset["id"] for subset in meta["subsets"]} >= {"marked_failures_2026_06_28"}
 
 
 async def test_paired_live_benchmark_reuses_sample_and_saves_two_results(

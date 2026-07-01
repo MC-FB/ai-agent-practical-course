@@ -11,11 +11,11 @@ load_dotenv()
 
 
 class LLMConfig(BaseModel):
-    provider: Literal["gemini", "openrouter", "azure_openai", "cluster", "dspy"] = "gemini"
-    model: str = "gemini/gemini-2.0-flash"
+    provider: Literal["azure_openai", "cluster"] = "cluster"
+    model: str = "mistralai/Mistral-Medium-3.5-128B"
     model_env: str | None = None
     temperature: float = 0.0
-    api_key_env: str | None = "GEMINI_API_KEY"
+    api_key_env: str | None = "CLUSTER_API_KEY"
     api_base: str | None = None
     api_base_env: str | None = None
     api_version: str | None = None
@@ -26,10 +26,14 @@ class LLMConfig(BaseModel):
     retry_max_delay_seconds: float = Field(default=8.0, gt=0)
 
 
+PlannerMode = Literal["structured", "simple"]
+
+
 class PlannerConfig(BaseModel):
     max_nodes: int = Field(default=10, ge=1)
     max_depth: int = Field(default=3, ge=1)
     repair_rounds: int = Field(default=1, ge=0)
+    planner_mode: PlannerMode = "simple"
 
 
 class ExecutionConfig(BaseModel):

@@ -1,8 +1,12 @@
 from __future__ import annotations
 
-from dagqa.nodes.output_validation import coerce_output_to_schema, validate_evidence_citations
+from dagqa.nodes.output_validation import (
+    coerce_output_to_schema,
+    validate_evidence_citations,
+    validate_factual_output_grounding,
+)
 from dagqa.nodes.prompts import render_repair_prompt
-from dagqa.schemas import EvidenceDocument, EvidenceSelection
+from dagqa.schemas import EvidenceDocument, EvidenceSelection, TaskType
 
 
 def _evidence() -> EvidenceSelection:
@@ -103,6 +107,47 @@ def test_out_of_range_sentence_index_fails() -> None:
 
     assert not result.valid
     assert "only has sentence indices 0 through 1" in result.errors[0]
+
+
+def test_citation_fact_must_be_copied_from_cited_document() -> None:
+    result = validate_evidence_citations(
+        {
+            "answer": "Calumet",
+            "_evidence_citations": [
+                {
+                    "document_id": "context-0",
+                    "title": "Final Fantasy",
+                    "sentence_indices": [0],
+                    "fact": "Calumet is the answer.",
+                }
+            ],
+        },
+        _evidence(),
+    )
+
+    assert not result.valid
+    assert "fact is not copied from the cited document" in result.errors[0]
+
+
+def test_fact_lookup_answer_must_be_exact_evidence_span() -> None:
+    result = validate_factual_output_grounding(
+        {"answer": "Calumet"},
+        _evidence(),
+        TaskType.fact_lookup,
+    )
+
+    assert not result.valid
+    assert "not an exact span" in result.errors[0]
+
+
+def test_fact_lookup_answer_allows_source_surface() -> None:
+    result = validate_factual_output_grounding(
+        {"answer": "Nobuo Uematsu"},
+        _evidence(),
+        TaskType.fact_lookup,
+    )
+
+    assert result.valid
 
 
 def test_repair_prompt_lists_valid_evidence_ids() -> None:

@@ -31,7 +31,7 @@ fi
 
 if [ ! -f .env ]; then
   touch .env
-  echo "Created empty .env. Add GEMINI_API_KEY or choose another config if you need live LLM calls."
+  echo "Created empty .env. Add CLUSTER_API_KEY for chair cluster LLM calls."
 fi
 
 mkdir -p runs

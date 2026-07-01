@@ -35,46 +35,28 @@ def normalize_plan_dependencies(plan: DagPlan) -> DagPlan:
     downstream_ids = {dependency for node in plan.nodes for dependency in node.depends_on}
     for node in plan.nodes:
         if node.id != plan.final_node and node.id in downstream_ids:
-            _ensure_bridge_reasoning_contract(node)
+            _ensure_intermediate_answer_contract(node)
     return plan
 
 
-def _ensure_bridge_reasoning_contract(node: Any) -> None:
+def _ensure_intermediate_answer_contract(node: Any) -> None:
+    """Ensure intermediate (non-final) bridge nodes expose answer + reasoning."""
     if node.task_type not in _BRIDGE_TASK_TYPES:
         return
     properties = node.output_schema.setdefault("properties", {})
     required = node.output_schema.setdefault("required", [])
-    bridge_fields = {
-        "bridge_answer": {
+    intermediate_fields = {
+        "answer": {
             "type": "string",
-            "description": (
-                "Concise value selected for downstream bridge reasoning. Copy the exact answer "
-                "surface from evidence when possible."
-            ),
+            "description": "Concise answer to this sub-question, used by downstream nodes.",
         },
-        "bridge_reasoning": {
+        "reasoning": {
             "type": "string",
-            "description": (
-                "One or two sentences explaining why bridge_answer satisfies the resolved "
-                "subquestion and dependency constraints."
-            ),
-        },
-        "bridge_source_span": {
-            "type": "string",
-            "description": "Shortest exact evidence or dependency span supporting bridge_answer.",
-        },
-        "constraint_status": {
-            "type": "string",
-            "enum": ["satisfied", "ambiguous", "not_found"],
-            "description": (
-                "Whether the evidence fully satisfies the subquestion and dependency constraints."
-            ),
+            "description": "Brief explanation of why this answer was selected from evidence.",
         },
     }
-    for field, schema in bridge_fields.items():
-        existing = properties.setdefault(field, schema)
-        if field == "constraint_status":
-            existing.setdefault("enum", ["satisfied", "ambiguous", "not_found"])
+    for field, schema in intermediate_fields.items():
+        properties.setdefault(field, schema)
         if field not in required:
             required.append(field)
 

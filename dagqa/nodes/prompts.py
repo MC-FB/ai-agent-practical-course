@@ -51,6 +51,7 @@ def render_node_prompt(
     dependency_values: dict[str, Any],
     outputs: dict[str, dict[str, Any]] | None = None,
     supporting_evidence: EvidenceSelection | None = None,
+    original_question: str | None = None,
 ) -> str:
     namespaced_outputs = {
         f"{node_id}.{field}": value
@@ -70,116 +71,146 @@ def render_node_prompt(
         lambda match: str(context.get(match.group(1), match.group(0))),
         node.prompt.user_template,
     )
-    if node.depends_on and dependency_values and "dependencies" not in node.prompt.user_template:
+    if node.depends_on:
         rendered = (
-            "Dependency values available to this node:\n"
-            f"{json.dumps(dependency_values, indent=2, ensure_ascii=False)}\n\n"
-            f"{rendered}"
+            render_chain_of_answers(
+                original_question=original_question,
+                resolved_question=resolved_question,
+                outputs=outputs or {},
+                dependency_ids=node.depends_on,
+            )
+            + "\n\n"
+            + rendered
         )
+    elif original_question:
+        rendered = (
+            render_question_context_block(
+                original_question=original_question,
+                resolved_question=resolved_question,
+            )
+            + "\n\n"
+            + rendered
+        )
+    is_final = bool(
+        node.output_schema.get("properties", {}).get("answer_type")
+        or node.output_schema.get("properties", {}).get("answer_source_span")
+    )
     if supporting_evidence is not None:
-        rendered += render_evidence_section(supporting_evidence)
+        rendered += render_evidence_section(supporting_evidence, require_citations=is_final)
     rendered += "\n\nReturn format JSON Schema:\n"
-    rendered += json.dumps(node_output_schema(node, supporting_evidence), indent=2)
+    rendered += json.dumps(
+        node_output_schema(node, supporting_evidence, is_final=is_final), indent=2
+    )
     rendered += """
 
 Return JSON only. Do not wrap the JSON in markdown fences.
-Normalize final answer values:
-- yes/no questions: answer with "yes" or "no", not true/false.
-- dates: use the natural date form requested by the question when possible.
-- numbers: return only the concise number or quantity unless units are part of the answer.
-- answer surface: when the evidence gives the answer in a specific written form, copy that
-  form exactly. For example, keep "3." if the source says "3.", keep "third" or
-  "third-largest" if the source says that, and keep "July 11, 2017" instead of rewriting it
-  to "2017-07-11".
-- table or fixture rows: when evidence is formatted as a table row with teams/entities and a
-  score such as "Home 2 -- 1 Away", compare the numbers in row order. If asked when one team
-  beat another, return the date from rows where that team's score is greater.
-- compact score tables: scan every row, including later rows. Some tables omit the away/opponent
-  column because the table title or question defines the matchup. In that case, infer the omitted
-  opponent as the other side in the same table instead of returning never. Treat renamed clubs or
-  organizations in the same table as possible aliases when the bridge entity is historical.
-  A draw such as "0 -- 0" is not a win and must not be returned for "beat" questions.
-- capital-duration questions: if asked how long a place had been the capital/capitol city of
-  another resolved location, prefer a direct evidence span like "had been the capital city of X
-  for Y". Do not override that span with modern administrative reasoning such as "X is only a city"
-  or with a country capital unless the question explicitly asks for the country capital.
-- do not return empty, unknown, none, or never if the supplied evidence contains a row or span
-  that answers the requested field.
-- bridge questions: keep the answer anchored to the entity or value supplied by dependencies.
-- bridge contract fields: if the schema contains bridge_answer, bridge_reasoning,
-  bridge_source_span, or constraint_status, fill them explicitly. bridge_answer is the value
-  downstream nodes may rely on; bridge_reasoning must explain why it satisfies the resolved
-  question and dependency constraints; bridge_source_span is the shortest exact support span;
-  constraint_status must be exactly "satisfied", "ambiguous", or "not_found".
-- set constraint_status to "satisfied" only when the cited evidence supports every required
-  dependency constraint. If evidence only partially matches, points to a similarly named
-  distractor, or lacks the requested date/place/entity relation, set "ambiguous" or "not_found"
-  and do not present the bridge answer as certain.
-- parent nodes: inspect dependency bridge_reasoning and constraint_status before using child
-  values. If a dependency is ambiguous or not_found, resolve the uncertainty from evidence rather
-  than treating the child value as established.
-- final synthesis with evidence: cite the sentence or connected sentence chain that supports
-  the final answer under the resolved dependency values. Do not answer from a sentence that
-  only matches one dependency while contradicting or ignoring another dependency.
-- dependency constraints: before returning the final answer, check that the answer span is
-  about the resolved target entity from dependencies, not a similarly named distractor or a
-  broader category from another document.
-- in "region/place of the country where X is located is Y" questions, X is a country/scope
-  bridge; answer with the region/place of Y, not the region/place of X.
-- entity answers: return the exact specific entity/value requested, not a broader modern successor,
-  hypernym, parent region, or shortened form when the evidence gives the more specific answer.
-- country/place answers: preserve historical or qualified polity names from evidence titles and
-  sentences, including directional qualifiers and acronyms; do not collapse them to a modern or
-  broader country name.
-- do not append addresses, explanatory clauses, or parenthetical details unless the question asks
-  for that extra detail.
-- if the schema contains answer_type, first identify what kind of value the original question asks
-  for, then ensure answer has that type. Do not return a bridge value of a different type.
-- if the schema contains answer_source_span, copy the shortest dependency or evidence span that
-  directly supports answer. Preserve modifiers from that span in answer when they change meaning.
-- before/after/later than/earlier than/since/until questions: preserve the requested boundary
-  value; do not substitute a latest or earliest endpoint unless that is explicitly asked.
-- quoted-title questions: answer about the quoted work/title itself, not a different entity
-  mentioned inside that title.
-- language questions: preserve descriptors such as "English-language"; do not collapse them
-  to a person's nationality or to an original-title language.
-- if the schema contains an answer field, put the concise final answer there.
+Normalize answer values:
+- yes/no questions: answer "yes" or "no".
+- dates: use the natural date form from evidence.
+- numbers: return only the concise number or quantity.
+- answer surface: copy the exact written form from evidence when possible.
+- do not return empty, unknown, none, or never if evidence contains a matching span.
+- entity answers: return the specific entity requested, not a broader successor or hypernym.
+- preserve historical or qualified names from evidence; do not modernize them.
+- if the schema contains answer_type, ensure answer matches that type.
+- if the schema contains answer_source_span, copy the shortest supporting span.
 """
     return rendered
+
+
+def render_question_context_block(
+    *,
+    original_question: str,
+    resolved_question: str,
+) -> str:
+    lines = [
+        "Question context for this node:",
+        f"- Original user question: {original_question}",
+        f"- Current node question: {resolved_question}",
+        "- Answer this node only as a step toward the original question.",
+        "- Preserve the original question's scope, comparisons, constraints, and final "
+        "answer type.",
+    ]
+    if _has_scoped_superlative(original_question):
+        lines.append(
+            "- The original question contains a scoped superlative/comparative. Keep the "
+            "superlative inside that scope; do not answer a broader global superlative."
+        )
+    return "\n".join(lines)
+
+
+def render_chain_of_answers(
+    *,
+    original_question: str | None,
+    resolved_question: str,
+    outputs: dict[str, dict[str, Any]],
+    dependency_ids: list[str],
+) -> str:
+    lines: list[str] = []
+    if original_question:
+        lines.append(f"Original question: {original_question}")
+        lines.append("")
+    qa_pairs: list[str] = []
+    for dependency_id in dependency_ids:
+        output = outputs.get(dependency_id, {})
+        answer = output.get("answer") or output.get("bridge_answer") or ""
+        if answer:
+            qa_pairs.append(f"{dependency_id}: {answer}")
+    if qa_pairs:
+        lines.append("Answers so far:")
+        lines.extend(qa_pairs)
+        lines.append("")
+    lines.append("Your task: Answer the following question using the evidence below.")
+    lines.append(f"Question: {resolved_question}")
+    return "\n".join(lines)
+
+
+def _has_scoped_superlative(question: str) -> bool:
+    lowered = question.casefold()
+    return bool(
+        re.search(
+            r"\b(largest|smallest|oldest|youngest|first|last|most|least)\b.+"
+            r"\b(where|in|from|of|within|containing|that|which)\b",
+            lowered,
+        )
+    )
 
 
 def node_output_schema(
     node: DagNode,
     supporting_evidence: EvidenceSelection | None,
+    *,
+    is_final: bool = False,
 ) -> dict[str, Any]:
     if supporting_evidence is None:
         return node.output_schema
     schema = json.loads(json.dumps(node.output_schema))
-    properties = schema.setdefault("properties", {})
-    properties["_evidence_citations"] = {
-        "type": "array",
-        "description": (
-            "Only evidence facts that directly determine the returned values; exclude inspected "
-            "or rejected candidates."
-        ),
-        "minItems": 1,
-        "items": {
-            "type": "object",
-            "required": ["document_id", "title", "sentence_indices", "fact"],
-            "properties": {
-                "document_id": {"type": "string"},
-                "title": {"type": "string"},
-                "sentence_indices": {
-                    "type": "array",
-                    "items": {"type": "integer", "minimum": 0},
+    if is_final:
+        properties = schema.setdefault("properties", {})
+        properties["_evidence_citations"] = {
+            "type": "array",
+            "description": (
+                "Only evidence facts that directly determine the "
+                "returned values; exclude inspected or rejected candidates."
+            ),
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "required": ["document_id", "title", "sentence_indices", "fact"],
+                "properties": {
+                    "document_id": {"type": "string"},
+                    "title": {"type": "string"},
+                    "sentence_indices": {
+                        "type": "array",
+                        "items": {"type": "integer", "minimum": 0},
+                    },
+                    "fact": {"type": "string"},
                 },
-                "fact": {"type": "string"},
             },
-        },
-    }
-    required = schema.setdefault("required", [])
-    if "_evidence_citations" not in required:
-        required.append("_evidence_citations")
+        }
+        required = schema.setdefault("required", [])
+        if "_evidence_citations" not in required:
+            required.append("_evidence_citations")
     return schema
 
 

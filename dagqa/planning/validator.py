@@ -8,7 +8,7 @@ from jsonschema import Draft202012Validator
 from jsonschema.exceptions import SchemaError
 
 from dagqa.config import PlannerConfig
-from dagqa.schemas import DagPlan, ValidationResult
+from dagqa.schemas import DagPlan, TaskType, ValidationResult
 
 _PLACEHOLDER_RE = re.compile(r"\{([A-Za-z][A-Za-z0-9_-]*)\.([A-Za-z_][A-Za-z0-9_]*)\}")
 _ANY_PLACEHOLDER_RE = re.compile(r"\{([A-Za-z_][A-Za-z0-9_.-]*)\}")
@@ -20,6 +20,21 @@ _BUILTIN_PROMPT_PLACEHOLDERS = {
     "node.label",
     "node.question",
 }
+_DEPENDENT_LOOKUP_TASK_TYPES = {
+    TaskType.fact_lookup,
+    TaskType.entity_resolution,
+    TaskType.date_lookup,
+}
+_SCOPED_SUPERLATIVE_RE = re.compile(
+    r"\b(?P<modifier>largest|smallest|oldest|youngest|first|last|most|least)\s+"
+    r"(?P<target>[A-Za-z][A-Za-z0-9'’-]*)\b.*?"
+    r"\b(?P<scope>where|in|from|of|within|containing|that|which)\b",
+    flags=re.IGNORECASE | re.DOTALL,
+)
+_SCOPE_MARKER_RE = re.compile(
+    r"\b(where|in|from|of|within|containing|that|which|among|inside)\b",
+    flags=re.IGNORECASE,
+)
 
 
 def validate_plan(  # noqa: PLR0912
@@ -86,6 +101,7 @@ def validate_plan(  # noqa: PLR0912
             )
 
         _validate_dependent_prompt_uses_children(errors, node.id, declared_deps, node)
+        _validate_scoped_superlative_context(errors, plan, node)
 
         try:
             Draft202012Validator.check_schema(node.output_schema)
@@ -106,6 +122,35 @@ def validate_plan(  # noqa: PLR0912
                 errors.append(f"Plan depth is {depth}; max_depth is {config.max_depth}.")
 
     return ValidationResult(valid=not errors, errors=errors)
+
+
+def _validate_scoped_superlative_context(errors: list[str], plan: DagPlan, node: Any) -> None:
+    if node.task_type not in _DEPENDENT_LOOKUP_TASK_TYPES or node.id == plan.final_node:
+        return
+    scoped = _scoped_superlative_terms(plan.question)
+    if not scoped:
+        return
+    node_text = f"{node.question} {node.prompt.user_template}".casefold()
+    for modifier, target in scoped:
+        if modifier not in node_text or target not in node_text:
+            continue
+        if node.depends_on:
+            return
+        if _SCOPE_MARKER_RE.search(node_text):
+            return
+        errors.append(
+            f"Node '{node.id}' looks up the scoped superlative '{modifier} {target}' but has "
+            "no dependency or scope marker. Preserve the original scope by depending on the "
+            "bridge node that resolves it, e.g. ask for the superlative within that scope rather "
+            "than a global lookup."
+        )
+
+
+def _scoped_superlative_terms(question: str) -> list[tuple[str, str]]:
+    return [
+        (match.group("modifier").casefold(), match.group("target").casefold())
+        for match in _SCOPED_SUPERLATIVE_RE.finditer(question)
+    ]
 
 
 def _child_placeholders(template: str) -> list[tuple[str, str]]:

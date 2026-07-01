@@ -7,7 +7,7 @@ from typing import Any
 import yaml
 from jsonschema import Draft202012Validator
 
-from dagqa.schemas import EvidenceSelection, ValidationResult
+from dagqa.schemas import EvidenceSelection, TaskType, ValidationResult
 
 _FENCE_RE = re.compile(r"```(?:json|yaml)?\s*([\s\S]*?)```", re.IGNORECASE)
 
@@ -126,6 +126,8 @@ def validate_evidence_citations(
                 f"for document_id '{document_id}' exactly: '{document.title}'."
             )
 
+        _validate_citation_fact(errors, citation_index, citation, document_id, document.text)
+
         sentence_indices = citation.get("sentence_indices")
         if not isinstance(sentence_indices, list):
             errors.append(
@@ -149,8 +151,110 @@ def validate_evidence_citations(
     return ValidationResult(valid=not errors, errors=errors)
 
 
+def validate_factual_output_grounding(
+    output: dict[str, Any],
+    supporting_evidence: EvidenceSelection | None,
+    task_type: TaskType,
+) -> ValidationResult:
+    if supporting_evidence is None or task_type not in {
+        TaskType.fact_lookup,
+        TaskType.entity_resolution,
+        TaskType.date_lookup,
+    }:
+        return ValidationResult(valid=True)
+
+    evidence_text = "\n".join(
+        f"{document.title}\n{document.text}" for document in supporting_evidence.documents
+    )
+    errors: list[str] = []
+    for key, value in output.items():
+        if key == "_evidence_citations" or key not in _GROUNDED_VALUE_FIELDS:
+            continue
+        for surface in _iter_grounded_surfaces(value):
+            if not _surface_requires_grounding(surface):
+                continue
+            if not _contains_surface(evidence_text, surface):
+                errors.append(
+                    f"{key} value '{surface}' is not an exact span in the supplied evidence."
+                )
+    return ValidationResult(valid=not errors, errors=errors)
+
+
 def _max_sentence_index(document: Any) -> int:
     sentences = document.metadata.get("sentences")
     if isinstance(sentences, list) and sentences:
         return len(sentences) - 1
     return 0
+
+
+_GROUNDED_VALUE_FIELDS = {
+    "answer",
+    "bridge_answer",
+    "date",
+    "entity",
+    "family_or_parent_name",
+    "language",
+    "local_name",
+    "location",
+    "name",
+    "person",
+    "place",
+    "value",
+}
+_UNGROUNDED_PLACEHOLDERS = {"", "unknown", "not found", "not_found", "none", "n/a", "null"}
+
+
+def _iter_grounded_surfaces(value: Any) -> list[str]:
+    if isinstance(value, str):
+        return [value.strip()]
+    if isinstance(value, int | float | bool):
+        return [str(value)]
+    if isinstance(value, list):
+        surfaces: list[str] = []
+        for item in value:
+            surfaces.extend(_iter_grounded_surfaces(item))
+        return surfaces
+    if isinstance(value, dict):
+        surfaces = []
+        for nested_key in _GROUNDED_VALUE_FIELDS:
+            if nested_key in value:
+                surfaces.extend(_iter_grounded_surfaces(value[nested_key]))
+        return surfaces
+    return []
+
+
+def _surface_requires_grounding(surface: str) -> bool:
+    cleaned = surface.strip()
+    if cleaned.lower() in _UNGROUNDED_PLACEHOLDERS:
+        return False
+    return len(cleaned) > 1
+
+
+def _validate_citation_fact(
+    errors: list[str],
+    citation_index: int,
+    citation: dict[str, Any],
+    document_id: str,
+    document_text: str,
+) -> None:
+    fact = citation.get("fact")
+    if not isinstance(fact, str) or not fact.strip():
+        errors.append(f"_evidence_citations[{citation_index}].fact must be a non-empty string.")
+        return
+    if not _contains_surface(document_text, fact):
+        errors.append(
+            f"_evidence_citations[{citation_index}].fact is not copied from the cited "
+            f"document_id '{document_id}'."
+        )
+
+
+def _contains_surface(text: str, surface: str) -> bool:
+    needle = _normalize_surface(surface)
+    if not needle:
+        return True
+    haystack = _normalize_surface(text)
+    return needle in haystack
+
+
+def _normalize_surface(value: str) -> str:
+    return re.sub(r"\s+", " ", value).strip().casefold()

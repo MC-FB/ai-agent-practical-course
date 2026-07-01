@@ -65,6 +65,144 @@ def test_planner_prompts_preserve_bridge_entity_anchoring() -> None:
     )
 
 
+def test_planner_prompts_preserve_scoped_superlatives() -> None:
+    prompt = planner_user_prompt(
+        "What is the population of the largest state where The Handmaid's Tale is set?",
+        max_nodes=5,
+        max_depth=3,
+    )
+    structured_prompt = structured_planner_prompt(
+        "What is the population of the largest state where The Handmaid's Tale is set?",
+        max_nodes=5,
+        max_depth=3,
+    )
+
+    assert "Preserve scoped superlatives" in PLANNER_SYSTEM
+    assert "largest state in New England" in prompt
+    assert "What is the largest state in New England?" in structured_prompt
+
+
+def test_validator_rejects_unscoped_global_superlative_lookup(app_config) -> None:
+    plan = DagPlan(
+        question="What is the population of the largest state where The Handmaid's Tale is set?",
+        final_node="q3",
+        nodes=[
+            DagNode(
+                id="q1",
+                label="Setting",
+                task_type=TaskType.fact_lookup,
+                operation=Operation.answer,
+                question="Where is The Handmaid's Tale set?",
+                prompt=PromptSpec(system="Return JSON.", user_template="Where is it set?"),
+                output_schema={
+                    "type": "object",
+                    "properties": {"answer": {"type": "string"}},
+                    "required": ["answer"],
+                },
+            ),
+            DagNode(
+                id="q2",
+                label="Largest state",
+                task_type=TaskType.fact_lookup,
+                operation=Operation.answer,
+                question="What is the largest U.S. state by area?",
+                prompt=PromptSpec(
+                    system="Return JSON.",
+                    user_template="What is the largest U.S. state by area?",
+                ),
+                output_schema={
+                    "type": "object",
+                    "properties": {"answer": {"type": "string"}},
+                    "required": ["answer"],
+                },
+            ),
+            DagNode(
+                id="q3",
+                label="Population",
+                task_type=TaskType.fact_lookup,
+                operation=Operation.answer,
+                question="What is the population of {q2.answer}?",
+                depends_on=["q2"],
+                prompt=PromptSpec(
+                    system="Return JSON.",
+                    user_template="What is the population of {q2.answer}? {dependencies}",
+                ),
+                input_map={"state": "q2.answer"},
+                output_schema={
+                    "type": "object",
+                    "properties": {"answer": {"type": "string"}},
+                    "required": ["answer"],
+                },
+            ),
+        ],
+    )
+
+    result = validate_plan(plan, app_config.planner)
+
+    assert not result.valid
+    assert any("scoped superlative 'largest state'" in error for error in result.errors)
+
+
+def test_validator_accepts_scoped_superlative_with_bridge_dependency(app_config) -> None:
+    plan = DagPlan(
+        question="What is the population of the largest state where The Handmaid's Tale is set?",
+        final_node="q3",
+        nodes=[
+            DagNode(
+                id="q1",
+                label="Setting",
+                task_type=TaskType.fact_lookup,
+                operation=Operation.answer,
+                question="Where is The Handmaid's Tale set?",
+                prompt=PromptSpec(system="Return JSON.", user_template="Where is it set?"),
+                output_schema={
+                    "type": "object",
+                    "properties": {"answer": {"type": "string"}},
+                    "required": ["answer"],
+                },
+            ),
+            DagNode(
+                id="q2",
+                label="Largest state in setting",
+                task_type=TaskType.fact_lookup,
+                operation=Operation.answer,
+                question="What is the largest state in {q1.answer}?",
+                depends_on=["q1"],
+                prompt=PromptSpec(
+                    system="Return JSON.",
+                    user_template=("What is the largest state in {q1.answer}? {dependencies}"),
+                ),
+                input_map={"setting": "q1.answer"},
+                output_schema={
+                    "type": "object",
+                    "properties": {"answer": {"type": "string"}},
+                    "required": ["answer"],
+                },
+            ),
+            DagNode(
+                id="q3",
+                label="Population",
+                task_type=TaskType.fact_lookup,
+                operation=Operation.answer,
+                question="What is the population of {q2.answer}?",
+                depends_on=["q2"],
+                prompt=PromptSpec(
+                    system="Return JSON.",
+                    user_template="What is the population of {q2.answer}? {dependencies}",
+                ),
+                input_map={"state": "q2.answer"},
+                output_schema={
+                    "type": "object",
+                    "properties": {"answer": {"type": "string"}},
+                    "required": ["answer"],
+                },
+            ),
+        ],
+    )
+
+    assert validate_plan(plan, app_config.planner).valid
+
+
 def test_planner_prompts_preserve_temporal_boundary_wording() -> None:
     prompt = planner_user_prompt(
         "A sparse image is used by FileVault in versions later than which?",
@@ -163,22 +301,14 @@ def test_normalizer_adds_referenced_nodes_to_dependencies(app_config) -> None:
     assert result.valid
 
 
-def test_normalizer_adds_bridge_reasoning_contract_to_nonfinal_bridge_nodes() -> None:
+def test_normalizer_adds_intermediate_answer_contract_to_nonfinal_bridge_nodes() -> None:
     plan = normalize_plan_dependencies(parse_plan(PARALLEL_PLAN))
     first_child_schema = plan.nodes[0].output_schema
     final_schema = plan.nodes[2].output_schema
 
-    assert {
-        "bridge_answer",
-        "bridge_reasoning",
-        "bridge_source_span",
-        "constraint_status",
-    } <= set(first_child_schema["required"])
-    assert first_child_schema["properties"]["constraint_status"]["enum"] == [
-        "satisfied",
-        "ambiguous",
-        "not_found",
-    ]
+    assert {"answer", "reasoning"} <= set(first_child_schema["required"])
+    assert "bridge_answer" not in first_child_schema["properties"]
+    assert "constraint_status" not in first_child_schema["properties"]
     assert "bridge_answer" not in final_schema["properties"]
 
 
@@ -284,6 +414,57 @@ def test_rejects_dependent_node_that_does_not_prompt_with_child_values(app_confi
     assert any(
         "prompt.user_template does not include child values" in error for error in result.errors
     )
+
+
+def test_accepts_dependent_lookup_with_simple_answer_reference(app_config) -> None:
+    plan = DagPlan(
+        question=(
+            "The leader visiting where Steven Spielberg's grandparents are from met with whom "
+            "on November 22?"
+        ),
+        final_node="q2",
+        nodes=[
+            DagNode(
+                id="q1",
+                label="Grandparents origin",
+                task_type=TaskType.fact_lookup,
+                operation=Operation.answer,
+                question="Where are Steven Spielberg's grandparents from?",
+                prompt=PromptSpec(system="Return JSON only.", user_template="{resolved_question}"),
+                output_schema={
+                    "type": "object",
+                    "properties": {
+                        "answer": {"type": "string"},
+                        "reasoning": {"type": "string"},
+                    },
+                    "required": ["answer", "reasoning"],
+                },
+            ),
+            DagNode(
+                id="q2",
+                label="Meeting participant",
+                task_type=TaskType.fact_lookup,
+                operation=Operation.answer,
+                question="The leader visiting {q1.answer} met with whom on November 22?",
+                depends_on=["q1"],
+                prompt=PromptSpec(
+                    system="Return JSON only.",
+                    user_template="The leader visiting {origin} met with whom on November 22?",
+                ),
+                input_map={"origin": "q1.answer"},
+                output_schema={
+                    "type": "object",
+                    "properties": {"answer": {"type": "string"}},
+                    "required": ["answer"],
+                },
+            ),
+        ],
+    )
+
+    normalized = normalize_plan_dependencies(plan)
+    result = validate_plan(normalized, app_config.planner)
+
+    assert result.valid
 
 
 def test_accepts_dependent_node_that_uses_input_map_placeholders(app_config) -> None:
