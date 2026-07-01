@@ -36,6 +36,7 @@ class DagQaClient:
         question: str,
         evidence_documents: list[EvidenceDocument] | None = None,
     ) -> RunTrace:
+        """Combined LtM + DAG with self-consistency selection."""
         plan = await self.plan(question)
         if (
             evidence_documents
@@ -43,4 +44,24 @@ class DagQaClient:
             and len(plan.nodes) > 1
         ):
             return await self.executor.execute_least_to_most(plan, evidence_documents)
+        return await self.execute(plan, evidence_documents)
+
+    async def ask_multi_hop(
+        self,
+        question: str,
+        evidence_documents: list[EvidenceDocument] | None = None,
+    ) -> RunTrace:
+        """Pure node-by-node DAG execution (no LtM)."""
+        plan = await self.plan(question)
+        return await self.execute(plan, evidence_documents)
+
+    async def ask_least_to_most(
+        self,
+        question: str,
+        evidence_documents: list[EvidenceDocument] | None = None,
+    ) -> RunTrace:
+        """Pure Least-to-Most execution (no DAG fallback)."""
+        plan = await self.plan(question)
+        if evidence_documents and len(plan.nodes) > 1:
+            return await self.executor.execute_least_to_most_only(plan, evidence_documents)
         return await self.execute(plan, evidence_documents)

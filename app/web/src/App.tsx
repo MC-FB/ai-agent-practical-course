@@ -1453,12 +1453,19 @@ const COMPARISON_METRICS = [
   ["wrong_supporting_text_rate", "Non-Gold Citations", "percent", "lower"],
 ] as const;
 
+const SYSTEM_LABELS: Record<string, string> = {
+  direct_llm: "Single prompt",
+  dag_multi_hop: "Multi-hop DAG",
+  dag_least_to_most: "Least-to-Most",
+  dag_agent: "Combined (LtM+DAG)",
+};
+
 function systemLabel(system: string) {
-  return system === "dag_agent" ? "DAG agent" : "Single prompt";
+  return SYSTEM_LABELS[system] ?? system;
 }
 
 function runTypeLabel(system?: string | null) {
-  return system === "dag_agent" ? "Multi-node DAG" : "Single-node prompt";
+  return SYSTEM_LABELS[system ?? ""] ?? system ?? "Unknown";
 }
 
 function benchmarkOptionLabel(item: SavedBenchmarkSummary | HotpotBenchmarkResult) {
@@ -1627,7 +1634,7 @@ function MultiModelComparisonView({
   const rows = results.map((r) => ({
     result: r,
     model: r.model?.split("/").pop() ?? r.model ?? "unknown",
-    system: r.system === "dag_agent" ? "DAG agent" : "Single prompt",
+    system: SYSTEM_LABELS[r.system] ?? r.system,
     cosine: r.metrics.cosine_sim ?? 0,
     em: (r.metrics.exact_match ?? 0) * 100,
     f1: (r.metrics.f1 ?? 0) * 100,
@@ -1759,11 +1766,11 @@ function BenchmarkComparisonView({
   ) => void;
 }) {
   const mixedSystems = first.system !== second.system;
-  const focus = mixedSystems && second.system === "dag_agent" ? second : first;
+  const focus = mixedSystems && first.system === "direct_llm" ? second : first;
   const reference = focus === first ? second : first;
-  const focusLabel = mixedSystems ? "Multi-node DAG" : "Run A";
-  const referenceLabel = mixedSystems ? "Single-node prompt" : "Run B";
-  const deltaLabel = mixedSystems ? "Multi-node impact" : "Run A impact";
+  const focusLabel = mixedSystems ? systemLabel(focus.system) : "Run A";
+  const referenceLabel = mixedSystems ? systemLabel(reference.system) : "Run B";
+  const deltaLabel = mixedSystems ? `${systemLabel(focus.system)} impact` : "Run A impact";
   const sameSeed = focus.seed === reference.seed;
   const referenceById = new Map(reference.records.map((record) => [record.id, record]));
   const [hideEmptyResponses, setHideEmptyResponses] = useState(false);
@@ -1813,7 +1820,7 @@ function BenchmarkComparisonView({
       <div className="comparison-heading">
         <div>
           <span className="comparison-eyebrow">Performance overview</span>
-          <strong>{mixedSystems ? "Multi-node DAG vs Single-node prompt" : `${systemLabel(first.system)} comparison`}</strong>
+          <strong>{mixedSystems ? `${systemLabel(focus.system)} vs ${systemLabel(reference.system)}` : `${systemLabel(first.system)} comparison`}</strong>
           <span>
             {sameSeed
               ? `Aligned question comparison, seed ${focus.seed}`
@@ -1997,7 +2004,7 @@ function DatasetView({
   const [benchmarkName, setBenchmarkName] = useState("");
   const [benchmarkDataset, setBenchmarkDataset] = useState("hotpotqa");
   const [benchmarkSubset, setBenchmarkSubset] = useState<BenchmarkSubset>("validation");
-  const [systems, setSystems] = useState<string[]>(["dag_agent", "direct_llm"]);
+  const [systems, setSystems] = useState<string[]>(["direct_llm", "dag_least_to_most"]);
   const [seedInput, setSeedInput] = useState("");
   const clusterModels = useMemo(
     () => (modelCatalog?.models ?? []).filter((m) => m.provider === "cluster"),
@@ -2370,7 +2377,7 @@ function DatasetView({
       setBenchmarkDataset(selected.dataset ?? "hotpotqa");
       setBenchmarkSubset((selected.subset as BenchmarkSubset | undefined) ?? "validation");
       setSystems(
-        selected.systems?.filter((system) => system === "dag_agent" || system === "direct_llm") ??
+        selected.systems?.filter((system) => system in SYSTEM_LABELS) ??
           systems,
       );
       window.localStorage.setItem(ACTIVE_BENCHMARK_STORAGE_KEY, selected.run_id);
@@ -2482,8 +2489,10 @@ function DatasetView({
                 </div>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {[
-                    ["dag_agent", "DAG agent", "Multi-step graph"],
-                    ["direct_llm", "Single prompt", "One model call"],
+                    ["direct_llm", "Single prompt", "One LLM call with all evidence"],
+                    ["dag_multi_hop", "Multi-hop DAG", "Plan then execute nodes independently"],
+                    ["dag_least_to_most", "Least-to-Most", "Plan then answer all steps in one call"],
+                    ["dag_agent", "Combined (LtM+DAG)", "Least-to-Most with DAG fallback"],
                   ].map(([value, label, description]) => (
                     <label
                       className="flex min-h-16 items-start gap-3 rounded-md border border-slate-200 bg-white p-3 shadow-sm transition-colors hover:border-emerald-200 hover:bg-emerald-50/40"

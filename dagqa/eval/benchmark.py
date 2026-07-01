@@ -448,7 +448,16 @@ async def _run_example(  # noqa: PLR0912, PLR0915
             structural_issues = []
             structural_failure = False
         else:
-            run = await client.ask(example.question, evidence_documents=example.context)
+            if system == "dag_multi_hop":
+                run = await client.ask_multi_hop(
+                    example.question, evidence_documents=example.context
+                )
+            elif system == "dag_least_to_most":
+                run = await client.ask_least_to_most(
+                    example.question, evidence_documents=example.context
+                )
+            else:
+                run = await client.ask(example.question, evidence_documents=example.context)
             evidence_metrics = _evaluate_evidence_citations(run, example.supporting_facts)
             raw_prediction = _extract_answer(run.final_answer)
             repair_llm_calls = 0
