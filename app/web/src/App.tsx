@@ -21,7 +21,7 @@ import {
   Timer,
 } from "lucide-react";
 import mermaid from "mermaid";
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { Badge } from "./components/ui/badge";
 import { Button } from "./components/ui/button";
@@ -390,6 +390,13 @@ function legacyScores(record: HotpotBenchmarkRecord): Record<string, number> {
     }
   );
 }
+
+// A toggleable column in the per-record results table.
+type RecordColumn = {
+  key: string;
+  label: string;
+  render: (record: HotpotBenchmarkRecord) => ReactNode;
+};
 
 function formatSavedDateTime(value?: string | null) {
   if (!value) return "Unknown date";
@@ -1101,8 +1108,6 @@ function BenchmarkResultView({
   const sampleTotal = result?.dataset_size ?? totalExamples;
   const tableKey = result ? `${result.run_id}:${result.records.length}` : "empty";
   const { visibleRows, sentinelRef } = useIncrementalRows(result?.records.length ?? 0, tableKey);
-  // "agent" = AI-agent performance table; "metrics" = compare metric functions per record.
-  const [recordView, setRecordView] = useState<"agent" | "metrics">("agent");
   // Ordered union of metric keys across records, so a newly registered metric becomes a column
   // automatically without any frontend change.
   const metricKeys = useMemo(() => {
@@ -1114,6 +1119,77 @@ function BenchmarkResultView({
     }
     return keys;
   }, [result]);
+  // Every metric (raw score) plus the agent-analysis columns, all optional. Question / Gold /
+  // Prediction are rendered separately and always shown.
+  const toggleableColumns = useMemo<RecordColumn[]>(() => {
+    const metricColumns: RecordColumn[] = metricKeys.map((key) => ({
+      key: `metric:${key}`,
+      label: humanizeMetric(key),
+      render: (record) => {
+        const scores = legacyScores(record);
+        return key in scores ? formatNumber(scores[key], 3) : "-";
+      },
+    }));
+    const analysisColumns: RecordColumn[] = [
+      {
+        key: "status",
+        label: "Status",
+        render: (record) =>
+          record.error ? "error" : record.structural_failure ? "failed" : "ok",
+      },
+      ...(onSelectRecord
+        ? [
+            {
+              key: "inspect",
+              label: "Inspect",
+              render: (record: HotpotBenchmarkRecord) =>
+                record.run_trace ? (
+                  <button
+                    className="record-action"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onSelectRecord(record);
+                    }}
+                    type="button"
+                  >
+                    Inspect
+                  </button>
+                ) : (
+                  <span className="muted-value">No trace</span>
+                ),
+            },
+          ]
+        : []),
+      {
+        key: "evidence",
+        label: "Evidence",
+        render: (record) =>
+          record.wrong_supporting_text_rate === null ||
+          record.wrong_supporting_text_rate === undefined
+            ? "-"
+            : `${formatPercent(record.wrong_supporting_text_rate)} non-gold`,
+      },
+      {
+        key: "gold_recall",
+        label: "Gold Recall",
+        render: (record) => formatPercent(record.gold_supporting_fact_recall ?? undefined),
+      },
+    ];
+    return [...metricColumns, ...analysisColumns];
+  }, [metricKeys, onSelectRecord]);
+  // Session-only selection; defaults to the columns the table showed before it became configurable.
+  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
+    () =>
+      new Set([
+        "metric:exact_match",
+        "metric:cosine_sim",
+        "status",
+        "inspect",
+        "evidence",
+        "gold_recall",
+      ]),
+  );
+  const shownColumns = toggleableColumns.filter((column) => visibleColumns.has(column.key));
 
   if (!result || !metrics) {
     return <div className="empty">Metrics will appear here.</div>;
@@ -1218,36 +1294,38 @@ function BenchmarkResultView({
           </span>
         </div>
       </div>
-      <div className="flex items-center gap-2 mb-3">
-        <Button
-          variant={recordView === "agent" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setRecordView("agent")}
-        >
-          Agent performance
-        </Button>
-        <Button
-          variant={recordView === "metrics" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setRecordView("metrics")}
-        >
-          Metric scores
-        </Button>
+      <div className="flex flex-wrap items-center gap-3 mb-3">
+        <span className="text-sm font-semibold text-slate-600">Columns</span>
+        {toggleableColumns.map((column) => (
+          <label key={column.key} className="flex items-center gap-1.5 text-sm">
+            <Checkbox
+              checked={visibleColumns.has(column.key)}
+              onCheckedChange={(checked) =>
+                setVisibleColumns((previous) => {
+                  const next = new Set(previous);
+                  if (checked === true) {
+                    next.add(column.key);
+                  } else {
+                    next.delete(column.key);
+                  }
+                  return next;
+                })
+              }
+            />
+            <span>{column.label}</span>
+          </label>
+        ))}
       </div>
       <div className="record-table-wrap">
-        {recordView === "agent" ? (
         <table className="record-table">
           <thead>
             <tr>
               <th>Question</th>
               <th>Gold</th>
               <th>Prediction</th>
-              <th>EM</th>
-              <th>Cos Sim</th>
-              <th>Status</th>
-              <th>Graph</th>
-              <th>Evidence</th>
-              <th>Gold Recall</th>
+              {shownColumns.map((column) => (
+                <th key={column.key}>{column.label}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -1274,68 +1352,14 @@ function BenchmarkResultView({
                   <td>{record.question}</td>
                   <td>{record.gold_answer}</td>
                   <td>{record.prediction}</td>
-                  <td>{formatPercent(record.exact_match)}</td>
-                  <td>{formatNumber(record.cosine_sim, 3)}</td>
-                  <td>{record.error ? "error" : record.structural_failure ? "failed" : "ok"}</td>
-                  <td>
-                    {canInspect ? (
-                      <button
-                        className="record-action"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onSelectRecord?.(record);
-                        }}
-                        type="button"
-                      >
-                        Inspect
-                      </button>
-                    ) : (
-                      <span className="muted-value">No trace</span>
-                    )}
-                  </td>
-                  <td>
-                    {record.wrong_supporting_text_rate === null ||
-                    record.wrong_supporting_text_rate === undefined
-                      ? "-"
-                      : `${formatPercent(record.wrong_supporting_text_rate)} non-gold`}
-                  </td>
-                  <td>{formatPercent(record.gold_supporting_fact_recall ?? undefined)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        ) : (
-        <table className="record-table">
-          <thead>
-            <tr>
-              <th>Question</th>
-              <th>Gold</th>
-              <th>Prediction</th>
-              {metricKeys.map((key) => (
-                <th key={key}>{humanizeMetric(key)}</th>
-              ))}
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {result.records.slice(0, visibleRows).map((record) => {
-              const scores = legacyScores(record);
-              return (
-                <tr key={record.id}>
-                  <td>{record.question}</td>
-                  <td>{record.gold_answer}</td>
-                  <td>{record.prediction}</td>
-                  {metricKeys.map((key) => (
-                    <td key={key}>{key in scores ? formatNumber(scores[key], 3) : "-"}</td>
+                  {shownColumns.map((column) => (
+                    <td key={column.key}>{column.render(record)}</td>
                   ))}
-                  <td>{record.error ? "error" : record.structural_failure ? "failed" : "ok"}</td>
                 </tr>
               );
             })}
           </tbody>
         </table>
-        )}
         {visibleRows < result.records.length && (
           <div className="table-load-sentinel" ref={sentinelRef}>
             Showing {formatNumber(visibleRows)} of {formatNumber(result.records.length)}
