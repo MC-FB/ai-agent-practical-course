@@ -1,0 +1,279 @@
+{
+  "records": [
+    {
+      "run_id": "46bdfb84-a098-40ed-a15a-bbbac2add9f5",
+      "record_id": "5a89f90a5542992e4fca84be",
+      "question": "John Wickham Legg was recommended by Jenner for the post of medical attendant to which eighth child and youngest son of Queen Victoria and Prince Albert of Saxe-Coburg and Gotha?",
+      "gold_answer": "Prince Leopold",
+      "prediction": "Prince Leopold, Duke of Albany",
+      "human_low": 0.8,
+      "human_high": 1.0,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "46bdfb84-a098-40ed-a15a-bbbac2add9f5",
+      "record_id": "5a84eecd5542994c784dda8e",
+      "question": "What type of group does Pablo Carballo and Argentine Air Force have in common?",
+      "gold_answer": "military",
+      "prediction": "Argentine Air Force",
+      "human_low": 0.3,
+      "human_high": 0.5,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "16d41259-7060-4369-8e19-e27617b52d94",
+      "record_id": "5ade4e415542992fa25da73f",
+      "question": "At what stadium did Mychal George Thompson play home games with the San Antonio Spurs?",
+      "gold_answer": "AT&T Center in San Antonio",
+      "prediction": "AT&T Center",
+      "human_low": 0.8,
+      "human_high": 1.0,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "16d41259-7060-4369-8e19-e27617b52d94",
+      "record_id": "5a84eecd5542994c784dda8e",
+      "question": "What type of group does Pablo Carballo and Argentine Air Force have in common?",
+      "gold_answer": "military",
+      "prediction": "national aviation branch of the Armed Forces of the Argentine Republic",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "16d41259-7060-4369-8e19-e27617b52d94",
+      "record_id": "5a7def0d5542990b8f503af9",
+      "question": "Who graduated from The SC Bastia Reserves and Academy  and was born 9 September 1987?",
+      "gold_answer": "Alexandre Dimitri Song Billong",
+      "prediction": "Alex Song",
+      "human_low": 0.8,
+      "human_high": 1.0,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "musique_failed_subset_bridge_surface_repair_25",
+      "record_id": "3hop1__483634_720378_15538",
+      "question": "When was the death penalty reinstated in the state that contains the county where Howard Mill is located?",
+      "gold_answer": "1984",
+      "prediction": "1977",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "musique_failed_subset_bridge_surface_repair_25",
+      "record_id": "4hop1__39871_314549_131976_90181",
+      "question": "What is the deepest part of the ocean by the state where Main Street Station is located?",
+      "gold_answer": "Milwaukee Deep",
+      "prediction": "Puerto Rico Trench",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "musique_failed_subset_bridge_surface_repair_25",
+      "record_id": "4hop1__94201_642284_131926_90707",
+      "question": "Where does the river by the city where the Southeast Library designer died and the Ohio River meet?",
+      "gold_answer": "at the city of Cairo, Illinois",
+      "prediction": "Cairo, Illinois",
+      "human_low": 0.8,
+      "human_high": 1.0,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "musique_failed_subset_bridge_surface_repair_25",
+      "record_id": "3hop1__622497_160088_821792",
+      "question": "Who wrote a book about growing up in the same nationality as the man who produced The Wild Women of Chastity Gulch?",
+      "gold_answer": "Min Zhou",
+      "prediction": "Min Zhou and Carl L. Bankston III",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "musique_failed_subset_bridge_surface_repair_25",
+      "record_id": "4hop3__650050_88460_30152_20999",
+      "question": "How were people from whom the new coins were a proclamation of independence by the Somali Muslim Ajuran Empire expelled from the natural boundary between Thailand and A Doi's country?",
+      "gold_answer": "The dynasty regrouped and defeated the Portuguese",
+      "prediction": "naval wars",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "musique_failed_subset_bridge_surface_repair_25",
+      "record_id": "4hop1__161765_53706_795904_580996",
+      "question": "What city shares a border with the city where the person who went to the state where Englebart died during the gold rush works?",
+      "gold_answer": "Rio Linda",
+      "prediction": "Daly City",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "musique_failed_subset_bridge_surface_repair_25",
+      "record_id": "3hop1__135793_87694_64412",
+      "question": "When did the location of the basilica named after the same saint at San Pietro in Ciel d'Oro become its own country?",
+      "gold_answer": "11 February 1929",
+      "prediction": "1929-02-11",
+      "human_low": 0.9,
+      "human_high": 1.0,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "musique_failed_subset_bridge_surface_repair_25",
+      "record_id": "4hop1__39871_314549_131976_44892",
+      "question": "A line with Williamsburg, Main Street and another station are in a state that's next to an ocean. When did that ocean start to open up?",
+      "gold_answer": "around 140 million years ago",
+      "prediction": "Early-Middle Jurassic",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "9cd61785-c405-44ad-93f7-ff8bed0a01de",
+      "record_id": "5a7663665542992d0ec060d3",
+      "question": "What election will take place on the same day as the United States Senate election in Texas?",
+      "gold_answer": "The 2018 Texas gubernatorial election",
+      "prediction": "Texas gubernatorial election",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "9cd61785-c405-44ad-93f7-ff8bed0a01de",
+      "record_id": "5a83dd2c554299334474609e",
+      "question": "Name five actors that worked with a German cinematographer?",
+      "gold_answer": "George Clooney, Thekla Reuten, Violante Placido, Irina Bj\u00f6rklund, and Paolo Bonacelli",
+      "prediction": "Luis Trenker, Leni Riefenstahl, George Clooney, Thekla Reuten, Violante Placido",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "9cd61785-c405-44ad-93f7-ff8bed0a01de",
+      "record_id": "5abdb8ba5542993f32c2a015",
+      "question": "Maggie May is a musical based on a folk song about a prostitute who robbed whom?",
+      "gold_answer": "sailor",
+      "prediction": "a sailor",
+      "human_low": 0.9,
+      "human_high": 1.0,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "9cd61785-c405-44ad-93f7-ff8bed0a01de",
+      "record_id": "5a8836445542997e5c09a5a5",
+      "question": "Professor A. Selvanathan is a professor at a university that is public or private ?",
+      "gold_answer": "public",
+      "prediction": "private",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "9cd61785-c405-44ad-93f7-ff8bed0a01de",
+      "record_id": "5a79b525554299029c4b5f67",
+      "question": "What performing traditionally from the longest continental mountain range in the world, are Grupo Aymara famous for?",
+      "gold_answer": "traditional music",
+      "prediction": "traditional Andean music",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "9cd61785-c405-44ad-93f7-ff8bed0a01de",
+      "record_id": "5ab294a6554299545a2cf9a6",
+      "question": "Who is the son of John Button under contract with as a driver?",
+      "gold_answer": "McLaren-Honda",
+      "prediction": "Jenson Button",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "ea8d8149-23be-4738-a855-5d50db78b883",
+      "record_id": "5ae3790f5542992e3233c415",
+      "question": "Are Leopold Lummerstorfer and Valeria Sarmiento both authors?",
+      "gold_answer": "no",
+      "prediction": "yes",
+      "human_low": 0.0,
+      "human_high": 0.2,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "ea8d8149-23be-4738-a855-5d50db78b883",
+      "record_id": "5ab463da5542990594ba9c0d",
+      "question": "What comic book does Hershel Greene and Carl Grimes appear in as characters?",
+      "gold_answer": "\"The Walking Dead\"",
+      "prediction": "The Walking Dead",
+      "human_low": 0.9,
+      "human_high": 1.0,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "ea8d8149-23be-4738-a855-5d50db78b883",
+      "record_id": "5ab802085542990e739ec7ca",
+      "question": "What is the uppermost age range for the sort of fiction written by Alexander Gordon Smith?",
+      "gold_answer": "early 20s",
+      "prediction": "young adult",
+      "human_low": 0.7,
+      "human_high": 0.9,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "ea8d8149-23be-4738-a855-5d50db78b883",
+      "record_id": "5ab1c6c5554299722f9b4c67",
+      "question": "Boulevardier and Earthquake are cocktails, one of which has a french nickname of what?",
+      "gold_answer": "The Tremblement de Terre",
+      "prediction": "Tremblement de Terre",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "ea8d8149-23be-4738-a855-5d50db78b883",
+      "record_id": "5ab29bdc554299545a2cf9d1",
+      "question": "Which tendencies does a group like Uyoku dantai fall under?",
+      "gold_answer": "authoritarian tendencies",
+      "prediction": "ultranationalist far-right",
+      "human_low": 0.6,
+      "human_high": 0.8,
+      "note": null,
+      "scores": {}
+    },
+    {
+      "run_id": "ea8d8149-23be-4738-a855-5d50db78b883",
+      "record_id": "5ab2be12554299295394686b",
+      "question": "Who was the football manager that played in the Football League Cup in 1985 and managed to lead the Birmingham City Football Club's 103rd season to finish in the 18th position?",
+      "gold_answer": "Stephen Roger \"Steve\" Bruce",
+      "prediction": "Steve Bruce",
+      "human_low": 0.8,
+      "human_high": 1.0,
+      "note": null,
+      "scores": {}
+    }
+  ]
+}

@@ -543,3 +543,104 @@ export async function repairBenchmarkResult(runId: string): Promise<HotpotBenchm
   if (!response.ok) throw new Error(await response.text());
   return response.json();
 }
+
+export type AnnotationRecord = {
+  key: string;
+  run_id: string;
+  record_id: string;
+  question: string;
+  gold_answer: string;
+  prediction: string;
+  human_low?: number | null;
+  human_high?: number | null;
+  note?: string | null;
+};
+
+export type MetricEvalResult = {
+  name: string;
+  n: number;
+  in_range_rate: number;
+  ci_low: number;
+  ci_high: number;
+  mean_center_distance: number;
+  spearman: number | null;
+  kendall: number | null;
+};
+
+export type MetricEvaluation = {
+  total: number;
+  annotated: number;
+  results: MetricEvalResult[];
+};
+
+export async function listAnnotations(): Promise<{ records: AnnotationRecord[] }> {
+  const response = await fetch("/api/benchmarks/annotations");
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
+export async function addAnnotation(
+  record: Pick<
+    AnnotationRecord,
+    "run_id" | "record_id" | "question" | "gold_answer" | "prediction"
+  >,
+): Promise<{ records: AnnotationRecord[] }> {
+  const response = await fetch("/api/benchmarks/annotations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(record),
+  });
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
+export async function deleteAnnotation(key: string): Promise<{ records: AnnotationRecord[] }> {
+  const response = await fetch(`/api/benchmarks/annotations/${encodeURIComponent(key)}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
+export type AnnotationTableRecord = {
+  key: string;
+  run_id: string;
+  record_id: string;
+  question: string;
+  gold_answer: string;
+  prediction: string;
+  human_low: number | null;
+  human_high: number | null;
+  scores: Record<string, number>;
+};
+
+export type AnnotationTable = {
+  metrics: string[];
+  records: AnnotationTableRecord[];
+};
+
+export async function getAnnotationTable(): Promise<AnnotationTable> {
+  const response = await fetch("/api/benchmarks/annotations/table");
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
+export async function saveAnnotationBand(
+  key: string,
+  humanLow: number | null,
+  humanHigh: number | null,
+): Promise<AnnotationTableRecord> {
+  const response = await fetch("/api/benchmarks/annotations/band", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ key, human_low: humanLow, human_high: humanHigh }),
+  });
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
+export async function getMetricEvaluation(): Promise<MetricEvaluation> {
+  const response = await fetch("/api/benchmarks/annotations/evaluation");
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}

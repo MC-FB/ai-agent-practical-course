@@ -30,6 +30,12 @@ from dagqa.eval.datasets import (
     get_benchmark_dataset,
     load_benchmark_examples,
 )
+from dagqa.eval.metric_eval import (
+    AnnotationRecord,
+    evaluate_metrics,
+    fill_scores,
+    score_records,
+)
 from dagqa.eval.metrics import ANSWER_METRICS, cosine_sim
 from dagqa.graph.render import render_mermaid
 from dagqa.graph.scheduler import Scheduler
@@ -1430,6 +1436,98 @@ def delete_marked_benchmark_row(row_key: str) -> dict[str, Any]:
     return {"rows": [row.model_dump(mode="json") for row in rows]}
 
 
+class AnnotationBand(BaseModel):
+    key: str
+    human_low: float | None = None
+    human_high: float | None = None
+
+
+@router.get(
+    "/benchmarks/annotations",
+    tags=["Benchmarks"],
+    summary="List metric-evaluation annotation records",
+)
+def list_annotation_records() -> dict[str, Any]:
+    return {"records": [_annotation_payload(record) for record in _load_annotation_records()]}
+
+
+@router.post(
+    "/benchmarks/annotations",
+    tags=["Benchmarks"],
+    summary="Add a record to the metric-evaluation annotation set",
+)
+def add_annotation_record(record: AnnotationRecord) -> dict[str, Any]:
+    _validate_storage_id(record.key)
+    records = [existing for existing in _load_annotation_records() if existing.key != record.key]
+    records.append(record)
+    _store_annotation_records(records)
+    return {"records": [_annotation_payload(saved) for saved in records]}
+
+
+@router.delete(
+    "/benchmarks/annotations/{key:path}",
+    tags=["Benchmarks"],
+    summary="Remove a record from the annotation set",
+)
+def delete_annotation_record(key: str) -> dict[str, Any]:
+    _validate_storage_id(key)
+    records = [record for record in _load_annotation_records() if record.key != key]
+    _store_annotation_records(records)
+    return {"records": [_annotation_payload(record) for record in records]}
+
+
+@router.get(
+    "/benchmarks/annotations/table",
+    tags=["Benchmarks"],
+    summary="Annotation records with every metric's freshly computed score",
+)
+def annotation_score_table() -> dict[str, Any]:
+    records = _load_annotation_records()
+    # Fill any missing metric scores once and persist them so later opens are fast.
+    if fill_scores(records):
+        _store_annotation_records(records)
+    return {
+        "metrics": [metric.name for metric in ANSWER_METRICS],
+        "records": [row.model_dump(mode="json") for row in score_records(records)],
+    }
+
+
+@router.post(
+    "/benchmarks/annotations/band",
+    tags=["Benchmarks"],
+    summary="Save the human score band for an annotation record",
+)
+def save_annotation_band(payload: AnnotationBand) -> dict[str, Any]:
+    records = _load_annotation_records()
+    updated: AnnotationRecord | None = None
+    for record in records:
+        if record.key == payload.key:
+            record.human_low = payload.human_low
+            record.human_high = payload.human_high
+            updated = record
+            break
+    if updated is None:
+        raise HTTPException(status_code=404, detail="Annotation record not found.")
+    _store_annotation_records(records)
+    return _annotation_payload(updated)
+
+
+@router.get(
+    "/benchmarks/annotations/evaluation",
+    tags=["Benchmarks"],
+    summary="Score every metric against the human annotation bands",
+)
+def evaluate_annotation_metrics() -> dict[str, Any]:
+    records = _load_annotation_records()
+    annotated = sum(1 for record in records if record.band is not None)
+    results = evaluate_metrics(records)
+    return {
+        "total": len(records),
+        "annotated": annotated,
+        "results": [result.model_dump(mode="json") for result in results],
+    }
+
+
 @router.post("/benchmarks/results/{run_id}/repair")
 def repair_benchmark_result(run_id: str) -> dict[str, Any]:
     _validate_storage_id(run_id)
@@ -1480,6 +1578,41 @@ def _store_marked_benchmark_rows(rows: list[MarkedBenchmarkRow]) -> None:
         _marked_benchmark_rows_path(),
         {"rows": [row.model_dump(mode="json") for row in rows]},
     )
+
+
+def _annotation_records_path() -> Path:
+    return _benchmark_output_dir() / ".annotations" / "records.json"
+
+
+def _load_annotation_records() -> list[AnnotationRecord]:
+    path = _annotation_records_path()
+    if not path.exists():
+        return []
+    try:
+        payload = json.loads(path.read_text())
+    except Exception:
+        return []
+    raw_records = payload.get("records") if isinstance(payload, dict) else payload
+    if not isinstance(raw_records, list):
+        return []
+    records: list[AnnotationRecord] = []
+    for raw_record in raw_records:
+        try:
+            records.append(AnnotationRecord.model_validate(raw_record))
+        except Exception:
+            continue
+    return records
+
+
+def _store_annotation_records(records: list[AnnotationRecord]) -> None:
+    _atomic_write_json(
+        _annotation_records_path(),
+        {"records": [record.model_dump(mode="json") for record in records]},
+    )
+
+
+def _annotation_payload(record: AnnotationRecord) -> dict[str, Any]:
+    return {**record.model_dump(mode="json"), "key": record.key}
 
 
 def _save_benchmark_result(result: BenchmarkResult) -> Path:
