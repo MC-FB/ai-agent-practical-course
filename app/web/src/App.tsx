@@ -7,6 +7,10 @@ import {
   BookOpen,
   CheckCircle2,
   ChevronDown,
+  ClipboardCheck,
+  ClipboardPlus,
+  ClipboardCheck,
+  ClipboardPlus,
   Database,
   GitBranch,
   History,
@@ -21,7 +25,7 @@ import {
   Timer,
 } from "lucide-react";
 import mermaid from "mermaid";
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { Badge } from "./components/ui/badge";
 import { Button } from "./components/ui/button";
@@ -32,6 +36,11 @@ import { Label } from "./components/ui/label";
 import { Progress } from "./components/ui/progress";
 import {
   ApiError,
+  addAnnotation,
+  deleteAnnotation,
+  getAnnotationTable,
+  saveAnnotationBand,
+  listAnnotations,
   getAppConfig,
   deleteMarkedBenchmarkRow,
   getBenchmarkMeta,
@@ -52,6 +61,7 @@ import {
   type BenchmarkSubset,
   type DagNode,
   type BenchmarkMeta,
+  type AnnotationTable,
   type HotpotBenchmarkRecord,
   type HotpotBenchmarkResult,
   type LiveBenchmark,
@@ -262,7 +272,7 @@ function TreeParametersControl({
 const RECORD_TABLE_INITIAL_ROWS = 80;
 const RECORD_TABLE_LOAD_ROWS = 120;
 
-type Tab = "chat" | "dataset" | "results" | "marked";
+type Tab = "chat" | "dataset" | "results" | "marked" | "metrics";
 type RunPhase = "idle" | "planning" | "executing" | "complete" | "error";
 type AppRoute = {
   tab: Tab;
@@ -274,7 +284,10 @@ type AppRoute = {
 function parseRoute(): AppRoute {
   const parts = window.location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
   const tab: Tab =
-    parts[0] === "dataset" || parts[0] === "results" || parts[0] === "marked"
+    parts[0] === "dataset" ||
+    parts[0] === "results" ||
+    parts[0] === "marked" ||
+    parts[0] === "metrics"
       ? parts[0]
       : "chat";
   return {
@@ -370,6 +383,33 @@ function formatDuration(ms?: number) {
   const minutes = Math.round((ms % 3_600_000) / 60_000);
   return `${hours} h ${minutes} min`;
 }
+
+// Turn a snake_case metric key into a column header, e.g. "exact_match" -> "Exact Match".
+function humanizeMetric(key: string) {
+  return key
+    .split("_")
+    .map((token) => token.charAt(0).toUpperCase() + token.slice(1))
+    .join(" ");
+}
+
+// The per-record metric scores, falling back to the legacy named fields so runs saved before
+// the metric_scores registry still render in the metric-scores table.
+function legacyScores(record: HotpotBenchmarkRecord): Record<string, number> {
+  return (
+    record.metric_scores ?? {
+      exact_match: record.exact_match,
+      f1: record.f1,
+      cosine_sim: record.cosine_sim,
+    }
+  );
+}
+
+// A toggleable column in the per-record results table.
+type RecordColumn = {
+  key: string;
+  label: string;
+  render: (record: HotpotBenchmarkRecord) => ReactNode;
+};
 
 function formatSavedDateTime(value?: string | null) {
   if (!value) return "Unknown date";
@@ -1081,6 +1121,113 @@ function BenchmarkResultView({
   const sampleTotal = result?.dataset_size ?? totalExamples;
   const tableKey = result ? `${result.run_id}:${result.records.length}` : "empty";
   const { visibleRows, sentinelRef } = useIncrementalRows(result?.records.length ?? 0, tableKey);
+  // Ordered union of metric keys across records, so a newly registered metric becomes a column
+  // automatically without any frontend change.
+  const metricKeys = useMemo(() => {
+    const keys: string[] = [];
+    for (const record of result?.records ?? []) {
+      for (const key of Object.keys(legacyScores(record))) {
+        if (!keys.includes(key)) keys.push(key);
+      }
+    }
+    return keys;
+  }, [result]);
+  // Every metric (raw score) plus the agent-analysis columns, all optional. Question / Gold /
+  // Prediction are rendered separately and always shown.
+  const toggleableColumns = useMemo<RecordColumn[]>(() => {
+    const metricColumns: RecordColumn[] = metricKeys.map((key) => ({
+      key: `metric:${key}`,
+      label: humanizeMetric(key),
+      render: (record) => {
+        const scores = legacyScores(record);
+        return key in scores ? formatNumber(scores[key], 3) : "-";
+      },
+    }));
+    const analysisColumns: RecordColumn[] = [
+      {
+        key: "status",
+        label: "Status",
+        render: (record) =>
+          record.error ? "error" : record.structural_failure ? "failed" : "ok",
+      },
+      ...(onSelectRecord
+        ? [
+            {
+              key: "inspect",
+              label: "Inspect",
+              render: (record: HotpotBenchmarkRecord) =>
+                record.run_trace ? (
+                  <button
+                    className="record-action"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onSelectRecord(record);
+                    }}
+                    type="button"
+                  >
+                    Inspect
+                  </button>
+                ) : (
+                  <span className="muted-value">No trace</span>
+                ),
+            },
+          ]
+        : []),
+      {
+        key: "evidence",
+        label: "Evidence",
+        render: (record) =>
+          record.wrong_supporting_text_rate === null ||
+          record.wrong_supporting_text_rate === undefined
+            ? "-"
+            : `${formatPercent(record.wrong_supporting_text_rate)} non-gold`,
+      },
+      {
+        key: "gold_recall",
+        label: "Gold Recall",
+        render: (record) => formatPercent(record.gold_supporting_fact_recall ?? undefined),
+      },
+    ];
+    return [...metricColumns, ...analysisColumns];
+  }, [metricKeys, onSelectRecord]);
+  // Session-only selection; defaults to the columns the table showed before it became configurable.
+  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
+    () =>
+      new Set([
+        "metric:exact_match",
+        "metric:cosine_sim",
+        "status",
+        "inspect",
+        "evidence",
+        "gold_recall",
+      ]),
+  );
+  const shownColumns = toggleableColumns.filter((column) => visibleColumns.has(column.key));
+  // Metric-evaluation annotation set: keys of records added for human band annotation.
+  const [annotationKeys, setAnnotationKeys] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    listAnnotations()
+      .then((data) => setAnnotationKeys(new Set(data.records.map((record) => record.key))))
+      .catch(() => {});
+  }, []);
+
+  const toggleAnnotation = (record: HotpotBenchmarkRecord) => {
+    if (!result) return;
+    const key = `${result.run_id}:${record.id}`;
+    const request = annotationKeys.has(key)
+      ? deleteAnnotation(key)
+      : addAnnotation({
+          run_id: result.run_id,
+          record_id: record.id,
+          question: record.question,
+          gold_answer: record.gold_answer,
+          prediction: record.prediction,
+        });
+    request
+      .then((data) => setAnnotationKeys(new Set(data.records.map((entry) => entry.key))))
+      .catch(() => {});
+  };
 
   if (!result || !metrics) {
     return <div className="empty">Metrics will appear here.</div>;
@@ -1185,6 +1332,36 @@ function BenchmarkResultView({
           </span>
         </div>
       </div>
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="text-sm font-semibold text-slate-600">
+          Annotation set: {annotationKeys.size}
+        </span>
+        <span className="text-xs text-slate-500">
+          Click the clipboard on a row to add it, then set its score band in the Metrics tab.
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-3 mb-3">
+        <span className="text-sm font-semibold text-slate-600">Columns</span>
+        {toggleableColumns.map((column) => (
+          <label key={column.key} className="flex items-center gap-1.5 text-sm">
+            <Checkbox
+              checked={visibleColumns.has(column.key)}
+              onCheckedChange={(checked) =>
+                setVisibleColumns((previous) => {
+                  const next = new Set(previous);
+                  if (checked === true) {
+                    next.add(column.key);
+                  } else {
+                    next.delete(column.key);
+                  }
+                  return next;
+                })
+              }
+            />
+            <span>{column.label}</span>
+          </label>
+        ))}
+      </div>
       <div className="record-table-wrap">
         <table className="record-table">
           <thead>
@@ -1192,12 +1369,10 @@ function BenchmarkResultView({
               <th>Question</th>
               <th>Gold</th>
               <th>Prediction</th>
-              <th>EM</th>
-              <th>Cos Sim</th>
-              <th>Status</th>
-              <th>Graph</th>
-              <th>Evidence</th>
-              <th>Gold Recall</th>
+              {shownColumns.map((column) => (
+                <th key={column.key}>{column.label}</th>
+              ))}
+              <th>Annotate</th>
             </tr>
           </thead>
           <tbody>
@@ -1224,32 +1399,32 @@ function BenchmarkResultView({
                   <td>{record.question}</td>
                   <td>{record.gold_answer}</td>
                   <td>{record.prediction}</td>
-                  <td>{formatPercent(record.exact_match)}</td>
-                  <td>{formatNumber(record.cosine_sim, 3)}</td>
-                  <td>{record.error ? "error" : record.structural_failure ? "failed" : "ok"}</td>
+                  {shownColumns.map((column) => (
+                    <td key={column.key}>{column.render(record)}</td>
+                  ))}
                   <td>
-                    {canInspect ? (
-                      <button
-                        className="record-action"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onSelectRecord?.(record);
-                        }}
-                        type="button"
-                      >
-                        Inspect
-                      </button>
-                    ) : (
-                      <span className="muted-value">No trace</span>
-                    )}
+                    <button
+                      className={`mark-record-button ${
+                        annotationKeys.has(`${result.run_id}:${record.id}`) ? "marked" : ""
+                      }`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        toggleAnnotation(record);
+                      }}
+                      title={
+                        annotationKeys.has(`${result.run_id}:${record.id}`)
+                          ? "Remove from annotation set"
+                          : "Add to annotation set"
+                      }
+                      type="button"
+                    >
+                      {annotationKeys.has(`${result.run_id}:${record.id}`) ? (
+                        <ClipboardCheck size={16} />
+                      ) : (
+                        <ClipboardPlus size={16} />
+                      )}
+                    </button>
                   </td>
-                  <td>
-                    {record.wrong_supporting_text_rate === null ||
-                    record.wrong_supporting_text_rate === undefined
-                      ? "-"
-                      : `${formatPercent(record.wrong_supporting_text_rate)} non-gold`}
-                  </td>
-                  <td>{formatPercent(record.gold_supporting_fact_recall ?? undefined)}</td>
                 </tr>
               );
             })}
@@ -3204,6 +3379,203 @@ function ModelRequiredView({ action }: { action: string }) {
   );
 }
 
+// Parse a percent input ("80") to a 0-1 fraction, or null if blank/invalid.
+function bandFraction(text: string): number | null {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+  const value = Number(trimmed);
+  return Number.isFinite(value) ? value / 100 : null;
+}
+
+// Out-of-band distance (0-1 space): 0 inside the band, else distance to the nearest edge.
+function outOfBandDistance(
+  score: number,
+  low: number | null,
+  high: number | null,
+): number | null {
+  if (low === null || high === null) return null;
+  const lo = Math.min(low, high);
+  const hi = Math.max(low, high);
+  if (score < lo) return lo - score;
+  if (score > hi) return score - hi;
+  return 0;
+}
+
+function MetricEvaluationView() {
+  const [table, setTable] = useState<AnnotationTable>();
+  const [bands, setBands] = useState<Record<string, { low: string; high: string }>>({});
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  const refresh = () => {
+    setLoading(true);
+    getAnnotationTable()
+      .then((data) => {
+        setTable(data);
+        const seeded: Record<string, { low: string; high: string }> = {};
+        for (const record of data.records) {
+          seeded[record.key] = {
+            low: record.human_low === null ? "" : String(Math.round(record.human_low * 1000) / 10),
+            high:
+              record.human_high === null ? "" : String(Math.round(record.human_high * 1000) / 10),
+          };
+        }
+        setBands(seeded);
+        setError("");
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : String(err)))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
+
+  const metrics = table?.metrics ?? [];
+  const records = table?.records ?? [];
+
+  // Live sum of out-of-band error per metric, recomputed from the current band inputs.
+  const errorSums: Record<string, number> = {};
+  for (const metric of metrics) {
+    let sum = 0;
+    for (const record of records) {
+      const band = bands[record.key];
+      const distance = outOfBandDistance(
+        record.scores[metric] ?? 0,
+        band ? bandFraction(band.low) : null,
+        band ? bandFraction(band.high) : null,
+      );
+      if (distance !== null) sum += distance;
+    }
+    errorSums[metric] = sum;
+  }
+  const bestMetric =
+    metrics.length > 0
+      ? metrics.reduce((best, metric) => (errorSums[metric] < errorSums[best] ? metric : best))
+      : undefined;
+
+  const updateBand = (key: string, edge: "low" | "high", value: string) => {
+    setBands((previous) => {
+      const current = previous[key] ?? { low: "", high: "" };
+      return { ...previous, [key]: { ...current, [edge]: value } };
+    });
+  };
+
+  const persistBand = (key: string) => {
+    const band = bands[key];
+    saveAnnotationBand(key, bandFraction(band?.low ?? ""), bandFraction(band?.high ?? "")).catch(
+      () => {},
+    );
+  };
+
+  return (
+    <main className="dataset-workspace">
+      <div className="section-header">
+        <div>
+          <h2>Metric evaluation</h2>
+          <span>
+            {table
+              ? `${records.length} annotation records — type each acceptable score band (%); the top row sums every metric's out-of-band error (lower is better).`
+              : "Loading…"}
+          </span>
+        </div>
+        <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
+          Refresh
+        </Button>
+      </div>
+      {error && <div className="empty">{error}</div>}
+      {!loading && !error && records.length === 0 && (
+        <div className="empty">
+          No annotation records yet. Open a benchmark result and click the clipboard on the rows you
+          want to annotate, then return here to set their bands.
+        </div>
+      )}
+      {records.length > 0 && (
+        <div className="record-table-wrap">
+          <table className="record-table">
+            <thead>
+              <tr>
+                <th>Question</th>
+                <th>Gold</th>
+                <th>Prediction</th>
+                <th>Low %</th>
+                <th>High %</th>
+                {metrics.map((metric) => (
+                  <th key={metric}>{humanizeMetric(metric)}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colSpan={5} style={{ fontWeight: 600 }}>
+                  Sum of out-of-band error
+                </td>
+                {metrics.map((metric) => (
+                  <td
+                    key={metric}
+                    style={{
+                      fontWeight: metric === bestMetric ? 700 : 500,
+                      color: metric === bestMetric ? "#065f46" : undefined,
+                    }}
+                  >
+                    {formatNumber(errorSums[metric] * 100, 1)}
+                  </td>
+                ))}
+              </tr>
+              {records.map((record) => {
+                const band = bands[record.key] ?? { low: "", high: "" };
+                const low = bandFraction(band.low);
+                const high = bandFraction(band.high);
+                return (
+                  <tr key={record.key}>
+                    <td>{record.question}</td>
+                    <td>{record.gold_answer}</td>
+                    <td>{record.prediction}</td>
+                    <td>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={band.low}
+                        onChange={(event) => updateBand(record.key, "low", event.target.value)}
+                        onBlur={() => persistBand(record.key)}
+                        style={{ width: 64 }}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={band.high}
+                        onChange={(event) => updateBand(record.key, "high", event.target.value)}
+                        onBlur={() => persistBand(record.key)}
+                        style={{ width: 64 }}
+                      />
+                    </td>
+                    {metrics.map((metric) => {
+                      const distance = outOfBandDistance(record.scores[metric] ?? 0, low, high);
+                      const background =
+                        distance === null ? undefined : distance === 0 ? "#dcfce7" : "#fee2e2";
+                      return (
+                        <td key={metric} style={{ background }}>
+                          {formatPercent(record.scores[metric] ?? 0)}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </main>
+  );
+}
+
 function App() {
   const [route, setRoute] = useState<AppRoute>(() => parseRoute());
   const [modelCatalog, setModelCatalog] = useState<LLMModelCatalog>();
@@ -3352,6 +3724,14 @@ function App() {
             <BookmarkCheck size={18} />
             <span>Marked</span>
           </button>
+          <button
+            className={route.tab === "metrics" ? "active" : ""}
+            onClick={() => navigate({ tab: "metrics" })}
+            title="Metric evaluation"
+          >
+            <BarChart3 size={18} />
+            <span>Metrics</span>
+          </button>
           <a href="http://localhost:8000/docs" target="_blank" rel="noreferrer" title="API Docs">
             <BookOpen size={18} />
             <span>API Docs</span>
@@ -3388,6 +3768,8 @@ function App() {
           }
           onRemoveRow={removeMarkedRow}
         />
+      ) : route.tab === "metrics" ? (
+        <MetricEvaluationView />
       ) : !selectedLLM ? (
         <ModelRequiredView action={route.tab === "chat" ? "Chat" : "Benchmark actions"} />
       ) : route.tab === "chat" ? (
