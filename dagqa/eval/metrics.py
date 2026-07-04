@@ -33,8 +33,85 @@ def _sentence_transformer() -> SentenceTransformer:
     return SentenceTransformer("sentence-transformers/all-mpnet-base-v2", device=get_device())
 
 
+@lru_cache(maxsize=1)
 def mini_l6_sentence_transformer() -> SentenceTransformer:
     return SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", device=get_device())
+
+
+# ---------------------------------------------------------------------------
+# Additional SBERT bi-encoders trialled as answer metrics. Each is cached for
+# the process lifetime (mirroring ``_sentence_transformer``) so the benchmark
+# loop loads the weights once, not once per record.
+# ---------------------------------------------------------------------------
+
+
+@lru_cache(maxsize=1)
+def _multi_qa_mpnet_transformer() -> SentenceTransformer:
+    # QA-tuned sibling of all-mpnet-base-v2; cosine-normalised, no prefix needed.
+    return SentenceTransformer(
+        "sentence-transformers/multi-qa-mpnet-base-cos-v1", device=get_device()
+    )
+
+
+@lru_cache(maxsize=1)
+def _gte_base_transformer() -> SentenceTransformer:
+    # GTE is trained on raw text; no instruction prefix.
+    return SentenceTransformer("thenlper/gte-base", device=get_device())
+
+
+@lru_cache(maxsize=1)
+def _bge_base_transformer() -> SentenceTransformer:
+    # BGE only prefixes the query in *asymmetric* retrieval; our answer-vs-answer
+    # comparison is symmetric, so no prefix.
+    return SentenceTransformer("BAAI/bge-base-en-v1.5", device=get_device())
+
+
+@lru_cache(maxsize=1)
+def _e5_base_transformer() -> SentenceTransformer:
+    # E5 was trained with every input wearing a prefix; see ``e5_base_cosine_sim``.
+    return SentenceTransformer("intfloat/e5-base-v2", device=get_device())
+
+
+def _prefixed_cosine(
+    prediction: str,
+    ground_truth: str,
+    model_loader: Callable[[], SentenceTransformer],
+    query_prefix: str = "",
+) -> float:
+    """Cosine similarity between two answers, honouring a model's instruction prefix.
+
+    ``model_loader`` is passed uncalled and invoked only *after* the guard clauses,
+    so the fast paths (identical or empty strings) never trigger a model load —
+    matching how ``cosine_sim`` defers ``_sentence_transformer()`` until it's needed.
+
+    ``query_prefix`` is prepended to BOTH strings because comparing a predicted
+    answer to a gold answer is a *symmetric* task (both sides are the same kind of
+    text). Models such as E5 were trained with every input wearing this prefix, so
+    omitting it feeds them an out-of-distribution input and silently degrades the
+    embedding. Models that expect no prefix pass ``query_prefix=""`` and behave
+    exactly like the plain ``cosine_sim`` path.
+    """
+    if prediction == ground_truth:
+        return 1.0
+
+    if prediction == "" or ground_truth == "":
+        return 0.0
+
+    model = model_loader()
+    texts = [query_prefix + prediction, query_prefix + ground_truth]
+    pred_embedding, gt_embedding = model.encode(texts)  # (2, D) -> two (D,) rows
+
+    pred_mag = np.linalg.norm(pred_embedding)
+    gt_mag = np.linalg.norm(gt_embedding)
+
+    if pred_mag == 0.0 or gt_mag == 0.0:
+        return 0.0
+
+    norm_pred_embedding = pred_embedding / pred_mag
+    norm_gt_embedding = gt_embedding / gt_mag
+
+    metric = np.dot(norm_pred_embedding, norm_gt_embedding)
+    return float(metric)
 
 
 def normalize_answer(text: str) -> str:
@@ -175,6 +252,23 @@ def mini_l6_context_cosine_sim(prediction: str, ground_truth: str, question: str
 
     metric = np.dot(norm_pred_embedding, norm_gt_embedding)
     return float(metric)
+
+
+def multi_qa_mpnet_cosine_sim(prediction: str, ground_truth: str, _question: str) -> float:
+    return _prefixed_cosine(prediction, ground_truth, _multi_qa_mpnet_transformer)
+
+
+def gte_base_cosine_sim(prediction: str, ground_truth: str, _question: str) -> float:
+    return _prefixed_cosine(prediction, ground_truth, _gte_base_transformer)
+
+
+def bge_base_cosine_sim(prediction: str, ground_truth: str, _question: str) -> float:
+    return _prefixed_cosine(prediction, ground_truth, _bge_base_transformer)
+
+
+def e5_base_cosine_sim(prediction: str, ground_truth: str, _question: str) -> float:
+    # E5 expects the "query: " prefix on every input; on a symmetric task both sides get it.
+    return _prefixed_cosine(prediction, ground_truth, _e5_base_transformer, query_prefix="query: ")
 
 
 # ---------------------------------------------------------------------------
@@ -405,6 +499,10 @@ ANSWER_METRICS: list[Metric] = [
     Metric("context_cosine_sim", context_cosine_sim),
     Metric("mini_l6_cosine_sim", mini_l6_cosine_sim),
     Metric("mini_l6_context_cosine_sim", mini_l6_context_cosine_sim),
+    Metric("multi_qa_mpnet_cosine_sim", multi_qa_mpnet_cosine_sim),
+    Metric("gte_base_cosine_sim", gte_base_cosine_sim),
+    Metric("bge_base_cosine_sim", bge_base_cosine_sim),
+    Metric("e5_base_cosine_sim", e5_base_cosine_sim),
     Metric("bleu", bleu),
     Metric("bigram_f1", bigram_f1),
     Metric("chrf", chrf),

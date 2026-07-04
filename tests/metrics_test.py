@@ -17,7 +17,15 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from dagqa.eval.metrics import answer_f1, cosine_sim, exact_match
+from dagqa.eval.metrics import (
+    answer_f1,
+    bge_base_cosine_sim,
+    cosine_sim,
+    e5_base_cosine_sim,
+    exact_match,
+    gte_base_cosine_sim,
+    multi_qa_mpnet_cosine_sim,
+)
 
 # ---------------------------------------------------------------------------
 # exact_match
@@ -195,3 +203,71 @@ class TestCosineSim:
             result = cosine_sim("anything", "something else", "")
 
         assert result == pytest.approx(1.0, abs=1e-5)
+
+
+# ---------------------------------------------------------------------------
+# Additional SBERT cosine metrics (multi-qa mpnet / gte / bge / e5)
+#
+# Each shares the _prefixed_cosine implementation, differing only by model
+# loader and instruction prefix. Loaders are patched so no model is downloaded.
+# ---------------------------------------------------------------------------
+
+# (metric function, loader symbol to patch) for the no-prefix / shared-math cases.
+_SBERT_METRICS = [
+    (multi_qa_mpnet_cosine_sim, "dagqa.eval.metrics._multi_qa_mpnet_transformer"),
+    (gte_base_cosine_sim, "dagqa.eval.metrics._gte_base_transformer"),
+    (bge_base_cosine_sim, "dagqa.eval.metrics._bge_base_transformer"),
+    (e5_base_cosine_sim, "dagqa.eval.metrics._e5_base_transformer"),
+]
+
+
+class TestNewSbertCosineMetrics:
+    """Fast-path, math, and prefix-handling coverage for the four new metrics."""
+
+    def _make_mock(self, embeddings: np.ndarray) -> MagicMock:
+        fake_model = MagicMock()
+        fake_model.encode.return_value = embeddings
+        return fake_model
+
+    # --- fast-path cases (no mock needed) -----------------------------------
+
+    @pytest.mark.parametrize("metric_fn", [m for m, _ in _SBERT_METRICS])
+    def test_identical_strings_fast_path(self, metric_fn):
+        """Identical strings short-circuit to 1.0 before the model loads."""
+        assert metric_fn("hello", "hello", "") == 1.0
+
+    @pytest.mark.parametrize("metric_fn", [m for m, _ in _SBERT_METRICS])
+    def test_empty_prediction_fast_path(self, metric_fn):
+        """Empty prediction short-circuits to 0.0."""
+        assert metric_fn("", "hello", "") == 0.0
+
+    @pytest.mark.parametrize("metric_fn", [m for m, _ in _SBERT_METRICS])
+    def test_empty_ground_truth_fast_path(self, metric_fn):
+        """Empty ground truth short-circuits to 0.0."""
+        assert metric_fn("hello", "", "") == 0.0
+
+    # --- math case (mock the loader) ----------------------------------------
+
+    @pytest.mark.parametrize(("metric_fn", "loader"), _SBERT_METRICS)
+    def test_known_embeddings_partial_similarity(self, metric_fn, loader):
+        """Same [1,0] / [1,1] vectors as TestCosineSim -> dot = 1/sqrt(2)."""
+        fake_model = self._make_mock(np.array([[1.0, 0.0], [1.0, 1.0]]))
+        with patch(loader, return_value=fake_model):
+            result = metric_fn("anything", "something else", "")
+        assert result == pytest.approx(1 / np.sqrt(2), abs=1e-5)
+
+    # --- prefix handling: the whole point of _prefixed_cosine ---------------
+
+    def test_e5_prepends_query_prefix_to_both_sides(self):
+        """E5 must see 'query: ' glued to BOTH the prediction and the ground truth."""
+        fake_model = self._make_mock(np.array([[1.0, 0.0], [0.0, 1.0]]))
+        with patch("dagqa.eval.metrics._e5_base_transformer", return_value=fake_model):
+            e5_base_cosine_sim("yes", "no", "")
+        fake_model.encode.assert_called_once_with(["query: yes", "query: no"])
+
+    def test_no_prefix_model_passes_raw_text(self):
+        """No-prefix models (e.g. gte) encode the raw strings, unmodified."""
+        fake_model = self._make_mock(np.array([[1.0, 0.0], [0.0, 1.0]]))
+        with patch("dagqa.eval.metrics._gte_base_transformer", return_value=fake_model):
+            gte_base_cosine_sim("yes", "no", "")
+        fake_model.encode.assert_called_once_with(["yes", "no"])

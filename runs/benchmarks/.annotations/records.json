@@ -9,7 +9,23 @@
       "human_low": 0.8,
       "human_high": 1.0,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.5714285714285715,
+        "cosine_sim": 0.8244324922561646,
+        "context_cosine_sim": 0.7872905135154724,
+        "mini_l6_cosine_sim": 0.8199734687805176,
+        "mini_l6_context_cosine_sim": 0.7124868035316467,
+        "multi_qa_mpnet_cosine_sim": 0.8218592405319214,
+        "gte_base_cosine_sim": 0.94677734375,
+        "bge_base_cosine_sim": 0.8934072256088257,
+        "e5_base_cosine_sim": 0.9458785057067871,
+        "bleu": 0.35930411196308426,
+        "bigram_f1": 0.4,
+        "chrf": 0.7901624111182933,
+        "rouge_l": 0.5714285714285715,
+        "meteor": 0.8152173913043478
+      }
     },
     {
       "run_id": "46bdfb84-a098-40ed-a15a-bbbac2add9f5",
@@ -20,7 +36,23 @@
       "human_low": 0.3,
       "human_high": 0.5,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.0,
+        "cosine_sim": 0.5486948490142822,
+        "context_cosine_sim": 0.5080884695053101,
+        "mini_l6_cosine_sim": 0.5219087600708008,
+        "mini_l6_context_cosine_sim": 0.3647019863128662,
+        "multi_qa_mpnet_cosine_sim": 0.4009968638420105,
+        "gte_base_cosine_sim": 0.81640625,
+        "bge_base_cosine_sim": 0.5858249664306641,
+        "e5_base_cosine_sim": 0.7886934280395508,
+        "bleu": 0.3466806371753174,
+        "bigram_f1": 0.0,
+        "chrf": 0.09981528843421426,
+        "rouge_l": 0.0,
+        "meteor": 0.0
+      }
     },
     {
       "run_id": "16d41259-7060-4369-8e19-e27617b52d94",
@@ -31,7 +63,23 @@
       "human_low": 0.8,
       "human_high": 1.0,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.5714285714285715,
+        "cosine_sim": 0.8491396307945251,
+        "context_cosine_sim": 0.9281227588653564,
+        "mini_l6_cosine_sim": 0.8282637596130371,
+        "mini_l6_context_cosine_sim": 0.922070324420929,
+        "multi_qa_mpnet_cosine_sim": 0.8251806497573853,
+        "gte_base_cosine_sim": 0.947265625,
+        "bge_base_cosine_sim": 0.8924699425697327,
+        "e5_base_cosine_sim": 0.9241049885749817,
+        "bleu": 0.22313016014842982,
+        "bigram_f1": 0.4,
+        "chrf": 0.37983148602343647,
+        "rouge_l": 0.5714285714285715,
+        "meteor": 0.39893617021276595
+      }
     },
     {
       "run_id": "16d41259-7060-4369-8e19-e27617b52d94",
@@ -42,7 +90,23 @@
       "human_low": null,
       "human_high": null,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.0,
+        "cosine_sim": 0.3634651303291321,
+        "context_cosine_sim": 0.4762667119503021,
+        "mini_l6_cosine_sim": 0.3788161873817444,
+        "mini_l6_context_cosine_sim": 0.3654663562774658,
+        "multi_qa_mpnet_cosine_sim": 0.36382657289505005,
+        "gte_base_cosine_sim": 0.8408203125,
+        "bge_base_cosine_sim": 0.5892188549041748,
+        "e5_base_cosine_sim": 0.7558004856109619,
+        "bleu": 0.11868405219520975,
+        "bigram_f1": 0.0,
+        "chrf": 0.08078332934895209,
+        "rouge_l": 0.0,
+        "meteor": 0.0
+      }
     },
     {
       "run_id": "16d41259-7060-4369-8e19-e27617b52d94",
@@ -53,7 +117,23 @@
       "human_low": 0.8,
       "human_high": 1.0,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.3333333333333333,
+        "cosine_sim": 0.6352795362472534,
+        "context_cosine_sim": 0.554771900177002,
+        "mini_l6_cosine_sim": 0.4635169506072998,
+        "mini_l6_context_cosine_sim": 0.43418318033218384,
+        "multi_qa_mpnet_cosine_sim": 0.576591968536377,
+        "gte_base_cosine_sim": 0.87890625,
+        "bge_base_cosine_sim": 0.7487027645111084,
+        "e5_base_cosine_sim": 0.8367531895637512,
+        "bleu": 0.21239529438966132,
+        "bigram_f1": 0.0,
+        "chrf": 0.16977163573889142,
+        "rouge_l": 0.3333333333333333,
+        "meteor": 0.13157894736842105
+      }
     },
     {
       "run_id": "musique_failed_subset_bridge_surface_repair_25",
@@ -64,7 +144,23 @@
       "human_low": null,
       "human_high": null,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.0,
+        "cosine_sim": 0.6688258647918701,
+        "context_cosine_sim": 0.6094599962234497,
+        "mini_l6_cosine_sim": 0.5819642543792725,
+        "mini_l6_context_cosine_sim": 0.27490678429603577,
+        "multi_qa_mpnet_cosine_sim": 0.3393566906452179,
+        "gte_base_cosine_sim": 0.8310546875,
+        "bge_base_cosine_sim": 0.6202601790428162,
+        "e5_base_cosine_sim": 0.8543664216995239,
+        "bleu": 0.5,
+        "bigram_f1": 0.0,
+        "chrf": 0.20833333333333331,
+        "rouge_l": 0.0,
+        "meteor": 0.0
+      }
     },
     {
       "run_id": "musique_failed_subset_bridge_surface_repair_25",
@@ -75,7 +171,23 @@
       "human_low": null,
       "human_high": null,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.0,
+        "cosine_sim": 0.36858606338500977,
+        "context_cosine_sim": 0.33094921708106995,
+        "mini_l6_cosine_sim": 0.3412121534347534,
+        "mini_l6_context_cosine_sim": 0.1045411229133606,
+        "multi_qa_mpnet_cosine_sim": 0.23155246675014496,
+        "gte_base_cosine_sim": 0.7841796875,
+        "bge_base_cosine_sim": 0.543746829032898,
+        "e5_base_cosine_sim": 0.7749543190002441,
+        "bleu": 0.3466806371753174,
+        "bigram_f1": 0.0,
+        "chrf": 0.06756756756756756,
+        "rouge_l": 0.0,
+        "meteor": 0.0
+      }
     },
     {
       "run_id": "musique_failed_subset_bridge_surface_repair_25",
@@ -86,7 +198,23 @@
       "human_low": 0.8,
       "human_high": 1.0,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.5714285714285715,
+        "cosine_sim": 0.7994530200958252,
+        "context_cosine_sim": 0.9416455030441284,
+        "mini_l6_cosine_sim": 0.8944634795188904,
+        "mini_l6_context_cosine_sim": 0.9774325489997864,
+        "multi_qa_mpnet_cosine_sim": 0.9265713691711426,
+        "gte_base_cosine_sim": 0.96142578125,
+        "bge_base_cosine_sim": 0.8584244251251221,
+        "e5_base_cosine_sim": 0.9495969414710999,
+        "bleu": 0.22313016014842982,
+        "bigram_f1": 0.4,
+        "chrf": 0.5633961444287333,
+        "rouge_l": 0.5714285714285715,
+        "meteor": 0.39893617021276595
+      }
     },
     {
       "run_id": "musique_failed_subset_bridge_surface_repair_25",
@@ -94,10 +222,26 @@
       "question": "Who wrote a book about growing up in the same nationality as the man who produced The Wild Women of Chastity Gulch?",
       "gold_answer": "Min Zhou",
       "prediction": "Min Zhou and Carl L. Bankston III",
-      "human_low": null,
-      "human_high": null,
+      "human_low": 0.6,
+      "human_high": 0.8,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.4444444444444445,
+        "cosine_sim": 0.47334641218185425,
+        "context_cosine_sim": 0.6985183954238892,
+        "mini_l6_cosine_sim": 0.7743526101112366,
+        "mini_l6_context_cosine_sim": 0.8777040243148804,
+        "multi_qa_mpnet_cosine_sim": 0.604961633682251,
+        "gte_base_cosine_sim": 0.90673828125,
+        "bge_base_cosine_sim": 0.8006036877632141,
+        "e5_base_cosine_sim": 0.8815385103225708,
+        "bleu": 0.24446151121745047,
+        "bigram_f1": 0.2857142857142857,
+        "chrf": 0.5205234692220164,
+        "rouge_l": 0.4444444444444445,
+        "meteor": 0.75
+      }
     },
     {
       "run_id": "musique_failed_subset_bridge_surface_repair_25",
@@ -108,7 +252,23 @@
       "human_low": null,
       "human_high": null,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.0,
+        "cosine_sim": 0.26267701387405396,
+        "context_cosine_sim": 0.3304761052131653,
+        "mini_l6_cosine_sim": 0.29058700799942017,
+        "mini_l6_context_cosine_sim": 0.20290939509868622,
+        "multi_qa_mpnet_cosine_sim": 0.24180229008197784,
+        "gte_base_cosine_sim": 0.7578125,
+        "bge_base_cosine_sim": 0.4531041979789734,
+        "e5_base_cosine_sim": 0.7417647242546082,
+        "bleu": 0.09109250643152444,
+        "bigram_f1": 0.0,
+        "chrf": 0.038455870683987405,
+        "rouge_l": 0.0,
+        "meteor": 0.0
+      }
     },
     {
       "run_id": "musique_failed_subset_bridge_surface_repair_25",
@@ -116,10 +276,26 @@
       "question": "What city shares a border with the city where the person who went to the state where Englebart died during the gold rush works?",
       "gold_answer": "Rio Linda",
       "prediction": "Daly City",
-      "human_low": null,
-      "human_high": null,
+      "human_low": 0.0,
+      "human_high": 0.3,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.0,
+        "cosine_sim": 0.4685790538787842,
+        "context_cosine_sim": 0.39694809913635254,
+        "mini_l6_cosine_sim": 0.28740906715393066,
+        "mini_l6_context_cosine_sim": 0.06482037156820297,
+        "multi_qa_mpnet_cosine_sim": 0.19965943694114685,
+        "gte_base_cosine_sim": 0.75634765625,
+        "bge_base_cosine_sim": 0.43899571895599365,
+        "e5_base_cosine_sim": 0.7830635905265808,
+        "bleu": 0.408248290463863,
+        "bigram_f1": 0.0,
+        "chrf": 0.11342592592592593,
+        "rouge_l": 0.0,
+        "meteor": 0.0
+      }
     },
     {
       "run_id": "musique_failed_subset_bridge_surface_repair_25",
@@ -130,7 +306,23 @@
       "human_low": 0.9,
       "human_high": 1.0,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.0,
+        "cosine_sim": 0.7961587905883789,
+        "context_cosine_sim": 0.9058201313018799,
+        "mini_l6_cosine_sim": 0.8451783061027527,
+        "mini_l6_context_cosine_sim": 0.9402576684951782,
+        "multi_qa_mpnet_cosine_sim": 0.8259381651878357,
+        "gte_base_cosine_sim": 0.9482421875,
+        "bge_base_cosine_sim": 0.9161239266395569,
+        "e5_base_cosine_sim": 0.9385629892349243,
+        "bleu": 0.06766764161830635,
+        "bigram_f1": 0.0,
+        "chrf": 0.16069729169658217,
+        "rouge_l": 0.0,
+        "meteor": 0.0
+      }
     },
     {
       "run_id": "musique_failed_subset_bridge_surface_repair_25",
@@ -138,10 +330,26 @@
       "question": "A line with Williamsburg, Main Street and another station are in a state that's next to an ocean. When did that ocean start to open up?",
       "gold_answer": "around 140 million years ago",
       "prediction": "Early-Middle Jurassic",
-      "human_low": null,
-      "human_high": null,
+      "human_low": 0.0,
+      "human_high": 0.3,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.0,
+        "cosine_sim": 0.5730673670768738,
+        "context_cosine_sim": 0.5469314455986023,
+        "mini_l6_cosine_sim": 0.3911118507385254,
+        "mini_l6_context_cosine_sim": 0.26856040954589844,
+        "multi_qa_mpnet_cosine_sim": 0.5147242546081543,
+        "gte_base_cosine_sim": 0.81201171875,
+        "bge_base_cosine_sim": 0.6365028023719788,
+        "e5_base_cosine_sim": 0.838790237903595,
+        "bleu": 0.09109250643152444,
+        "bigram_f1": 0.0,
+        "chrf": 0.1212126101599446,
+        "rouge_l": 0.0,
+        "meteor": 0.0
+      }
     },
     {
       "run_id": "9cd61785-c405-44ad-93f7-ff8bed0a01de",
@@ -152,7 +360,23 @@
       "human_low": null,
       "human_high": null,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.8571428571428571,
+        "cosine_sim": 0.898279070854187,
+        "context_cosine_sim": 0.6916136145591736,
+        "mini_l6_cosine_sim": 0.9222704172134399,
+        "mini_l6_context_cosine_sim": 0.8306294083595276,
+        "multi_qa_mpnet_cosine_sim": 0.9115480184555054,
+        "gte_base_cosine_sim": 0.9501953125,
+        "bge_base_cosine_sim": 0.8862020969390869,
+        "e5_base_cosine_sim": 0.9564342498779297,
+        "bleu": 0.7165313105737893,
+        "bigram_f1": 0.8,
+        "chrf": 0.8639496805190169,
+        "rouge_l": 0.8571428571428571,
+        "meteor": 0.754985754985755
+      }
     },
     {
       "run_id": "9cd61785-c405-44ad-93f7-ff8bed0a01de",
@@ -160,10 +384,26 @@
       "question": "Name five actors that worked with a German cinematographer?",
       "gold_answer": "George Clooney, Thekla Reuten, Violante Placido, Irina Bj\u00f6rklund, and Paolo Bonacelli",
       "prediction": "Luis Trenker, Leni Riefenstahl, George Clooney, Thekla Reuten, Violante Placido",
-      "human_low": null,
-      "human_high": null,
+      "human_low": 0.5,
+      "human_high": 0.7,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.5714285714285713,
+        "cosine_sim": 0.7255262136459351,
+        "context_cosine_sim": 0.8223700523376465,
+        "mini_l6_cosine_sim": 0.7514851093292236,
+        "mini_l6_context_cosine_sim": 0.6929641962051392,
+        "multi_qa_mpnet_cosine_sim": 0.8045381903648376,
+        "gte_base_cosine_sim": 0.9287109375,
+        "bge_base_cosine_sim": 0.8331314921379089,
+        "e5_base_cosine_sim": 0.9317620992660522,
+        "bleu": 0.5163677114298966,
+        "bigram_f1": 0.5263157894736842,
+        "chrf": 0.5934986737358111,
+        "rouge_l": 0.5714285714285713,
+        "meteor": 0.5491845056065238
+      }
     },
     {
       "run_id": "9cd61785-c405-44ad-93f7-ff8bed0a01de",
@@ -174,7 +414,23 @@
       "human_low": 0.9,
       "human_high": 1.0,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 1.0,
+        "f1": 1.0,
+        "cosine_sim": 0.8643562197685242,
+        "context_cosine_sim": 0.9780761003494263,
+        "mini_l6_cosine_sim": 0.9304856061935425,
+        "mini_l6_context_cosine_sim": 0.985912561416626,
+        "multi_qa_mpnet_cosine_sim": 0.9368125796318054,
+        "gte_base_cosine_sim": 0.9619140625,
+        "bge_base_cosine_sim": 0.9249682426452637,
+        "e5_base_cosine_sim": 0.9736583232879639,
+        "bleu": 1.0,
+        "bigram_f1": 1.0,
+        "chrf": 1.0,
+        "rouge_l": 1.0,
+        "meteor": 0.5
+      }
     },
     {
       "run_id": "9cd61785-c405-44ad-93f7-ff8bed0a01de",
@@ -182,10 +438,26 @@
       "question": "Professor A. Selvanathan is a professor at a university that is public or private ?",
       "gold_answer": "public",
       "prediction": "private",
-      "human_low": null,
-      "human_high": null,
+      "human_low": 0.0,
+      "human_high": 0.2,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.0,
+        "cosine_sim": 0.6714659929275513,
+        "context_cosine_sim": 0.7280817627906799,
+        "mini_l6_cosine_sim": 0.6689483523368835,
+        "mini_l6_context_cosine_sim": 0.4315056800842285,
+        "multi_qa_mpnet_cosine_sim": 0.591141939163208,
+        "gte_base_cosine_sim": 0.88232421875,
+        "bge_base_cosine_sim": 0.7612507343292236,
+        "e5_base_cosine_sim": 0.9189883470535278,
+        "bleu": 0.5,
+        "bigram_f1": 0.0,
+        "chrf": 0.053763440860215055,
+        "rouge_l": 0.0,
+        "meteor": 0.0
+      }
     },
     {
       "run_id": "9cd61785-c405-44ad-93f7-ff8bed0a01de",
@@ -196,7 +468,23 @@
       "human_low": null,
       "human_high": null,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.8,
+        "cosine_sim": 0.7033751606941223,
+        "context_cosine_sim": 0.5409027934074402,
+        "mini_l6_cosine_sim": 0.7490837574005127,
+        "mini_l6_context_cosine_sim": 0.853513240814209,
+        "multi_qa_mpnet_cosine_sim": 0.713912844657898,
+        "gte_base_cosine_sim": 0.8955078125,
+        "bge_base_cosine_sim": 0.8157605528831482,
+        "e5_base_cosine_sim": 0.899553656578064,
+        "bleu": 0.49999999999999994,
+        "bigram_f1": 0.0,
+        "chrf": 0.7946319931645071,
+        "rouge_l": 0.8,
+        "meteor": 0.4761904761904762
+      }
     },
     {
       "run_id": "9cd61785-c405-44ad-93f7-ff8bed0a01de",
@@ -207,7 +495,23 @@
       "human_low": null,
       "human_high": null,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.0,
+        "cosine_sim": 0.4564970135688782,
+        "context_cosine_sim": 0.7869150638580322,
+        "mini_l6_cosine_sim": 0.42501139640808105,
+        "mini_l6_context_cosine_sim": 0.5438820719718933,
+        "multi_qa_mpnet_cosine_sim": 0.4481169283390045,
+        "gte_base_cosine_sim": 0.8134765625,
+        "bge_base_cosine_sim": 0.6559300422668457,
+        "e5_base_cosine_sim": 0.825120210647583,
+        "bleu": 0.408248290463863,
+        "bigram_f1": 0.0,
+        "chrf": 0.08440671350507416,
+        "rouge_l": 0.0,
+        "meteor": 0.0
+      }
     },
     {
       "run_id": "ea8d8149-23be-4738-a855-5d50db78b883",
@@ -218,7 +522,23 @@
       "human_low": 0.0,
       "human_high": 0.2,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.0,
+        "cosine_sim": 0.7000373601913452,
+        "context_cosine_sim": 0.7278547286987305,
+        "mini_l6_cosine_sim": 0.7334949970245361,
+        "mini_l6_context_cosine_sim": 0.9195215702056885,
+        "multi_qa_mpnet_cosine_sim": 0.9064962267875671,
+        "gte_base_cosine_sim": 0.90576171875,
+        "bge_base_cosine_sim": 0.7340085506439209,
+        "e5_base_cosine_sim": 0.8736510276794434,
+        "bleu": 0.5,
+        "bigram_f1": 0.0,
+        "chrf": 0.0,
+        "rouge_l": 0.0,
+        "meteor": 0.0
+      }
     },
     {
       "run_id": "ea8d8149-23be-4738-a855-5d50db78b883",
@@ -229,7 +549,23 @@
       "human_low": 0.9,
       "human_high": 1.0,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 1.0,
+        "f1": 1.0,
+        "cosine_sim": 0.932364821434021,
+        "context_cosine_sim": 0.9665297269821167,
+        "mini_l6_cosine_sim": 0.9350578784942627,
+        "mini_l6_context_cosine_sim": 0.9782224893569946,
+        "multi_qa_mpnet_cosine_sim": 0.9595031142234802,
+        "gte_base_cosine_sim": 0.96484375,
+        "bge_base_cosine_sim": 0.8711534738540649,
+        "e5_base_cosine_sim": 0.9646786451339722,
+        "bleu": 1.0,
+        "bigram_f1": 1.0,
+        "chrf": 1.0,
+        "rouge_l": 1.0,
+        "meteor": 0.9375
+      }
     },
     {
       "run_id": "ea8d8149-23be-4738-a855-5d50db78b883",
@@ -240,7 +576,23 @@
       "human_low": 0.7,
       "human_high": 0.9,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.0,
+        "cosine_sim": 0.5415173172950745,
+        "context_cosine_sim": 0.11303877085447311,
+        "mini_l6_cosine_sim": 0.5508756637573242,
+        "mini_l6_context_cosine_sim": 0.5095854997634888,
+        "multi_qa_mpnet_cosine_sim": 0.5617145299911499,
+        "gte_base_cosine_sim": 0.83056640625,
+        "bge_base_cosine_sim": 0.7200221419334412,
+        "e5_base_cosine_sim": 0.9004926681518555,
+        "bleu": 0.408248290463863,
+        "bigram_f1": 0.0,
+        "chrf": 0.07092198581560284,
+        "rouge_l": 0.0,
+        "meteor": 0.0
+      }
     },
     {
       "run_id": "ea8d8149-23be-4738-a855-5d50db78b883",
@@ -248,10 +600,26 @@
       "question": "Boulevardier and Earthquake are cocktails, one of which has a french nickname of what?",
       "gold_answer": "The Tremblement de Terre",
       "prediction": "Tremblement de Terre",
-      "human_low": null,
-      "human_high": null,
+      "human_low": 0.9,
+      "human_high": 1.0,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 1.0,
+        "f1": 1.0,
+        "cosine_sim": 0.9115581512451172,
+        "context_cosine_sim": 0.969995379447937,
+        "mini_l6_cosine_sim": 0.9382678270339966,
+        "mini_l6_context_cosine_sim": 0.9887056350708008,
+        "multi_qa_mpnet_cosine_sim": 0.9731546640396118,
+        "gte_base_cosine_sim": 0.9892578125,
+        "bge_base_cosine_sim": 0.9739919900894165,
+        "e5_base_cosine_sim": 0.9832298755645752,
+        "bleu": 1.0,
+        "bigram_f1": 1.0,
+        "chrf": 1.0,
+        "rouge_l": 1.0,
+        "meteor": 0.9814814814814815
+      }
     },
     {
       "run_id": "ea8d8149-23be-4738-a855-5d50db78b883",
@@ -262,7 +630,23 @@
       "human_low": 0.6,
       "human_high": 0.8,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.0,
+        "cosine_sim": 0.4321705102920532,
+        "context_cosine_sim": 0.366249680519104,
+        "mini_l6_cosine_sim": 0.3671742379665375,
+        "mini_l6_context_cosine_sim": 0.4227116107940674,
+        "multi_qa_mpnet_cosine_sim": 0.2781955599784851,
+        "gte_base_cosine_sim": 0.79833984375,
+        "bge_base_cosine_sim": 0.5342531204223633,
+        "e5_base_cosine_sim": 0.8017942905426025,
+        "bleu": 0.408248290463863,
+        "bigram_f1": 0.0,
+        "chrf": 0.14551866628669136,
+        "rouge_l": 0.0,
+        "meteor": 0.0
+      }
     },
     {
       "run_id": "ea8d8149-23be-4738-a855-5d50db78b883",
@@ -273,7 +657,23 @@
       "human_low": 0.8,
       "human_high": 1.0,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.6666666666666666,
+        "cosine_sim": 0.8144155740737915,
+        "context_cosine_sim": 0.9501354694366455,
+        "mini_l6_cosine_sim": 0.8211517333984375,
+        "mini_l6_context_cosine_sim": 0.8608121871948242,
+        "multi_qa_mpnet_cosine_sim": 0.8654676675796509,
+        "gte_base_cosine_sim": 0.958984375,
+        "bge_base_cosine_sim": 0.9120770692825317,
+        "e5_base_cosine_sim": 0.9163058996200562,
+        "bleu": 0.36787944117144233,
+        "bigram_f1": 0.5,
+        "chrf": 0.42714290395714416,
+        "rouge_l": 0.6666666666666666,
+        "meteor": 0.4934210526315789
+      }
     }
   ]
 }
