@@ -9,8 +9,6 @@ import {
   ChevronDown,
   ClipboardCheck,
   ClipboardPlus,
-  ClipboardCheck,
-  ClipboardPlus,
   Database,
   GitBranch,
   History,
