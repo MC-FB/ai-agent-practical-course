@@ -5,10 +5,7 @@ import string
 from collections import Counter
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from collections.abc import Callable, Sequence
-from dataclasses import dataclass
 from functools import lru_cache
-from typing import NamedTuple
 from typing import NamedTuple
 
 import numpy as np

@@ -1874,6 +1874,7 @@ def _repair_benchmark_payload(data: dict[str, Any], path: Path) -> dict[str, Any
             record["cosine_sim"] = cosine_sim(
                 record.get("prediction", " "),
                 record.get("gold_answer", " "),
+                record.get("question", ""),
             )
             needs_save = True
         # Upgrade legacy records to the metric_scores dict format (keeping the
