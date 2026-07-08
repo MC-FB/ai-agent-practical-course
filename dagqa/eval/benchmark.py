@@ -116,7 +116,9 @@ class BenchmarkResult(BaseModel):
 async def benchmark_hotpotqa(
     client: DagQaClient,
     *,
-    system: Literal["direct_llm", "dag_agent"] = "dag_agent",
+    system: Literal[
+        "direct_llm", "dag_agent", "dag_multi_hop", "dag_least_to_most", "dag_ltm_conversation"
+    ] = "dag_agent",
     limit: int = 100,
     path: str | Path | None = None,
     seed: int | None = None,
@@ -147,7 +149,9 @@ async def benchmark_dataset(
     client: DagQaClient,
     *,
     dataset: str = "hotpotqa",
-    system: Literal["direct_llm", "dag_agent"] = "dag_agent",
+    system: Literal[
+        "direct_llm", "dag_agent", "dag_multi_hop", "dag_least_to_most", "dag_ltm_conversation"
+    ] = "dag_agent",
     limit: int = 100,
     path: str | Path | None = None,
     seed: int | None = None,
@@ -422,6 +426,10 @@ async def _run_example(  # noqa: PLR0912, PLR0915
                 )
             elif system == "dag_least_to_most":
                 run = await client.ask_least_to_most(
+                    example.question, evidence_documents=example.context
+                )
+            elif system == "dag_ltm_conversation":
+                run = await client.ask_least_to_most_conversation(
                     example.question, evidence_documents=example.context
                 )
             else:

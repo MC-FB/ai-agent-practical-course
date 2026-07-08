@@ -65,3 +65,14 @@ class DagQaClient:
         if evidence_documents and len(plan.nodes) > 1:
             return await self.executor.execute_least_to_most_only(plan, evidence_documents)
         return await self.execute(plan, evidence_documents)
+
+    async def ask_least_to_most_conversation(
+        self,
+        question: str,
+        evidence_documents: list[EvidenceDocument] | None = None,
+    ) -> RunTrace:
+        """Least-to-Most as a multi-turn conversation (one sub-question per turn)."""
+        plan = await self.plan(question)
+        if evidence_documents and len(plan.nodes) > 1:
+            return await self.executor.execute_least_to_most_conversation(plan, evidence_documents)
+        return await self.execute(plan, evidence_documents)
