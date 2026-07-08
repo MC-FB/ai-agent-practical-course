@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 from dagqa.config import LLMConfig
 from dagqa.llm import openai_compatible
-from dagqa.schemas import LLMRequest
+from dagqa.schemas import ChatMessage, LLMRequest
 
 
 async def test_openai_compatible_llm_uses_selected_model_and_messages(monkeypatch) -> None:
@@ -94,3 +94,48 @@ async def test_openai_compatible_llm_retries_retryable_errors(monkeypatch) -> No
     assert response.text == "ready"
     assert response.metadata["retry_count"] == 1
     assert attempts == expected_attempts
+
+
+async def test_openai_compatible_llm_includes_history_messages(monkeypatch) -> None:
+    captured: dict = {}
+
+    class Completions:
+        async def create(self, **kwargs):
+            captured.update(kwargs)
+            return SimpleNamespace(
+                choices=[SimpleNamespace(message=SimpleNamespace(content="ready"))],
+                usage=None,
+            )
+
+    class Client:
+        def __init__(self, **kwargs):  # noqa: ANN001, ARG002
+            self.chat = SimpleNamespace(completions=Completions())
+
+    monkeypatch.setenv("CLUSTER_API_KEY", "secret")
+    monkeypatch.setattr(openai_compatible, "AsyncOpenAI", Client)
+    llm = openai_compatible.OpenAICompatibleLanguageModel(
+        LLMConfig(
+            provider="cluster",
+            model="model",
+            api_key_env="CLUSTER_API_KEY",
+            api_base="http://cluster/inference",
+        )
+    )
+
+    await llm.complete(
+        LLMRequest(
+            system="System instruction",
+            prompt="Second question",
+            history=[
+                ChatMessage(role="user", content="First question"),
+                ChatMessage(role="assistant", content="First answer"),
+            ],
+        )
+    )
+
+    assert captured["messages"] == [
+        {"role": "system", "content": "System instruction"},
+        {"role": "user", "content": "First question"},
+        {"role": "assistant", "content": "First answer"},
+        {"role": "user", "content": "Second question"},
+    ]

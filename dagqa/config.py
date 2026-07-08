@@ -41,6 +41,7 @@ class ExecutionConfig(BaseModel):
     node_timeout_seconds: float = Field(default=120.0, gt=0)
     node_repair_rounds: int = Field(default=1, ge=0)
     fail_fast: bool = False
+    ltm_conversation_turn_format: Literal["text", "json"] = "text"
 
 
 class ValidationConfig(BaseModel):

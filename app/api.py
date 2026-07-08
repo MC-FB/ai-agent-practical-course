@@ -65,11 +65,14 @@ CLUSTER_MODEL_MAX_PARALLEL_EXAMPLES = {
 PAIRED_SYSTEM_COUNT = 2
 MUSIQUE_BENCHMARK_MAX_DEPTH = 6
 BenchmarkDatasetId = Literal["hotpotqa", "musique"]
-BenchmarkSystem = Literal["direct_llm", "dag_agent", "dag_multi_hop", "dag_least_to_most"]
+BenchmarkSystem = Literal[
+    "direct_llm", "dag_agent", "dag_multi_hop", "dag_least_to_most", "dag_ltm_conversation"
+]
 _ALL_SYSTEMS: tuple[str, ...] = (
     "direct_llm",
     "dag_multi_hop",
     "dag_least_to_most",
+    "dag_ltm_conversation",
     "dag_agent",
 )
 
