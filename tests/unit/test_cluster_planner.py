@@ -39,6 +39,62 @@ def test_structured_planner_prompt_requires_bridge_reasoning_contract() -> None:
     assert "ambiguous" in prompt
 
 
+def test_structured_planner_prompt_includes_source_catalog_and_instruction() -> None:
+    prompt = planner.structured_planner_prompt(
+        "Which person was born earlier?",
+        max_nodes=5,
+        max_depth=3,
+        source_catalog="\n\nSupporting evidence documents:\nDocument ID: context-0\n",
+    )
+
+    assert "set sources to the Document IDs" in prompt
+    assert "Supporting evidence documents:" in prompt
+    assert "Document ID: context-0" in prompt
+
+
+def test_structured_data_to_plan_carries_sources() -> None:
+    data = {
+        "question": "Which person was born earlier?",
+        "final_node": "q1",
+        "nodes": [
+            {
+                "id": "q1",
+                "label": "lookup",
+                "task_type": "fact_lookup",
+                "operation": "answer",
+                "question": "When was Ada born?",
+                "depends_on": [],
+                "sources": ["context-3", "context-5"],
+                "prompt": {"system": "s", "user_template": "u"},
+                "input_map": [],
+                "child_output_policy": None,
+                "output_fields": [{"name": "answer", "type": "string", "description": "a"}],
+            }
+        ],
+    }
+
+    plan = planner._structured_data_to_plan(data)
+
+    assert plan.nodes[0].sources == ["context-3", "context-5"]
+
+
+def test_simple_steps_to_plan_carries_sources() -> None:
+    data = {
+        "steps": [
+            {
+                "id": "q1",
+                "question": "When was Ada born?",
+                "depends_on": [],
+                "sources": ["context-2"],
+            }
+        ]
+    }
+
+    plan = planner._simple_steps_to_plan(data, "When was Ada born?")
+
+    assert plan.nodes[0].sources == ["context-2"]
+
+
 async def test_cluster_planner_uses_structured_json_schema(monkeypatch) -> None:
     captured: dict = {}
     plan = parse_plan(PARALLEL_PLAN)

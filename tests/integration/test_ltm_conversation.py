@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dagqa.client import DagQaClient
 from dagqa.graph.executor import DagExecutor
 from dagqa.planning.parser import parse_plan
 from dagqa.schemas import ChatMessage, EvidenceDocument, NodeStatus
@@ -52,12 +53,62 @@ async def test_conversation_asks_one_sub_question_per_turn_with_history(app_conf
         ChatMessage(role="user", content=llm.requests[1].prompt),
         ChatMessage(role="assistant", content="23 June 1912"),
     ]
-    assert "Supporting evidence documents:" in llm.requests[0].system
+    # Evidence is no longer in the shared system prompt; each turn shows only its
+    # node's planner-assigned documents.
+    assert "Supporting evidence documents:" not in llm.requests[0].system
     assert llm.requests[0].system == llm.requests[2].system
+    assert "Supporting evidence documents:" in llm.requests[0].prompt
     assert "When was Ada Lovelace born?" in llm.requests[0].prompt
     assert "answer the original question" in llm.requests[2].prompt
+    # Turn 1 sees only Ada Lovelace's document; turn 2 only Alan Turing's.
+    assert "Ada was born on 10 December 1815." in llm.requests[0].prompt
+    assert "Turing was born on 23 June 1912." not in llm.requests[0].prompt
+    assert "Turing was born on 23 June 1912." in llm.requests[1].prompt
+    assert "Ada was born on 10 December 1815." not in llm.requests[1].prompt
+    # The final turn synthesizes over the union of both steps' documents.
+    assert "Ada was born on 10 December 1815." in llm.requests[2].prompt
+    assert "Turing was born on 23 June 1912." in llm.requests[2].prompt
     assert run.nodes[0].returned_value == {"answer": "10 December 1815"}
     assert run.nodes[2].evidence_citations[0].document_id == "context-0"
+    # Turns record the dependency values the conversation history carried in.
+    assert run.nodes[0].dependency_values == {}
+    assert run.nodes[2].dependency_values == {
+        "left_date": "10 December 1815",
+        "right_date": "23 June 1912",
+    }
+    # Per-turn traces record the planner-assigned evidence subset they were shown.
+    assert run.nodes[0].supporting_evidence.strategy == "planner_assigned_sources"
+    assert [doc.id for doc in run.nodes[0].supporting_evidence.documents] == ["context-0"]
+    assert [doc.id for doc in run.nodes[2].supporting_evidence.documents] == [
+        "context-0",
+        "context-1",
+    ]
+
+
+async def test_single_prompt_ltm_uses_only_planner_assigned_sources(app_config) -> None:
+    documents = [
+        *_documents(),
+        EvidenceDocument(id="context-2", title="Distractor", text="Totally unrelated content."),
+    ]
+    llm = StubLLM([PARALLEL_PLAN, FINAL_JSON])
+
+    run = await DagQaClient(app_config, llm).ask_least_to_most(
+        "Which person was born earlier?", evidence_documents=documents
+    )
+
+    assert run.status == NodeStatus.succeeded
+    # requests[0] is the planner (sees the full catalog); requests[1] is the
+    # compiled Least-to-Most prompt (only planner-assigned sources per step).
+    ltm_prompt = llm.requests[1].prompt
+    assert "Ada was born on 10 December 1815." in ltm_prompt
+    assert "Turing was born on 23 June 1912." in ltm_prompt
+    # The distractor was assigned to no node, so it never enters the LtM prompt.
+    assert "Totally unrelated content." not in ltm_prompt
+    assert run.nodes[0].supporting_evidence.strategy == "planner_assigned_sources"
+    assert [doc.id for doc in run.nodes[0].supporting_evidence.documents] == [
+        "context-0",
+        "context-1",
+    ]
 
 
 async def test_conversation_json_turn_format_parses_intermediate_answers(app_config) -> None:

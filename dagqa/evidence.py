@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import Any
 
 from dagqa.schemas import DagNode, EvidenceDocument, EvidenceSelection, TaskType
@@ -38,6 +39,77 @@ def select_evidence(
             total_available=len(documents),
             documents=selected_documents,
         )
+    return EvidenceSelection(
+        strategy="all_documents",
+        total_available=len(documents),
+        documents=list(documents),
+    )
+
+
+def _selection_from_ids(
+    document_ids: Iterable[str],
+    documents: list[EvidenceDocument],
+) -> EvidenceSelection | None:
+    """Resolve document IDs to a selection, dropping unknown/duplicate IDs.
+
+    Order follows first appearance in ``document_ids``. Returns ``None`` when no
+    ID resolves to an available document.
+    """
+    by_id = {document.id: document for document in documents}
+    seen: set[str] = set()
+    selected: list[EvidenceDocument] = []
+    for source_id in document_ids:
+        if source_id in by_id and source_id not in seen:
+            seen.add(source_id)
+            selected.append(by_id[source_id])
+    if not selected:
+        return None
+    return EvidenceSelection(
+        strategy="planner_assigned_sources",
+        total_available=len(documents),
+        documents=selected,
+    )
+
+
+def select_planner_sources(
+    node: DagNode,
+    documents: list[EvidenceDocument] | None,
+) -> EvidenceSelection | None:
+    """Resolve a node's planner-assigned source IDs to evidence documents.
+
+    The planner declares, per node, which document IDs supply its supporting
+    evidence. Invented IDs (not among ``documents``) are dropped silently.
+    Returns ``None`` when the node declared no sources or none of them resolve,
+    letting the caller apply its own fallback (e.g. all documents).
+    """
+    if not documents:
+        return None
+    return _selection_from_ids(node.sources, documents)
+
+
+def select_source_union(
+    document_ids: Iterable[str],
+    documents: list[EvidenceDocument] | None,
+) -> EvidenceSelection | None:
+    """Build a selection from the union of document IDs gathered across a plan.
+
+    Used for the final synthesis node/turn, which should see everything the
+    sub-questions relied on. Returns ``None`` when nothing resolves.
+    """
+    if not documents:
+        return None
+    return _selection_from_ids(document_ids, documents)
+
+
+def all_documents_selection(
+    documents: list[EvidenceDocument] | None,
+) -> EvidenceSelection | None:
+    """Build a selection over every available document.
+
+    Fallback used when the planner assigned no resolvable sources to a node.
+    """
+    if not documents:
+        return None
     return EvidenceSelection(
         strategy="all_documents",
         total_available=len(documents),

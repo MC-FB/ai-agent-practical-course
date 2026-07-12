@@ -44,6 +44,7 @@ class DagNode(BaseModel):
     question: str
     operation: Operation
     depends_on: list[str] = Field(default_factory=list)
+    sources: list[str] = Field(default_factory=list)
     prompt: PromptSpec
     input_map: dict[str, str] = Field(default_factory=dict)
     child_output_policy: str | None = None

@@ -60,6 +60,31 @@ async def test_client_ask_uses_planner_then_executor(app_config) -> None:
     assert len(run.nodes) == expected_node_count
 
 
+async def test_planner_receives_evidence_catalog_in_prompt(app_config) -> None:
+    llm = StubLLM(
+        [
+            PARALLEL_PLAN,
+            "10 December 1815",
+            "23 June 1912",
+            '{"answer": "Ada Lovelace"}',
+        ]
+    )
+    documents = [
+        EvidenceDocument(id="context-0", title="Ada Lovelace", text="Ada was born in 1815."),
+    ]
+
+    await DagQaClient(app_config, llm).ask_least_to_most_conversation(
+        "Which person was born earlier?",
+        evidence_documents=documents,
+    )
+
+    # The first LLM call is the planner; its prompt now lists the document catalog.
+    planner_prompt = llm.requests[0].prompt
+    assert "Supporting evidence documents:" in planner_prompt
+    assert "Document ID: context-0" in planner_prompt
+    assert "Ada was born in 1815." in planner_prompt
+
+
 async def test_client_ask_uses_least_to_most_with_evidence(app_config) -> None:
     llm = StubLLM(
         [

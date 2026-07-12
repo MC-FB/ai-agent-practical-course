@@ -1147,7 +1147,14 @@ def _structural_issues(run: Any) -> list[str]:
     final_trace = by_trace.get(run.plan.final_node)
     if "answer" not in final_node.output_schema.get("properties", {}):
         issues.append(f"{final_node.id}: final schema missing answer field")
-    if final_node.depends_on and not (final_trace and final_trace.dependency_values):
+    # The dependency_values check only applies to runs that execute plan nodes
+    # individually; single-prompt LtM runs carry one synthetic "ltm" trace.
+    executed_plan_nodes = set(by_trace) & {node.id for node in run.plan.nodes}
+    if (
+        final_node.depends_on
+        and executed_plan_nodes
+        and not (final_trace and final_trace.dependency_values)
+    ):
         issues.append(f"{final_node.id}: final trace has no dependency_values")
     return issues
 
