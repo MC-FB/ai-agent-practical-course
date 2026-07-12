@@ -21,8 +21,12 @@ class DagQaClient:
     def from_config(cls, path: str | Path) -> DagQaClient:
         return cls(AppConfig.from_file(path))
 
-    async def plan(self, question: str) -> DagPlan:
-        return await self.planner.plan(question)
+    async def plan(
+        self,
+        question: str,
+        evidence_documents: list[EvidenceDocument] | None = None,
+    ) -> DagPlan:
+        return await self.planner.plan(question, evidence_documents)
 
     async def execute(
         self,
@@ -37,7 +41,7 @@ class DagQaClient:
         evidence_documents: list[EvidenceDocument] | None = None,
     ) -> RunTrace:
         """Combined LtM + DAG with self-consistency selection."""
-        plan = await self.plan(question)
+        plan = await self.plan(question, evidence_documents)
         if (
             evidence_documents
             and self.config.planner.planner_mode == "simple"
@@ -52,7 +56,7 @@ class DagQaClient:
         evidence_documents: list[EvidenceDocument] | None = None,
     ) -> RunTrace:
         """Pure node-by-node DAG execution (no LtM)."""
-        plan = await self.plan(question)
+        plan = await self.plan(question, evidence_documents)
         return await self.execute(plan, evidence_documents)
 
     async def ask_least_to_most(
@@ -61,7 +65,7 @@ class DagQaClient:
         evidence_documents: list[EvidenceDocument] | None = None,
     ) -> RunTrace:
         """Pure Least-to-Most execution (no DAG fallback)."""
-        plan = await self.plan(question)
+        plan = await self.plan(question, evidence_documents)
         if evidence_documents and len(plan.nodes) > 1:
             return await self.executor.execute_least_to_most_only(plan, evidence_documents)
         return await self.execute(plan, evidence_documents)
@@ -72,7 +76,7 @@ class DagQaClient:
         evidence_documents: list[EvidenceDocument] | None = None,
     ) -> RunTrace:
         """Least-to-Most as a multi-turn conversation (one sub-question per turn)."""
-        plan = await self.plan(question)
+        plan = await self.plan(question, evidence_documents)
         if evidence_documents and len(plan.nodes) > 1:
             return await self.executor.execute_least_to_most_conversation(plan, evidence_documents)
         return await self.execute(plan, evidence_documents)
