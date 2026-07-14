@@ -2,8 +2,8 @@
 
 DAG QA is a multi-hop question answering prototype for the AI Agents practical
 course. It contains a FastAPI backend, a React/Vite frontend, benchmark tooling
-for HotpotQA-style evaluations, and persistent benchmark result storage under
-`runs/benchmarks`.
+for HotpotQA and MuSiQue-style evaluations, and persistent benchmark result
+storage under `runs/benchmarks`.
 
 ## Requirements
 
@@ -11,7 +11,7 @@ for HotpotQA-style evaluations, and persistent benchmark result storage under
 - `uv`
 - Node.js 20+ and npm
 - Docker Desktop with Docker Compose, if you want to run the containerized setup
-- API credentials in `.env` for live LLM calls
+- API credentials in `.env` for live LLM calls and dataset downloads
 
 Create your local environment file from the example:
 
@@ -19,7 +19,7 @@ Create your local environment file from the example:
 cp .example.env .env
 ```
 
-For the university chair inference service, configure at least:
+For the university chair inference service, configure:
 
 ```bash
 CLUSTER_API_KEY=...
@@ -27,9 +27,26 @@ CLUSTER_API_BASE=http://atknoll32.air.cit.tum.de:3000/inference
 CLUSTER_MODELS_URL=http://atknoll32.air.cit.tum.de:3000/models
 ```
 
-The application can also load the other configs in `configs/`, but current
-benchmark work should use the chair models rather than the older OpenRouter
-configs.
+Other supported `.env` values:
+
+```bash
+# Optional, needed when Hugging Face requires authentication for dataset access.
+HF_TOKEN=...
+
+# Optional, only needed when using configs/azure-openai.yaml.
+AZURE_OPENAI_API_KEY=...
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com
+AZURE_OPENAI_API_VERSION=...
+AZURE_OPENAI_MODEL=...
+
+# Optional application overrides.
+DAGQA_CONFIG=configs/local.yaml
+DAGQA_WEB_DIST=app/web/dist
+```
+
+By default the app uses `configs/local.yaml`, which points at the chair cluster
+and defaults to `mistralai/Mistral-Medium-3.5-128B`. The other configs in
+`configs/` can be selected with `DAGQA_CONFIG`.
 
 ## Start Locally
 
@@ -110,8 +127,8 @@ docker compose --profile test run --rm test
 
 ## Benchmarks
 
-Benchmarks are started through the backend so they appear in the frontend
-Results tab. Start the local app first, then run:
+HotpotQA benchmarks can be started through the backend so they appear in the
+frontend Results tab. Start the local app first, then run:
 
 ```bash
 DAGQA_API_URL=http://127.0.0.1:8000 ./scripts/start_benchmark.sh 30
@@ -129,6 +146,9 @@ Saved/marked rows from the frontend are stored persistently in:
 ```text
 runs/benchmarks/.marked/rows.json
 ```
+
+The Dataset page in the frontend can also start and resume live benchmark runs
+for the supported datasets and reasoning strategies.
 
 ## Documentation
 
