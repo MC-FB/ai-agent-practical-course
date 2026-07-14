@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -44,6 +44,7 @@ class DagNode(BaseModel):
     question: str
     operation: Operation
     depends_on: list[str] = Field(default_factory=list)
+    sources: list[str] = Field(default_factory=list)
     prompt: PromptSpec
     input_map: dict[str, str] = Field(default_factory=dict)
     child_output_policy: str | None = None
@@ -56,9 +57,15 @@ class DagPlan(BaseModel):
     final_node: str
 
 
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+
+
 class LLMRequest(BaseModel):
     system: str
     prompt: str
+    history: list[ChatMessage] = Field(default_factory=list)
     temperature: float = 0.0
     metadata: dict[str, Any] = Field(default_factory=dict)
 

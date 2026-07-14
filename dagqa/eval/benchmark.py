@@ -148,7 +148,9 @@ class BenchmarkResult(BaseModel):
 async def benchmark_hotpotqa(
     client: DagQaClient,
     *,
-    system: Literal["direct_llm", "dag_agent"] = "dag_agent",
+    system: Literal[
+        "direct_llm", "dag_agent", "dag_multi_hop", "dag_least_to_most", "dag_ltm_conversation"
+    ] = "dag_agent",
     limit: int = 100,
     path: str | Path | None = None,
     seed: int | None = None,
@@ -179,7 +181,9 @@ async def benchmark_dataset(
     client: DagQaClient,
     *,
     dataset: str = "hotpotqa",
-    system: Literal["direct_llm", "dag_agent"] = "dag_agent",
+    system: Literal[
+        "direct_llm", "dag_agent", "dag_multi_hop", "dag_least_to_most", "dag_ltm_conversation"
+    ] = "dag_agent",
     limit: int = 100,
     path: str | Path | None = None,
     seed: int | None = None,
@@ -448,7 +452,20 @@ async def _run_example(  # noqa: PLR0912, PLR0915
             structural_issues = []
             structural_failure = False
         else:
-            run = await client.ask(example.question, evidence_documents=example.context)
+            if system == "dag_multi_hop":
+                run = await client.ask_multi_hop(
+                    example.question, evidence_documents=example.context
+                )
+            elif system == "dag_least_to_most":
+                run = await client.ask_least_to_most(
+                    example.question, evidence_documents=example.context
+                )
+            elif system == "dag_ltm_conversation":
+                run = await client.ask_least_to_most_conversation(
+                    example.question, evidence_documents=example.context
+                )
+            else:
+                run = await client.ask(example.question, evidence_documents=example.context)
             evidence_metrics = _evaluate_evidence_citations(run, example.supporting_facts)
             raw_prediction = _extract_answer(run.final_answer)
             repair_llm_calls = 0
@@ -1160,7 +1177,14 @@ def _structural_issues(run: Any) -> list[str]:
     final_trace = by_trace.get(run.plan.final_node)
     if "answer" not in final_node.output_schema.get("properties", {}):
         issues.append(f"{final_node.id}: final schema missing answer field")
-    if final_node.depends_on and not (final_trace and final_trace.dependency_values):
+    # The dependency_values check only applies to runs that execute plan nodes
+    # individually; single-prompt LtM runs carry one synthetic "ltm" trace.
+    executed_plan_nodes = set(by_trace) & {node.id for node in run.plan.nodes}
+    if (
+        final_node.depends_on
+        and executed_plan_nodes
+        and not (final_trace and final_trace.dependency_values)
+    ):
         issues.append(f"{final_node.id}: final trace has no dependency_values")
     return issues
 

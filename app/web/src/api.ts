@@ -58,6 +58,7 @@ export type DagNode = {
   operation: string;
   question: string;
   depends_on: string[];
+  sources: string[];
   prompt: {
     system: string;
     user_template: string;

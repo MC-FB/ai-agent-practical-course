@@ -1,0 +1,1001 @@
+{
+  "run_id": "8fa5215e-df62-40a6-ae47-ddec13aff355",
+  "name": null,
+  "comparison_group_id": "3ba37c04-4852-485d-b097-fae901fce546",
+  "system": "dag_least_to_most",
+  "limit": 2,
+  "provider": "cluster",
+  "model": "google/gemma-4-31B-it",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "subset": "validation",
+  "dataset_size": 7405,
+  "seed": 2042884045,
+  "max_parallel_examples": 4,
+  "max_nodes": 10,
+  "max_depth": 3,
+  "created_at": "2026-07-14T15:36:40Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260714T153640Z-8fa5215e-df62-40a6-ae47-ddec13aff355.json",
+  "total_runtime_ms": 8221.238999991328,
+  "records": [
+    {
+      "id": "5adfe0de55429925eb1afae9",
+      "question": "Who produced a song, written and performed by Paul McCartney and Michael Jackson, which was included on an album titled \"Pipes of Peace\"?",
+      "gold_answer": "George Martin",
+      "prediction": "George Martin",
+      "raw_prediction": null,
+      "metric_scores": {
+        "exact_match": 1.0,
+        "f1": 1.0,
+        "cosine_sim": 1.0,
+        "context_cosine_sim": 1.0,
+        "mini_l6_cosine_sim": 1.0,
+        "mini_l6_context_cosine_sim": 1.0,
+        "multi_qa_mpnet_cosine_sim": 1.0,
+        "gte_base_cosine_sim": 1.0,
+        "bge_base_cosine_sim": 1.0,
+        "e5_base_cosine_sim": 1.0,
+        "bleu": 1.0,
+        "bigram_f1": 1.0,
+        "chrf": 1.0,
+        "rouge_l": 1.0,
+        "meteor": 1.0
+      },
+      "latency_ms": 6472.596118997899,
+      "llm_call_count": 2,
+      "llm_retry_count": 0,
+      "node_count": 2,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "The Girl Is Mine",
+          "sentence_index": 0
+        },
+        {
+          "title": "The Girl Is Mine",
+          "sentence_index": 4
+        },
+        {
+          "title": "Say Say Say",
+          "sentence_index": 0
+        },
+        {
+          "title": "Say Say Say",
+          "sentence_index": 1
+        }
+      ],
+      "evidence_citation_count": 1,
+      "correct_evidence_citation_count": 1,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 0.5,
+      "run_trace": {
+        "run_id": "d995f5ca-8939-4920-a71e-4b3e2a1ee4b9",
+        "question": "Who produced a song, written and performed by Paul McCartney and Michael Jackson, which was included on an album titled \"Pipes of Peace\"?",
+        "plan": {
+          "question": "Who produced a song, written and performed by Paul McCartney and Michael Jackson, which was included on an album titled \"Pipes of Peace\"?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Which song written and performed by Paul McCartney and Micha",
+              "task_type": "fact_lookup",
+              "question": "Which song written and performed by Paul McCartney and Michael Jackson was included on the album titled \"Pipes of Peace\"?",
+              "operation": "answer",
+              "depends_on": [],
+              "sources": [
+                "context-1",
+                "context-5",
+                "context-6"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}"
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "reasoning"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise answer to this sub-question."
+                  },
+                  "reasoning": {
+                    "type": "string",
+                    "description": "Brief explanation of why this answer was selected."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Who produced the song {q1.answer}?",
+              "task_type": "synthesis",
+              "question": "Who produced the song {q1.answer}?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q1"
+              ],
+              "sources": [
+                "context-6"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}\n{dependencies}"
+              },
+              "input_map": {
+                "q1_answer": "q1.answer"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "answer_type",
+                  "answer_source_span"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise final answer to the original user question."
+                  },
+                  "answer_type": {
+                    "type": "string",
+                    "description": "Answer type requested by the original question."
+                  },
+                  "answer_source_span": {
+                    "type": "string",
+                    "description": "Shortest evidence span supporting the final answer."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q2"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "ltm"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "ltm",
+            "label": "Least-to-Most execution",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": null,
+            "rendered_prompt": "Question: Who produced a song, written and performed by Paul McCartney and Michael Jackson, which was included on an album titled \"Pipes of Peace\"?\n\nSolve step by step. For each step, find the answer in the evidence before moving to the next step.\n\n  Step 1: Which song written and performed by Paul McCartney and Michael Jackson was included on the album titled \"Pipes of Peace\"?\n  Final step: Using the above answers, answer the original question.\n\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below. Never invent document IDs, titles, or sentence indices; use only the document IDs and sentence numbers printed in this prompt.\n\nDocument ID: context-0\nTitle: Billie Jean\n  (0) \"Billie Jean\" is a song by American singer Michael Jackson.\n  (1)  It is the second single from the singer's sixth studio album, \"Thriller\" (1982).\n  (2)  It was written and composed by Jackson and produced by Jackson and Quincy Jones.\n  (3)  There are contradictory claims on the meaning of the song's lyrics.\n  (4)  One suggests that they are derived from a real-life experience, in which a female fan claimed that Jackson (or one of his brothers) had fathered her twins.\n  (5)  However, Michael Jackson stated that \"Billie Jean\" was based on groupies he had encountered.\n  (6)  The song is well known for its distinctive bassline played by Louis Johnson, the standard drum beat heard in the beginning, the repetition of \"Billie Jean is not my lover\" towards the end of the song and Michael Jackson's vocal hiccups.\n  (7)  The song was mixed 91 times by audio engineer Bruce Swedien before it was finalized, though he reportedly went with the second mix as the final product.\n\nDocument ID: context-1\nTitle: Pipes of Peace\n  (0) Pipes of Peace is the fourth studio album by English singer-songwriter Paul McCartney using his own name, released in 1983.\n  (1)  As the follow-up to the popular \"Tug of War\", the album came close to matching the commercial success of its predecessor in Britain but peaked only at number 15 on America's \"Billboard\" 200 albums chart.\n  (2)  While \"Pipes of Peace\" was the source of international hit singles such as \"Say Say Say\" (recorded with Michael Jackson) and the title track, the critical response to the album was less favourable than that afforded to \"Tug of War\".\n\nDocument ID: context-2\nTitle: Girlfriend (Paul McCartney song)\n  (0) \"Girlfriend\" is a song written by Paul McCartney.\n  (1)  McCartney thought of the song as one that Michael Jackson might like to record, and mentioned this to Jackson at a party in Hollywood.\n  (2)  Jackson had stated in interviews with the music press in the 1970s that he was a fan of The Beatles and the chance to record a McCartney original helped to inspire his next project.\n  (3)  However, McCartney ended up recording it himself with his band Wings, and it was issued in 1978 on the album \"London Town\".\n  (4)  Subsequently, it was suggested by Quincy Jones as a possible track for Jackson to record for his 1979 album \"Off the Wall\".\n  (5)  Jones was unaware that the song had been written for Jackson in the first place.\n  (6)  Jackson's recording omitted the middle eight heard in McCartney's version.\n  (7)  It was issued exclusively in the UK in 1980, as the fifth and final single from the \"Off the Wall\" album.\n  (8)  This proved to be another hit single for Jackson and one of his first recordings of a Paul McCartney song.\n\nDocument ID: context-3\nTitle: Pipes of Peace (song)\n  (0) \"Pipes of Peace\" is a song written by Paul McCartney, which was first released on his album of the same name on 31 October 1983.\n  (1)  It was also released as a single on 5 December 1983 and reached #1 on the UK singles charts for two weeks.\n  (2)  The Song also reached #1 on the Irish Single Charts.\n\nDocument ID: context-4\nTitle: This Time Around (Michael Jackson song)\n  (0) \"This Time Around\" is a song by American recording artist and songwriter Michael Jackson that features the vocals from rapper The Notorious B.I.G. The song appears on Jackson's ninth studio album, entitled \"\", which was released in 1995 as a two-disc set.\n  (1)  It is released as the fourth single from that album.\n  (2)  The song and lyrics were written by Michael Jackson, while the music was composed by Dallas Austin, Bruce Swedien and Rene Moore.\n  (3)  Dallas Austin and Michael Jackson produced the song, while Bruce Swedien and Ren\u00e9 Moore served as co-producers.\n  (4)  The song's lyrics details a musician's problems with being famous and dealing with stardom.\n  (5)  In December 1995, the track was released as a promotional single in the United States only, containing a radio edit and remixes.\n  (6)  \"This Time Around\" had a good chart performance, having charted solely due to radio airplay throughout the country.\n  (7)  The song received positive reviews from contemporary music critics.\n\nDocument ID: context-5\nTitle: The Girl Is Mine\n  (0) \"The Girl Is Mine\" is a song recorded by Michael Jackson and Paul McCartney.\n  (1)  The track was written by Jackson and produced by Jackson and Quincy Jones.\n  (2)  It was released as the first single for Jackson's sixth solo album, \"Thriller\" (1982).\n  (3)  The song was recorded at Westlake Studios, Los Angeles, from April 14 to 16, 1982.\n  (4)  The year before, Jackson and McCartney had recorded \"Say Say Say\" and \"The Man\" for the latter's fifth solo album, \"Pipes of Peace\" (1983).\n  (5)  Although it was released as a single, Jackson never performed the song live.\n\nDocument ID: context-6\nTitle: Say Say Say\n  (0) \"Say Say Say\" is a song written and performed by Paul McCartney and Michael Jackson, released in 1983.\n  (1)  The track was produced by George Martin for McCartney's album, \"Pipes of Peace\".\n  (2)  The song was recorded during production of McCartney's 1982 \"Tug of War\" album, about a year before the release of \"The Girl Is Mine\", the pair's first duet from Jackson's album \"Thriller\" (1982).\n\nDocument ID: context-7\nTitle: Press to Play\n  (0) Press to Play is the sixth post-Beatles studio album by the English musician Paul McCartney (outside of Wings' body of work), released in August 1986.\n  (1)  It was McCartney's first album of entirely new music since \"Pipes of Peace\" in 1983, and his first solo album to be issued internationally by EMI following a six-year alliance with Columbia Records in the United States and Canada.\n  (2)  Keen to re-establish himself after his poorly received 1984 musical film \"Give My Regards to Broad Street\", McCartney enlisted producer Hugh Padgham to give the album a contemporary sound.\n\nDocument ID: context-8\nTitle: Just a Little Bit of You\n  (0) \"Just a Little Bit of You\" is a song from the 1975 Michael Jackson album titled \"Forever, Michael\".\n  (1)  The album was Jackson's fourth and was released when he was 16 years old.\n  (2)  Produced by Brian Holland, \"Just a Little Bit of You\" became Jackson's biggest solo hit in three years reaching #23 on the U.S. Pop Singles chart and #4 on the Soul Singles chart.\n\nDocument ID: context-9\nTitle: Can't Let Her Get Away\n  (0) \"Can\u2019t Let Her Get Away\" is a song by Michael Jackson produced by Michael Jackson and Teddy Riley.\n  (1)  The song is the 6th track on Jackson\u2019s 8th studio album \"Dangerous\".\n  (2)  It was recorded and mixed by Bruce Swedien and Teddy Riley in 1991.\n  (3)  It was written and composed by Michael Jackson and Teddy Riley.\n  (4)  The song is about a failing relationship between Michael and his lover.\n  (5)  He does everything to satisfy his lover but to no avail, she breaks up with him.\n  (6)  Michael is battling within himself throughout the song and he finally decides that he can\u2019t let her get away.\n  (7)  The song was re-recorded in 1993 in promote of the movie The Meteor Man.\n  (8) It was also released as the albm's promo single.\n\nInstructions:\n- For each step, find the specific entity, value, or fact in the evidence.\n- Copy exact names, numbers, and dates from the evidence.\n- The final answer must be a short, specific value (a name, number, place, date, or entity) \u2014 not a sentence or explanation.\n- If the evidence does not contain the answer, still give your best short answer based on what is available.\n- Never return 'not determinable' or 'unsupported' \u2014 always return a concrete answer.\n\nReturn JSON: {\"steps\": \"Step 1: ... Step 2: ...\", \"answer\": \"short final answer\", \"_evidence_citations\": [{\"document_id\": \"...\", \"title\": \"...\", \"sentence_indices\": [0], \"fact\": \"...\"}]}\nReturn JSON only.",
+            "raw_response": "```json\n{\n \"steps\": \"Step 1: The song written and performed by Paul McCartney and Michael Jackson included on the album titled \\\"Pipes of Peace\\\" is \\\"Say Say Say\\\".\",\n \"answer\": \"George Martin\",\n \"_evidence_citations\": [\n  {\n   \"document_id\": \"context-6\",\n   \"title\": \"Say Say Say\",\n   \"sentence_indices\": [\n    0,\n    1\n   ],\n   \"fact\": \"\\\"Say Say Say\\\" is a song written and performed by Paul McCartney and Michael Jackson, released in 1983. The track was produced by George Martin for McCartney's album, \\\"Pipes of Peace\\\".\"\n  }\n ]\n}\n```",
+            "parsed_output": {
+              "steps": "Step 1: The song written and performed by Paul McCartney and Michael Jackson included on the album titled \"Pipes of Peace\" is \"Say Say Say\".",
+              "answer": "George Martin",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-6",
+                  "title": "Say Say Say",
+                  "sentence_indices": [
+                    0,
+                    1
+                  ],
+                  "fact": "\"Say Say Say\" is a song written and performed by Paul McCartney and Michael Jackson, released in 1983. The track was produced by George Martin for McCartney's album, \"Pipes of Peace\"."
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "George Martin"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Billie Jean",
+                  "text": "\"Billie Jean\" is a song by American singer Michael Jackson. It is the second single from the singer's sixth studio album, \"Thriller\" (1982). It was written and composed by Jackson and produced by Jackson and Quincy Jones. There are contradictory claims on the meaning of the song's lyrics. One suggests that they are derived from a real-life experience, in which a female fan claimed that Jackson (or one of his brothers) had fathered her twins. However, Michael Jackson stated that \"Billie Jean\" was based on groupies he had encountered. The song is well known for its distinctive bassline played by Louis Johnson, the standard drum beat heard in the beginning, the repetition of \"Billie Jean is not my lover\" towards the end of the song and Michael Jackson's vocal hiccups. The song was mixed 91 times by audio engineer Bruce Swedien before it was finalized, though he reportedly went with the second mix as the final product.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "\"Billie Jean\" is a song by American singer Michael Jackson.",
+                      " It is the second single from the singer's sixth studio album, \"Thriller\" (1982).",
+                      " It was written and composed by Jackson and produced by Jackson and Quincy Jones.",
+                      " There are contradictory claims on the meaning of the song's lyrics.",
+                      " One suggests that they are derived from a real-life experience, in which a female fan claimed that Jackson (or one of his brothers) had fathered her twins.",
+                      " However, Michael Jackson stated that \"Billie Jean\" was based on groupies he had encountered.",
+                      " The song is well known for its distinctive bassline played by Louis Johnson, the standard drum beat heard in the beginning, the repetition of \"Billie Jean is not my lover\" towards the end of the song and Michael Jackson's vocal hiccups.",
+                      " The song was mixed 91 times by audio engineer Bruce Swedien before it was finalized, though he reportedly went with the second mix as the final product."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Pipes of Peace",
+                  "text": "Pipes of Peace is the fourth studio album by English singer-songwriter Paul McCartney using his own name, released in 1983. As the follow-up to the popular \"Tug of War\", the album came close to matching the commercial success of its predecessor in Britain but peaked only at number 15 on America's \"Billboard\" 200 albums chart. While \"Pipes of Peace\" was the source of international hit singles such as \"Say Say Say\" (recorded with Michael Jackson) and the title track, the critical response to the album was less favourable than that afforded to \"Tug of War\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Pipes of Peace is the fourth studio album by English singer-songwriter Paul McCartney using his own name, released in 1983.",
+                      " As the follow-up to the popular \"Tug of War\", the album came close to matching the commercial success of its predecessor in Britain but peaked only at number 15 on America's \"Billboard\" 200 albums chart.",
+                      " While \"Pipes of Peace\" was the source of international hit singles such as \"Say Say Say\" (recorded with Michael Jackson) and the title track, the critical response to the album was less favourable than that afforded to \"Tug of War\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Girlfriend (Paul McCartney song)",
+                  "text": "\"Girlfriend\" is a song written by Paul McCartney. McCartney thought of the song as one that Michael Jackson might like to record, and mentioned this to Jackson at a party in Hollywood. Jackson had stated in interviews with the music press in the 1970s that he was a fan of The Beatles and the chance to record a McCartney original helped to inspire his next project. However, McCartney ended up recording it himself with his band Wings, and it was issued in 1978 on the album \"London Town\". Subsequently, it was suggested by Quincy Jones as a possible track for Jackson to record for his 1979 album \"Off the Wall\". Jones was unaware that the song had been written for Jackson in the first place. Jackson's recording omitted the middle eight heard in McCartney's version. It was issued exclusively in the UK in 1980, as the fifth and final single from the \"Off the Wall\" album. This proved to be another hit single for Jackson and one of his first recordings of a Paul McCartney song.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "\"Girlfriend\" is a song written by Paul McCartney.",
+                      " McCartney thought of the song as one that Michael Jackson might like to record, and mentioned this to Jackson at a party in Hollywood.",
+                      " Jackson had stated in interviews with the music press in the 1970s that he was a fan of The Beatles and the chance to record a McCartney original helped to inspire his next project.",
+                      " However, McCartney ended up recording it himself with his band Wings, and it was issued in 1978 on the album \"London Town\".",
+                      " Subsequently, it was suggested by Quincy Jones as a possible track for Jackson to record for his 1979 album \"Off the Wall\".",
+                      " Jones was unaware that the song had been written for Jackson in the first place.",
+                      " Jackson's recording omitted the middle eight heard in McCartney's version.",
+                      " It was issued exclusively in the UK in 1980, as the fifth and final single from the \"Off the Wall\" album.",
+                      " This proved to be another hit single for Jackson and one of his first recordings of a Paul McCartney song."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Pipes of Peace (song)",
+                  "text": "\"Pipes of Peace\" is a song written by Paul McCartney, which was first released on his album of the same name on 31 October 1983. It was also released as a single on 5 December 1983 and reached #1 on the UK singles charts for two weeks. The Song also reached #1 on the Irish Single Charts.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "\"Pipes of Peace\" is a song written by Paul McCartney, which was first released on his album of the same name on 31 October 1983.",
+                      " It was also released as a single on 5 December 1983 and reached #1 on the UK singles charts for two weeks.",
+                      " The Song also reached #1 on the Irish Single Charts."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "This Time Around (Michael Jackson song)",
+                  "text": "\"This Time Around\" is a song by American recording artist and songwriter Michael Jackson that features the vocals from rapper The Notorious B.I.G. The song appears on Jackson's ninth studio album, entitled \"\", which was released in 1995 as a two-disc set. It is released as the fourth single from that album. The song and lyrics were written by Michael Jackson, while the music was composed by Dallas Austin, Bruce Swedien and Rene Moore. Dallas Austin and Michael Jackson produced the song, while Bruce Swedien and Ren\u00e9 Moore served as co-producers. The song's lyrics details a musician's problems with being famous and dealing with stardom. In December 1995, the track was released as a promotional single in the United States only, containing a radio edit and remixes. \"This Time Around\" had a good chart performance, having charted solely due to radio airplay throughout the country. The song received positive reviews from contemporary music critics.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "\"This Time Around\" is a song by American recording artist and songwriter Michael Jackson that features the vocals from rapper The Notorious B.I.G. The song appears on Jackson's ninth studio album, entitled \"\", which was released in 1995 as a two-disc set.",
+                      " It is released as the fourth single from that album.",
+                      " The song and lyrics were written by Michael Jackson, while the music was composed by Dallas Austin, Bruce Swedien and Rene Moore.",
+                      " Dallas Austin and Michael Jackson produced the song, while Bruce Swedien and Ren\u00e9 Moore served as co-producers.",
+                      " The song's lyrics details a musician's problems with being famous and dealing with stardom.",
+                      " In December 1995, the track was released as a promotional single in the United States only, containing a radio edit and remixes.",
+                      " \"This Time Around\" had a good chart performance, having charted solely due to radio airplay throughout the country.",
+                      " The song received positive reviews from contemporary music critics."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "The Girl Is Mine",
+                  "text": "\"The Girl Is Mine\" is a song recorded by Michael Jackson and Paul McCartney. The track was written by Jackson and produced by Jackson and Quincy Jones. It was released as the first single for Jackson's sixth solo album, \"Thriller\" (1982). The song was recorded at Westlake Studios, Los Angeles, from April 14 to 16, 1982. The year before, Jackson and McCartney had recorded \"Say Say Say\" and \"The Man\" for the latter's fifth solo album, \"Pipes of Peace\" (1983). Although it was released as a single, Jackson never performed the song live.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "\"The Girl Is Mine\" is a song recorded by Michael Jackson and Paul McCartney.",
+                      " The track was written by Jackson and produced by Jackson and Quincy Jones.",
+                      " It was released as the first single for Jackson's sixth solo album, \"Thriller\" (1982).",
+                      " The song was recorded at Westlake Studios, Los Angeles, from April 14 to 16, 1982.",
+                      " The year before, Jackson and McCartney had recorded \"Say Say Say\" and \"The Man\" for the latter's fifth solo album, \"Pipes of Peace\" (1983).",
+                      " Although it was released as a single, Jackson never performed the song live."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Say Say Say",
+                  "text": "\"Say Say Say\" is a song written and performed by Paul McCartney and Michael Jackson, released in 1983. The track was produced by George Martin for McCartney's album, \"Pipes of Peace\". The song was recorded during production of McCartney's 1982 \"Tug of War\" album, about a year before the release of \"The Girl Is Mine\", the pair's first duet from Jackson's album \"Thriller\" (1982).",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "\"Say Say Say\" is a song written and performed by Paul McCartney and Michael Jackson, released in 1983.",
+                      " The track was produced by George Martin for McCartney's album, \"Pipes of Peace\".",
+                      " The song was recorded during production of McCartney's 1982 \"Tug of War\" album, about a year before the release of \"The Girl Is Mine\", the pair's first duet from Jackson's album \"Thriller\" (1982)."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Press to Play",
+                  "text": "Press to Play is the sixth post-Beatles studio album by the English musician Paul McCartney (outside of Wings' body of work), released in August 1986. It was McCartney's first album of entirely new music since \"Pipes of Peace\" in 1983, and his first solo album to be issued internationally by EMI following a six-year alliance with Columbia Records in the United States and Canada. Keen to re-establish himself after his poorly received 1984 musical film \"Give My Regards to Broad Street\", McCartney enlisted producer Hugh Padgham to give the album a contemporary sound.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Press to Play is the sixth post-Beatles studio album by the English musician Paul McCartney (outside of Wings' body of work), released in August 1986.",
+                      " It was McCartney's first album of entirely new music since \"Pipes of Peace\" in 1983, and his first solo album to be issued internationally by EMI following a six-year alliance with Columbia Records in the United States and Canada.",
+                      " Keen to re-establish himself after his poorly received 1984 musical film \"Give My Regards to Broad Street\", McCartney enlisted producer Hugh Padgham to give the album a contemporary sound."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Just a Little Bit of You",
+                  "text": "\"Just a Little Bit of You\" is a song from the 1975 Michael Jackson album titled \"Forever, Michael\". The album was Jackson's fourth and was released when he was 16 years old. Produced by Brian Holland, \"Just a Little Bit of You\" became Jackson's biggest solo hit in three years reaching #23 on the U.S. Pop Singles chart and #4 on the Soul Singles chart.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "\"Just a Little Bit of You\" is a song from the 1975 Michael Jackson album titled \"Forever, Michael\".",
+                      " The album was Jackson's fourth and was released when he was 16 years old.",
+                      " Produced by Brian Holland, \"Just a Little Bit of You\" became Jackson's biggest solo hit in three years reaching #23 on the U.S. Pop Singles chart and #4 on the Soul Singles chart."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Can't Let Her Get Away",
+                  "text": "\"Can\u2019t Let Her Get Away\" is a song by Michael Jackson produced by Michael Jackson and Teddy Riley. The song is the 6th track on Jackson\u2019s 8th studio album \"Dangerous\". It was recorded and mixed by Bruce Swedien and Teddy Riley in 1991. It was written and composed by Michael Jackson and Teddy Riley. The song is about a failing relationship between Michael and his lover. He does everything to satisfy his lover but to no avail, she breaks up with him. Michael is battling within himself throughout the song and he finally decides that he can\u2019t let her get away. The song was re-recorded in 1993 in promote of the movie The Meteor Man.It was also released as the albm's promo single.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "\"Can\u2019t Let Her Get Away\" is a song by Michael Jackson produced by Michael Jackson and Teddy Riley.",
+                      " The song is the 6th track on Jackson\u2019s 8th studio album \"Dangerous\".",
+                      " It was recorded and mixed by Bruce Swedien and Teddy Riley in 1991.",
+                      " It was written and composed by Michael Jackson and Teddy Riley.",
+                      " The song is about a failing relationship between Michael and his lover.",
+                      " He does everything to satisfy his lover but to no avail, she breaks up with him.",
+                      " Michael is battling within himself throughout the song and he finally decides that he can\u2019t let her get away.",
+                      " The song was re-recorded in 1993 in promote of the movie The Meteor Man.",
+                      "It was also released as the albm's promo single."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-6",
+                "title": "Say Say Say",
+                "sentence_indices": [
+                  0,
+                  1
+                ],
+                "fact": "\"Say Say Say\" is a song written and performed by Paul McCartney and Michael Jackson, released in 1983. The track was produced by George Martin for McCartney's album, \"Pipes of Peace\"."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-6",
+                  "title": "Say Say Say",
+                  "sentence_indices": [
+                    0,
+                    1
+                  ],
+                  "fact": "\"Say Say Say\" is a song written and performed by Paul McCartney and Michael Jackson, released in 1983. The track was produced by George Martin for McCartney's album, \"Pipes of Peace\"."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Say Say Say",
+                    "sentence_index": 0
+                  },
+                  {
+                    "title": "Say Say Say",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": null,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "George Martin"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 2463.218074000906,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "google/gemma-4-31B-it",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 180.0,
+            "max_retries": 8,
+            "retry_initial_delay_seconds": 2.0,
+            "retry_max_delay_seconds": 120.0
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1,
+            "planner_mode": "simple"
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false,
+            "ltm_conversation_turn_format": "text"
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "empty_prediction_retries": 1,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Which song written and performed by Paul McCartney and Micha\\nfact_lookup\\npending\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: Who produced the song {q1.answer}?\\nsynthesis\\npending\"]\n  click q2 dagqaSelectGraphNode\n  q1 --> q2"
+      },
+      "error": null,
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0
+    },
+    {
+      "id": "5a790f5e55429970f5fffe40",
+      "question": "What date did the movement Hans Knirsch was an activist for officially gain traction?",
+      "gold_answer": "November 15, 1903",
+      "prediction": "November 15, 1903",
+      "raw_prediction": null,
+      "metric_scores": {
+        "exact_match": 1.0,
+        "f1": 1.0,
+        "cosine_sim": 1.0,
+        "context_cosine_sim": 1.0,
+        "mini_l6_cosine_sim": 1.0,
+        "mini_l6_context_cosine_sim": 1.0,
+        "multi_qa_mpnet_cosine_sim": 1.0,
+        "gte_base_cosine_sim": 1.0,
+        "bge_base_cosine_sim": 1.0,
+        "e5_base_cosine_sim": 1.0,
+        "bleu": 1.0,
+        "bigram_f1": 1.0,
+        "chrf": 1.0,
+        "rouge_l": 1.0,
+        "meteor": 1.0
+      },
+      "latency_ms": 7699.755408000783,
+      "llm_call_count": 2,
+      "llm_retry_count": 0,
+      "node_count": 3,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Hans Knirsch",
+          "sentence_index": 0
+        },
+        {
+          "title": "Austrian National Socialism",
+          "sentence_index": 0
+        },
+        {
+          "title": "Austrian National Socialism",
+          "sentence_index": 1
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 0.6666666666666666,
+      "run_trace": {
+        "run_id": "51e7a5cd-0b97-4184-92b4-0f7f134b1422",
+        "question": "What date did the movement Hans Knirsch was an activist for officially gain traction?",
+        "plan": {
+          "question": "What date did the movement Hans Knirsch was an activist for officially gain traction?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "What movement was Hans Knirsch an activist for?",
+              "task_type": "fact_lookup",
+              "question": "What movement was Hans Knirsch an activist for?",
+              "operation": "answer",
+              "depends_on": [],
+              "sources": [
+                "context-2"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}"
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "reasoning"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise answer to this sub-question."
+                  },
+                  "reasoning": {
+                    "type": "string",
+                    "description": "Brief explanation of why this answer was selected."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "On what date did the movement {q1.answer} officially gain tr",
+              "task_type": "fact_lookup",
+              "question": "On what date did the movement {q1.answer} officially gain traction (take a concrete form)?",
+              "operation": "answer",
+              "depends_on": [
+                "q1"
+              ],
+              "sources": [
+                "context-8"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}\n{dependencies}"
+              },
+              "input_map": {
+                "q1_answer": "q1.answer"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "reasoning"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise answer to this sub-question."
+                  },
+                  "reasoning": {
+                    "type": "string",
+                    "description": "Brief explanation of why this answer was selected."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q3",
+              "label": "What date did the movement Hans Knirsch was an activist for ",
+              "task_type": "synthesis",
+              "question": "What date did the movement Hans Knirsch was an activist for officially gain traction?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q2"
+              ],
+              "sources": [
+                "context-2",
+                "context-8"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}\n{dependencies}"
+              },
+              "input_map": {
+                "q2_answer": "q2.answer"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "answer_type",
+                  "answer_source_span"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise final answer to the original user question."
+                  },
+                  "answer_type": {
+                    "type": "string",
+                    "description": "Answer type requested by the original question."
+                  },
+                  "answer_source_span": {
+                    "type": "string",
+                    "description": "Shortest evidence span supporting the final answer."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q3"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "ltm"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "ltm",
+            "label": "Least-to-Most execution",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": null,
+            "rendered_prompt": "Question: What date did the movement Hans Knirsch was an activist for officially gain traction?\n\nSolve step by step. For each step, find the answer in the evidence before moving to the next step.\n\n  Step 1: What movement was Hans Knirsch an activist for?\n  Step 2: On what date did the movement {q1.answer} officially gain traction (take a concrete form)?\n  Final step: Using the above answers, answer the original question.\n\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below. Never invent document IDs, titles, or sentence indices; use only the document IDs and sentence numbers printed in this prompt.\n\nDocument ID: context-0\nTitle: Micro venture capital\n  (0) Micro venture capital is money invested to seed early-stage emerging companies with amounts of finance that is typically less than that of traditional venture capital.\n  (1)  In contrast to traditional venture capital which is money used to invest in companies looking to fund growth (also referred to as a Series A round of funding), micro venture capital consists of smaller seed investments, typically between $25K to $500K, in companies that have yet to gain traction.\n  (2)  In the United States, the number of micro venture capital firms have continued to rise rapidly over the last 5 years, and have become an important source of finance for startup companies.\n\nDocument ID: context-1\nTitle: Xerox 500 series\n  (0) The Xerox 500 series was a line of computers from Xerox Data Systems (XDS) introduced in the early 1970s as backward-compatible upgrades for the Sigma series machines.\n  (1)  The systems had failed to gain traction by the time Xerox sold its Data Systems Division in 1975.\n  (2)  The buyer, Honeywell, Inc., continued to support existing 500-series systems until 1984 but discontinued manufacturing.\n\nDocument ID: context-2\nTitle: Hans Knirsch\n  (0) Hans Knirsch (September 14, 1877, Triebendorf \u2013 December 6, 1933, Duchcov) was an Austro-German activist from Moravia for Austrian National Socialism.\n  (1)  After the breakup of the Austro-Hungarian Empire, he led the original party in Bohemia, called the Sudeten German National Socialist Party.\n  (2)  Together with Rudolf Jung and Hans Krebs, he was one of the original core of National Socialists that remained in the Nazi Party after 1933.\n\nDocument ID: context-3\nTitle: Bent edge\n  (0) Bent edge or curved edge was an offshoot of hardcore punk that was formed to be a counter-movement to straight edge at the time straight edge was starting to gain traction and support.\n  (1)  Bent edge was also part of a rising anti-Dischord sentiment among many people in the punk scene.\n\nDocument ID: context-4\nTitle: LaserDisc\n  (0) LaserDisc (abbreviated as LD) is a home video format and the first commercial optical disc storage medium, initially licensed, sold and marketed as MCA DiscoVision in North America in 1978.\n  (1)  Although the format was capable of offering higher-quality video and audio than its consumer rivals, VHS and Betamax videotape, LaserDisc never managed to gain widespread use in North America, largely due to high costs for the players and video titles themselves and the inability to record TV programs.\n  (2)  It was not a popular format in Europe and Australia when first released but eventually did gain traction in these regions to become popular in the 1990s.\n  (3)  By contrast, the format was much more popular in Japan and in the more affluent regions of Southeast Asia, such as Hong Kong, Singapore and Malaysia, and was the prevalent rental video medium in Hong Kong during the 1990s.\n  (4)  Its superior video and audio quality made it a popular choice among videophiles and film enthusiasts during its lifespan.\n  (5)  The technologies and concepts behind LaserDisc were the foundation for later optical disc formats including Compact Disc (CD), DVD and Blu-ray (BD).\n\nDocument ID: context-5\nTitle: Multimodality\n  (0) In its most basic sense, multimodality is a theory of communication and social semiotics.\n  (1)  Multimodality describes communication practices in terms of the textual, aural, linguistic, spatial, and visual resources - or modes - used to compose messages.\n  (2)  Where media are concerned, multimodality is the use of several modes (media) to create a single artifact.\n  (3)  The collection of these modes, or elements, contributes to how multimodality affects different rhetorical situations, or opportunities for increasing an audience's reception of an idea or concept.\n  (4)  Everything from the placement of images to the organization of the content creates meaning.\n  (5)  This is the result of a shift from isolated text being relied on as the primary source of communication, to the image being utilized more frequently in the digital age.\n  (6)  While multimodality as an area of academic study did not gain traction until the twentieth century, all communication, literacy, and composing practices are and always have been multimodal.\n\nDocument ID: context-6\nTitle: David Duke presidential campaign, 1988\n  (0) David Duke, a Grand Wizard in the Ku Klux Klan and notable perennial candidate, was a candidate for President of the United States in the 1988 election.\n  (1)  His run was notable in that after failing to gain traction in the Democratic primaries he switched and became the candidate for the Populist Party and he won the 1988 New Hampshire Vice-Presidential primary.\n\nDocument ID: context-7\nTitle: Alexander McCormick Sturm\n  (0) Alexander McCormick \"Alex\" Sturm (June 23, 1923 \u2013 November 16, 1951) was an American artist, author, and entrepreneur who co-founded in 1949, the American firearm maker, Sturm, Ruger & Co. Sturm provided the start-up money and designed the Germanic heraldic eagle that is found on Ruger guns.\n  (1)  He was the husband of Paulina Longworth.\n  (2)  Sturm came from a prominent Connecticut family, and his wealthy mother was of the McCormick mercantile family.\n  (3)  He was a Yale University graduate.\n  (4)  Not long after the company had begun to succeed financially and gain traction, Sturm died from viral hepatitis.\n\nDocument ID: context-8\nTitle: Austrian National Socialism\n  (0) Austrian National Socialism was a Pan-German movement that was formed at the beginning of the 20th century.\n  (1)  The movement took a concrete form on November 15, 1903 when the German Worker's Party (DAP) was established in Austria with its secretariat stationed in the town of Aussig (now Usti nad Labem in the Czech Republic).\n  (2)  It was suppressed under the rule of Engelbert Dollfuss (1932\u201334), with its political organization, the DNSAP (\"German National Socialist Workers' Party\") banned in early 1933, but revived and made part of the German Nazi Party after the German annexation of Austria in 1938.\n\nDocument ID: context-9\nTitle: United States Senate election in Oregon, 2002\n  (0) The 2002 United States Senate election in Oregon was held on November 5, 2002.\n  (1)  Incumbent Republican United States Senator Gordon Smith ran for re-election to a second term.\n  (2)  Oregon Secretary of State Bill Bradbury emerged as the Democratic nominee, and though a competitive gubernatorial election occurred at the same time, Bradbury's campaign was never able to gain traction and Smith overwhelmingly won re-election.\n  (3)  As of 2017, this is the last Senate election in Oregon won by a Republican.\n\nInstructions:\n- For each step, find the specific entity, value, or fact in the evidence.\n- Copy exact names, numbers, and dates from the evidence.\n- The final answer must be a short, specific value (a name, number, place, date, or entity) \u2014 not a sentence or explanation.\n- If the evidence does not contain the answer, still give your best short answer based on what is available.\n- Never return 'not determinable' or 'unsupported' \u2014 always return a concrete answer.\n\nReturn JSON: {\"steps\": \"Step 1: ... Step 2: ...\", \"answer\": \"short final answer\", \"_evidence_citations\": [{\"document_id\": \"...\", \"title\": \"...\", \"sentence_indices\": [0], \"fact\": \"...\"}]}\nReturn JSON only.",
+            "raw_response": "```json\n{\n \"steps\": \"Step 1: Hans Knirsch was an activist for Austrian National Socialism. Step 2: Austrian National Socialism took a concrete form on November 15, 1903.\",\n \"answer\": \"November 15, 1903\",\n \"_evidence_citations\": [\n  {\n   \"document_id\": \"context-2\",\n   \"title\": \"Hans Knirsch\",\n   \"sentence_indices\": [\n    0\n   ],\n   \"fact\": \"Hans Knirsch (September 14, 1877, Triebendorf \u2013 December 6, 1933, Duchcov) was an Austro-German activist from Moravia for Austrian National Socialism.\"\n  },\n  {\n   \"document_id\": \"context-8\",\n   \"title\": \"Austrian National Socialism\",\n   \"sentence_indices\": [\n    1\n   ],\n   \"fact\": \"The movement took a concrete form on November 15, 1903 when the German Worker's Party (DAP) was established in Austria with its secretariat stationed in the town of Aussig (now Usti nad Labem in the Czech Republic).\"\n  }\n ]\n}\n```",
+            "parsed_output": {
+              "steps": "Step 1: Hans Knirsch was an activist for Austrian National Socialism. Step 2: Austrian National Socialism took a concrete form on November 15, 1903.",
+              "answer": "November 15, 1903",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-2",
+                  "title": "Hans Knirsch",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Hans Knirsch (September 14, 1877, Triebendorf \u2013 December 6, 1933, Duchcov) was an Austro-German activist from Moravia for Austrian National Socialism."
+                },
+                {
+                  "document_id": "context-8",
+                  "title": "Austrian National Socialism",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "The movement took a concrete form on November 15, 1903 when the German Worker's Party (DAP) was established in Austria with its secretariat stationed in the town of Aussig (now Usti nad Labem in the Czech Republic)."
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "November 15, 1903"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Micro venture capital",
+                  "text": "Micro venture capital is money invested to seed early-stage emerging companies with amounts of finance that is typically less than that of traditional venture capital. In contrast to traditional venture capital which is money used to invest in companies looking to fund growth (also referred to as a Series A round of funding), micro venture capital consists of smaller seed investments, typically between $25K to $500K, in companies that have yet to gain traction. In the United States, the number of micro venture capital firms have continued to rise rapidly over the last 5 years, and have become an important source of finance for startup companies.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Micro venture capital is money invested to seed early-stage emerging companies with amounts of finance that is typically less than that of traditional venture capital.",
+                      " In contrast to traditional venture capital which is money used to invest in companies looking to fund growth (also referred to as a Series A round of funding), micro venture capital consists of smaller seed investments, typically between $25K to $500K, in companies that have yet to gain traction.",
+                      " In the United States, the number of micro venture capital firms have continued to rise rapidly over the last 5 years, and have become an important source of finance for startup companies."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Xerox 500 series",
+                  "text": "The Xerox 500 series was a line of computers from Xerox Data Systems (XDS) introduced in the early 1970s as backward-compatible upgrades for the Sigma series machines. The systems had failed to gain traction by the time Xerox sold its Data Systems Division in 1975. The buyer, Honeywell, Inc., continued to support existing 500-series systems until 1984 but discontinued manufacturing.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "The Xerox 500 series was a line of computers from Xerox Data Systems (XDS) introduced in the early 1970s as backward-compatible upgrades for the Sigma series machines.",
+                      " The systems had failed to gain traction by the time Xerox sold its Data Systems Division in 1975.",
+                      " The buyer, Honeywell, Inc., continued to support existing 500-series systems until 1984 but discontinued manufacturing."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Hans Knirsch",
+                  "text": "Hans Knirsch (September 14, 1877, Triebendorf \u2013 December 6, 1933, Duchcov) was an Austro-German activist from Moravia for Austrian National Socialism. After the breakup of the Austro-Hungarian Empire, he led the original party in Bohemia, called the Sudeten German National Socialist Party. Together with Rudolf Jung and Hans Krebs, he was one of the original core of National Socialists that remained in the Nazi Party after 1933.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "Hans Knirsch (September 14, 1877, Triebendorf \u2013 December 6, 1933, Duchcov) was an Austro-German activist from Moravia for Austrian National Socialism.",
+                      " After the breakup of the Austro-Hungarian Empire, he led the original party in Bohemia, called the Sudeten German National Socialist Party.",
+                      " Together with Rudolf Jung and Hans Krebs, he was one of the original core of National Socialists that remained in the Nazi Party after 1933."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Bent edge",
+                  "text": "Bent edge or curved edge was an offshoot of hardcore punk that was formed to be a counter-movement to straight edge at the time straight edge was starting to gain traction and support. Bent edge was also part of a rising anti-Dischord sentiment among many people in the punk scene.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Bent edge or curved edge was an offshoot of hardcore punk that was formed to be a counter-movement to straight edge at the time straight edge was starting to gain traction and support.",
+                      " Bent edge was also part of a rising anti-Dischord sentiment among many people in the punk scene."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "LaserDisc",
+                  "text": "LaserDisc (abbreviated as LD) is a home video format and the first commercial optical disc storage medium, initially licensed, sold and marketed as MCA DiscoVision in North America in 1978. Although the format was capable of offering higher-quality video and audio than its consumer rivals, VHS and Betamax videotape, LaserDisc never managed to gain widespread use in North America, largely due to high costs for the players and video titles themselves and the inability to record TV programs. It was not a popular format in Europe and Australia when first released but eventually did gain traction in these regions to become popular in the 1990s. By contrast, the format was much more popular in Japan and in the more affluent regions of Southeast Asia, such as Hong Kong, Singapore and Malaysia, and was the prevalent rental video medium in Hong Kong during the 1990s. Its superior video and audio quality made it a popular choice among videophiles and film enthusiasts during its lifespan. The technologies and concepts behind LaserDisc were the foundation for later optical disc formats including Compact Disc (CD), DVD and Blu-ray (BD).",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "LaserDisc (abbreviated as LD) is a home video format and the first commercial optical disc storage medium, initially licensed, sold and marketed as MCA DiscoVision in North America in 1978.",
+                      " Although the format was capable of offering higher-quality video and audio than its consumer rivals, VHS and Betamax videotape, LaserDisc never managed to gain widespread use in North America, largely due to high costs for the players and video titles themselves and the inability to record TV programs.",
+                      " It was not a popular format in Europe and Australia when first released but eventually did gain traction in these regions to become popular in the 1990s.",
+                      " By contrast, the format was much more popular in Japan and in the more affluent regions of Southeast Asia, such as Hong Kong, Singapore and Malaysia, and was the prevalent rental video medium in Hong Kong during the 1990s.",
+                      " Its superior video and audio quality made it a popular choice among videophiles and film enthusiasts during its lifespan.",
+                      " The technologies and concepts behind LaserDisc were the foundation for later optical disc formats including Compact Disc (CD), DVD and Blu-ray (BD)."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Multimodality",
+                  "text": "In its most basic sense, multimodality is a theory of communication and social semiotics. Multimodality describes communication practices in terms of the textual, aural, linguistic, spatial, and visual resources - or modes - used to compose messages. Where media are concerned, multimodality is the use of several modes (media) to create a single artifact. The collection of these modes, or elements, contributes to how multimodality affects different rhetorical situations, or opportunities for increasing an audience's reception of an idea or concept. Everything from the placement of images to the organization of the content creates meaning. This is the result of a shift from isolated text being relied on as the primary source of communication, to the image being utilized more frequently in the digital age. While multimodality as an area of academic study did not gain traction until the twentieth century, all communication, literacy, and composing practices are and always have been multimodal.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "In its most basic sense, multimodality is a theory of communication and social semiotics.",
+                      " Multimodality describes communication practices in terms of the textual, aural, linguistic, spatial, and visual resources - or modes - used to compose messages.",
+                      " Where media are concerned, multimodality is the use of several modes (media) to create a single artifact.",
+                      " The collection of these modes, or elements, contributes to how multimodality affects different rhetorical situations, or opportunities for increasing an audience's reception of an idea or concept.",
+                      " Everything from the placement of images to the organization of the content creates meaning.",
+                      " This is the result of a shift from isolated text being relied on as the primary source of communication, to the image being utilized more frequently in the digital age.",
+                      " While multimodality as an area of academic study did not gain traction until the twentieth century, all communication, literacy, and composing practices are and always have been multimodal."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "David Duke presidential campaign, 1988",
+                  "text": "David Duke, a Grand Wizard in the Ku Klux Klan and notable perennial candidate, was a candidate for President of the United States in the 1988 election. His run was notable in that after failing to gain traction in the Democratic primaries he switched and became the candidate for the Populist Party and he won the 1988 New Hampshire Vice-Presidential primary.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "David Duke, a Grand Wizard in the Ku Klux Klan and notable perennial candidate, was a candidate for President of the United States in the 1988 election.",
+                      " His run was notable in that after failing to gain traction in the Democratic primaries he switched and became the candidate for the Populist Party and he won the 1988 New Hampshire Vice-Presidential primary."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Alexander McCormick Sturm",
+                  "text": "Alexander McCormick \"Alex\" Sturm (June 23, 1923 \u2013 November 16, 1951) was an American artist, author, and entrepreneur who co-founded in 1949, the American firearm maker, Sturm, Ruger & Co. Sturm provided the start-up money and designed the Germanic heraldic eagle that is found on Ruger guns. He was the husband of Paulina Longworth. Sturm came from a prominent Connecticut family, and his wealthy mother was of the McCormick mercantile family. He was a Yale University graduate. Not long after the company had begun to succeed financially and gain traction, Sturm died from viral hepatitis.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Alexander McCormick \"Alex\" Sturm (June 23, 1923 \u2013 November 16, 1951) was an American artist, author, and entrepreneur who co-founded in 1949, the American firearm maker, Sturm, Ruger & Co. Sturm provided the start-up money and designed the Germanic heraldic eagle that is found on Ruger guns.",
+                      " He was the husband of Paulina Longworth.",
+                      " Sturm came from a prominent Connecticut family, and his wealthy mother was of the McCormick mercantile family.",
+                      " He was a Yale University graduate.",
+                      " Not long after the company had begun to succeed financially and gain traction, Sturm died from viral hepatitis."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Austrian National Socialism",
+                  "text": "Austrian National Socialism was a Pan-German movement that was formed at the beginning of the 20th century. The movement took a concrete form on November 15, 1903 when the German Worker's Party (DAP) was established in Austria with its secretariat stationed in the town of Aussig (now Usti nad Labem in the Czech Republic). It was suppressed under the rule of Engelbert Dollfuss (1932\u201334), with its political organization, the DNSAP (\"German National Socialist Workers' Party\") banned in early 1933, but revived and made part of the German Nazi Party after the German annexation of Austria in 1938.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Austrian National Socialism was a Pan-German movement that was formed at the beginning of the 20th century.",
+                      " The movement took a concrete form on November 15, 1903 when the German Worker's Party (DAP) was established in Austria with its secretariat stationed in the town of Aussig (now Usti nad Labem in the Czech Republic).",
+                      " It was suppressed under the rule of Engelbert Dollfuss (1932\u201334), with its political organization, the DNSAP (\"German National Socialist Workers' Party\") banned in early 1933, but revived and made part of the German Nazi Party after the German annexation of Austria in 1938."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "United States Senate election in Oregon, 2002",
+                  "text": "The 2002 United States Senate election in Oregon was held on November 5, 2002. Incumbent Republican United States Senator Gordon Smith ran for re-election to a second term. Oregon Secretary of State Bill Bradbury emerged as the Democratic nominee, and though a competitive gubernatorial election occurred at the same time, Bradbury's campaign was never able to gain traction and Smith overwhelmingly won re-election. As of 2017, this is the last Senate election in Oregon won by a Republican.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "The 2002 United States Senate election in Oregon was held on November 5, 2002.",
+                      " Incumbent Republican United States Senator Gordon Smith ran for re-election to a second term.",
+                      " Oregon Secretary of State Bill Bradbury emerged as the Democratic nominee, and though a competitive gubernatorial election occurred at the same time, Bradbury's campaign was never able to gain traction and Smith overwhelmingly won re-election.",
+                      " As of 2017, this is the last Senate election in Oregon won by a Republican."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-2",
+                "title": "Hans Knirsch",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Hans Knirsch (September 14, 1877, Triebendorf \u2013 December 6, 1933, Duchcov) was an Austro-German activist from Moravia for Austrian National Socialism."
+              },
+              {
+                "document_id": "context-8",
+                "title": "Austrian National Socialism",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "The movement took a concrete form on November 15, 1903 when the German Worker's Party (DAP) was established in Austria with its secretariat stationed in the town of Aussig (now Usti nad Labem in the Czech Republic)."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-2",
+                  "title": "Hans Knirsch",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Hans Knirsch (September 14, 1877, Triebendorf \u2013 December 6, 1933, Duchcov) was an Austro-German activist from Moravia for Austrian National Socialism."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Hans Knirsch",
+                    "sentence_index": 0
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-8",
+                  "title": "Austrian National Socialism",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "The movement took a concrete form on November 15, 1903 when the German Worker's Party (DAP) was established in Austria with its secretariat stationed in the town of Aussig (now Usti nad Labem in the Czech Republic)."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Austrian National Socialism",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": null,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "November 15, 1903"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 4478.095800004667,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "google/gemma-4-31B-it",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 180.0,
+            "max_retries": 8,
+            "retry_initial_delay_seconds": 2.0,
+            "retry_max_delay_seconds": 120.0
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1,
+            "planner_mode": "simple"
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false,
+            "ltm_conversation_turn_format": "text"
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "empty_prediction_retries": 1,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: What movement was Hans Knirsch an activist for?\\nfact_lookup\\npending\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: On what date did the movement {q1.answer} officially gain tr\\nfact_lookup\\npending\"]\n  click q2 dagqaSelectGraphNode\n  q1 --> q2\n  q3[\"q3: What date did the movement Hans Knirsch was an activist for \\nsynthesis\\npending\"]\n  click q3 dagqaSelectGraphNode\n  q2 --> q3"
+      },
+      "error": null,
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0
+    }
+  ],
+  "metrics": {
+    "example_count": 2.0,
+    "success_count": 2.0,
+    "failure_count": 0.0,
+    "error_count": 0.0,
+    "exact_match": 1.0,
+    "f1": 1.0,
+    "cosine_sim": 1.0,
+    "context_cosine_sim": 1.0,
+    "mini_l6_cosine_sim": 1.0,
+    "mini_l6_context_cosine_sim": 1.0,
+    "multi_qa_mpnet_cosine_sim": 1.0,
+    "gte_base_cosine_sim": 1.0,
+    "bge_base_cosine_sim": 1.0,
+    "e5_base_cosine_sim": 1.0,
+    "bleu": 1.0,
+    "bigram_f1": 1.0,
+    "chrf": 1.0,
+    "rouge_l": 1.0,
+    "meteor": 1.0,
+    "avg_latency_ms": 7086.175763499341,
+    "p50_latency_ms": 7699.755408000783,
+    "total_llm_call_count": 4.0,
+    "total_llm_retry_count": 0.0,
+    "avg_llm_retry_count": 0.0,
+    "avg_llm_call_count": 2.0,
+    "avg_node_count": 2.5,
+    "avg_graph_depth": 0.0,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.0,
+    "total_evidence_citation_count": 3.0,
+    "correct_evidence_citation_count": 3.0,
+    "wrong_evidence_citation_count": 0.0,
+    "wrong_supporting_text_rate": 0.0,
+    "avg_gold_supporting_fact_recall": 0.5833333333333333,
+    "total_runtime_ms": 8221.238999991328
+  }
+}

@@ -7,7 +7,9 @@ from typing import Any
 from uuid import uuid4
 
 from dagqa.config import AppConfig
+from dagqa.evidence import all_documents_selection
 from dagqa.graph.scheduler import Scheduler
+from dagqa.graph.substitution import MissingDependencyValue, get_path
 from dagqa.llm.base import LanguageModel
 from dagqa.nodes.output_validation import parse_node_output
 from dagqa.nodes.prompts import render_evidence_section
@@ -15,6 +17,8 @@ from dagqa.nodes.runner import NodeRunner
 from dagqa.planning.normalizer import normalize_plan_dependencies
 from dagqa.planning.validator import validate_plan
 from dagqa.schemas import (
+    ChatMessage,
+    DagNode,
     DagPlan,
     EvidenceCitation,
     EvidenceDocument,
@@ -45,6 +49,24 @@ def _parse_citations(parsed: dict) -> list[EvidenceCitation]:
         except Exception:
             continue
     return citations
+
+
+def _resolve_turn_dependency_values(
+    node: DagNode,
+    outputs: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Lenient variant of resolve_input_map for conversation turns.
+
+    Conversation turns only return {"answer": ...}, so input_map references to
+    other fields may not resolve; those are skipped instead of raising.
+    """
+    values: dict[str, Any] = {}
+    for name, reference in node.input_map.items():
+        try:
+            values[name] = get_path(outputs, reference)
+        except MissingDependencyValue:
+            continue
+    return values
 
 
 class ExecutionError(RuntimeError):
@@ -144,6 +166,29 @@ class DagExecutor:
             config=self.config.model_dump(mode="json"),
         )
 
+    async def execute_least_to_most_only(
+        self,
+        plan: DagPlan,
+        evidence_documents: list[EvidenceDocument],
+    ) -> RunTrace:
+        """Pure Least-to-Most execution without DAG fallback."""
+        plan = normalize_plan_dependencies(plan)
+        return await self._run_least_to_most(plan, evidence_documents)
+
+    async def execute_least_to_most_conversation(
+        self,
+        plan: DagPlan,
+        evidence_documents: list[EvidenceDocument],
+    ) -> RunTrace:
+        """Least-to-Most as a multi-turn conversation.
+
+        Instead of compiling all sub-questions into one prompt, the LLM is
+        asked one sub-question per turn in the same chat session (history
+        retained), ending with a final turn for the original question.
+        """
+        plan = normalize_plan_dependencies(plan)
+        return await self._run_least_to_most_conversation(plan, evidence_documents)
+
     async def execute_least_to_most(
         self,
         plan: DagPlan,
@@ -203,6 +248,16 @@ class DagExecutor:
         chosen.run_id = run_id
         return chosen
 
+    def _ordered_sub_question_nodes(self, plan: DagPlan) -> list[DagNode]:
+        """Non-final plan nodes in topological (least-to-most) order."""
+        by_id = {node.id: node for node in plan.nodes}
+        return [
+            by_id[node_id]
+            for wave in self.scheduler.build_waves(plan)
+            for node_id in wave.node_ids
+            if node_id != plan.final_node
+        ]
+
     async def _run_least_to_most(
         self,
         plan: DagPlan,
@@ -211,21 +266,16 @@ class DagExecutor:
         started = time.perf_counter()
         run_id = str(uuid4())
 
-        # Build ordered sub-questions from topological order
-        waves = self.scheduler.build_waves(plan)
-        ordered_questions: list[str] = []
-        for wave in waves:
-            for node_id in wave.node_ids:
-                node = next(n for n in plan.nodes if n.id == node_id)
-                if node.id != plan.final_node:
-                    ordered_questions.append(node.question)
+        # Build ordered sub-questions from topological order. Every step reasons over
+        # the same full document set, rendered once at the end of the prompt.
+        ordered_questions = [node.question for node in self._ordered_sub_question_nodes(plan)]
 
-        evidence = EvidenceSelection(
-            strategy="all_documents",
-            total_available=len(evidence_documents),
-            documents=evidence_documents,
+        evidence = all_documents_selection(evidence_documents)
+        evidence_section = (
+            render_evidence_section(evidence, require_citations=True)
+            if evidence is not None
+            else ""
         )
-        evidence_section = render_evidence_section(evidence, require_citations=True)
 
         sub_q_block = "\n".join(f"  Step {i + 1}: {q}" for i, q in enumerate(ordered_questions))
 
@@ -304,6 +354,205 @@ class DagExecutor:
             plan=plan,
             waves=[SchedulerWave(index=0, node_ids=["ltm"])],
             nodes=[trace],
+            final_answer=final_answer,
+            status=status,
+            total_duration_ms=(time.perf_counter() - started) * 1000,
+            config=self.config.model_dump(mode="json"),
+        )
+
+    def _build_ltm_prompts(
+        self,
+        plan: DagPlan,
+        evidence: EvidenceSelection | None,
+        turn_format: str,
+    ) -> tuple[str, str, str]:
+        """Build the (system, per-turn instruction, final) prompts for an LtM conversation."""
+        evidence_section = (
+            render_evidence_section(evidence, require_citations=True)
+            if evidence is not None
+            else ""
+        )
+        system_prompt = (
+            f"You are answering a question step by step over multiple turns.\n"
+            f"Original question: {plan.question}\n\n"
+            f"Each turn asks one sub-question. Answer it using only the evidence "
+            f"below, copying exact names, numbers, and dates from the evidence. "
+            f"Your earlier answers remain available in the conversation for "
+            f"later turns."
+            f"{evidence_section}"
+        )
+        if turn_format == "json":
+            turn_instruction = 'Return JSON only: {"answer": "short answer"}'
+        else:
+            turn_instruction = (
+                "Answer concisely with the specific entity, value, or fact from the evidence."
+            )
+        final_prompt = (
+            f"Using your previous answers, now answer the original question: "
+            f"{plan.question}\n\n"
+            f"Instructions:\n"
+            f"- The final answer must be a short, specific value (a name, number, "
+            f"place, date, or entity) — not a sentence or explanation.\n"
+            f"- If the evidence does not contain the answer, still give your best "
+            f"short answer based on what is available.\n"
+            f"- Never return 'not determinable' or 'unsupported' — always return "
+            f"a concrete answer.\n\n"
+            f'Return JSON: {{"answer": "short final answer", '
+            f'"_evidence_citations": '
+            f'[{{"document_id": "...", "title": "...", '
+            f'"sentence_indices": [0], "fact": "..."}}]}}\n'
+            f"Return JSON only."
+        )
+        return system_prompt, turn_instruction, final_prompt
+
+    @staticmethod
+    def _parse_ltm_answer(
+        trace: NodeTrace, response_text: str, is_final: bool, turn_format: str
+    ) -> str:
+        """Extract the answer string from a turn response, recording parsed output on the trace."""
+        if is_final:
+            parsed = parse_node_output(response_text)
+            trace.parsed_output = parsed
+            raw_answer = parsed.get("answer") or parsed.get("final_answer") or ""
+            # Handle case where LLM returns a dict/list as the answer
+            if isinstance(raw_answer, dict):
+                raw_answer = (
+                    raw_answer.get("answer") or raw_answer.get("final_answer") or str(raw_answer)
+                )
+            trace.evidence_citations = _parse_citations(parsed)
+            return str(raw_answer).strip()
+        if turn_format == "json":
+            try:
+                parsed = parse_node_output(response_text)
+                trace.parsed_output = parsed
+                answer = str(parsed.get("answer") or "").strip()
+            except ValueError:
+                answer = ""
+            return answer or response_text.strip()
+        return response_text.strip()
+
+    async def _run_ltm_turn(
+        self,
+        node: DagNode,
+        is_final: bool,
+        plan: DagPlan,
+        evidence: EvidenceSelection | None,
+        system_prompt: str,
+        user_prompt: str,
+        turn_format: str,
+        history: list[ChatMessage],
+        dependency_values: dict[str, Any] | None = None,
+    ) -> tuple[NodeTrace, str | None]:
+        """Run a single conversation turn, returning its trace and the raw response text.
+
+        The response text is ``None`` when the turn raised, so the caller knows not to
+        append it to the conversation history.
+        """
+        trace = NodeTrace(
+            node_id=node.id,
+            label=node.label,
+            task_type=node.task_type,
+            operation=node.operation,
+            status=NodeStatus.running,
+            resolved_question=plan.question if is_final else node.question,
+            dependency_values=dependency_values or {},
+        )
+        # Each turn records the evidence it was actually shown.
+        trace.supporting_evidence = evidence
+        # The system prompt is only recorded on the opening turn's trace.
+        trace.rendered_prompt = user_prompt if history else f"{system_prompt}\n\n{user_prompt}"
+        turn_started = time.perf_counter()
+        response_text: str | None = None
+        try:
+            response = await self.llm.complete(
+                LLMRequest(
+                    system=system_prompt,
+                    prompt=user_prompt,
+                    history=list(history),
+                    temperature=0.0,
+                )
+            )
+            response_text = response.text
+            trace.raw_response = response.text
+            trace.llm_retry_count = int(response.metadata.get("retry_count", 0))
+            answer = self._parse_ltm_answer(trace, response.text, is_final, turn_format)
+            if answer:
+                trace.returned_value = {"answer": answer}
+                trace.status = NodeStatus.succeeded
+            else:
+                trace.status = NodeStatus.failed
+        except Exception as exc:
+            trace.status = NodeStatus.failed
+            trace.error = str(exc)
+        trace.duration_ms = (time.perf_counter() - turn_started) * 1000
+        return trace, response_text
+
+    async def _run_least_to_most_conversation(
+        self,
+        plan: DagPlan,
+        evidence_documents: list[EvidenceDocument],
+    ) -> RunTrace:
+        started = time.perf_counter()
+        run_id = str(uuid4())
+
+        sub_question_nodes = self._ordered_sub_question_nodes(plan)
+        final_node = next(node for node in plan.nodes if node.id == plan.final_node)
+
+        # Every turn reasons over the same full document set, carried once in the
+        # system prompt rather than repeated in each turn's user message.
+        evidence = all_documents_selection(evidence_documents)
+
+        turn_format = self.config.execution.ltm_conversation_turn_format
+        system_prompt, turn_instruction, final_prompt = self._build_ltm_prompts(
+            plan, evidence, turn_format
+        )
+
+        history: list[ChatMessage] = []
+        traces: list[NodeTrace] = []
+        waves: list[SchedulerWave] = []
+        outputs: dict[str, dict[str, Any]] = {}
+        status = NodeStatus.succeeded
+        final_answer: dict[str, Any] | None = None
+
+        for turn_index, node in enumerate([*sub_question_nodes, final_node]):
+            is_final = node.id == plan.final_node
+            if is_final:
+                user_prompt = final_prompt
+            else:
+                user_prompt = f"Step {turn_index + 1}: {node.question}\n{turn_instruction}"
+            # Record the dependency values the conversation history carries into
+            # this turn (audit only; the model reads them from the history).
+            dependency_values = _resolve_turn_dependency_values(node, outputs)
+            trace, response_text = await self._run_ltm_turn(
+                node,
+                is_final,
+                plan,
+                evidence,
+                system_prompt,
+                user_prompt,
+                turn_format,
+                history,
+                dependency_values,
+            )
+            waves.append(SchedulerWave(index=turn_index, node_ids=[node.id]))
+            traces.append(trace)
+            if trace.status != NodeStatus.succeeded or response_text is None:
+                status = NodeStatus.failed
+                break
+            outputs[node.id] = dict(trace.returned_value or {})
+            history.append(ChatMessage(role="user", content=user_prompt))
+            history.append(ChatMessage(role="assistant", content=response_text))
+            if is_final:
+                final_answer = trace.returned_value
+
+        if final_answer is None:
+            status = NodeStatus.failed
+        return RunTrace(
+            run_id=run_id,
+            question=plan.question,
+            plan=plan,
+            waves=waves,
+            nodes=traces,
             final_answer=final_answer,
             status=status,
             total_duration_ms=(time.perf_counter() - started) * 1000,

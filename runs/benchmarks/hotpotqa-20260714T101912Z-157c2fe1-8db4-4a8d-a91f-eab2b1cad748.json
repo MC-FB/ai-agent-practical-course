@@ -1,0 +1,1574 @@
+{
+  "run_id": "157c2fe1-8db4-4a8d-a91f-eab2b1cad748",
+  "name": null,
+  "comparison_group_id": "67c110cf-9187-4033-978e-f7565162dd92",
+  "system": "dag_least_to_most",
+  "limit": 4,
+  "provider": "cluster",
+  "model": "google/gemma-4-31B-it",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "subset": "validation",
+  "dataset_size": 7405,
+  "seed": 188044012,
+  "max_parallel_examples": 4,
+  "max_nodes": 10,
+  "max_depth": 3,
+  "created_at": "2026-07-14T10:19:12Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260714T101912Z-157c2fe1-8db4-4a8d-a91f-eab2b1cad748.json",
+  "total_runtime_ms": 40663.10995200183,
+  "records": [
+    {
+      "id": "5a75e3845542994ccc91864e",
+      "question": "What award did Flossie Bailey receive that was named after the first female self-made millionaire in America?",
+      "gold_answer": "Madam C. J. Walker",
+      "prediction": "Madam C. J. Walker Medal",
+      "raw_prediction": null,
+      "metric_scores": {
+        "exact_match": 0.0,
+        "f1": 0.888888888888889,
+        "cosine_sim": 0.6756979823112488,
+        "context_cosine_sim": 0.8610901236534119,
+        "mini_l6_cosine_sim": 0.8106279373168945,
+        "mini_l6_context_cosine_sim": 0.8037842512130737,
+        "multi_qa_mpnet_cosine_sim": 0.7068939208984375,
+        "gte_base_cosine_sim": 0.951171875,
+        "bge_base_cosine_sim": 0.8771506547927856,
+        "e5_base_cosine_sim": 0.938745379447937,
+        "bleu": 0.7598356856515925,
+        "bigram_f1": 0.8571428571428571,
+        "chrf": 0.9172390544573487,
+        "rouge_l": 0.888888888888889,
+        "meteor": 0.9679878048780488
+      },
+      "latency_ms": 12283.395834994735,
+      "llm_call_count": 2,
+      "llm_retry_count": 0,
+      "node_count": 2,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Flossie Bailey",
+          "sentence_index": 3
+        },
+        {
+          "title": "Madam C. J. Walker",
+          "sentence_index": 1
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 1.0,
+      "run_trace": {
+        "run_id": "5a5d5d4a-9d8e-42f7-ad03-9f86c6043975",
+        "question": "What award did Flossie Bailey receive that was named after the first female self-made millionaire in America?",
+        "plan": {
+          "question": "What award did Flossie Bailey receive that was named after the first female self-made millionaire in America?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Who was the first female self-made millionaire in America?",
+              "task_type": "fact_lookup",
+              "question": "Who was the first female self-made millionaire in America?",
+              "operation": "answer",
+              "depends_on": [],
+              "sources": [
+                "context-1",
+                "context-3"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}"
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "reasoning"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise answer to this sub-question."
+                  },
+                  "reasoning": {
+                    "type": "string",
+                    "description": "Brief explanation of why this answer was selected."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "What award did Flossie Bailey receive that was named after {",
+              "task_type": "synthesis",
+              "question": "What award did Flossie Bailey receive that was named after {q1.answer}?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q1"
+              ],
+              "sources": [
+                "context-2"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}\n{dependencies}"
+              },
+              "input_map": {
+                "q1_answer": "q1.answer"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "answer_type",
+                  "answer_source_span"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise final answer to the original user question."
+                  },
+                  "answer_type": {
+                    "type": "string",
+                    "description": "Answer type requested by the original question."
+                  },
+                  "answer_source_span": {
+                    "type": "string",
+                    "description": "Shortest evidence span supporting the final answer."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q2"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "ltm"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "ltm",
+            "label": "Least-to-Most execution",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": null,
+            "rendered_prompt": "Question: What award did Flossie Bailey receive that was named after the first female self-made millionaire in America?\n\nSolve step by step. For each step, find the answer in that step's evidence before moving to the next step.\n\n  Step 1: Who was the first female self-made millionaire in America?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims.\n\nDocument ID: context-1\nTitle: Villa Lewaro\n  (0) Villa Lewaro, formerly known as the Anne E. Poth Home, is a 34-room 20000 sqft mansion located at Fargo Lane and North Broadway (US 9) in Irvington, New York.\n  (1)  It was the home of Madam C. J. Walker from 1918 to 1919.\n  (2)  Walker was the first American female and first African-American female self-made millionaire, and \"the world's most successful female entrepreneur of her time.\"\n  (3)  The mansion is an Italianate villa house designed for Walker by Vertner Tandy, the first African-American architect registered in New York, and has been considered to be one of his greatest works.\n  (4)  It was constructed during 1916\u20131918 at an estimated cost of $250,000, and was furnished lavishly.\n  (5)  The name Villa Lewaro was coined by a distinguished visitor, Enrico Caruso, from the first two letters of each word in Lelia Walker Robinson, the name of Walker's daughter, who later went by the name of A'Lelia Walker.\n\nDocument ID: context-3\nTitle: Madam C. J. Walker\n  (0) Sarah Breedlove (December 23, 1867 \u2013 May 25, 1919), known as Madam C. J. Walker, was an African American entrepreneur, philanthropist, and a political and social activist.\n  (1)  Eulogized as the first female self-made millionaire in America, she became one of the wealthiest African American women in the country, \"the world's most successful female entrepreneur of her time,\" and one of the most successful African-American business owners ever.\n\n  Final step: Using the above answers, answer the original question.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below. Never invent document IDs, titles, or sentence indices; use only the document IDs and sentence numbers printed in this prompt.\n\nDocument ID: context-1\nTitle: Villa Lewaro\n  (0) Villa Lewaro, formerly known as the Anne E. Poth Home, is a 34-room 20000 sqft mansion located at Fargo Lane and North Broadway (US 9) in Irvington, New York.\n  (1)  It was the home of Madam C. J. Walker from 1918 to 1919.\n  (2)  Walker was the first American female and first African-American female self-made millionaire, and \"the world's most successful female entrepreneur of her time.\"\n  (3)  The mansion is an Italianate villa house designed for Walker by Vertner Tandy, the first African-American architect registered in New York, and has been considered to be one of his greatest works.\n  (4)  It was constructed during 1916\u20131918 at an estimated cost of $250,000, and was furnished lavishly.\n  (5)  The name Villa Lewaro was coined by a distinguished visitor, Enrico Caruso, from the first two letters of each word in Lelia Walker Robinson, the name of Walker's daughter, who later went by the name of A'Lelia Walker.\n\nDocument ID: context-3\nTitle: Madam C. J. Walker\n  (0) Sarah Breedlove (December 23, 1867 \u2013 May 25, 1919), known as Madam C. J. Walker, was an African American entrepreneur, philanthropist, and a political and social activist.\n  (1)  Eulogized as the first female self-made millionaire in America, she became one of the wealthiest African American women in the country, \"the world's most successful female entrepreneur of her time,\" and one of the most successful African-American business owners ever.\n\nDocument ID: context-2\nTitle: Flossie Bailey\n  (0) Katherine \"Flossie\" Bailey (1895\u2013February 6, 1952) was a civil rights and anti-lynching activist from Indiana.\n  (1)  She established a local chapter of the National Association for the Advancement of Colored People in Marion, Indiana, in 1918 and became especially active fighting for justice and equality following the double lynching of Thomas Shipp and Abram Smith in 1930.\n  (2)  As president of the Indiana NAACP, Bailey was pivotal in lobbying for passage of a statewide anti-lynching law in Indiana in 1931 and advocated for a similar bill at the national level.\n  (3)  She was also a recipient of the national NAACP's Madam C. J. Walker Medal.\n\n\nInstructions:\n- For each step, find the specific entity, value, or fact in the evidence.\n- Copy exact names, numbers, and dates from the evidence.\n- The final answer must be a short, specific value (a name, number, place, date, or entity) \u2014 not a sentence or explanation.\n- If the evidence does not contain the answer, still give your best short answer based on what is available.\n- Never return 'not determinable' or 'unsupported' \u2014 always return a concrete answer.\n\nReturn JSON: {\"steps\": \"Step 1: ... Step 2: ...\", \"answer\": \"short final answer\", \"_evidence_citations\": [{\"document_id\": \"...\", \"title\": \"...\", \"sentence_indices\": [0], \"fact\": \"...\"}]}\nReturn JSON only.",
+            "raw_response": "```json\n{\n  \"steps\": \"Step 1: According to context-3, the first female self-made millionaire in America was Madam C. J. Walker. Step 2: According to context-2, Flossie Bailey was a recipient of the national NAACP's Madam C. J. Walker Medal.\",\n  \"answer\": \"Madam C. J. Walker Medal\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-3\",\n      \"title\": \"Madam C. J. Walker\",\n      \"sentence_indices\": [\n        1\n      ],\n      \"fact\": \"Eulogized as the first female self-made millionaire in America, she became one of the wealthiest African American women in the country\"\n    },\n    {\n      \"document_id\": \"context-2\",\n      \"title\": \"Flossie Bailey\",\n      \"sentence_indices\": [\n        3\n      ],\n      \"fact\": \"She was also a recipient of the national NAACP's Madam C. J. Walker Medal.\"\n    }\n  ]\n}\n```",
+            "parsed_output": {
+              "steps": "Step 1: According to context-3, the first female self-made millionaire in America was Madam C. J. Walker. Step 2: According to context-2, Flossie Bailey was a recipient of the national NAACP's Madam C. J. Walker Medal.",
+              "answer": "Madam C. J. Walker Medal",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-3",
+                  "title": "Madam C. J. Walker",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "Eulogized as the first female self-made millionaire in America, she became one of the wealthiest African American women in the country"
+                },
+                {
+                  "document_id": "context-2",
+                  "title": "Flossie Bailey",
+                  "sentence_indices": [
+                    3
+                  ],
+                  "fact": "She was also a recipient of the national NAACP's Madam C. J. Walker Medal."
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "Madam C. J. Walker Medal"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "planner_assigned_sources",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-1",
+                  "title": "Villa Lewaro",
+                  "text": "Villa Lewaro, formerly known as the Anne E. Poth Home, is a 34-room 20000 sqft mansion located at Fargo Lane and North Broadway (US 9) in Irvington, New York. It was the home of Madam C. J. Walker from 1918 to 1919. Walker was the first American female and first African-American female self-made millionaire, and \"the world's most successful female entrepreneur of her time.\" The mansion is an Italianate villa house designed for Walker by Vertner Tandy, the first African-American architect registered in New York, and has been considered to be one of his greatest works. It was constructed during 1916\u20131918 at an estimated cost of $250,000, and was furnished lavishly. The name Villa Lewaro was coined by a distinguished visitor, Enrico Caruso, from the first two letters of each word in Lelia Walker Robinson, the name of Walker's daughter, who later went by the name of A'Lelia Walker.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Villa Lewaro, formerly known as the Anne E. Poth Home, is a 34-room 20000 sqft mansion located at Fargo Lane and North Broadway (US 9) in Irvington, New York.",
+                      " It was the home of Madam C. J. Walker from 1918 to 1919.",
+                      " Walker was the first American female and first African-American female self-made millionaire, and \"the world's most successful female entrepreneur of her time.\"",
+                      " The mansion is an Italianate villa house designed for Walker by Vertner Tandy, the first African-American architect registered in New York, and has been considered to be one of his greatest works.",
+                      " It was constructed during 1916\u20131918 at an estimated cost of $250,000, and was furnished lavishly.",
+                      " The name Villa Lewaro was coined by a distinguished visitor, Enrico Caruso, from the first two letters of each word in Lelia Walker Robinson, the name of Walker's daughter, who later went by the name of A'Lelia Walker."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Madam C. J. Walker",
+                  "text": "Sarah Breedlove (December 23, 1867 \u2013 May 25, 1919), known as Madam C. J. Walker, was an African American entrepreneur, philanthropist, and a political and social activist. Eulogized as the first female self-made millionaire in America, she became one of the wealthiest African American women in the country, \"the world's most successful female entrepreneur of her time,\" and one of the most successful African-American business owners ever.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Sarah Breedlove (December 23, 1867 \u2013 May 25, 1919), known as Madam C. J. Walker, was an African American entrepreneur, philanthropist, and a political and social activist.",
+                      " Eulogized as the first female self-made millionaire in America, she became one of the wealthiest African American women in the country, \"the world's most successful female entrepreneur of her time,\" and one of the most successful African-American business owners ever."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Flossie Bailey",
+                  "text": "Katherine \"Flossie\" Bailey (1895\u2013February 6, 1952) was a civil rights and anti-lynching activist from Indiana. She established a local chapter of the National Association for the Advancement of Colored People in Marion, Indiana, in 1918 and became especially active fighting for justice and equality following the double lynching of Thomas Shipp and Abram Smith in 1930. As president of the Indiana NAACP, Bailey was pivotal in lobbying for passage of a statewide anti-lynching law in Indiana in 1931 and advocated for a similar bill at the national level. She was also a recipient of the national NAACP's Madam C. J. Walker Medal.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "Katherine \"Flossie\" Bailey (1895\u2013February 6, 1952) was a civil rights and anti-lynching activist from Indiana.",
+                      " She established a local chapter of the National Association for the Advancement of Colored People in Marion, Indiana, in 1918 and became especially active fighting for justice and equality following the double lynching of Thomas Shipp and Abram Smith in 1930.",
+                      " As president of the Indiana NAACP, Bailey was pivotal in lobbying for passage of a statewide anti-lynching law in Indiana in 1931 and advocated for a similar bill at the national level.",
+                      " She was also a recipient of the national NAACP's Madam C. J. Walker Medal."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-3",
+                "title": "Madam C. J. Walker",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "Eulogized as the first female self-made millionaire in America, she became one of the wealthiest African American women in the country"
+              },
+              {
+                "document_id": "context-2",
+                "title": "Flossie Bailey",
+                "sentence_indices": [
+                  3
+                ],
+                "fact": "She was also a recipient of the national NAACP's Madam C. J. Walker Medal."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-3",
+                  "title": "Madam C. J. Walker",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "Eulogized as the first female self-made millionaire in America, she became one of the wealthiest African American women in the country"
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Madam C. J. Walker",
+                    "sentence_index": 1
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-2",
+                  "title": "Flossie Bailey",
+                  "sentence_indices": [
+                    3
+                  ],
+                  "fact": "She was also a recipient of the national NAACP's Madam C. J. Walker Medal."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Flossie Bailey",
+                    "sentence_index": 3
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": null,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Madam C. J. Walker Medal"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 7420.339443997364,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "google/gemma-4-31B-it",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 180.0,
+            "max_retries": 8,
+            "retry_initial_delay_seconds": 2.0,
+            "retry_max_delay_seconds": 120.0
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1,
+            "planner_mode": "simple"
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false,
+            "ltm_conversation_turn_format": "text"
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "empty_prediction_retries": 1,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Who was the first female self-made millionaire in America?\\nfact_lookup\\npending\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: What award did Flossie Bailey receive that was named after {\\nsynthesis\\npending\"]\n  click q2 dagqaSelectGraphNode\n  q1 --> q2"
+      },
+      "error": null,
+      "exact_match": 0.0,
+      "f1": 0.888888888888889,
+      "cosine_sim": 0.6756979823112488
+    },
+    {
+      "id": "5a8600665542994775f606ee",
+      "question": "Does the drink Quick Fuck have more layers than the drink Ti' Punch?",
+      "gold_answer": "yes",
+      "prediction": "yes",
+      "raw_prediction": "Yes",
+      "metric_scores": {
+        "exact_match": 1.0,
+        "f1": 1.0,
+        "cosine_sim": 1.0,
+        "context_cosine_sim": 1.0,
+        "mini_l6_cosine_sim": 1.0,
+        "mini_l6_context_cosine_sim": 1.0,
+        "multi_qa_mpnet_cosine_sim": 1.0,
+        "gte_base_cosine_sim": 1.0,
+        "bge_base_cosine_sim": 1.0,
+        "e5_base_cosine_sim": 1.0,
+        "bleu": 1.0,
+        "bigram_f1": 1.0,
+        "chrf": 1.0,
+        "rouge_l": 1.0,
+        "meteor": 1.0
+      },
+      "latency_ms": 40591.41914900101,
+      "llm_call_count": 2,
+      "llm_retry_count": 0,
+      "node_count": 3,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Ti' Punch",
+          "sentence_index": 0
+        },
+        {
+          "title": "Ti' Punch",
+          "sentence_index": 1
+        },
+        {
+          "title": "Quick Fuck",
+          "sentence_index": 0
+        },
+        {
+          "title": "Quick Fuck",
+          "sentence_index": 2
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 0.75,
+      "run_trace": {
+        "run_id": "451e3693-16b5-4dd8-a2da-9ddeefc27231",
+        "question": "Does the drink Quick Fuck have more layers than the drink Ti' Punch?",
+        "plan": {
+          "question": "Does the drink Quick Fuck have more layers than the drink Ti' Punch?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "How many layers does the drink Quick Fuck have?",
+              "task_type": "fact_lookup",
+              "question": "How many layers does the drink Quick Fuck have?",
+              "operation": "answer",
+              "depends_on": [],
+              "sources": [
+                "context-2"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}"
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "reasoning"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise answer to this sub-question."
+                  },
+                  "reasoning": {
+                    "type": "string",
+                    "description": "Brief explanation of why this answer was selected."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "How many layers does the drink Ti' Punch have?",
+              "task_type": "fact_lookup",
+              "question": "How many layers does the drink Ti' Punch have?",
+              "operation": "answer",
+              "depends_on": [],
+              "sources": [
+                "context-8"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}"
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "reasoning"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise answer to this sub-question."
+                  },
+                  "reasoning": {
+                    "type": "string",
+                    "description": "Brief explanation of why this answer was selected."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q3",
+              "label": "Does the drink Quick Fuck have more layers than the drink Ti",
+              "task_type": "synthesis",
+              "question": "Does the drink Quick Fuck have more layers than the drink Ti' Punch based on {q1.answer} and {q2.answer}?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q1",
+                "q2"
+              ],
+              "sources": [
+                "context-2",
+                "context-8"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}\n{dependencies}"
+              },
+              "input_map": {
+                "q1_answer": "q1.answer",
+                "q2_answer": "q2.answer"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "answer_type",
+                  "answer_source_span"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise final answer to the original user question."
+                  },
+                  "answer_type": {
+                    "type": "string",
+                    "description": "Answer type requested by the original question."
+                  },
+                  "answer_source_span": {
+                    "type": "string",
+                    "description": "Shortest evidence span supporting the final answer."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q3"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "ltm"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "ltm",
+            "label": "Least-to-Most execution",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": null,
+            "rendered_prompt": "Question: Does the drink Quick Fuck have more layers than the drink Ti' Punch?\n\nSolve step by step. For each step, find the answer in that step's evidence before moving to the next step.\n\n  Step 1: How many layers does the drink Quick Fuck have?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims.\n\nDocument ID: context-2\nTitle: Quick Fuck\n  (0) A Quick Fuck is a layered shooter made from one part coffee liqueur like Kahlua, one part cold Midori liqueur and one part Baileys Irish Cream.\n  (1)  The Baileys is poured off the back of a bar spoon so it \"floats\" on top of the Kahlua in a shot glass.\n  (2)  Then slowly layer the Midori on top of the Baileys.\n  (3)  Note that Baileys does not have to be used; any type of Irish Cream will do.\n\n  Step 2: How many layers does the drink Ti' Punch have?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims.\n\nDocument ID: context-8\nTitle: Ti' Punch\n  (0) Ti' Punch (] ; French: \"Petit Ponch\" ) literally meaning \"small punch,\" is a rum-based mixed drink that is especially popular in Martinique, Guadeloupe, Haiti, French Guiana and other French-speaking Caribbean islands.\n  (1)  It is very similar to the daiquiri, which is usually identified with Cuba.\n\n  Final step: Using the above answers, answer the original question.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below. Never invent document IDs, titles, or sentence indices; use only the document IDs and sentence numbers printed in this prompt.\n\nDocument ID: context-2\nTitle: Quick Fuck\n  (0) A Quick Fuck is a layered shooter made from one part coffee liqueur like Kahlua, one part cold Midori liqueur and one part Baileys Irish Cream.\n  (1)  The Baileys is poured off the back of a bar spoon so it \"floats\" on top of the Kahlua in a shot glass.\n  (2)  Then slowly layer the Midori on top of the Baileys.\n  (3)  Note that Baileys does not have to be used; any type of Irish Cream will do.\n\nDocument ID: context-8\nTitle: Ti' Punch\n  (0) Ti' Punch (] ; French: \"Petit Ponch\" ) literally meaning \"small punch,\" is a rum-based mixed drink that is especially popular in Martinique, Guadeloupe, Haiti, French Guiana and other French-speaking Caribbean islands.\n  (1)  It is very similar to the daiquiri, which is usually identified with Cuba.\n\n\nInstructions:\n- For each step, find the specific entity, value, or fact in the evidence.\n- Copy exact names, numbers, and dates from the evidence.\n- The final answer must be a short, specific value (a name, number, place, date, or entity) \u2014 not a sentence or explanation.\n- If the evidence does not contain the answer, still give your best short answer based on what is available.\n- Never return 'not determinable' or 'unsupported' \u2014 always return a concrete answer.\n\nReturn JSON: {\"steps\": \"Step 1: ... Step 2: ...\", \"answer\": \"short final answer\", \"_evidence_citations\": [{\"document_id\": \"...\", \"title\": \"...\", \"sentence_indices\": [0], \"fact\": \"...\"}]}\nReturn JSON only.",
+            "raw_response": "```json\n{\n \"steps\": \"Step 1: The Quick Fuck is a layered shooter made from one part coffee liqueur like Kahlua, one part cold Midori liqueur and one part Baileys Irish Cream, with the Baileys floating on top of the Kahlua and the Midori layered on top of the Baileys, totaling 3 layers. Step 2: The provided text for Ti' Punch describes it as a rum-based mixed drink but does not mention it being layered.\",\n \"answer\": \"Yes\",\n \"_evidence_citations\": [\n  {\n   \"document_id\": \"context-2\",\n   \"title\": \"Quick Fuck\",\n   \"sentence_indices\": [\n    0,\n    1,\n    2\n   ],\n   \"fact\": \"A Quick Fuck is a layered shooter made from one part coffee liqueur like Kahlua, one part cold Midori liqueur and one part Baileys Irish Cream. The Baileys is poured off the back of a bar spoon so it \\\"floats\\\" on top of the Kahlua in a shot glass. Then slowly layer the Midori on top of the Baileys.\"\n  },\n  {\n   \"document_id\": \"context-8\",\n   \"title\": \"Ti' Punch\",\n   \"sentence_indices\": [\n    0\n   ],\n   \"fact\": \"Ti' Punch (] ; French: \\\"Petit Ponch\\\" ) literally meaning \\\"small punch,\\\" is a rum-based mixed drink\"\n  }\n ]\n}\n```",
+            "parsed_output": {
+              "steps": "Step 1: The Quick Fuck is a layered shooter made from one part coffee liqueur like Kahlua, one part cold Midori liqueur and one part Baileys Irish Cream, with the Baileys floating on top of the Kahlua and the Midori layered on top of the Baileys, totaling 3 layers. Step 2: The provided text for Ti' Punch describes it as a rum-based mixed drink but does not mention it being layered.",
+              "answer": "Yes",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-2",
+                  "title": "Quick Fuck",
+                  "sentence_indices": [
+                    0,
+                    1,
+                    2
+                  ],
+                  "fact": "A Quick Fuck is a layered shooter made from one part coffee liqueur like Kahlua, one part cold Midori liqueur and one part Baileys Irish Cream. The Baileys is poured off the back of a bar spoon so it \"floats\" on top of the Kahlua in a shot glass. Then slowly layer the Midori on top of the Baileys."
+                },
+                {
+                  "document_id": "context-8",
+                  "title": "Ti' Punch",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Ti' Punch (] ; French: \"Petit Ponch\" ) literally meaning \"small punch,\" is a rum-based mixed drink"
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "Yes"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "planner_assigned_sources",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-2",
+                  "title": "Quick Fuck",
+                  "text": "A Quick Fuck is a layered shooter made from one part coffee liqueur like Kahlua, one part cold Midori liqueur and one part Baileys Irish Cream. The Baileys is poured off the back of a bar spoon so it \"floats\" on top of the Kahlua in a shot glass. Then slowly layer the Midori on top of the Baileys. Note that Baileys does not have to be used; any type of Irish Cream will do.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "A Quick Fuck is a layered shooter made from one part coffee liqueur like Kahlua, one part cold Midori liqueur and one part Baileys Irish Cream.",
+                      " The Baileys is poured off the back of a bar spoon so it \"floats\" on top of the Kahlua in a shot glass.",
+                      " Then slowly layer the Midori on top of the Baileys.",
+                      " Note that Baileys does not have to be used; any type of Irish Cream will do."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Ti' Punch",
+                  "text": "Ti' Punch (] ; French: \"Petit Ponch\" ) literally meaning \"small punch,\" is a rum-based mixed drink that is especially popular in Martinique, Guadeloupe, Haiti, French Guiana and other French-speaking Caribbean islands. It is very similar to the daiquiri, which is usually identified with Cuba.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Ti' Punch (] ; French: \"Petit Ponch\" ) literally meaning \"small punch,\" is a rum-based mixed drink that is especially popular in Martinique, Guadeloupe, Haiti, French Guiana and other French-speaking Caribbean islands.",
+                      " It is very similar to the daiquiri, which is usually identified with Cuba."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-2",
+                "title": "Quick Fuck",
+                "sentence_indices": [
+                  0,
+                  1,
+                  2
+                ],
+                "fact": "A Quick Fuck is a layered shooter made from one part coffee liqueur like Kahlua, one part cold Midori liqueur and one part Baileys Irish Cream. The Baileys is poured off the back of a bar spoon so it \"floats\" on top of the Kahlua in a shot glass. Then slowly layer the Midori on top of the Baileys."
+              },
+              {
+                "document_id": "context-8",
+                "title": "Ti' Punch",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Ti' Punch (] ; French: \"Petit Ponch\" ) literally meaning \"small punch,\" is a rum-based mixed drink"
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-2",
+                  "title": "Quick Fuck",
+                  "sentence_indices": [
+                    0,
+                    1,
+                    2
+                  ],
+                  "fact": "A Quick Fuck is a layered shooter made from one part coffee liqueur like Kahlua, one part cold Midori liqueur and one part Baileys Irish Cream. The Baileys is poured off the back of a bar spoon so it \"floats\" on top of the Kahlua in a shot glass. Then slowly layer the Midori on top of the Baileys."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Quick Fuck",
+                    "sentence_index": 0
+                  },
+                  {
+                    "title": "Quick Fuck",
+                    "sentence_index": 2
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-8",
+                  "title": "Ti' Punch",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Ti' Punch (] ; French: \"Petit Ponch\" ) literally meaning \"small punch,\" is a rum-based mixed drink"
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Ti' Punch",
+                    "sentence_index": 0
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": null,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Yes"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 6071.654687009868,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "google/gemma-4-31B-it",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 180.0,
+            "max_retries": 8,
+            "retry_initial_delay_seconds": 2.0,
+            "retry_max_delay_seconds": 120.0
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1,
+            "planner_mode": "simple"
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false,
+            "ltm_conversation_turn_format": "text"
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "empty_prediction_retries": 1,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: How many layers does the drink Quick Fuck have?\\nfact_lookup\\npending\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: How many layers does the drink Ti' Punch have?\\nfact_lookup\\npending\"]\n  click q2 dagqaSelectGraphNode\n  q3[\"q3: Does the drink Quick Fuck have more layers than the drink Ti\\nsynthesis\\npending\"]\n  click q3 dagqaSelectGraphNode\n  q1 --> q3\n  q2 --> q3"
+      },
+      "error": null,
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0
+    },
+    {
+      "id": "5a8eb63455429917b4a5bdb7",
+      "question": "With which American musician, singer-songwriter, and multi-instrumentalist from Berklee College of Music did Jonny Browning collaborate?",
+      "gold_answer": "St. Vincent",
+      "prediction": "St. Vincent",
+      "raw_prediction": null,
+      "metric_scores": {
+        "exact_match": 1.0,
+        "f1": 1.0,
+        "cosine_sim": 1.0,
+        "context_cosine_sim": 1.0,
+        "mini_l6_cosine_sim": 1.0,
+        "mini_l6_context_cosine_sim": 1.0,
+        "multi_qa_mpnet_cosine_sim": 1.0,
+        "gte_base_cosine_sim": 1.0,
+        "bge_base_cosine_sim": 1.0,
+        "e5_base_cosine_sim": 1.0,
+        "bleu": 1.0,
+        "bigram_f1": 1.0,
+        "chrf": 1.0,
+        "rouge_l": 1.0,
+        "meteor": 1.0
+      },
+      "latency_ms": 10717.016933005652,
+      "llm_call_count": 2,
+      "llm_retry_count": 0,
+      "node_count": 3,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Jonny Browning",
+          "sentence_index": 6
+        },
+        {
+          "title": "St. Vincent (musician)",
+          "sentence_index": 0
+        },
+        {
+          "title": "St. Vincent (musician)",
+          "sentence_index": 1
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 1.0,
+      "run_trace": {
+        "run_id": "cbbd960b-c355-4c38-9cdf-48fb52c29f08",
+        "question": "With which American musician, singer-songwriter, and multi-instrumentalist from Berklee College of Music did Jonny Browning collaborate?",
+        "plan": {
+          "question": "With which American musician, singer-songwriter, and multi-instrumentalist from Berklee College of Music did Jonny Browning collaborate?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "Which American musician, singer-songwriter, and multi-instru",
+              "task_type": "fact_lookup",
+              "question": "Which American musician, singer-songwriter, and multi-instrumentalist attended Berklee College of Music?",
+              "operation": "answer",
+              "depends_on": [],
+              "sources": [
+                "context-4",
+                "context-6",
+                "context-7"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}"
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "reasoning"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise answer to this sub-question."
+                  },
+                  "reasoning": {
+                    "type": "string",
+                    "description": "Brief explanation of why this answer was selected."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "Which of the musicians identified in {q1.answer} collaborate",
+              "task_type": "fact_lookup",
+              "question": "Which of the musicians identified in {q1.answer} collaborated with Jonny Browning?",
+              "operation": "answer",
+              "depends_on": [
+                "q1"
+              ],
+              "sources": [
+                "context-8"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}\n{dependencies}"
+              },
+              "input_map": {
+                "q1_answer": "q1.answer"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "reasoning"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise answer to this sub-question."
+                  },
+                  "reasoning": {
+                    "type": "string",
+                    "description": "Brief explanation of why this answer was selected."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q3",
+              "label": "With which American musician, singer-songwriter, and multi-i",
+              "task_type": "synthesis",
+              "question": "With which American musician, singer-songwriter, and multi-instrumentalist from Berklee College of Music did Jonny Browning collaborate?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q2"
+              ],
+              "sources": [
+                "context-4",
+                "context-8"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}\n{dependencies}"
+              },
+              "input_map": {
+                "q2_answer": "q2.answer"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "answer_type",
+                  "answer_source_span"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise final answer to the original user question."
+                  },
+                  "answer_type": {
+                    "type": "string",
+                    "description": "Answer type requested by the original question."
+                  },
+                  "answer_source_span": {
+                    "type": "string",
+                    "description": "Shortest evidence span supporting the final answer."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q3"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "ltm"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "ltm",
+            "label": "Least-to-Most execution",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": null,
+            "rendered_prompt": "Question: With which American musician, singer-songwriter, and multi-instrumentalist from Berklee College of Music did Jonny Browning collaborate?\n\nSolve step by step. For each step, find the answer in that step's evidence before moving to the next step.\n\n  Step 1: Which American musician, singer-songwriter, and multi-instrumentalist attended Berklee College of Music?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims.\n\nDocument ID: context-4\nTitle: St. Vincent (musician)\n  (0) Anne Erin \"Annie\" Clark (born September 28, 1982), better known by her stage name St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist.\n  (1)  After studying at Berklee College of Music for three years, she began her music career as a member of the Polyphonic Spree.\n  (2)  Clark was also a member of Sufjan Stevens's touring band before forming her own band in 2006.\n\nDocument ID: context-6\nTitle: Wang Leehom\n  (0) Wang Leehom (born May 17, 1976), sometimes credited as Leehom Wang, is a Chinese-American singer-songwriter, record producer, actor and film director.\n  (1)  He is currently based in Taiwan.\n  (2)  Formally trained at the Eastman School of Music, Williams College and Berklee College of Music, his musical style is known for fusing Chinese elements (such as Beijing opera, traditional styles of ethnic minorities, Chinese classical orchestra) with hip-hop and R&B.\n  (3)  Wang debuted in 1995 and since then has released over 25 albums, with sales of over 50 million copies.\n  (4)  He is also a four-time winner and 19-time nominee of Taiwan's Golden Melody Awards, the \"Grammys\" of Chinese music.\n  (5)  His sold-out concert at the 90,000 seat Beijing Bird's Nest on April 14, 2012 was the first solo pop concert to be held at the iconic venue.\n  (6)  He holds honorary doctoral degrees from both Williams College and Berklee.\n  (7)  With over 60 million followers on social media, he is one of the most followed celebrities in China (peaked as #1 most followed person in China's social media in 2014).\n\nDocument ID: context-7\nTitle: Jared Faber\n  (0) Jared Faber (also known as J-Radical) is an American musician, composer, producer and multi-instrumentalist.\n  (1)  He grew up in New York City where he attended High School of Performing Arts, and later continued his music education at Berklee College of Music, studying jazz arranging and composition.\n\n  Step 2: Which of the musicians identified in {q1.answer} collaborated with Jonny Browning?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims.\n\nDocument ID: context-8\nTitle: Jonny Browning\n  (0) Jonny Browning is an American instrumental surf musician, primarily known as touring guitarist Victor Vector for the band Man or Astro-Man?\n  (1)  Prior to his performing in the band, he also played the part of Chromo-Crunch in Man or Astro-Man?\n  (2) : Clone Project Alpha in 1997-1998.\n  (3)  He has played guitar and written songs for Sound of Humans (also featuring Birdstuff of Man or Astro-Man?\n  (4) ), Jonny and the Shamen, and The Man Made Brain.\n  (5)  He currently plays guitar and writes for Canadian instrumental surf band The Other Timelines.\n  (6)  Jonny has played in bands or recorded with members of many other bands, including: St. Vincent, The Polyphonic Spree, Drive-By Truckers, And You Will Know Us By The Trail Of Dead, Verbena, and Servotron.\n  (7)  He was born and raised in Alabama and has resided in Vancouver, BC since 2009.\n\n  Final step: Using the above answers, answer the original question.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below. Never invent document IDs, titles, or sentence indices; use only the document IDs and sentence numbers printed in this prompt.\n\nDocument ID: context-4\nTitle: St. Vincent (musician)\n  (0) Anne Erin \"Annie\" Clark (born September 28, 1982), better known by her stage name St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist.\n  (1)  After studying at Berklee College of Music for three years, she began her music career as a member of the Polyphonic Spree.\n  (2)  Clark was also a member of Sufjan Stevens's touring band before forming her own band in 2006.\n\nDocument ID: context-6\nTitle: Wang Leehom\n  (0) Wang Leehom (born May 17, 1976), sometimes credited as Leehom Wang, is a Chinese-American singer-songwriter, record producer, actor and film director.\n  (1)  He is currently based in Taiwan.\n  (2)  Formally trained at the Eastman School of Music, Williams College and Berklee College of Music, his musical style is known for fusing Chinese elements (such as Beijing opera, traditional styles of ethnic minorities, Chinese classical orchestra) with hip-hop and R&B.\n  (3)  Wang debuted in 1995 and since then has released over 25 albums, with sales of over 50 million copies.\n  (4)  He is also a four-time winner and 19-time nominee of Taiwan's Golden Melody Awards, the \"Grammys\" of Chinese music.\n  (5)  His sold-out concert at the 90,000 seat Beijing Bird's Nest on April 14, 2012 was the first solo pop concert to be held at the iconic venue.\n  (6)  He holds honorary doctoral degrees from both Williams College and Berklee.\n  (7)  With over 60 million followers on social media, he is one of the most followed celebrities in China (peaked as #1 most followed person in China's social media in 2014).\n\nDocument ID: context-7\nTitle: Jared Faber\n  (0) Jared Faber (also known as J-Radical) is an American musician, composer, producer and multi-instrumentalist.\n  (1)  He grew up in New York City where he attended High School of Performing Arts, and later continued his music education at Berklee College of Music, studying jazz arranging and composition.\n\nDocument ID: context-8\nTitle: Jonny Browning\n  (0) Jonny Browning is an American instrumental surf musician, primarily known as touring guitarist Victor Vector for the band Man or Astro-Man?\n  (1)  Prior to his performing in the band, he also played the part of Chromo-Crunch in Man or Astro-Man?\n  (2) : Clone Project Alpha in 1997-1998.\n  (3)  He has played guitar and written songs for Sound of Humans (also featuring Birdstuff of Man or Astro-Man?\n  (4) ), Jonny and the Shamen, and The Man Made Brain.\n  (5)  He currently plays guitar and writes for Canadian instrumental surf band The Other Timelines.\n  (6)  Jonny has played in bands or recorded with members of many other bands, including: St. Vincent, The Polyphonic Spree, Drive-By Truckers, And You Will Know Us By The Trail Of Dead, Verbena, and Servotron.\n  (7)  He was born and raised in Alabama and has resided in Vancouver, BC since 2009.\n\n\nInstructions:\n- For each step, find the specific entity, value, or fact in the evidence.\n- Copy exact names, numbers, and dates from the evidence.\n- The final answer must be a short, specific value (a name, number, place, date, or entity) \u2014 not a sentence or explanation.\n- If the evidence does not contain the answer, still give your best short answer based on what is available.\n- Never return 'not determinable' or 'unsupported' \u2014 always return a concrete answer.\n\nReturn JSON: {\"steps\": \"Step 1: ... Step 2: ...\", \"answer\": \"short final answer\", \"_evidence_citations\": [{\"document_id\": \"...\", \"title\": \"...\", \"sentence_indices\": [0], \"fact\": \"...\"}]}\nReturn JSON only.",
+            "raw_response": "```json\n{\n \"steps\": \"Step 1: Anne Erin \\\"Annie\\\" Clark (better known as St. Vincent), Wang Leehom, and Jared Faber are American musicians who attended Berklee College of Music. Step 2: Jonny Browning has played in bands or recorded with St. Vincent.\",\n \"answer\": \"St. Vincent\",\n \"_evidence_citations\": [\n  {\n   \"document_id\": \"context-4\",\n   \"title\": \"St. Vincent (musician)\",\n   \"sentence_indices\": [\n    0,\n    1\n   ],\n   \"fact\": \"Anne Erin \\\"Annie\\\" Clark (born September 28, 1982), better known by her stage name St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist. After studying at Berklee College of Music for three years, she began her music career as a member of the Polyphonic Spree.\"\n  },\n  {\n   \"document_id\": \"context-8\",\n   \"title\": \"Jonny Browning\",\n   \"sentence_indices\": [\n    6\n   ],\n   \"fact\": \"Jonny has played in bands or recorded with members of many other bands, including: St. Vincent, The Polyphonic Spree, Drive-By Truckers, And You Will Know Us By The Trail Of Dead, Verbena, and Servotron.\"\n  }\n ]\n}\n```",
+            "parsed_output": {
+              "steps": "Step 1: Anne Erin \"Annie\" Clark (better known as St. Vincent), Wang Leehom, and Jared Faber are American musicians who attended Berklee College of Music. Step 2: Jonny Browning has played in bands or recorded with St. Vincent.",
+              "answer": "St. Vincent",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-4",
+                  "title": "St. Vincent (musician)",
+                  "sentence_indices": [
+                    0,
+                    1
+                  ],
+                  "fact": "Anne Erin \"Annie\" Clark (born September 28, 1982), better known by her stage name St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist. After studying at Berklee College of Music for three years, she began her music career as a member of the Polyphonic Spree."
+                },
+                {
+                  "document_id": "context-8",
+                  "title": "Jonny Browning",
+                  "sentence_indices": [
+                    6
+                  ],
+                  "fact": "Jonny has played in bands or recorded with members of many other bands, including: St. Vincent, The Polyphonic Spree, Drive-By Truckers, And You Will Know Us By The Trail Of Dead, Verbena, and Servotron."
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "St. Vincent"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "planner_assigned_sources",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-4",
+                  "title": "St. Vincent (musician)",
+                  "text": "Anne Erin \"Annie\" Clark (born September 28, 1982), better known by her stage name St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist. After studying at Berklee College of Music for three years, she began her music career as a member of the Polyphonic Spree. Clark was also a member of Sufjan Stevens's touring band before forming her own band in 2006.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Anne Erin \"Annie\" Clark (born September 28, 1982), better known by her stage name St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist.",
+                      " After studying at Berklee College of Music for three years, she began her music career as a member of the Polyphonic Spree.",
+                      " Clark was also a member of Sufjan Stevens's touring band before forming her own band in 2006."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Wang Leehom",
+                  "text": "Wang Leehom (born May 17, 1976), sometimes credited as Leehom Wang, is a Chinese-American singer-songwriter, record producer, actor and film director. He is currently based in Taiwan. Formally trained at the Eastman School of Music, Williams College and Berklee College of Music, his musical style is known for fusing Chinese elements (such as Beijing opera, traditional styles of ethnic minorities, Chinese classical orchestra) with hip-hop and R&B. Wang debuted in 1995 and since then has released over 25 albums, with sales of over 50 million copies. He is also a four-time winner and 19-time nominee of Taiwan's Golden Melody Awards, the \"Grammys\" of Chinese music. His sold-out concert at the 90,000 seat Beijing Bird's Nest on April 14, 2012 was the first solo pop concert to be held at the iconic venue. He holds honorary doctoral degrees from both Williams College and Berklee. With over 60 million followers on social media, he is one of the most followed celebrities in China (peaked as #1 most followed person in China's social media in 2014).",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Wang Leehom (born May 17, 1976), sometimes credited as Leehom Wang, is a Chinese-American singer-songwriter, record producer, actor and film director.",
+                      " He is currently based in Taiwan.",
+                      " Formally trained at the Eastman School of Music, Williams College and Berklee College of Music, his musical style is known for fusing Chinese elements (such as Beijing opera, traditional styles of ethnic minorities, Chinese classical orchestra) with hip-hop and R&B.",
+                      " Wang debuted in 1995 and since then has released over 25 albums, with sales of over 50 million copies.",
+                      " He is also a four-time winner and 19-time nominee of Taiwan's Golden Melody Awards, the \"Grammys\" of Chinese music.",
+                      " His sold-out concert at the 90,000 seat Beijing Bird's Nest on April 14, 2012 was the first solo pop concert to be held at the iconic venue.",
+                      " He holds honorary doctoral degrees from both Williams College and Berklee.",
+                      " With over 60 million followers on social media, he is one of the most followed celebrities in China (peaked as #1 most followed person in China's social media in 2014)."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Jared Faber",
+                  "text": "Jared Faber (also known as J-Radical) is an American musician, composer, producer and multi-instrumentalist. He grew up in New York City where he attended High School of Performing Arts, and later continued his music education at Berklee College of Music, studying jazz arranging and composition.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Jared Faber (also known as J-Radical) is an American musician, composer, producer and multi-instrumentalist.",
+                      " He grew up in New York City where he attended High School of Performing Arts, and later continued his music education at Berklee College of Music, studying jazz arranging and composition."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Jonny Browning",
+                  "text": "Jonny Browning is an American instrumental surf musician, primarily known as touring guitarist Victor Vector for the band Man or Astro-Man? Prior to his performing in the band, he also played the part of Chromo-Crunch in Man or Astro-Man?: Clone Project Alpha in 1997-1998. He has played guitar and written songs for Sound of Humans (also featuring Birdstuff of Man or Astro-Man?), Jonny and the Shamen, and The Man Made Brain. He currently plays guitar and writes for Canadian instrumental surf band The Other Timelines. Jonny has played in bands or recorded with members of many other bands, including: St. Vincent, The Polyphonic Spree, Drive-By Truckers, And You Will Know Us By The Trail Of Dead, Verbena, and Servotron. He was born and raised in Alabama and has resided in Vancouver, BC since 2009.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Jonny Browning is an American instrumental surf musician, primarily known as touring guitarist Victor Vector for the band Man or Astro-Man?",
+                      " Prior to his performing in the band, he also played the part of Chromo-Crunch in Man or Astro-Man?",
+                      ": Clone Project Alpha in 1997-1998.",
+                      " He has played guitar and written songs for Sound of Humans (also featuring Birdstuff of Man or Astro-Man?",
+                      "), Jonny and the Shamen, and The Man Made Brain.",
+                      " He currently plays guitar and writes for Canadian instrumental surf band The Other Timelines.",
+                      " Jonny has played in bands or recorded with members of many other bands, including: St. Vincent, The Polyphonic Spree, Drive-By Truckers, And You Will Know Us By The Trail Of Dead, Verbena, and Servotron.",
+                      " He was born and raised in Alabama and has resided in Vancouver, BC since 2009."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-4",
+                "title": "St. Vincent (musician)",
+                "sentence_indices": [
+                  0,
+                  1
+                ],
+                "fact": "Anne Erin \"Annie\" Clark (born September 28, 1982), better known by her stage name St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist. After studying at Berklee College of Music for three years, she began her music career as a member of the Polyphonic Spree."
+              },
+              {
+                "document_id": "context-8",
+                "title": "Jonny Browning",
+                "sentence_indices": [
+                  6
+                ],
+                "fact": "Jonny has played in bands or recorded with members of many other bands, including: St. Vincent, The Polyphonic Spree, Drive-By Truckers, And You Will Know Us By The Trail Of Dead, Verbena, and Servotron."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-4",
+                  "title": "St. Vincent (musician)",
+                  "sentence_indices": [
+                    0,
+                    1
+                  ],
+                  "fact": "Anne Erin \"Annie\" Clark (born September 28, 1982), better known by her stage name St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist. After studying at Berklee College of Music for three years, she began her music career as a member of the Polyphonic Spree."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "St. Vincent (musician)",
+                    "sentence_index": 0
+                  },
+                  {
+                    "title": "St. Vincent (musician)",
+                    "sentence_index": 1
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-8",
+                  "title": "Jonny Browning",
+                  "sentence_indices": [
+                    6
+                  ],
+                  "fact": "Jonny has played in bands or recorded with members of many other bands, including: St. Vincent, The Polyphonic Spree, Drive-By Truckers, And You Will Know Us By The Trail Of Dead, Verbena, and Servotron."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Jonny Browning",
+                    "sentence_index": 6
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": null,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "St. Vincent"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 7072.132239001803,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "google/gemma-4-31B-it",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 180.0,
+            "max_retries": 8,
+            "retry_initial_delay_seconds": 2.0,
+            "retry_max_delay_seconds": 120.0
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1,
+            "planner_mode": "simple"
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false,
+            "ltm_conversation_turn_format": "text"
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "empty_prediction_retries": 1,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: Which American musician, singer-songwriter, and multi-instru\\nfact_lookup\\npending\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: Which of the musicians identified in {q1.answer} collaborate\\nfact_lookup\\npending\"]\n  click q2 dagqaSelectGraphNode\n  q1 --> q2\n  q3[\"q3: With which American musician, singer-songwriter, and multi-i\\nsynthesis\\npending\"]\n  click q3 dagqaSelectGraphNode\n  q2 --> q3"
+      },
+      "error": null,
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0
+    },
+    {
+      "id": "5a7be2595542997c3ec972ac",
+      "question": "Who was born earlier, Emma Bull or Virginia Woolf?",
+      "gold_answer": "Adeline Virginia Woolf",
+      "prediction": "Virginia Woolf",
+      "raw_prediction": null,
+      "metric_scores": {
+        "exact_match": 0.0,
+        "f1": 0.8,
+        "cosine_sim": 0.8399142026901245,
+        "context_cosine_sim": 0.7011175155639648,
+        "mini_l6_cosine_sim": 0.9161258935928345,
+        "mini_l6_context_cosine_sim": 0.6348953247070312,
+        "multi_qa_mpnet_cosine_sim": 0.8139036893844604,
+        "gte_base_cosine_sim": 0.93798828125,
+        "bge_base_cosine_sim": 0.8393278121948242,
+        "e5_base_cosine_sim": 0.9401494860649109,
+        "bleu": 0.6065306597126334,
+        "bigram_f1": 0.6666666666666666,
+        "chrf": 0.6391511842755736,
+        "rouge_l": 0.8,
+        "meteor": 0.6465517241379309
+      },
+      "latency_ms": 9721.950941995601,
+      "llm_call_count": 2,
+      "llm_retry_count": 0,
+      "node_count": 3,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Emma Bull",
+          "sentence_index": 0
+        },
+        {
+          "title": "Virginia Woolf",
+          "sentence_index": 0
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 1.0,
+      "run_trace": {
+        "run_id": "2ed80a63-356c-4143-beb8-41aff23d7ad5",
+        "question": "Who was born earlier, Emma Bull or Virginia Woolf?",
+        "plan": {
+          "question": "Who was born earlier, Emma Bull or Virginia Woolf?",
+          "nodes": [
+            {
+              "id": "q1",
+              "label": "When was Emma Bull born?",
+              "task_type": "fact_lookup",
+              "question": "When was Emma Bull born?",
+              "operation": "answer",
+              "depends_on": [],
+              "sources": [
+                "context-1"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}"
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "reasoning"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise answer to this sub-question."
+                  },
+                  "reasoning": {
+                    "type": "string",
+                    "description": "Brief explanation of why this answer was selected."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q2",
+              "label": "When was Virginia Woolf born?",
+              "task_type": "fact_lookup",
+              "question": "When was Virginia Woolf born?",
+              "operation": "answer",
+              "depends_on": [],
+              "sources": [
+                "context-2"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}"
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "reasoning"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise answer to this sub-question."
+                  },
+                  "reasoning": {
+                    "type": "string",
+                    "description": "Brief explanation of why this answer was selected."
+                  }
+                }
+              }
+            },
+            {
+              "id": "q3",
+              "label": "Who was born earlier, Emma Bull (born {q1.answer}) or Virgin",
+              "task_type": "synthesis",
+              "question": "Who was born earlier, Emma Bull (born {q1.answer}) or Virginia Woolf (born {q2.answer})?",
+              "operation": "synthesize",
+              "depends_on": [
+                "q1",
+                "q2"
+              ],
+              "sources": [
+                "context-1",
+                "context-2"
+              ],
+              "prompt": {
+                "system": "Return JSON only.",
+                "user_template": "Question: {resolved_question}\n{dependencies}"
+              },
+              "input_map": {
+                "q1_answer": "q1.answer",
+                "q2_answer": "q2.answer"
+              },
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "answer_type",
+                  "answer_source_span"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "description": "Concise final answer to the original user question."
+                  },
+                  "answer_type": {
+                    "type": "string",
+                    "description": "Answer type requested by the original question."
+                  },
+                  "answer_source_span": {
+                    "type": "string",
+                    "description": "Shortest evidence span supporting the final answer."
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "q3"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "ltm"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "ltm",
+            "label": "Least-to-Most execution",
+            "task_type": "synthesis",
+            "operation": "synthesize",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": null,
+            "rendered_prompt": "Question: Who was born earlier, Emma Bull or Virginia Woolf?\n\nSolve step by step. For each step, find the answer in that step's evidence before moving to the next step.\n\n  Step 1: When was Emma Bull born?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims.\n\nDocument ID: context-1\nTitle: Emma Bull\n  (0) Emma Bull (born December 13, 1954) is an American science fiction and fantasy author.\n  (1)  Her novels include the Hugo- and Nebula-nominated \"Bone Dance\" and the urban fantasy \"War for the Oaks\".\n  (2)  She is also known for a series of anthologies set in Liavek, a shared universe that she created with her husband Will Shetterly.\n  (3)  As a singer, songwriter, and guitarist, she has been a member of the Minneapolis-based folk/rock bands Cats Laughing and The Flash Girls.\n\n  Step 2: When was Virginia Woolf born?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims.\n\nDocument ID: context-2\nTitle: Virginia Woolf\n  (0) Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941) was an English writer who is considered one of the foremost modernists of the twentieth century, and a pioneer in the use of stream of consciousness as a narrative device.\n  (1)  Born in an affluent household in Kensington, London, she attended the King's College London and was acquainted with the early reformers of women's higher education.\n\n  Final step: Using the above answers, answer the original question.\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below. Never invent document IDs, titles, or sentence indices; use only the document IDs and sentence numbers printed in this prompt.\n\nDocument ID: context-1\nTitle: Emma Bull\n  (0) Emma Bull (born December 13, 1954) is an American science fiction and fantasy author.\n  (1)  Her novels include the Hugo- and Nebula-nominated \"Bone Dance\" and the urban fantasy \"War for the Oaks\".\n  (2)  She is also known for a series of anthologies set in Liavek, a shared universe that she created with her husband Will Shetterly.\n  (3)  As a singer, songwriter, and guitarist, she has been a member of the Minneapolis-based folk/rock bands Cats Laughing and The Flash Girls.\n\nDocument ID: context-2\nTitle: Virginia Woolf\n  (0) Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941) was an English writer who is considered one of the foremost modernists of the twentieth century, and a pioneer in the use of stream of consciousness as a narrative device.\n  (1)  Born in an affluent household in Kensington, London, she attended the King's College London and was acquainted with the early reformers of women's higher education.\n\n\nInstructions:\n- For each step, find the specific entity, value, or fact in the evidence.\n- Copy exact names, numbers, and dates from the evidence.\n- The final answer must be a short, specific value (a name, number, place, date, or entity) \u2014 not a sentence or explanation.\n- If the evidence does not contain the answer, still give your best short answer based on what is available.\n- Never return 'not determinable' or 'unsupported' \u2014 always return a concrete answer.\n\nReturn JSON: {\"steps\": \"Step 1: ... Step 2: ...\", \"answer\": \"short final answer\", \"_evidence_citations\": [{\"document_id\": \"...\", \"title\": \"...\", \"sentence_indices\": [0], \"fact\": \"...\"}]}\nReturn JSON only.",
+            "raw_response": "```json\n{\n \"steps\": \"Step 1: Emma Bull was born December 13, 1954. Step 2: Virginia Woolf was born 25 January 1882.\",\n \"answer\": \"Virginia Woolf\",\n \"_evidence_citations\": [\n  {\n   \"document_id\": \"context-1\",\n   \"title\": \"Emma Bull\",\n   \"sentence_indices\": [\n    0\n   ],\n   \"fact\": \"Emma Bull (born December 13, 1954)\"\n  },\n  {\n   \"document_id\": \"context-2\",\n   \"title\": \"Virginia Woolf\",\n   \"sentence_indices\": [\n    0\n   ],\n   \"fact\": \"Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941)\"\n  }\n ]\n}\n```",
+            "parsed_output": {
+              "steps": "Step 1: Emma Bull was born December 13, 1954. Step 2: Virginia Woolf was born 25 January 1882.",
+              "answer": "Virginia Woolf",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-1",
+                  "title": "Emma Bull",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Emma Bull (born December 13, 1954)"
+                },
+                {
+                  "document_id": "context-2",
+                  "title": "Virginia Woolf",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941)"
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "Virginia Woolf"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "planner_assigned_sources",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-1",
+                  "title": "Emma Bull",
+                  "text": "Emma Bull (born December 13, 1954) is an American science fiction and fantasy author. Her novels include the Hugo- and Nebula-nominated \"Bone Dance\" and the urban fantasy \"War for the Oaks\". She is also known for a series of anthologies set in Liavek, a shared universe that she created with her husband Will Shetterly. As a singer, songwriter, and guitarist, she has been a member of the Minneapolis-based folk/rock bands Cats Laughing and The Flash Girls.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Emma Bull (born December 13, 1954) is an American science fiction and fantasy author.",
+                      " Her novels include the Hugo- and Nebula-nominated \"Bone Dance\" and the urban fantasy \"War for the Oaks\".",
+                      " She is also known for a series of anthologies set in Liavek, a shared universe that she created with her husband Will Shetterly.",
+                      " As a singer, songwriter, and guitarist, she has been a member of the Minneapolis-based folk/rock bands Cats Laughing and The Flash Girls."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Virginia Woolf",
+                  "text": "Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941) was an English writer who is considered one of the foremost modernists of the twentieth century, and a pioneer in the use of stream of consciousness as a narrative device. Born in an affluent household in Kensington, London, she attended the King's College London and was acquainted with the early reformers of women's higher education.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941) was an English writer who is considered one of the foremost modernists of the twentieth century, and a pioneer in the use of stream of consciousness as a narrative device.",
+                      " Born in an affluent household in Kensington, London, she attended the King's College London and was acquainted with the early reformers of women's higher education."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-1",
+                "title": "Emma Bull",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Emma Bull (born December 13, 1954)"
+              },
+              {
+                "document_id": "context-2",
+                "title": "Virginia Woolf",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941)"
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-1",
+                  "title": "Emma Bull",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Emma Bull (born December 13, 1954)"
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Emma Bull",
+                    "sentence_index": 0
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-2",
+                  "title": "Virginia Woolf",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941)"
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Virginia Woolf",
+                    "sentence_index": 0
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": null,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Virginia Woolf"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 3211.6168220090913,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "google/gemma-4-31B-it",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 180.0,
+            "max_retries": 8,
+            "retry_initial_delay_seconds": 2.0,
+            "retry_max_delay_seconds": 120.0
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1,
+            "planner_mode": "simple"
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false,
+            "ltm_conversation_turn_format": "text"
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "empty_prediction_retries": 1,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  q1[\"q1: When was Emma Bull born?\\nfact_lookup\\npending\"]\n  click q1 dagqaSelectGraphNode\n  q2[\"q2: When was Virginia Woolf born?\\nfact_lookup\\npending\"]\n  click q2 dagqaSelectGraphNode\n  q3[\"q3: Who was born earlier, Emma Bull (born {q1.answer}) or Virgin\\nsynthesis\\npending\"]\n  click q3 dagqaSelectGraphNode\n  q1 --> q3\n  q2 --> q3"
+      },
+      "error": null,
+      "exact_match": 0.0,
+      "f1": 0.8,
+      "cosine_sim": 0.8399142026901245
+    }
+  ],
+  "metrics": {
+    "example_count": 4.0,
+    "success_count": 4.0,
+    "failure_count": 0.0,
+    "error_count": 0.0,
+    "exact_match": 0.5,
+    "f1": 0.9222222222222223,
+    "cosine_sim": 0.8789030462503433,
+    "context_cosine_sim": 0.8905519098043442,
+    "mini_l6_cosine_sim": 0.9316884577274323,
+    "mini_l6_context_cosine_sim": 0.8596698939800262,
+    "multi_qa_mpnet_cosine_sim": 0.8801994025707245,
+    "gte_base_cosine_sim": 0.9722900390625,
+    "bge_base_cosine_sim": 0.9291196167469025,
+    "e5_base_cosine_sim": 0.969723716378212,
+    "bleu": 0.8415915863410565,
+    "bigram_f1": 0.8809523809523809,
+    "chrf": 0.8890975596832306,
+    "rouge_l": 0.9222222222222223,
+    "meteor": 0.9036348822539949,
+    "avg_latency_ms": 18328.44571474925,
+    "p50_latency_ms": 12283.395834994735,
+    "total_llm_call_count": 8.0,
+    "total_llm_retry_count": 0.0,
+    "avg_llm_retry_count": 0.0,
+    "avg_llm_call_count": 2.0,
+    "avg_node_count": 2.75,
+    "avg_graph_depth": 0.0,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.0,
+    "total_evidence_citation_count": 8.0,
+    "correct_evidence_citation_count": 8.0,
+    "wrong_evidence_citation_count": 0.0,
+    "wrong_supporting_text_rate": 0.0,
+    "avg_gold_supporting_fact_recall": 0.9375,
+    "total_runtime_ms": 40663.10995200183
+  }
+}

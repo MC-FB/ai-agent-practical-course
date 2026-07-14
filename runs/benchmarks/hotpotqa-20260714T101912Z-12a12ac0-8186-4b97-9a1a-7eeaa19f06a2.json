@@ -1,0 +1,1713 @@
+{
+  "run_id": "12a12ac0-8186-4b97-9a1a-7eeaa19f06a2",
+  "name": null,
+  "comparison_group_id": "67c110cf-9187-4033-978e-f7565162dd92",
+  "system": "direct_llm",
+  "limit": 4,
+  "provider": "cluster",
+  "model": "mistralai/Mistral-Medium-3.5-128B",
+  "dataset": "hotpotqa",
+  "split": "validation",
+  "subset": "validation",
+  "dataset_size": 7405,
+  "seed": 188044012,
+  "max_parallel_examples": 4,
+  "max_nodes": 10,
+  "max_depth": 3,
+  "created_at": "2026-07-14T10:19:12Z",
+  "output_path": "runs/benchmarks/hotpotqa-20260714T101912Z-12a12ac0-8186-4b97-9a1a-7eeaa19f06a2.json",
+  "total_runtime_ms": 14267.567857998074,
+  "records": [
+    {
+      "id": "5a75e3845542994ccc91864e",
+      "question": "What award did Flossie Bailey receive that was named after the first female self-made millionaire in America?",
+      "gold_answer": "Madam C. J. Walker",
+      "prediction": "Madam C. J. Walker Medal",
+      "raw_prediction": null,
+      "metric_scores": {
+        "exact_match": 0.0,
+        "f1": 0.888888888888889,
+        "cosine_sim": 0.6756979823112488,
+        "context_cosine_sim": 0.8610901236534119,
+        "mini_l6_cosine_sim": 0.8106279373168945,
+        "mini_l6_context_cosine_sim": 0.8037842512130737,
+        "multi_qa_mpnet_cosine_sim": 0.7068939208984375,
+        "gte_base_cosine_sim": 0.951171875,
+        "bge_base_cosine_sim": 0.8771506547927856,
+        "e5_base_cosine_sim": 0.938745379447937,
+        "bleu": 0.7598356856515925,
+        "bigram_f1": 0.8571428571428571,
+        "chrf": 0.9172390544573487,
+        "rouge_l": 0.888888888888889,
+        "meteor": 0.9679878048780488
+      },
+      "latency_ms": 14148.517866997281,
+      "llm_call_count": 1,
+      "llm_retry_count": 0,
+      "node_count": 1,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Flossie Bailey",
+          "sentence_index": 3
+        },
+        {
+          "title": "Madam C. J. Walker",
+          "sentence_index": 1
+        }
+      ],
+      "evidence_citation_count": 3,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 1,
+      "wrong_supporting_text_rate": 0.3333333333333333,
+      "gold_supporting_fact_recall": 1.0,
+      "run_trace": {
+        "run_id": "4e979c4f-3715-4de7-8997-a353a8597610",
+        "question": "What award did Flossie Bailey receive that was named after the first female self-made millionaire in America?",
+        "plan": {
+          "question": "What award did Flossie Bailey receive that was named after the first female self-made millionaire in America?",
+          "nodes": [
+            {
+              "id": "single_prompt",
+              "label": "Single prompt",
+              "task_type": "synthesis",
+              "question": "What award did Flossie Bailey receive that was named after the first female self-made millionaire in America?",
+              "operation": "answer",
+              "depends_on": [],
+              "sources": [],
+              "prompt": {
+                "system": "Answer the question concisely using only the supplied sources.",
+                "user_template": "Question: What award did Flossie Bailey receive that was named after the first female self-made millionaire in America?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below. Never invent document IDs, titles, or sentence indices; use only the document IDs and sentence numbers printed in this prompt.\n\nDocument ID: context-0\nTitle: A Hazard of New Fortunes\n  (0) The book, which takes place in late 19th century New York City, tells the story of Basil March, who finds himself in the middle of a dispute between his employer, a self-made millionaire named Dryfoos, and his old German teacher, an advocate for workers' rights named Lindau.\n  (1)  The main character of the novel, Basil March, provides the main perspective throughout the novel.\n  (2)  He resides in Boston with his wife and children until he is persuaded by his idealistic friend Fulkerson to move to New York to help him start a new magazine, where the writers benefit in a primitive form of profit sharing.\n  (3)  After some deliberation, the Marches move to New York and begin a rather extensive search for a perfect apartment.\n  (4)  After many exhausting weeks of searching, Basil finally settles on an apartment full of what he and his wife refer to as \"gimcrackery\"\u2014trinkets and decorations that do not appeal to their upper-middle-class tastes.\n\nDocument ID: context-1\nTitle: Villa Lewaro\n  (0) Villa Lewaro, formerly known as the Anne E. Poth Home, is a 34-room 20000 sqft mansion located at Fargo Lane and North Broadway (US 9) in Irvington, New York.\n  (1)  It was the home of Madam C. J. Walker from 1918 to 1919.\n  (2)  Walker was the first American female and first African-American female self-made millionaire, and \"the world's most successful female entrepreneur of her time.\"\n  (3)  The mansion is an Italianate villa house designed for Walker by Vertner Tandy, the first African-American architect registered in New York, and has been considered to be one of his greatest works.\n  (4)  It was constructed during 1916\u20131918 at an estimated cost of $250,000, and was furnished lavishly.\n  (5)  The name Villa Lewaro was coined by a distinguished visitor, Enrico Caruso, from the first two letters of each word in Lelia Walker Robinson, the name of Walker's daughter, who later went by the name of A'Lelia Walker.\n\nDocument ID: context-2\nTitle: Flossie Bailey\n  (0) Katherine \"Flossie\" Bailey (1895\u2013February 6, 1952) was a civil rights and anti-lynching activist from Indiana.\n  (1)  She established a local chapter of the National Association for the Advancement of Colored People in Marion, Indiana, in 1918 and became especially active fighting for justice and equality following the double lynching of Thomas Shipp and Abram Smith in 1930.\n  (2)  As president of the Indiana NAACP, Bailey was pivotal in lobbying for passage of a statewide anti-lynching law in Indiana in 1931 and advocated for a similar bill at the national level.\n  (3)  She was also a recipient of the national NAACP's Madam C. J. Walker Medal.\n\nDocument ID: context-3\nTitle: Madam C. J. Walker\n  (0) Sarah Breedlove (December 23, 1867 \u2013 May 25, 1919), known as Madam C. J. Walker, was an African American entrepreneur, philanthropist, and a political and social activist.\n  (1)  Eulogized as the first female self-made millionaire in America, she became one of the wealthiest African American women in the country, \"the world's most successful female entrepreneur of her time,\" and one of the most successful African-American business owners ever.\n\nDocument ID: context-4\nTitle: James Tyson\n  (0) James Tyson (8 April 1819 \u2013 4 December 1898) was an Australian pastoralist.\n  (1)  He is regarded as Australia's first self-made millionaire.\n  (2)  His name became a byword for reticence, wealth and astute dealing.\n\nDocument ID: context-5\nTitle: Rex Cauble\n  (0) Rex Cauble (August 15, 1913\u2014June 23, 2003) was born in Vaughan, Texas to cotton farmers, Lou Butts and Fred C. \"Buddy\" Cauble.\n  (1)  He was a self-made millionaire known for his flamboyance as a Texas-size businessman who struck it rich as a wildcatter.\n  (2)  In the 1970s, he founded two high-end retail western wear stores comprising Cutter Bill Western World named after Cauble's world champion cutting horse, Cutter Bill; one store was located in Houston, the other in Dallas.\n\nDocument ID: context-6\nTitle: Sir Alexander MacRobert, 1st Baronet\n  (0) Sir Alexander MacRobert was a self-made millionaire from Aberdeen.\n  (1)  He came from a working-class background and left school when he was twelve to start his working life sweeping floors in Stoneywood Paper Mill; his education was continued by attending evening classes and he gained several qualifications as his early career progressed.\n  (2)  At the beginning of 1884 MacRobert travelled to India to take up employment in a woollen mill in Cawnpore, or Kanpur as it is now known.\n  (3)  By 1920 he had built up a portfolio of companies enabling him to found the British India Corporation.\n  (4)  He was raised to a baronet at the beginning of 1922, choosing to be named Sir Alexander MacRobert of Cawnpore and Cromar of the County of Aberdeen.\n\nDocument ID: context-7\nTitle: Love Lies Bleeding (TV drama)\n  (0) Love Lies Bleeding is a two-part British thriller crime drama, first broadcast on ITV between 27 and 28 February 2006.\n  (1)  The programme follows the story of self-made millionaire Mark Terry (Martin Kemp), whose life is turned upside down by the unexpected return of an old school friend, Stuart Milburn (Hugo Speer), who is determined to seek revenge for Terry's failure to acknowledge his part in the manslaughter of their schoolteacher, who collapsed and died after a schoolboy prank went horribly wrong.\n  (2)  As Milburn sets up a chain of events to ensure Terry's downfall, he finds he is slowly running out of friends - or people to turn to, and his only hope is to go on the run.\n  (3)  The programme was broadcast over two nights, with each part earning 5.81 and 4.56 million viewers respectively.\n  (4)  \"Love Lies Bleeding\" was released on DVD in Australia on 3 September 2009 by Roadshow Entertainment.\n\nDocument ID: context-8\nTitle: MacRobert baronets\n  (0) The MacRobert Baronetcy, of Douneside in the County of Aberdeen, was a title in the Baronetage of the United Kingdom.\n  (1)  It was created on 5 April 1922 for Alexander MacRobert, a self-made millionaire.\n  (2)  He was succeeded by his eldest son Alasdair in June of that year.\n  (3)  Tragedy struck the family again when Alasdair was killed in a flying accident in 1938, and the title passed to his younger brother Roderic.\n  (4)  In May 1941 Roderic was killed in action whilst flying a Hawker Hurricane fighter in the Middle East, and just over a month later on 30 June 1941, the title became extinct when the youngest brother Iain, was also killed in action whilst serving with the Royal Air Force.\n  (5)  Their mother, Rachel, Lady MacRobert (1884\u20131954), gave \u00a325,000 to purchase a Short Stirling bomber, the aircraft was named \"MacRobert's Reply\" in memory of her three sons.\n  (6)  Lady MacRobert believed that her sons had lived up to the family motto \"Virtutis Gloria Merces\" \u2013 translated as \"Honour is the Reward of Bravery\".\n  (7)  The MacRobert Award, which has been presented every year since 1969 by the Royal Academy of Engineering, is named in honour of Lady MacRobert.\n\nDocument ID: context-9\nTitle: Charles Craig (Unionist MP)\n  (0) Charles Curtis Craig (18 February 1869 \u2013 28 January 1960), was an Irish UnionIst and later Ulster Unionist politician.\n  (1)  He was Member of Parliament (MP) for constituencies in County Antrim from 1903 to 1929, taking his seat in the House of Commons of the United Kingdom.\n  (2)  The son of a self-made millionaire whisky distiller, among his brothers was Northern Ireland's first Prime Minister, The Viscount Craigavon.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "single_prompt"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "single_prompt"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "single_prompt",
+            "label": "Single prompt",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "What award did Flossie Bailey receive that was named after the first female self-made millionaire in America?",
+            "rendered_prompt": "Question: What award did Flossie Bailey receive that was named after the first female self-made millionaire in America?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below. Never invent document IDs, titles, or sentence indices; use only the document IDs and sentence numbers printed in this prompt.\n\nDocument ID: context-0\nTitle: A Hazard of New Fortunes\n  (0) The book, which takes place in late 19th century New York City, tells the story of Basil March, who finds himself in the middle of a dispute between his employer, a self-made millionaire named Dryfoos, and his old German teacher, an advocate for workers' rights named Lindau.\n  (1)  The main character of the novel, Basil March, provides the main perspective throughout the novel.\n  (2)  He resides in Boston with his wife and children until he is persuaded by his idealistic friend Fulkerson to move to New York to help him start a new magazine, where the writers benefit in a primitive form of profit sharing.\n  (3)  After some deliberation, the Marches move to New York and begin a rather extensive search for a perfect apartment.\n  (4)  After many exhausting weeks of searching, Basil finally settles on an apartment full of what he and his wife refer to as \"gimcrackery\"\u2014trinkets and decorations that do not appeal to their upper-middle-class tastes.\n\nDocument ID: context-1\nTitle: Villa Lewaro\n  (0) Villa Lewaro, formerly known as the Anne E. Poth Home, is a 34-room 20000 sqft mansion located at Fargo Lane and North Broadway (US 9) in Irvington, New York.\n  (1)  It was the home of Madam C. J. Walker from 1918 to 1919.\n  (2)  Walker was the first American female and first African-American female self-made millionaire, and \"the world's most successful female entrepreneur of her time.\"\n  (3)  The mansion is an Italianate villa house designed for Walker by Vertner Tandy, the first African-American architect registered in New York, and has been considered to be one of his greatest works.\n  (4)  It was constructed during 1916\u20131918 at an estimated cost of $250,000, and was furnished lavishly.\n  (5)  The name Villa Lewaro was coined by a distinguished visitor, Enrico Caruso, from the first two letters of each word in Lelia Walker Robinson, the name of Walker's daughter, who later went by the name of A'Lelia Walker.\n\nDocument ID: context-2\nTitle: Flossie Bailey\n  (0) Katherine \"Flossie\" Bailey (1895\u2013February 6, 1952) was a civil rights and anti-lynching activist from Indiana.\n  (1)  She established a local chapter of the National Association for the Advancement of Colored People in Marion, Indiana, in 1918 and became especially active fighting for justice and equality following the double lynching of Thomas Shipp and Abram Smith in 1930.\n  (2)  As president of the Indiana NAACP, Bailey was pivotal in lobbying for passage of a statewide anti-lynching law in Indiana in 1931 and advocated for a similar bill at the national level.\n  (3)  She was also a recipient of the national NAACP's Madam C. J. Walker Medal.\n\nDocument ID: context-3\nTitle: Madam C. J. Walker\n  (0) Sarah Breedlove (December 23, 1867 \u2013 May 25, 1919), known as Madam C. J. Walker, was an African American entrepreneur, philanthropist, and a political and social activist.\n  (1)  Eulogized as the first female self-made millionaire in America, she became one of the wealthiest African American women in the country, \"the world's most successful female entrepreneur of her time,\" and one of the most successful African-American business owners ever.\n\nDocument ID: context-4\nTitle: James Tyson\n  (0) James Tyson (8 April 1819 \u2013 4 December 1898) was an Australian pastoralist.\n  (1)  He is regarded as Australia's first self-made millionaire.\n  (2)  His name became a byword for reticence, wealth and astute dealing.\n\nDocument ID: context-5\nTitle: Rex Cauble\n  (0) Rex Cauble (August 15, 1913\u2014June 23, 2003) was born in Vaughan, Texas to cotton farmers, Lou Butts and Fred C. \"Buddy\" Cauble.\n  (1)  He was a self-made millionaire known for his flamboyance as a Texas-size businessman who struck it rich as a wildcatter.\n  (2)  In the 1970s, he founded two high-end retail western wear stores comprising Cutter Bill Western World named after Cauble's world champion cutting horse, Cutter Bill; one store was located in Houston, the other in Dallas.\n\nDocument ID: context-6\nTitle: Sir Alexander MacRobert, 1st Baronet\n  (0) Sir Alexander MacRobert was a self-made millionaire from Aberdeen.\n  (1)  He came from a working-class background and left school when he was twelve to start his working life sweeping floors in Stoneywood Paper Mill; his education was continued by attending evening classes and he gained several qualifications as his early career progressed.\n  (2)  At the beginning of 1884 MacRobert travelled to India to take up employment in a woollen mill in Cawnpore, or Kanpur as it is now known.\n  (3)  By 1920 he had built up a portfolio of companies enabling him to found the British India Corporation.\n  (4)  He was raised to a baronet at the beginning of 1922, choosing to be named Sir Alexander MacRobert of Cawnpore and Cromar of the County of Aberdeen.\n\nDocument ID: context-7\nTitle: Love Lies Bleeding (TV drama)\n  (0) Love Lies Bleeding is a two-part British thriller crime drama, first broadcast on ITV between 27 and 28 February 2006.\n  (1)  The programme follows the story of self-made millionaire Mark Terry (Martin Kemp), whose life is turned upside down by the unexpected return of an old school friend, Stuart Milburn (Hugo Speer), who is determined to seek revenge for Terry's failure to acknowledge his part in the manslaughter of their schoolteacher, who collapsed and died after a schoolboy prank went horribly wrong.\n  (2)  As Milburn sets up a chain of events to ensure Terry's downfall, he finds he is slowly running out of friends - or people to turn to, and his only hope is to go on the run.\n  (3)  The programme was broadcast over two nights, with each part earning 5.81 and 4.56 million viewers respectively.\n  (4)  \"Love Lies Bleeding\" was released on DVD in Australia on 3 September 2009 by Roadshow Entertainment.\n\nDocument ID: context-8\nTitle: MacRobert baronets\n  (0) The MacRobert Baronetcy, of Douneside in the County of Aberdeen, was a title in the Baronetage of the United Kingdom.\n  (1)  It was created on 5 April 1922 for Alexander MacRobert, a self-made millionaire.\n  (2)  He was succeeded by his eldest son Alasdair in June of that year.\n  (3)  Tragedy struck the family again when Alasdair was killed in a flying accident in 1938, and the title passed to his younger brother Roderic.\n  (4)  In May 1941 Roderic was killed in action whilst flying a Hawker Hurricane fighter in the Middle East, and just over a month later on 30 June 1941, the title became extinct when the youngest brother Iain, was also killed in action whilst serving with the Royal Air Force.\n  (5)  Their mother, Rachel, Lady MacRobert (1884\u20131954), gave \u00a325,000 to purchase a Short Stirling bomber, the aircraft was named \"MacRobert's Reply\" in memory of her three sons.\n  (6)  Lady MacRobert believed that her sons had lived up to the family motto \"Virtutis Gloria Merces\" \u2013 translated as \"Honour is the Reward of Bravery\".\n  (7)  The MacRobert Award, which has been presented every year since 1969 by the Royal Academy of Engineering, is named in honour of Lady MacRobert.\n\nDocument ID: context-9\nTitle: Charles Craig (Unionist MP)\n  (0) Charles Curtis Craig (18 February 1869 \u2013 28 January 1960), was an Irish UnionIst and later Ulster Unionist politician.\n  (1)  He was Member of Parliament (MP) for constituencies in County Antrim from 1903 to 1929, taking his seat in the House of Commons of the United Kingdom.\n  (2)  The son of a self-made millionaire whisky distiller, among his brothers was Northern Ireland's first Prime Minister, The Viscount Craigavon.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer.",
+            "raw_response": "```json\n{\n  \"answer\": \"Madam C. J. Walker Medal\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-2\",\n      \"title\": \"Flossie Bailey\",\n      \"sentence_indices\": [3],\n      \"fact\": \"She was also a recipient of the national NAACP's Madam C. J. Walker Medal.\"\n    },\n    {\n      \"document_id\": \"context-1\",\n      \"title\": \"Villa Lewaro\",\n      \"sentence_indices\": [2],\n      \"fact\": \"Walker was the first American female and first African-American female self-made millionaire\"\n    },\n    {\n      \"document_id\": \"context-3\",\n      \"title\": \"Madam C. J. Walker\",\n      \"sentence_indices\": [1],\n      \"fact\": \"Eulogized as the first female self-made millionaire in America\"\n    }\n  ]\n}\n```",
+            "parsed_output": {
+              "answer": "Madam C. J. Walker Medal",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-2",
+                  "title": "Flossie Bailey",
+                  "sentence_indices": [
+                    3
+                  ],
+                  "fact": "She was also a recipient of the national NAACP's Madam C. J. Walker Medal."
+                },
+                {
+                  "document_id": "context-1",
+                  "title": "Villa Lewaro",
+                  "sentence_indices": [
+                    2
+                  ],
+                  "fact": "Walker was the first American female and first African-American female self-made millionaire"
+                },
+                {
+                  "document_id": "context-3",
+                  "title": "Madam C. J. Walker",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "Eulogized as the first female self-made millionaire in America"
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "Madam C. J. Walker Medal"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "A Hazard of New Fortunes",
+                  "text": "The book, which takes place in late 19th century New York City, tells the story of Basil March, who finds himself in the middle of a dispute between his employer, a self-made millionaire named Dryfoos, and his old German teacher, an advocate for workers' rights named Lindau. The main character of the novel, Basil March, provides the main perspective throughout the novel. He resides in Boston with his wife and children until he is persuaded by his idealistic friend Fulkerson to move to New York to help him start a new magazine, where the writers benefit in a primitive form of profit sharing. After some deliberation, the Marches move to New York and begin a rather extensive search for a perfect apartment. After many exhausting weeks of searching, Basil finally settles on an apartment full of what he and his wife refer to as \"gimcrackery\"\u2014trinkets and decorations that do not appeal to their upper-middle-class tastes.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "The book, which takes place in late 19th century New York City, tells the story of Basil March, who finds himself in the middle of a dispute between his employer, a self-made millionaire named Dryfoos, and his old German teacher, an advocate for workers' rights named Lindau.",
+                      " The main character of the novel, Basil March, provides the main perspective throughout the novel.",
+                      " He resides in Boston with his wife and children until he is persuaded by his idealistic friend Fulkerson to move to New York to help him start a new magazine, where the writers benefit in a primitive form of profit sharing.",
+                      " After some deliberation, the Marches move to New York and begin a rather extensive search for a perfect apartment.",
+                      " After many exhausting weeks of searching, Basil finally settles on an apartment full of what he and his wife refer to as \"gimcrackery\"\u2014trinkets and decorations that do not appeal to their upper-middle-class tastes."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Villa Lewaro",
+                  "text": "Villa Lewaro, formerly known as the Anne E. Poth Home, is a 34-room 20000 sqft mansion located at Fargo Lane and North Broadway (US 9) in Irvington, New York. It was the home of Madam C. J. Walker from 1918 to 1919. Walker was the first American female and first African-American female self-made millionaire, and \"the world's most successful female entrepreneur of her time.\" The mansion is an Italianate villa house designed for Walker by Vertner Tandy, the first African-American architect registered in New York, and has been considered to be one of his greatest works. It was constructed during 1916\u20131918 at an estimated cost of $250,000, and was furnished lavishly. The name Villa Lewaro was coined by a distinguished visitor, Enrico Caruso, from the first two letters of each word in Lelia Walker Robinson, the name of Walker's daughter, who later went by the name of A'Lelia Walker.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Villa Lewaro, formerly known as the Anne E. Poth Home, is a 34-room 20000 sqft mansion located at Fargo Lane and North Broadway (US 9) in Irvington, New York.",
+                      " It was the home of Madam C. J. Walker from 1918 to 1919.",
+                      " Walker was the first American female and first African-American female self-made millionaire, and \"the world's most successful female entrepreneur of her time.\"",
+                      " The mansion is an Italianate villa house designed for Walker by Vertner Tandy, the first African-American architect registered in New York, and has been considered to be one of his greatest works.",
+                      " It was constructed during 1916\u20131918 at an estimated cost of $250,000, and was furnished lavishly.",
+                      " The name Villa Lewaro was coined by a distinguished visitor, Enrico Caruso, from the first two letters of each word in Lelia Walker Robinson, the name of Walker's daughter, who later went by the name of A'Lelia Walker."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Flossie Bailey",
+                  "text": "Katherine \"Flossie\" Bailey (1895\u2013February 6, 1952) was a civil rights and anti-lynching activist from Indiana. She established a local chapter of the National Association for the Advancement of Colored People in Marion, Indiana, in 1918 and became especially active fighting for justice and equality following the double lynching of Thomas Shipp and Abram Smith in 1930. As president of the Indiana NAACP, Bailey was pivotal in lobbying for passage of a statewide anti-lynching law in Indiana in 1931 and advocated for a similar bill at the national level. She was also a recipient of the national NAACP's Madam C. J. Walker Medal.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "Katherine \"Flossie\" Bailey (1895\u2013February 6, 1952) was a civil rights and anti-lynching activist from Indiana.",
+                      " She established a local chapter of the National Association for the Advancement of Colored People in Marion, Indiana, in 1918 and became especially active fighting for justice and equality following the double lynching of Thomas Shipp and Abram Smith in 1930.",
+                      " As president of the Indiana NAACP, Bailey was pivotal in lobbying for passage of a statewide anti-lynching law in Indiana in 1931 and advocated for a similar bill at the national level.",
+                      " She was also a recipient of the national NAACP's Madam C. J. Walker Medal."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Madam C. J. Walker",
+                  "text": "Sarah Breedlove (December 23, 1867 \u2013 May 25, 1919), known as Madam C. J. Walker, was an African American entrepreneur, philanthropist, and a political and social activist. Eulogized as the first female self-made millionaire in America, she became one of the wealthiest African American women in the country, \"the world's most successful female entrepreneur of her time,\" and one of the most successful African-American business owners ever.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Sarah Breedlove (December 23, 1867 \u2013 May 25, 1919), known as Madam C. J. Walker, was an African American entrepreneur, philanthropist, and a political and social activist.",
+                      " Eulogized as the first female self-made millionaire in America, she became one of the wealthiest African American women in the country, \"the world's most successful female entrepreneur of her time,\" and one of the most successful African-American business owners ever."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "James Tyson",
+                  "text": "James Tyson (8 April 1819 \u2013 4 December 1898) was an Australian pastoralist. He is regarded as Australia's first self-made millionaire. His name became a byword for reticence, wealth and astute dealing.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "James Tyson (8 April 1819 \u2013 4 December 1898) was an Australian pastoralist.",
+                      " He is regarded as Australia's first self-made millionaire.",
+                      " His name became a byword for reticence, wealth and astute dealing."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Rex Cauble",
+                  "text": "Rex Cauble (August 15, 1913\u2014June 23, 2003) was born in Vaughan, Texas to cotton farmers, Lou Butts and Fred C. \"Buddy\" Cauble. He was a self-made millionaire known for his flamboyance as a Texas-size businessman who struck it rich as a wildcatter. In the 1970s, he founded two high-end retail western wear stores comprising Cutter Bill Western World named after Cauble's world champion cutting horse, Cutter Bill; one store was located in Houston, the other in Dallas.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Rex Cauble (August 15, 1913\u2014June 23, 2003) was born in Vaughan, Texas to cotton farmers, Lou Butts and Fred C. \"Buddy\" Cauble.",
+                      " He was a self-made millionaire known for his flamboyance as a Texas-size businessman who struck it rich as a wildcatter.",
+                      " In the 1970s, he founded two high-end retail western wear stores comprising Cutter Bill Western World named after Cauble's world champion cutting horse, Cutter Bill; one store was located in Houston, the other in Dallas."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Sir Alexander MacRobert, 1st Baronet",
+                  "text": "Sir Alexander MacRobert was a self-made millionaire from Aberdeen. He came from a working-class background and left school when he was twelve to start his working life sweeping floors in Stoneywood Paper Mill; his education was continued by attending evening classes and he gained several qualifications as his early career progressed. At the beginning of 1884 MacRobert travelled to India to take up employment in a woollen mill in Cawnpore, or Kanpur as it is now known. By 1920 he had built up a portfolio of companies enabling him to found the British India Corporation. He was raised to a baronet at the beginning of 1922, choosing to be named Sir Alexander MacRobert of Cawnpore and Cromar of the County of Aberdeen.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Sir Alexander MacRobert was a self-made millionaire from Aberdeen.",
+                      " He came from a working-class background and left school when he was twelve to start his working life sweeping floors in Stoneywood Paper Mill; his education was continued by attending evening classes and he gained several qualifications as his early career progressed.",
+                      " At the beginning of 1884 MacRobert travelled to India to take up employment in a woollen mill in Cawnpore, or Kanpur as it is now known.",
+                      " By 1920 he had built up a portfolio of companies enabling him to found the British India Corporation.",
+                      " He was raised to a baronet at the beginning of 1922, choosing to be named Sir Alexander MacRobert of Cawnpore and Cromar of the County of Aberdeen."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Love Lies Bleeding (TV drama)",
+                  "text": "Love Lies Bleeding is a two-part British thriller crime drama, first broadcast on ITV between 27 and 28 February 2006. The programme follows the story of self-made millionaire Mark Terry (Martin Kemp), whose life is turned upside down by the unexpected return of an old school friend, Stuart Milburn (Hugo Speer), who is determined to seek revenge for Terry's failure to acknowledge his part in the manslaughter of their schoolteacher, who collapsed and died after a schoolboy prank went horribly wrong. As Milburn sets up a chain of events to ensure Terry's downfall, he finds he is slowly running out of friends - or people to turn to, and his only hope is to go on the run. The programme was broadcast over two nights, with each part earning 5.81 and 4.56 million viewers respectively. \"Love Lies Bleeding\" was released on DVD in Australia on 3 September 2009 by Roadshow Entertainment.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Love Lies Bleeding is a two-part British thriller crime drama, first broadcast on ITV between 27 and 28 February 2006.",
+                      " The programme follows the story of self-made millionaire Mark Terry (Martin Kemp), whose life is turned upside down by the unexpected return of an old school friend, Stuart Milburn (Hugo Speer), who is determined to seek revenge for Terry's failure to acknowledge his part in the manslaughter of their schoolteacher, who collapsed and died after a schoolboy prank went horribly wrong.",
+                      " As Milburn sets up a chain of events to ensure Terry's downfall, he finds he is slowly running out of friends - or people to turn to, and his only hope is to go on the run.",
+                      " The programme was broadcast over two nights, with each part earning 5.81 and 4.56 million viewers respectively.",
+                      " \"Love Lies Bleeding\" was released on DVD in Australia on 3 September 2009 by Roadshow Entertainment."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "MacRobert baronets",
+                  "text": "The MacRobert Baronetcy, of Douneside in the County of Aberdeen, was a title in the Baronetage of the United Kingdom. It was created on 5 April 1922 for Alexander MacRobert, a self-made millionaire. He was succeeded by his eldest son Alasdair in June of that year. Tragedy struck the family again when Alasdair was killed in a flying accident in 1938, and the title passed to his younger brother Roderic. In May 1941 Roderic was killed in action whilst flying a Hawker Hurricane fighter in the Middle East, and just over a month later on 30 June 1941, the title became extinct when the youngest brother Iain, was also killed in action whilst serving with the Royal Air Force. Their mother, Rachel, Lady MacRobert (1884\u20131954), gave \u00a325,000 to purchase a Short Stirling bomber, the aircraft was named \"MacRobert's Reply\" in memory of her three sons. Lady MacRobert believed that her sons had lived up to the family motto \"Virtutis Gloria Merces\" \u2013 translated as \"Honour is the Reward of Bravery\". The MacRobert Award, which has been presented every year since 1969 by the Royal Academy of Engineering, is named in honour of Lady MacRobert.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "The MacRobert Baronetcy, of Douneside in the County of Aberdeen, was a title in the Baronetage of the United Kingdom.",
+                      " It was created on 5 April 1922 for Alexander MacRobert, a self-made millionaire.",
+                      " He was succeeded by his eldest son Alasdair in June of that year.",
+                      " Tragedy struck the family again when Alasdair was killed in a flying accident in 1938, and the title passed to his younger brother Roderic.",
+                      " In May 1941 Roderic was killed in action whilst flying a Hawker Hurricane fighter in the Middle East, and just over a month later on 30 June 1941, the title became extinct when the youngest brother Iain, was also killed in action whilst serving with the Royal Air Force.",
+                      " Their mother, Rachel, Lady MacRobert (1884\u20131954), gave \u00a325,000 to purchase a Short Stirling bomber, the aircraft was named \"MacRobert's Reply\" in memory of her three sons.",
+                      " Lady MacRobert believed that her sons had lived up to the family motto \"Virtutis Gloria Merces\" \u2013 translated as \"Honour is the Reward of Bravery\".",
+                      " The MacRobert Award, which has been presented every year since 1969 by the Royal Academy of Engineering, is named in honour of Lady MacRobert."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Charles Craig (Unionist MP)",
+                  "text": "Charles Curtis Craig (18 February 1869 \u2013 28 January 1960), was an Irish UnionIst and later Ulster Unionist politician. He was Member of Parliament (MP) for constituencies in County Antrim from 1903 to 1929, taking his seat in the House of Commons of the United Kingdom. The son of a self-made millionaire whisky distiller, among his brothers was Northern Ireland's first Prime Minister, The Viscount Craigavon.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Charles Curtis Craig (18 February 1869 \u2013 28 January 1960), was an Irish UnionIst and later Ulster Unionist politician.",
+                      " He was Member of Parliament (MP) for constituencies in County Antrim from 1903 to 1929, taking his seat in the House of Commons of the United Kingdom.",
+                      " The son of a self-made millionaire whisky distiller, among his brothers was Northern Ireland's first Prime Minister, The Viscount Craigavon."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-2",
+                "title": "Flossie Bailey",
+                "sentence_indices": [
+                  3
+                ],
+                "fact": "She was also a recipient of the national NAACP's Madam C. J. Walker Medal."
+              },
+              {
+                "document_id": "context-1",
+                "title": "Villa Lewaro",
+                "sentence_indices": [
+                  2
+                ],
+                "fact": "Walker was the first American female and first African-American female self-made millionaire"
+              },
+              {
+                "document_id": "context-3",
+                "title": "Madam C. J. Walker",
+                "sentence_indices": [
+                  1
+                ],
+                "fact": "Eulogized as the first female self-made millionaire in America"
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-2",
+                  "title": "Flossie Bailey",
+                  "sentence_indices": [
+                    3
+                  ],
+                  "fact": "She was also a recipient of the national NAACP's Madam C. J. Walker Medal."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Flossie Bailey",
+                    "sentence_index": 3
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-1",
+                  "title": "Villa Lewaro",
+                  "sentence_indices": [
+                    2
+                  ],
+                  "fact": "Walker was the first American female and first African-American female self-made millionaire"
+                },
+                "matches_gold": false,
+                "matched_gold_facts": []
+              },
+              {
+                "citation": {
+                  "document_id": "context-3",
+                  "title": "Madam C. J. Walker",
+                  "sentence_indices": [
+                    1
+                  ],
+                  "fact": "Eulogized as the first female self-made millionaire in America"
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Madam C. J. Walker",
+                    "sentence_index": 1
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": 12682.216558008804,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Madam C. J. Walker Medal"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 12682.262361005996,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 180.0,
+            "max_retries": 8,
+            "retry_initial_delay_seconds": 2.0,
+            "retry_max_delay_seconds": 120.0
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1,
+            "planner_mode": "simple"
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false,
+            "ltm_conversation_turn_format": "text"
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "empty_prediction_retries": 1,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  single_prompt[\"single_prompt: Single prompt\\nsynthesis\\nsucceeded\"]\n  click single_prompt dagqaSelectGraphNode"
+      },
+      "error": null,
+      "exact_match": 0.0,
+      "f1": 0.888888888888889,
+      "cosine_sim": 0.6756979823112488
+    },
+    {
+      "id": "5a8600665542994775f606ee",
+      "question": "Does the drink Quick Fuck have more layers than the drink Ti' Punch?",
+      "gold_answer": "yes",
+      "prediction": "yes",
+      "raw_prediction": "Yes",
+      "metric_scores": {
+        "exact_match": 1.0,
+        "f1": 1.0,
+        "cosine_sim": 1.0,
+        "context_cosine_sim": 1.0,
+        "mini_l6_cosine_sim": 1.0,
+        "mini_l6_context_cosine_sim": 1.0,
+        "multi_qa_mpnet_cosine_sim": 1.0,
+        "gte_base_cosine_sim": 1.0,
+        "bge_base_cosine_sim": 1.0,
+        "e5_base_cosine_sim": 1.0,
+        "bleu": 1.0,
+        "bigram_f1": 1.0,
+        "chrf": 1.0,
+        "rouge_l": 1.0,
+        "meteor": 1.0
+      },
+      "latency_ms": 12632.797820013366,
+      "llm_call_count": 1,
+      "llm_retry_count": 0,
+      "node_count": 1,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Ti' Punch",
+          "sentence_index": 0
+        },
+        {
+          "title": "Ti' Punch",
+          "sentence_index": 1
+        },
+        {
+          "title": "Quick Fuck",
+          "sentence_index": 0
+        },
+        {
+          "title": "Quick Fuck",
+          "sentence_index": 2
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 0.75,
+      "run_trace": {
+        "run_id": "8c4647bd-4c61-4a61-92e5-c32442b49171",
+        "question": "Does the drink Quick Fuck have more layers than the drink Ti' Punch?",
+        "plan": {
+          "question": "Does the drink Quick Fuck have more layers than the drink Ti' Punch?",
+          "nodes": [
+            {
+              "id": "single_prompt",
+              "label": "Single prompt",
+              "task_type": "synthesis",
+              "question": "Does the drink Quick Fuck have more layers than the drink Ti' Punch?",
+              "operation": "answer",
+              "depends_on": [],
+              "sources": [],
+              "prompt": {
+                "system": "Answer the question concisely using only the supplied sources.",
+                "user_template": "Question: Does the drink Quick Fuck have more layers than the drink Ti' Punch?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below. Never invent document IDs, titles, or sentence indices; use only the document IDs and sentence numbers printed in this prompt.\n\nDocument ID: context-0\nTitle: Peanut punch\n  (0) Peanut punch is a beverage popular in the Caribbean and it is made with peanut butter, milk, sugar and sometimes spices.\n  (1)  It is also available commercially in supermarkets and grocery stores as well to cater those markets.\n  (2)  In Trinidad and Tobago, peanut punch is a popular drink that is often sold on sidewalks or in established food stores.\n  (3)  The drink is traditionally marketed as an energy drink and made with a variety of ingredients according to the vendor.\n\nDocument ID: context-1\nTitle: Colombia (cocktail)\n  (0) The Colombia is a cocktail containing vodka and cura\u00e7ao.\n  (1)  The layering effect takes advantage of the variation in density and temperature between the layers.\n  (2)  The drink appears as stacked horizontal layers of yellow, blue and red, which matches the three colours of the Colombian flag.\n\nDocument ID: context-2\nTitle: Quick Fuck\n  (0) A Quick Fuck is a layered shooter made from one part coffee liqueur like Kahlua, one part cold Midori liqueur and one part Baileys Irish Cream.\n  (1)  The Baileys is poured off the back of a bar spoon so it \"floats\" on top of the Kahlua in a shot glass.\n  (2)  Then slowly layer the Midori on top of the Baileys.\n  (3)  Note that Baileys does not have to be used; any type of Irish Cream will do.\n\nDocument ID: context-3\nTitle: F.T.F.O.\n  (0) F.T.F.O. (\"Fuck The Fuck Off\") is the second solo album, and first full length album by and Insane Clown Posse member Shaggy 2 Dope.\n  (1)  The album was released on February 21, 2006 on Psychopathic Records.\n  (2)  The album art alludes to the ICP tradition of spraying the audience (and themselves) with the American soft drink Faygo.\n\nDocument ID: context-4\nTitle: Fish House Punch\n  (0) Fish House Punch is a strong, rum-based punch containing rum, cognac, and peach brandy.\n  (1)  The drink is typically served over an ice block in a punch bowl and garnished with lemon slices.\n\nDocument ID: context-5\nTitle: Sudan (beverage)\n  (0) Sudan (\uc218\ub2e8 ; \u6c34\u5718/\u6c34\ud865\udf35 ) is a traditional Korean <a href=\"Punch%20%28drink%29\">punch</a> made with boiled grain cake balls and <a href=\"Honey\">honied</a> water.\n  (1)  It is usually served during the summer for quenching thirst.\n  (2)  Traditionally Sudan was always served during a village rite in 6th month in lunar calendar.\n  (3)  Korean farmers prayed for a bountiful harvest and god\u2019s blessing for their life in the future by making food offering including foods and Sudan drink.\n  (4)  It is sometimes considered a type of \"hwachae\".\n\nDocument ID: context-6\nTitle: Hexbus\n  (0) The Texas Instruments Hex-bus Interface was designed in 1982 and intended for commercial release in late 1983.\n  (1)  It connected the console to peripherals via a high-speed serial link.\n  (2)  Though it was prototypical to today's USB (plug and play, hot-swappable, etc.), it was never released, with only a small number of prototypes appearing in collector hands after TI pulled out of the market.\n  (3)  Several Hex-bus peripherals were planned or produced.\n  (4)  A WaferTape drive never made it past the prototype stage due to reliability issues with the tapes.\n  (5)  The 5.25-inch Floppy drive also never made it past the prototype stage, even though it worked.\n  (6)  Prototype DSDD disk controllers and Video controllers were also made.\n  (7)  A 4-color Printer-Plotter, a 300-Baud Modem, RS-232 Interface, an 80 column thermal/ink printer, and a 2.8\" \"Quick Disk\" drive were the only peripherals released in quantity, mostly for use with the TI CC-40.\n  (8)  All Hex-bus peripherals could be used with a TI-99/4A when connected through the Hex-bus Interface, through direct connection to the TI-99/8, or through direct connection to the Texas Instruments Compact Computer 40.\n\nDocument ID: context-7\nTitle: Punch (drink)\n  (0) Punch is a wide assortment of drinks, both non-alcoholic and alcoholic, generally containing fruit or fruit juice.\n  (1)  The drink was introduced from India to the United Kingdom in the early seventeenth century, and from there its use spread to other countries.\n  (2)  Punch is typically served at parties in large, wide bowls, known as \"punch bowls\".\n\nDocument ID: context-8\nTitle: Ti' Punch\n  (0) Ti' Punch (] ; French: \"Petit Ponch\" ) literally meaning \"small punch,\" is a rum-based mixed drink that is especially popular in Martinique, Guadeloupe, Haiti, French Guiana and other French-speaking Caribbean islands.\n  (1)  It is very similar to the daiquiri, which is usually identified with Cuba.\n\nDocument ID: context-9\nTitle: Goombay Punch\n  (0) Bahamas Goombay Punch is a soft drink that is produced in the Bahamas.\n  (1)  It is very sweet and has a high sugar content.\n  (2)  Goombay Punch is widely available throughout the bahamas in 12 fl oz cans as well as 20 fl oz bottles.\n  (3)  6-packs of the soft drink are also widely available.\n  (4)  The soft drink comes in two varieties, Bahamas Goombay Punch (the stock flavor) and Goombay Fruit Champagne.\n  (5)  The regular flavor is yellow in color (see picture).\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "single_prompt"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "single_prompt"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "single_prompt",
+            "label": "Single prompt",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Does the drink Quick Fuck have more layers than the drink Ti' Punch?",
+            "rendered_prompt": "Question: Does the drink Quick Fuck have more layers than the drink Ti' Punch?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below. Never invent document IDs, titles, or sentence indices; use only the document IDs and sentence numbers printed in this prompt.\n\nDocument ID: context-0\nTitle: Peanut punch\n  (0) Peanut punch is a beverage popular in the Caribbean and it is made with peanut butter, milk, sugar and sometimes spices.\n  (1)  It is also available commercially in supermarkets and grocery stores as well to cater those markets.\n  (2)  In Trinidad and Tobago, peanut punch is a popular drink that is often sold on sidewalks or in established food stores.\n  (3)  The drink is traditionally marketed as an energy drink and made with a variety of ingredients according to the vendor.\n\nDocument ID: context-1\nTitle: Colombia (cocktail)\n  (0) The Colombia is a cocktail containing vodka and cura\u00e7ao.\n  (1)  The layering effect takes advantage of the variation in density and temperature between the layers.\n  (2)  The drink appears as stacked horizontal layers of yellow, blue and red, which matches the three colours of the Colombian flag.\n\nDocument ID: context-2\nTitle: Quick Fuck\n  (0) A Quick Fuck is a layered shooter made from one part coffee liqueur like Kahlua, one part cold Midori liqueur and one part Baileys Irish Cream.\n  (1)  The Baileys is poured off the back of a bar spoon so it \"floats\" on top of the Kahlua in a shot glass.\n  (2)  Then slowly layer the Midori on top of the Baileys.\n  (3)  Note that Baileys does not have to be used; any type of Irish Cream will do.\n\nDocument ID: context-3\nTitle: F.T.F.O.\n  (0) F.T.F.O. (\"Fuck The Fuck Off\") is the second solo album, and first full length album by and Insane Clown Posse member Shaggy 2 Dope.\n  (1)  The album was released on February 21, 2006 on Psychopathic Records.\n  (2)  The album art alludes to the ICP tradition of spraying the audience (and themselves) with the American soft drink Faygo.\n\nDocument ID: context-4\nTitle: Fish House Punch\n  (0) Fish House Punch is a strong, rum-based punch containing rum, cognac, and peach brandy.\n  (1)  The drink is typically served over an ice block in a punch bowl and garnished with lemon slices.\n\nDocument ID: context-5\nTitle: Sudan (beverage)\n  (0) Sudan (\uc218\ub2e8 ; \u6c34\u5718/\u6c34\ud865\udf35 ) is a traditional Korean <a href=\"Punch%20%28drink%29\">punch</a> made with boiled grain cake balls and <a href=\"Honey\">honied</a> water.\n  (1)  It is usually served during the summer for quenching thirst.\n  (2)  Traditionally Sudan was always served during a village rite in 6th month in lunar calendar.\n  (3)  Korean farmers prayed for a bountiful harvest and god\u2019s blessing for their life in the future by making food offering including foods and Sudan drink.\n  (4)  It is sometimes considered a type of \"hwachae\".\n\nDocument ID: context-6\nTitle: Hexbus\n  (0) The Texas Instruments Hex-bus Interface was designed in 1982 and intended for commercial release in late 1983.\n  (1)  It connected the console to peripherals via a high-speed serial link.\n  (2)  Though it was prototypical to today's USB (plug and play, hot-swappable, etc.), it was never released, with only a small number of prototypes appearing in collector hands after TI pulled out of the market.\n  (3)  Several Hex-bus peripherals were planned or produced.\n  (4)  A WaferTape drive never made it past the prototype stage due to reliability issues with the tapes.\n  (5)  The 5.25-inch Floppy drive also never made it past the prototype stage, even though it worked.\n  (6)  Prototype DSDD disk controllers and Video controllers were also made.\n  (7)  A 4-color Printer-Plotter, a 300-Baud Modem, RS-232 Interface, an 80 column thermal/ink printer, and a 2.8\" \"Quick Disk\" drive were the only peripherals released in quantity, mostly for use with the TI CC-40.\n  (8)  All Hex-bus peripherals could be used with a TI-99/4A when connected through the Hex-bus Interface, through direct connection to the TI-99/8, or through direct connection to the Texas Instruments Compact Computer 40.\n\nDocument ID: context-7\nTitle: Punch (drink)\n  (0) Punch is a wide assortment of drinks, both non-alcoholic and alcoholic, generally containing fruit or fruit juice.\n  (1)  The drink was introduced from India to the United Kingdom in the early seventeenth century, and from there its use spread to other countries.\n  (2)  Punch is typically served at parties in large, wide bowls, known as \"punch bowls\".\n\nDocument ID: context-8\nTitle: Ti' Punch\n  (0) Ti' Punch (] ; French: \"Petit Ponch\" ) literally meaning \"small punch,\" is a rum-based mixed drink that is especially popular in Martinique, Guadeloupe, Haiti, French Guiana and other French-speaking Caribbean islands.\n  (1)  It is very similar to the daiquiri, which is usually identified with Cuba.\n\nDocument ID: context-9\nTitle: Goombay Punch\n  (0) Bahamas Goombay Punch is a soft drink that is produced in the Bahamas.\n  (1)  It is very sweet and has a high sugar content.\n  (2)  Goombay Punch is widely available throughout the bahamas in 12 fl oz cans as well as 20 fl oz bottles.\n  (3)  6-packs of the soft drink are also widely available.\n  (4)  The soft drink comes in two varieties, Bahamas Goombay Punch (the stock flavor) and Goombay Fruit Champagne.\n  (5)  The regular flavor is yellow in color (see picture).\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer.",
+            "raw_response": "```json\n{\n  \"answer\": \"Yes\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-2\",\n      \"title\": \"Quick Fuck\",\n      \"sentence_indices\": [0, 2],\n      \"fact\": \"A Quick Fuck is a layered shooter made from three layers: coffee liqueur, Midori liqueur, and Baileys Irish Cream.\"\n    },\n    {\n      \"document_id\": \"context-8\",\n      \"title\": \"Ti' Punch\",\n      \"sentence_indices\": [0],\n      \"fact\": \"Ti' Punch is a rum-based mixed drink with no mention of layers.\"\n    }\n  ]\n}\n```",
+            "parsed_output": {
+              "answer": "Yes",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-2",
+                  "title": "Quick Fuck",
+                  "sentence_indices": [
+                    0,
+                    2
+                  ],
+                  "fact": "A Quick Fuck is a layered shooter made from three layers: coffee liqueur, Midori liqueur, and Baileys Irish Cream."
+                },
+                {
+                  "document_id": "context-8",
+                  "title": "Ti' Punch",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Ti' Punch is a rum-based mixed drink with no mention of layers."
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "Yes"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Peanut punch",
+                  "text": "Peanut punch is a beverage popular in the Caribbean and it is made with peanut butter, milk, sugar and sometimes spices. It is also available commercially in supermarkets and grocery stores as well to cater those markets. In Trinidad and Tobago, peanut punch is a popular drink that is often sold on sidewalks or in established food stores. The drink is traditionally marketed as an energy drink and made with a variety of ingredients according to the vendor.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Peanut punch is a beverage popular in the Caribbean and it is made with peanut butter, milk, sugar and sometimes spices.",
+                      " It is also available commercially in supermarkets and grocery stores as well to cater those markets.",
+                      " In Trinidad and Tobago, peanut punch is a popular drink that is often sold on sidewalks or in established food stores.",
+                      " The drink is traditionally marketed as an energy drink and made with a variety of ingredients according to the vendor."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Colombia (cocktail)",
+                  "text": "The Colombia is a cocktail containing vodka and cura\u00e7ao. The layering effect takes advantage of the variation in density and temperature between the layers. The drink appears as stacked horizontal layers of yellow, blue and red, which matches the three colours of the Colombian flag.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "The Colombia is a cocktail containing vodka and cura\u00e7ao.",
+                      " The layering effect takes advantage of the variation in density and temperature between the layers.",
+                      " The drink appears as stacked horizontal layers of yellow, blue and red, which matches the three colours of the Colombian flag."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Quick Fuck",
+                  "text": "A Quick Fuck is a layered shooter made from one part coffee liqueur like Kahlua, one part cold Midori liqueur and one part Baileys Irish Cream. The Baileys is poured off the back of a bar spoon so it \"floats\" on top of the Kahlua in a shot glass. Then slowly layer the Midori on top of the Baileys. Note that Baileys does not have to be used; any type of Irish Cream will do.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "A Quick Fuck is a layered shooter made from one part coffee liqueur like Kahlua, one part cold Midori liqueur and one part Baileys Irish Cream.",
+                      " The Baileys is poured off the back of a bar spoon so it \"floats\" on top of the Kahlua in a shot glass.",
+                      " Then slowly layer the Midori on top of the Baileys.",
+                      " Note that Baileys does not have to be used; any type of Irish Cream will do."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "F.T.F.O.",
+                  "text": "F.T.F.O. (\"Fuck The Fuck Off\") is the second solo album, and first full length album by and Insane Clown Posse member Shaggy 2 Dope. The album was released on February 21, 2006 on Psychopathic Records. The album art alludes to the ICP tradition of spraying the audience (and themselves) with the American soft drink Faygo.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "F.T.F.O. (\"Fuck The Fuck Off\") is the second solo album, and first full length album by and Insane Clown Posse member Shaggy 2 Dope.",
+                      " The album was released on February 21, 2006 on Psychopathic Records.",
+                      " The album art alludes to the ICP tradition of spraying the audience (and themselves) with the American soft drink Faygo."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Fish House Punch",
+                  "text": "Fish House Punch is a strong, rum-based punch containing rum, cognac, and peach brandy. The drink is typically served over an ice block in a punch bowl and garnished with lemon slices.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Fish House Punch is a strong, rum-based punch containing rum, cognac, and peach brandy.",
+                      " The drink is typically served over an ice block in a punch bowl and garnished with lemon slices."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Sudan (beverage)",
+                  "text": "Sudan (\uc218\ub2e8 ; \u6c34\u5718/\u6c34\ud865\udf35 ) is a traditional Korean <a href=\"Punch%20%28drink%29\">punch</a> made with boiled grain cake balls and <a href=\"Honey\">honied</a> water. It is usually served during the summer for quenching thirst. Traditionally Sudan was always served during a village rite in 6th month in lunar calendar. Korean farmers prayed for a bountiful harvest and god\u2019s blessing for their life in the future by making food offering including foods and Sudan drink. It is sometimes considered a type of \"hwachae\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Sudan (\uc218\ub2e8 ; \u6c34\u5718/\u6c34\ud865\udf35 ) is a traditional Korean <a href=\"Punch%20%28drink%29\">punch</a> made with boiled grain cake balls and <a href=\"Honey\">honied</a> water.",
+                      " It is usually served during the summer for quenching thirst.",
+                      " Traditionally Sudan was always served during a village rite in 6th month in lunar calendar.",
+                      " Korean farmers prayed for a bountiful harvest and god\u2019s blessing for their life in the future by making food offering including foods and Sudan drink.",
+                      " It is sometimes considered a type of \"hwachae\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Hexbus",
+                  "text": "The Texas Instruments Hex-bus Interface was designed in 1982 and intended for commercial release in late 1983. It connected the console to peripherals via a high-speed serial link. Though it was prototypical to today's USB (plug and play, hot-swappable, etc.), it was never released, with only a small number of prototypes appearing in collector hands after TI pulled out of the market. Several Hex-bus peripherals were planned or produced. A WaferTape drive never made it past the prototype stage due to reliability issues with the tapes. The 5.25-inch Floppy drive also never made it past the prototype stage, even though it worked. Prototype DSDD disk controllers and Video controllers were also made. A 4-color Printer-Plotter, a 300-Baud Modem, RS-232 Interface, an 80 column thermal/ink printer, and a 2.8\" \"Quick Disk\" drive were the only peripherals released in quantity, mostly for use with the TI CC-40. All Hex-bus peripherals could be used with a TI-99/4A when connected through the Hex-bus Interface, through direct connection to the TI-99/8, or through direct connection to the Texas Instruments Compact Computer 40.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "The Texas Instruments Hex-bus Interface was designed in 1982 and intended for commercial release in late 1983.",
+                      " It connected the console to peripherals via a high-speed serial link.",
+                      " Though it was prototypical to today's USB (plug and play, hot-swappable, etc.), it was never released, with only a small number of prototypes appearing in collector hands after TI pulled out of the market.",
+                      " Several Hex-bus peripherals were planned or produced.",
+                      " A WaferTape drive never made it past the prototype stage due to reliability issues with the tapes.",
+                      " The 5.25-inch Floppy drive also never made it past the prototype stage, even though it worked.",
+                      " Prototype DSDD disk controllers and Video controllers were also made.",
+                      " A 4-color Printer-Plotter, a 300-Baud Modem, RS-232 Interface, an 80 column thermal/ink printer, and a 2.8\" \"Quick Disk\" drive were the only peripherals released in quantity, mostly for use with the TI CC-40.",
+                      " All Hex-bus peripherals could be used with a TI-99/4A when connected through the Hex-bus Interface, through direct connection to the TI-99/8, or through direct connection to the Texas Instruments Compact Computer 40."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Punch (drink)",
+                  "text": "Punch is a wide assortment of drinks, both non-alcoholic and alcoholic, generally containing fruit or fruit juice. The drink was introduced from India to the United Kingdom in the early seventeenth century, and from there its use spread to other countries. Punch is typically served at parties in large, wide bowls, known as \"punch bowls\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Punch is a wide assortment of drinks, both non-alcoholic and alcoholic, generally containing fruit or fruit juice.",
+                      " The drink was introduced from India to the United Kingdom in the early seventeenth century, and from there its use spread to other countries.",
+                      " Punch is typically served at parties in large, wide bowls, known as \"punch bowls\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Ti' Punch",
+                  "text": "Ti' Punch (] ; French: \"Petit Ponch\" ) literally meaning \"small punch,\" is a rum-based mixed drink that is especially popular in Martinique, Guadeloupe, Haiti, French Guiana and other French-speaking Caribbean islands. It is very similar to the daiquiri, which is usually identified with Cuba.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Ti' Punch (] ; French: \"Petit Ponch\" ) literally meaning \"small punch,\" is a rum-based mixed drink that is especially popular in Martinique, Guadeloupe, Haiti, French Guiana and other French-speaking Caribbean islands.",
+                      " It is very similar to the daiquiri, which is usually identified with Cuba."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Goombay Punch",
+                  "text": "Bahamas Goombay Punch is a soft drink that is produced in the Bahamas. It is very sweet and has a high sugar content. Goombay Punch is widely available throughout the bahamas in 12 fl oz cans as well as 20 fl oz bottles. 6-packs of the soft drink are also widely available. The soft drink comes in two varieties, Bahamas Goombay Punch (the stock flavor) and Goombay Fruit Champagne. The regular flavor is yellow in color (see picture).",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Bahamas Goombay Punch is a soft drink that is produced in the Bahamas.",
+                      " It is very sweet and has a high sugar content.",
+                      " Goombay Punch is widely available throughout the bahamas in 12 fl oz cans as well as 20 fl oz bottles.",
+                      " 6-packs of the soft drink are also widely available.",
+                      " The soft drink comes in two varieties, Bahamas Goombay Punch (the stock flavor) and Goombay Fruit Champagne.",
+                      " The regular flavor is yellow in color (see picture)."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-2",
+                "title": "Quick Fuck",
+                "sentence_indices": [
+                  0,
+                  2
+                ],
+                "fact": "A Quick Fuck is a layered shooter made from three layers: coffee liqueur, Midori liqueur, and Baileys Irish Cream."
+              },
+              {
+                "document_id": "context-8",
+                "title": "Ti' Punch",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Ti' Punch is a rum-based mixed drink with no mention of layers."
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-2",
+                  "title": "Quick Fuck",
+                  "sentence_indices": [
+                    0,
+                    2
+                  ],
+                  "fact": "A Quick Fuck is a layered shooter made from three layers: coffee liqueur, Midori liqueur, and Baileys Irish Cream."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Quick Fuck",
+                    "sentence_index": 0
+                  },
+                  {
+                    "title": "Quick Fuck",
+                    "sentence_index": 2
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-8",
+                  "title": "Ti' Punch",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Ti' Punch is a rum-based mixed drink with no mention of layers."
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Ti' Punch",
+                    "sentence_index": 0
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": 12632.548629000667,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Yes"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 12632.590287001221,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 180.0,
+            "max_retries": 8,
+            "retry_initial_delay_seconds": 2.0,
+            "retry_max_delay_seconds": 120.0
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1,
+            "planner_mode": "simple"
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false,
+            "ltm_conversation_turn_format": "text"
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "empty_prediction_retries": 1,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  single_prompt[\"single_prompt: Single prompt\\nsynthesis\\nsucceeded\"]\n  click single_prompt dagqaSelectGraphNode"
+      },
+      "error": null,
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0
+    },
+    {
+      "id": "5a8eb63455429917b4a5bdb7",
+      "question": "With which American musician, singer-songwriter, and multi-instrumentalist from Berklee College of Music did Jonny Browning collaborate?",
+      "gold_answer": "St. Vincent",
+      "prediction": "St. Vincent",
+      "raw_prediction": null,
+      "metric_scores": {
+        "exact_match": 1.0,
+        "f1": 1.0,
+        "cosine_sim": 1.0,
+        "context_cosine_sim": 1.0,
+        "mini_l6_cosine_sim": 1.0,
+        "mini_l6_context_cosine_sim": 1.0,
+        "multi_qa_mpnet_cosine_sim": 1.0,
+        "gte_base_cosine_sim": 1.0,
+        "bge_base_cosine_sim": 1.0,
+        "e5_base_cosine_sim": 1.0,
+        "bleu": 1.0,
+        "bigram_f1": 1.0,
+        "chrf": 1.0,
+        "rouge_l": 1.0,
+        "meteor": 1.0
+      },
+      "latency_ms": 9313.395757009857,
+      "llm_call_count": 1,
+      "llm_retry_count": 0,
+      "node_count": 1,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Jonny Browning",
+          "sentence_index": 6
+        },
+        {
+          "title": "St. Vincent (musician)",
+          "sentence_index": 0
+        },
+        {
+          "title": "St. Vincent (musician)",
+          "sentence_index": 1
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 1.0,
+      "run_trace": {
+        "run_id": "db44e569-3833-4145-be2d-451ed9bb071c",
+        "question": "With which American musician, singer-songwriter, and multi-instrumentalist from Berklee College of Music did Jonny Browning collaborate?",
+        "plan": {
+          "question": "With which American musician, singer-songwriter, and multi-instrumentalist from Berklee College of Music did Jonny Browning collaborate?",
+          "nodes": [
+            {
+              "id": "single_prompt",
+              "label": "Single prompt",
+              "task_type": "synthesis",
+              "question": "With which American musician, singer-songwriter, and multi-instrumentalist from Berklee College of Music did Jonny Browning collaborate?",
+              "operation": "answer",
+              "depends_on": [],
+              "sources": [],
+              "prompt": {
+                "system": "Answer the question concisely using only the supplied sources.",
+                "user_template": "Question: With which American musician, singer-songwriter, and multi-instrumentalist from Berklee College of Music did Jonny Browning collaborate?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below. Never invent document IDs, titles, or sentence indices; use only the document IDs and sentence numbers printed in this prompt.\n\nDocument ID: context-0\nTitle: Matt Hyde\n  (0) Matt Hyde (born June 19, 1964) is an American producer, engineer, mixer and musician.\n  (1)  From 1982 to 1985 he attended Berklee College of Music in Boston.\n  (2)  While still at Berklee (1984) he obtained an internship at Pyramid Recording Studio in Boston.\n  (3)  After two semesters at Berklee, Hyde took a break from classes to tour for the Department of Defense overseas entertainment program, playing guitar and keyboards in several top 40 cover bands that played shows at U.S. military bases in foreign countries throughout Europe and the Pacific.\n  (4)  When he returned to the U.S., he began working at recording studios, first in Boston and from 1989 in Los Angeles.\n\nDocument ID: context-1\nTitle: Lee Eliot Berk\n  (0) Lee Eliot Berk (born 1942) was President and namesake of the Berklee College of Music (founded as Schillinger House in 1945 by his father, Lawrence Berk, who renamed the school after Lee in 1954) from 1979 to 2004.\n  (1)  Under the younger Berk\u2019s leadership, the college underwent significant changes.\n  (2)  Berklee expanded its curriculum to create new majors, including Film Scoring, Music Production and Engineering, Music Synthesis, Songwriting, Music Business/Management, and Music Therapy.\n  (3)  Educational applications of music technology expanded, the college administration was reorganized, more student services were added, and non-music academic offerings increased.\n  (4)  In 1992, he established the Berklee International Network that includes music schools with a shared mission around the globe.\n\nDocument ID: context-2\nTitle: Shirish Korde\n  (0) Shirish Korde (born June 18, 1945), is a composer who was born in Uganda to Indian parents.\n  (1)  He is the Chair of the Music Department at the College of the Holy Cross (Worcester, MA) and has previously been on the faculty of the Berklee College of Music, the New England Conservatory, and Brown University.\n  (2)  Korde studied jazz and composition at the Berklee College of Music, analysis and composition at the New England Conservatory, and ethnomusicology at Brown University.\n\nDocument ID: context-3\nTitle: Berklee College of Music\n  (0) Berklee College of Music, located in Boston, Massachusetts, United States, is the largest independent college of contemporary music in the world.\n  (1)  Known for the study of jazz and modern American music, it also offers college-level courses in a wide range of contemporary and historic styles, including rock, flamenco, hip hop, reggae, salsa, and bluegrass.\n  (2)  Since 2012, Berklee College of Music has also operated a campus in Valencia, Spain.\n\nDocument ID: context-4\nTitle: St. Vincent (musician)\n  (0) Anne Erin \"Annie\" Clark (born September 28, 1982), better known by her stage name St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist.\n  (1)  After studying at Berklee College of Music for three years, she began her music career as a member of the Polyphonic Spree.\n  (2)  Clark was also a member of Sufjan Stevens's touring band before forming her own band in 2006.\n\nDocument ID: context-5\nTitle: Berklee method\n  (0) In music performance and education, the Berklee method is the music theory, terminology, and practice taught at Berklee College of Music, the largest independent college of contemporary music in the world.\n  (1)  The \"Berklee method\" was founded by Lawrence Berk after study with Joseph Schillinger regarding the latter's, \"elaborate system of composition that employed mathematical permutation and combination process to generate rhythms, harmonies, and melodies\".\n  (2)  Later, attempting to codify jazz and popular music practice, the Berklee method often differs from common practice harmony and voice-leading rules or guidelines.\n\nDocument ID: context-6\nTitle: Wang Leehom\n  (0) Wang Leehom (born May 17, 1976), sometimes credited as Leehom Wang, is a Chinese-American singer-songwriter, record producer, actor and film director.\n  (1)  He is currently based in Taiwan.\n  (2)  Formally trained at the Eastman School of Music, Williams College and Berklee College of Music, his musical style is known for fusing Chinese elements (such as Beijing opera, traditional styles of ethnic minorities, Chinese classical orchestra) with hip-hop and R&B.\n  (3)  Wang debuted in 1995 and since then has released over 25 albums, with sales of over 50 million copies.\n  (4)  He is also a four-time winner and 19-time nominee of Taiwan's Golden Melody Awards, the \"Grammys\" of Chinese music.\n  (5)  His sold-out concert at the 90,000 seat Beijing Bird's Nest on April 14, 2012 was the first solo pop concert to be held at the iconic venue.\n  (6)  He holds honorary doctoral degrees from both Williams College and Berklee.\n  (7)  With over 60 million followers on social media, he is one of the most followed celebrities in China (peaked as #1 most followed person in China's social media in 2014).\n\nDocument ID: context-7\nTitle: Jared Faber\n  (0) Jared Faber (also known as J-Radical) is an American musician, composer, producer and multi-instrumentalist.\n  (1)  He grew up in New York City where he attended High School of Performing Arts, and later continued his music education at Berklee College of Music, studying jazz arranging and composition.\n\nDocument ID: context-8\nTitle: Jonny Browning\n  (0) Jonny Browning is an American instrumental surf musician, primarily known as touring guitarist Victor Vector for the band Man or Astro-Man?\n  (1)  Prior to his performing in the band, he also played the part of Chromo-Crunch in Man or Astro-Man?\n  (2) : Clone Project Alpha in 1997-1998.\n  (3)  He has played guitar and written songs for Sound of Humans (also featuring Birdstuff of Man or Astro-Man?\n  (4) ), Jonny and the Shamen, and The Man Made Brain.\n  (5)  He currently plays guitar and writes for Canadian instrumental surf band The Other Timelines.\n  (6)  Jonny has played in bands or recorded with members of many other bands, including: St. Vincent, The Polyphonic Spree, Drive-By Truckers, And You Will Know Us By The Trail Of Dead, Verbena, and Servotron.\n  (7)  He was born and raised in Alabama and has resided in Vancouver, BC since 2009.\n\nDocument ID: context-9\nTitle: Berklee Performance Center\n  (0) The Berklee Performance Center is a 1,215-seat theatre located on Massachusetts Ave. in the Back Bay area of Boston, Massachusetts.\n  (1)  It is the largest theatre space on the Berklee College of Music campus and is used primarily for college-affiliated activities.\n  (2)  Presenters from outside the Berklee community also rent it for performances of all kinds.\n  (3)  In 2009, the Berklee Performance Center hosted a total of 200 events.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "single_prompt"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "single_prompt"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "single_prompt",
+            "label": "Single prompt",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "With which American musician, singer-songwriter, and multi-instrumentalist from Berklee College of Music did Jonny Browning collaborate?",
+            "rendered_prompt": "Question: With which American musician, singer-songwriter, and multi-instrumentalist from Berklee College of Music did Jonny Browning collaborate?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below. Never invent document IDs, titles, or sentence indices; use only the document IDs and sentence numbers printed in this prompt.\n\nDocument ID: context-0\nTitle: Matt Hyde\n  (0) Matt Hyde (born June 19, 1964) is an American producer, engineer, mixer and musician.\n  (1)  From 1982 to 1985 he attended Berklee College of Music in Boston.\n  (2)  While still at Berklee (1984) he obtained an internship at Pyramid Recording Studio in Boston.\n  (3)  After two semesters at Berklee, Hyde took a break from classes to tour for the Department of Defense overseas entertainment program, playing guitar and keyboards in several top 40 cover bands that played shows at U.S. military bases in foreign countries throughout Europe and the Pacific.\n  (4)  When he returned to the U.S., he began working at recording studios, first in Boston and from 1989 in Los Angeles.\n\nDocument ID: context-1\nTitle: Lee Eliot Berk\n  (0) Lee Eliot Berk (born 1942) was President and namesake of the Berklee College of Music (founded as Schillinger House in 1945 by his father, Lawrence Berk, who renamed the school after Lee in 1954) from 1979 to 2004.\n  (1)  Under the younger Berk\u2019s leadership, the college underwent significant changes.\n  (2)  Berklee expanded its curriculum to create new majors, including Film Scoring, Music Production and Engineering, Music Synthesis, Songwriting, Music Business/Management, and Music Therapy.\n  (3)  Educational applications of music technology expanded, the college administration was reorganized, more student services were added, and non-music academic offerings increased.\n  (4)  In 1992, he established the Berklee International Network that includes music schools with a shared mission around the globe.\n\nDocument ID: context-2\nTitle: Shirish Korde\n  (0) Shirish Korde (born June 18, 1945), is a composer who was born in Uganda to Indian parents.\n  (1)  He is the Chair of the Music Department at the College of the Holy Cross (Worcester, MA) and has previously been on the faculty of the Berklee College of Music, the New England Conservatory, and Brown University.\n  (2)  Korde studied jazz and composition at the Berklee College of Music, analysis and composition at the New England Conservatory, and ethnomusicology at Brown University.\n\nDocument ID: context-3\nTitle: Berklee College of Music\n  (0) Berklee College of Music, located in Boston, Massachusetts, United States, is the largest independent college of contemporary music in the world.\n  (1)  Known for the study of jazz and modern American music, it also offers college-level courses in a wide range of contemporary and historic styles, including rock, flamenco, hip hop, reggae, salsa, and bluegrass.\n  (2)  Since 2012, Berklee College of Music has also operated a campus in Valencia, Spain.\n\nDocument ID: context-4\nTitle: St. Vincent (musician)\n  (0) Anne Erin \"Annie\" Clark (born September 28, 1982), better known by her stage name St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist.\n  (1)  After studying at Berklee College of Music for three years, she began her music career as a member of the Polyphonic Spree.\n  (2)  Clark was also a member of Sufjan Stevens's touring band before forming her own band in 2006.\n\nDocument ID: context-5\nTitle: Berklee method\n  (0) In music performance and education, the Berklee method is the music theory, terminology, and practice taught at Berklee College of Music, the largest independent college of contemporary music in the world.\n  (1)  The \"Berklee method\" was founded by Lawrence Berk after study with Joseph Schillinger regarding the latter's, \"elaborate system of composition that employed mathematical permutation and combination process to generate rhythms, harmonies, and melodies\".\n  (2)  Later, attempting to codify jazz and popular music practice, the Berklee method often differs from common practice harmony and voice-leading rules or guidelines.\n\nDocument ID: context-6\nTitle: Wang Leehom\n  (0) Wang Leehom (born May 17, 1976), sometimes credited as Leehom Wang, is a Chinese-American singer-songwriter, record producer, actor and film director.\n  (1)  He is currently based in Taiwan.\n  (2)  Formally trained at the Eastman School of Music, Williams College and Berklee College of Music, his musical style is known for fusing Chinese elements (such as Beijing opera, traditional styles of ethnic minorities, Chinese classical orchestra) with hip-hop and R&B.\n  (3)  Wang debuted in 1995 and since then has released over 25 albums, with sales of over 50 million copies.\n  (4)  He is also a four-time winner and 19-time nominee of Taiwan's Golden Melody Awards, the \"Grammys\" of Chinese music.\n  (5)  His sold-out concert at the 90,000 seat Beijing Bird's Nest on April 14, 2012 was the first solo pop concert to be held at the iconic venue.\n  (6)  He holds honorary doctoral degrees from both Williams College and Berklee.\n  (7)  With over 60 million followers on social media, he is one of the most followed celebrities in China (peaked as #1 most followed person in China's social media in 2014).\n\nDocument ID: context-7\nTitle: Jared Faber\n  (0) Jared Faber (also known as J-Radical) is an American musician, composer, producer and multi-instrumentalist.\n  (1)  He grew up in New York City where he attended High School of Performing Arts, and later continued his music education at Berklee College of Music, studying jazz arranging and composition.\n\nDocument ID: context-8\nTitle: Jonny Browning\n  (0) Jonny Browning is an American instrumental surf musician, primarily known as touring guitarist Victor Vector for the band Man or Astro-Man?\n  (1)  Prior to his performing in the band, he also played the part of Chromo-Crunch in Man or Astro-Man?\n  (2) : Clone Project Alpha in 1997-1998.\n  (3)  He has played guitar and written songs for Sound of Humans (also featuring Birdstuff of Man or Astro-Man?\n  (4) ), Jonny and the Shamen, and The Man Made Brain.\n  (5)  He currently plays guitar and writes for Canadian instrumental surf band The Other Timelines.\n  (6)  Jonny has played in bands or recorded with members of many other bands, including: St. Vincent, The Polyphonic Spree, Drive-By Truckers, And You Will Know Us By The Trail Of Dead, Verbena, and Servotron.\n  (7)  He was born and raised in Alabama and has resided in Vancouver, BC since 2009.\n\nDocument ID: context-9\nTitle: Berklee Performance Center\n  (0) The Berklee Performance Center is a 1,215-seat theatre located on Massachusetts Ave. in the Back Bay area of Boston, Massachusetts.\n  (1)  It is the largest theatre space on the Berklee College of Music campus and is used primarily for college-affiliated activities.\n  (2)  Presenters from outside the Berklee community also rent it for performances of all kinds.\n  (3)  In 2009, the Berklee Performance Center hosted a total of 200 events.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer.",
+            "raw_response": "{\"answer\": \"St. Vincent\", \"_evidence_citations\": [{\"document_id\": \"context-4\", \"title\": \"St. Vincent (musician)\", \"sentence_indices\": [0, 1], \"fact\": \"Anne Erin 'Annie' Clark, known as St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist who studied at Berklee College of Music\"}, {\"document_id\": \"context-8\", \"title\": \"Jonny Browning\", \"sentence_indices\": [6], \"fact\": \"Jonny Browning has played in bands or recorded with St. Vincent\"}]}",
+            "parsed_output": {
+              "answer": "St. Vincent",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-4",
+                  "title": "St. Vincent (musician)",
+                  "sentence_indices": [
+                    0,
+                    1
+                  ],
+                  "fact": "Anne Erin 'Annie' Clark, known as St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist who studied at Berklee College of Music"
+                },
+                {
+                  "document_id": "context-8",
+                  "title": "Jonny Browning",
+                  "sentence_indices": [
+                    6
+                  ],
+                  "fact": "Jonny Browning has played in bands or recorded with St. Vincent"
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "St. Vincent"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "Matt Hyde",
+                  "text": "Matt Hyde (born June 19, 1964) is an American producer, engineer, mixer and musician. From 1982 to 1985 he attended Berklee College of Music in Boston. While still at Berklee (1984) he obtained an internship at Pyramid Recording Studio in Boston. After two semesters at Berklee, Hyde took a break from classes to tour for the Department of Defense overseas entertainment program, playing guitar and keyboards in several top 40 cover bands that played shows at U.S. military bases in foreign countries throughout Europe and the Pacific. When he returned to the U.S., he began working at recording studios, first in Boston and from 1989 in Los Angeles.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "Matt Hyde (born June 19, 1964) is an American producer, engineer, mixer and musician.",
+                      " From 1982 to 1985 he attended Berklee College of Music in Boston.",
+                      " While still at Berklee (1984) he obtained an internship at Pyramid Recording Studio in Boston.",
+                      " After two semesters at Berklee, Hyde took a break from classes to tour for the Department of Defense overseas entertainment program, playing guitar and keyboards in several top 40 cover bands that played shows at U.S. military bases in foreign countries throughout Europe and the Pacific.",
+                      " When he returned to the U.S., he began working at recording studios, first in Boston and from 1989 in Los Angeles."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Lee Eliot Berk",
+                  "text": "Lee Eliot Berk (born 1942) was President and namesake of the Berklee College of Music (founded as Schillinger House in 1945 by his father, Lawrence Berk, who renamed the school after Lee in 1954) from 1979 to 2004. Under the younger Berk\u2019s leadership, the college underwent significant changes. Berklee expanded its curriculum to create new majors, including Film Scoring, Music Production and Engineering, Music Synthesis, Songwriting, Music Business/Management, and Music Therapy. Educational applications of music technology expanded, the college administration was reorganized, more student services were added, and non-music academic offerings increased. In 1992, he established the Berklee International Network that includes music schools with a shared mission around the globe.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Lee Eliot Berk (born 1942) was President and namesake of the Berklee College of Music (founded as Schillinger House in 1945 by his father, Lawrence Berk, who renamed the school after Lee in 1954) from 1979 to 2004.",
+                      " Under the younger Berk\u2019s leadership, the college underwent significant changes.",
+                      " Berklee expanded its curriculum to create new majors, including Film Scoring, Music Production and Engineering, Music Synthesis, Songwriting, Music Business/Management, and Music Therapy.",
+                      " Educational applications of music technology expanded, the college administration was reorganized, more student services were added, and non-music academic offerings increased.",
+                      " In 1992, he established the Berklee International Network that includes music schools with a shared mission around the globe."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Shirish Korde",
+                  "text": "Shirish Korde (born June 18, 1945), is a composer who was born in Uganda to Indian parents. He is the Chair of the Music Department at the College of the Holy Cross (Worcester, MA) and has previously been on the faculty of the Berklee College of Music, the New England Conservatory, and Brown University. Korde studied jazz and composition at the Berklee College of Music, analysis and composition at the New England Conservatory, and ethnomusicology at Brown University.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "Shirish Korde (born June 18, 1945), is a composer who was born in Uganda to Indian parents.",
+                      " He is the Chair of the Music Department at the College of the Holy Cross (Worcester, MA) and has previously been on the faculty of the Berklee College of Music, the New England Conservatory, and Brown University.",
+                      " Korde studied jazz and composition at the Berklee College of Music, analysis and composition at the New England Conservatory, and ethnomusicology at Brown University."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Berklee College of Music",
+                  "text": "Berklee College of Music, located in Boston, Massachusetts, United States, is the largest independent college of contemporary music in the world. Known for the study of jazz and modern American music, it also offers college-level courses in a wide range of contemporary and historic styles, including rock, flamenco, hip hop, reggae, salsa, and bluegrass. Since 2012, Berklee College of Music has also operated a campus in Valencia, Spain.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Berklee College of Music, located in Boston, Massachusetts, United States, is the largest independent college of contemporary music in the world.",
+                      " Known for the study of jazz and modern American music, it also offers college-level courses in a wide range of contemporary and historic styles, including rock, flamenco, hip hop, reggae, salsa, and bluegrass.",
+                      " Since 2012, Berklee College of Music has also operated a campus in Valencia, Spain."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "St. Vincent (musician)",
+                  "text": "Anne Erin \"Annie\" Clark (born September 28, 1982), better known by her stage name St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist. After studying at Berklee College of Music for three years, she began her music career as a member of the Polyphonic Spree. Clark was also a member of Sufjan Stevens's touring band before forming her own band in 2006.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Anne Erin \"Annie\" Clark (born September 28, 1982), better known by her stage name St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist.",
+                      " After studying at Berklee College of Music for three years, she began her music career as a member of the Polyphonic Spree.",
+                      " Clark was also a member of Sufjan Stevens's touring band before forming her own band in 2006."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Berklee method",
+                  "text": "In music performance and education, the Berklee method is the music theory, terminology, and practice taught at Berklee College of Music, the largest independent college of contemporary music in the world. The \"Berklee method\" was founded by Lawrence Berk after study with Joseph Schillinger regarding the latter's, \"elaborate system of composition that employed mathematical permutation and combination process to generate rhythms, harmonies, and melodies\". Later, attempting to codify jazz and popular music practice, the Berklee method often differs from common practice harmony and voice-leading rules or guidelines.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "In music performance and education, the Berklee method is the music theory, terminology, and practice taught at Berklee College of Music, the largest independent college of contemporary music in the world.",
+                      " The \"Berklee method\" was founded by Lawrence Berk after study with Joseph Schillinger regarding the latter's, \"elaborate system of composition that employed mathematical permutation and combination process to generate rhythms, harmonies, and melodies\".",
+                      " Later, attempting to codify jazz and popular music practice, the Berklee method often differs from common practice harmony and voice-leading rules or guidelines."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Wang Leehom",
+                  "text": "Wang Leehom (born May 17, 1976), sometimes credited as Leehom Wang, is a Chinese-American singer-songwriter, record producer, actor and film director. He is currently based in Taiwan. Formally trained at the Eastman School of Music, Williams College and Berklee College of Music, his musical style is known for fusing Chinese elements (such as Beijing opera, traditional styles of ethnic minorities, Chinese classical orchestra) with hip-hop and R&B. Wang debuted in 1995 and since then has released over 25 albums, with sales of over 50 million copies. He is also a four-time winner and 19-time nominee of Taiwan's Golden Melody Awards, the \"Grammys\" of Chinese music. His sold-out concert at the 90,000 seat Beijing Bird's Nest on April 14, 2012 was the first solo pop concert to be held at the iconic venue. He holds honorary doctoral degrees from both Williams College and Berklee. With over 60 million followers on social media, he is one of the most followed celebrities in China (peaked as #1 most followed person in China's social media in 2014).",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Wang Leehom (born May 17, 1976), sometimes credited as Leehom Wang, is a Chinese-American singer-songwriter, record producer, actor and film director.",
+                      " He is currently based in Taiwan.",
+                      " Formally trained at the Eastman School of Music, Williams College and Berklee College of Music, his musical style is known for fusing Chinese elements (such as Beijing opera, traditional styles of ethnic minorities, Chinese classical orchestra) with hip-hop and R&B.",
+                      " Wang debuted in 1995 and since then has released over 25 albums, with sales of over 50 million copies.",
+                      " He is also a four-time winner and 19-time nominee of Taiwan's Golden Melody Awards, the \"Grammys\" of Chinese music.",
+                      " His sold-out concert at the 90,000 seat Beijing Bird's Nest on April 14, 2012 was the first solo pop concert to be held at the iconic venue.",
+                      " He holds honorary doctoral degrees from both Williams College and Berklee.",
+                      " With over 60 million followers on social media, he is one of the most followed celebrities in China (peaked as #1 most followed person in China's social media in 2014)."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "Jared Faber",
+                  "text": "Jared Faber (also known as J-Radical) is an American musician, composer, producer and multi-instrumentalist. He grew up in New York City where he attended High School of Performing Arts, and later continued his music education at Berklee College of Music, studying jazz arranging and composition.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "Jared Faber (also known as J-Radical) is an American musician, composer, producer and multi-instrumentalist.",
+                      " He grew up in New York City where he attended High School of Performing Arts, and later continued his music education at Berklee College of Music, studying jazz arranging and composition."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Jonny Browning",
+                  "text": "Jonny Browning is an American instrumental surf musician, primarily known as touring guitarist Victor Vector for the band Man or Astro-Man? Prior to his performing in the band, he also played the part of Chromo-Crunch in Man or Astro-Man?: Clone Project Alpha in 1997-1998. He has played guitar and written songs for Sound of Humans (also featuring Birdstuff of Man or Astro-Man?), Jonny and the Shamen, and The Man Made Brain. He currently plays guitar and writes for Canadian instrumental surf band The Other Timelines. Jonny has played in bands or recorded with members of many other bands, including: St. Vincent, The Polyphonic Spree, Drive-By Truckers, And You Will Know Us By The Trail Of Dead, Verbena, and Servotron. He was born and raised in Alabama and has resided in Vancouver, BC since 2009.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Jonny Browning is an American instrumental surf musician, primarily known as touring guitarist Victor Vector for the band Man or Astro-Man?",
+                      " Prior to his performing in the band, he also played the part of Chromo-Crunch in Man or Astro-Man?",
+                      ": Clone Project Alpha in 1997-1998.",
+                      " He has played guitar and written songs for Sound of Humans (also featuring Birdstuff of Man or Astro-Man?",
+                      "), Jonny and the Shamen, and The Man Made Brain.",
+                      " He currently plays guitar and writes for Canadian instrumental surf band The Other Timelines.",
+                      " Jonny has played in bands or recorded with members of many other bands, including: St. Vincent, The Polyphonic Spree, Drive-By Truckers, And You Will Know Us By The Trail Of Dead, Verbena, and Servotron.",
+                      " He was born and raised in Alabama and has resided in Vancouver, BC since 2009."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Berklee Performance Center",
+                  "text": "The Berklee Performance Center is a 1,215-seat theatre located on Massachusetts Ave. in the Back Bay area of Boston, Massachusetts. It is the largest theatre space on the Berklee College of Music campus and is used primarily for college-affiliated activities. Presenters from outside the Berklee community also rent it for performances of all kinds. In 2009, the Berklee Performance Center hosted a total of 200 events.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "The Berklee Performance Center is a 1,215-seat theatre located on Massachusetts Ave. in the Back Bay area of Boston, Massachusetts.",
+                      " It is the largest theatre space on the Berklee College of Music campus and is used primarily for college-affiliated activities.",
+                      " Presenters from outside the Berklee community also rent it for performances of all kinds.",
+                      " In 2009, the Berklee Performance Center hosted a total of 200 events."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-4",
+                "title": "St. Vincent (musician)",
+                "sentence_indices": [
+                  0,
+                  1
+                ],
+                "fact": "Anne Erin 'Annie' Clark, known as St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist who studied at Berklee College of Music"
+              },
+              {
+                "document_id": "context-8",
+                "title": "Jonny Browning",
+                "sentence_indices": [
+                  6
+                ],
+                "fact": "Jonny Browning has played in bands or recorded with St. Vincent"
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-4",
+                  "title": "St. Vincent (musician)",
+                  "sentence_indices": [
+                    0,
+                    1
+                  ],
+                  "fact": "Anne Erin 'Annie' Clark, known as St. Vincent, is an American musician, singer-songwriter, and multi-instrumentalist who studied at Berklee College of Music"
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "St. Vincent (musician)",
+                    "sentence_index": 0
+                  },
+                  {
+                    "title": "St. Vincent (musician)",
+                    "sentence_index": 1
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-8",
+                  "title": "Jonny Browning",
+                  "sentence_indices": [
+                    6
+                  ],
+                  "fact": "Jonny Browning has played in bands or recorded with St. Vincent"
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Jonny Browning",
+                    "sentence_index": 6
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": 9313.160841003992,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "St. Vincent"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 9313.200411008438,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 180.0,
+            "max_retries": 8,
+            "retry_initial_delay_seconds": 2.0,
+            "retry_max_delay_seconds": 120.0
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1,
+            "planner_mode": "simple"
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false,
+            "ltm_conversation_turn_format": "text"
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "empty_prediction_retries": 1,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  single_prompt[\"single_prompt: Single prompt\\nsynthesis\\nsucceeded\"]\n  click single_prompt dagqaSelectGraphNode"
+      },
+      "error": null,
+      "exact_match": 1.0,
+      "f1": 1.0,
+      "cosine_sim": 1.0
+    },
+    {
+      "id": "5a7be2595542997c3ec972ac",
+      "question": "Who was born earlier, Emma Bull or Virginia Woolf?",
+      "gold_answer": "Adeline Virginia Woolf",
+      "prediction": "Virginia Woolf",
+      "raw_prediction": null,
+      "metric_scores": {
+        "exact_match": 0.0,
+        "f1": 0.8,
+        "cosine_sim": 0.8399142026901245,
+        "context_cosine_sim": 0.7011175155639648,
+        "mini_l6_cosine_sim": 0.9161258935928345,
+        "mini_l6_context_cosine_sim": 0.6348953247070312,
+        "multi_qa_mpnet_cosine_sim": 0.8139036893844604,
+        "gte_base_cosine_sim": 0.93798828125,
+        "bge_base_cosine_sim": 0.8393278121948242,
+        "e5_base_cosine_sim": 0.9401494860649109,
+        "bleu": 0.6065306597126334,
+        "bigram_f1": 0.6666666666666666,
+        "chrf": 0.6391511842755736,
+        "rouge_l": 0.8,
+        "meteor": 0.6465517241379309
+      },
+      "latency_ms": 12586.753348994534,
+      "llm_call_count": 1,
+      "llm_retry_count": 0,
+      "node_count": 1,
+      "graph_depth": 0,
+      "structural_valid": true,
+      "structural_issues": [],
+      "structural_failure": false,
+      "gold_supporting_facts": [
+        {
+          "title": "Emma Bull",
+          "sentence_index": 0
+        },
+        {
+          "title": "Virginia Woolf",
+          "sentence_index": 0
+        }
+      ],
+      "evidence_citation_count": 2,
+      "correct_evidence_citation_count": 2,
+      "wrong_evidence_citation_count": 0,
+      "wrong_supporting_text_rate": 0.0,
+      "gold_supporting_fact_recall": 1.0,
+      "run_trace": {
+        "run_id": "9109981b-8cd4-4110-a2cd-9429bf780c7e",
+        "question": "Who was born earlier, Emma Bull or Virginia Woolf?",
+        "plan": {
+          "question": "Who was born earlier, Emma Bull or Virginia Woolf?",
+          "nodes": [
+            {
+              "id": "single_prompt",
+              "label": "Single prompt",
+              "task_type": "synthesis",
+              "question": "Who was born earlier, Emma Bull or Virginia Woolf?",
+              "operation": "answer",
+              "depends_on": [],
+              "sources": [],
+              "prompt": {
+                "system": "Answer the question concisely using only the supplied sources.",
+                "user_template": "Question: Who was born earlier, Emma Bull or Virginia Woolf?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below. Never invent document IDs, titles, or sentence indices; use only the document IDs and sentence numbers printed in this prompt.\n\nDocument ID: context-0\nTitle: The Mark on the Wall\n  (0) \"The Mark on the Wall\" is the first published story by Virginia Woolf.\n  (1)  It was published in 1917 as part of the first collection of short stories written by Virginia Woolf and her husband, Leonard Woolf, called \"Two Stories\".\n  (2)  It was later published in New York in 1921 as part of another collection entitled \"Monday or Tuesday\".\n\nDocument ID: context-1\nTitle: Emma Bull\n  (0) Emma Bull (born December 13, 1954) is an American science fiction and fantasy author.\n  (1)  Her novels include the Hugo- and Nebula-nominated \"Bone Dance\" and the urban fantasy \"War for the Oaks\".\n  (2)  She is also known for a series of anthologies set in Liavek, a shared universe that she created with her husband Will Shetterly.\n  (3)  As a singer, songwriter, and guitarist, she has been a member of the Minneapolis-based folk/rock bands Cats Laughing and The Flash Girls.\n\nDocument ID: context-2\nTitle: Virginia Woolf\n  (0) Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941) was an English writer who is considered one of the foremost modernists of the twentieth century, and a pioneer in the use of stream of consciousness as a narrative device.\n  (1)  Born in an affluent household in Kensington, London, she attended the King's College London and was acquainted with the early reformers of women's higher education.\n\nDocument ID: context-3\nTitle: Orlando: A Biography\n  (0) Orlando: A Biography is a novel by Virginia Woolf, first published on 11 October 1928.\n  (1)  A high-spirited romp inspired by the tumultuous family history of Woolf's lover and close friend, the aristocratic poet and novelist Vita Sackville-West, it is arguably one of Woolf's most popular novels: a history of English literature in satiric form.\n  (2)  The book describes the adventures of a poet who changes sex from man to woman and lives for centuries, meeting the key figures of English literary history.\n  (3)  Considered a feminist classic, the book has been written about extensively by scholars of women's writing and gender and transgender studies.\n\nDocument ID: context-4\nTitle: Me! I'm Afraid of Virginia Woolf\n  (0) Me!\n  (1)  I'm Afraid of Virginia Woolf is a 1978 television play by Alan Bennett, produced by London Weekend Television and directed by Stephen Frears.\n  (2)  The title of the play is a parody of \"Who's Afraid of Virginia Woolf?\n  (3) \", which in turn plays on the title of the Disney song \"Who's Afraid of the Big Bad Wolf?\n  (4) \".\n\nDocument ID: context-5\nTitle: Jane de Gay\n  (0) Rev Dr \"Jane de Gay\" is a British academic and lecturer who has earned a reputation as an expert on the life and works of Virginia Woolf.\n  (1)  Dr de Gay's works on Woolf include a series of articles and a 2006 book, \"Virginia Woolf's Novels and the Literary Past\", published by Edinburgh University Press.\n  (2)  Her work has been recognised by the Virginia Woolf Society of Great Britain.\n  (3)  She has co-edited four books on gender and theatre, including \"Languages of Theatre Shaped by Women\" (with Lizbeth Goodman).\n\nDocument ID: context-6\nTitle: Freshwater (opera)\n  (0) Freshwater is a two-act chamber opera composed by Andy Vores, based on the 1929 comic play by Virginia Woolf.\n  (1)  Vores received assistance in creating the opera from Quentin Bell, Woolf's nephew and executor, who provided a rarely seen earlier version of the text that served as the inspiration for several passages of the libretto.\n\nDocument ID: context-7\nTitle: The Duchess and the Jeweller\n  (0) \"The Duchess and the Jeweller\" (1938) is a short story by Virginia Woolf.\n  (1)  Woolf, being an advocate of addressing the \"stream of consciousness,\" shows the thoughts and actions of a greedy jeweller; Woolf makes a thematic point that corrupt people do corrupt actions for purely selfish motives (and often without regret).\n  (2)  It was first published in British \"Harper's Bazaar\" Magazine in April 1938 and subsequently published posthumously in 1944 in the collection \"A Haunted House and Other Short Stories.\n\nDocument ID: context-8\nTitle: Moments of Being\n  (0) Moments of Being is a collection of posthumously-published autobiographical essays by Virginia Woolf.\n  (1)  The collection was first found in the papers of her husband, used by Quentin Bell in his biography of Virginia Woolf, published in 1972.\n  (2)  In 1976, the essays were edited for publication by Jeanne Schulkind.\n  (3)  The second edition was published in 1985.\n  (4)  The original texts are now housed at Sussex University and in the British Library in London.\n\nDocument ID: context-9\nTitle: Jane Marcus\n  (0) Jane Marcus (1938\u20132015) was a pioneering feminist literary scholar, specializing in women writers of the Modernist era, but especially in the social and political context of their writings.\n  (1)  Focusing on Virginia Woolf, Rebecca West, and Nancy Cunard, among many others, she devised groundbreaking analyses of Woolf's writings, upending a generation of criticism that ignored feminist, pacifist, and socialist themes in much of Woolf's work and critique of imperialism and bourgeois society.\n  (2)  Marcus's understanding of Woolf's place within the larger context of English literature has become prevailing wisdom today in the fields affected by her theorization and research, despite the controversial nature of her positions when they were originally formulated and how much opposition she garnered from earlier scholars and critics.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer."
+              },
+              "input_map": {},
+              "child_output_policy": null,
+              "output_schema": {
+                "type": "object",
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "final_node": "single_prompt"
+        },
+        "waves": [
+          {
+            "index": 0,
+            "node_ids": [
+              "single_prompt"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "single_prompt",
+            "label": "Single prompt",
+            "task_type": "synthesis",
+            "operation": "answer",
+            "status": "succeeded",
+            "dependency_values": {},
+            "resolved_question": "Who was born earlier, Emma Bull or Virginia Woolf?",
+            "rendered_prompt": "Question: Who was born earlier, Emma Bull or Virginia Woolf?\n\nSupporting evidence documents:\nOnly some of these documents may be relevant. Use the relevant evidence to answer the question, ignore distractors, and do not make unsupported factual claims. In _evidence_citations, return only facts that directly determine the values in your output. Do not cite documents or candidate facts that you merely read, inspected, considered, or rejected. Do not cite an exhaustive list when only one item is needed. Every returned field value must be directly supported by one or more citations, including each item in an array. Do not fill broad lists from partial evidence; if the evidence supports only one relevant entity or fact, return only that entity or fact. Preserve the answer type requested by the question and schema: do not return \"yes\" or \"no\" unless the question asks yes/no. Cite each directly used fact with the exact document ID, title, and zero-based sentence indices shown below. Never invent document IDs, titles, or sentence indices; use only the document IDs and sentence numbers printed in this prompt.\n\nDocument ID: context-0\nTitle: The Mark on the Wall\n  (0) \"The Mark on the Wall\" is the first published story by Virginia Woolf.\n  (1)  It was published in 1917 as part of the first collection of short stories written by Virginia Woolf and her husband, Leonard Woolf, called \"Two Stories\".\n  (2)  It was later published in New York in 1921 as part of another collection entitled \"Monday or Tuesday\".\n\nDocument ID: context-1\nTitle: Emma Bull\n  (0) Emma Bull (born December 13, 1954) is an American science fiction and fantasy author.\n  (1)  Her novels include the Hugo- and Nebula-nominated \"Bone Dance\" and the urban fantasy \"War for the Oaks\".\n  (2)  She is also known for a series of anthologies set in Liavek, a shared universe that she created with her husband Will Shetterly.\n  (3)  As a singer, songwriter, and guitarist, she has been a member of the Minneapolis-based folk/rock bands Cats Laughing and The Flash Girls.\n\nDocument ID: context-2\nTitle: Virginia Woolf\n  (0) Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941) was an English writer who is considered one of the foremost modernists of the twentieth century, and a pioneer in the use of stream of consciousness as a narrative device.\n  (1)  Born in an affluent household in Kensington, London, she attended the King's College London and was acquainted with the early reformers of women's higher education.\n\nDocument ID: context-3\nTitle: Orlando: A Biography\n  (0) Orlando: A Biography is a novel by Virginia Woolf, first published on 11 October 1928.\n  (1)  A high-spirited romp inspired by the tumultuous family history of Woolf's lover and close friend, the aristocratic poet and novelist Vita Sackville-West, it is arguably one of Woolf's most popular novels: a history of English literature in satiric form.\n  (2)  The book describes the adventures of a poet who changes sex from man to woman and lives for centuries, meeting the key figures of English literary history.\n  (3)  Considered a feminist classic, the book has been written about extensively by scholars of women's writing and gender and transgender studies.\n\nDocument ID: context-4\nTitle: Me! I'm Afraid of Virginia Woolf\n  (0) Me!\n  (1)  I'm Afraid of Virginia Woolf is a 1978 television play by Alan Bennett, produced by London Weekend Television and directed by Stephen Frears.\n  (2)  The title of the play is a parody of \"Who's Afraid of Virginia Woolf?\n  (3) \", which in turn plays on the title of the Disney song \"Who's Afraid of the Big Bad Wolf?\n  (4) \".\n\nDocument ID: context-5\nTitle: Jane de Gay\n  (0) Rev Dr \"Jane de Gay\" is a British academic and lecturer who has earned a reputation as an expert on the life and works of Virginia Woolf.\n  (1)  Dr de Gay's works on Woolf include a series of articles and a 2006 book, \"Virginia Woolf's Novels and the Literary Past\", published by Edinburgh University Press.\n  (2)  Her work has been recognised by the Virginia Woolf Society of Great Britain.\n  (3)  She has co-edited four books on gender and theatre, including \"Languages of Theatre Shaped by Women\" (with Lizbeth Goodman).\n\nDocument ID: context-6\nTitle: Freshwater (opera)\n  (0) Freshwater is a two-act chamber opera composed by Andy Vores, based on the 1929 comic play by Virginia Woolf.\n  (1)  Vores received assistance in creating the opera from Quentin Bell, Woolf's nephew and executor, who provided a rarely seen earlier version of the text that served as the inspiration for several passages of the libretto.\n\nDocument ID: context-7\nTitle: The Duchess and the Jeweller\n  (0) \"The Duchess and the Jeweller\" (1938) is a short story by Virginia Woolf.\n  (1)  Woolf, being an advocate of addressing the \"stream of consciousness,\" shows the thoughts and actions of a greedy jeweller; Woolf makes a thematic point that corrupt people do corrupt actions for purely selfish motives (and often without regret).\n  (2)  It was first published in British \"Harper's Bazaar\" Magazine in April 1938 and subsequently published posthumously in 1944 in the collection \"A Haunted House and Other Short Stories.\n\nDocument ID: context-8\nTitle: Moments of Being\n  (0) Moments of Being is a collection of posthumously-published autobiographical essays by Virginia Woolf.\n  (1)  The collection was first found in the papers of her husband, used by Quentin Bell in his biography of Virginia Woolf, published in 1972.\n  (2)  In 1976, the essays were edited for publication by Jeanne Schulkind.\n  (3)  The second edition was published in 1985.\n  (4)  The original texts are now housed at Sussex University and in the British Library in London.\n\nDocument ID: context-9\nTitle: Jane Marcus\n  (0) Jane Marcus (1938\u20132015) was a pioneering feminist literary scholar, specializing in women writers of the Modernist era, but especially in the social and political context of their writings.\n  (1)  Focusing on Virginia Woolf, Rebecca West, and Nancy Cunard, among many others, she devised groundbreaking analyses of Woolf's writings, upending a generation of criticism that ignored feminist, pacifist, and socialist themes in much of Woolf's work and critique of imperialism and bourgeois society.\n  (2)  Marcus's understanding of Woolf's place within the larger context of English literature has become prevailing wisdom today in the fields affected by her theorization and research, despite the controversial nature of her positions when they were originally formulated and how much opposition she garnered from earlier scholars and critics.\n\nReturn JSON only with this exact shape:\n{\"answer\": \"concise answer\", \"_evidence_citations\": [{\"document_id\": \"exact document ID\", \"title\": \"exact title\", \"sentence_indices\": [0], \"fact\": \"directly supporting fact\"}]}\nThe citations array must contain the sentence-level evidence directly used to determine the answer.",
+            "raw_response": "```json\n{\n  \"answer\": \"Virginia Woolf\",\n  \"_evidence_citations\": [\n    {\n      \"document_id\": \"context-1\",\n      \"title\": \"Emma Bull\",\n      \"sentence_indices\": [0],\n      \"fact\": \"Emma Bull (born December 13, 1954)\"\n    },\n    {\n      \"document_id\": \"context-2\",\n      \"title\": \"Virginia Woolf\",\n      \"sentence_indices\": [0],\n      \"fact\": \"Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941)\"\n    }\n  ]\n}\n```",
+            "parsed_output": {
+              "answer": "Virginia Woolf",
+              "_evidence_citations": [
+                {
+                  "document_id": "context-1",
+                  "title": "Emma Bull",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Emma Bull (born December 13, 1954)"
+                },
+                {
+                  "document_id": "context-2",
+                  "title": "Virginia Woolf",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941)"
+                }
+              ]
+            },
+            "returned_value": {
+              "answer": "Virginia Woolf"
+            },
+            "validation": {
+              "valid": true,
+              "errors": []
+            },
+            "supporting_evidence": {
+              "strategy": "all_documents",
+              "total_available": 10,
+              "documents": [
+                {
+                  "id": "context-0",
+                  "title": "The Mark on the Wall",
+                  "text": "\"The Mark on the Wall\" is the first published story by Virginia Woolf. It was published in 1917 as part of the first collection of short stories written by Virginia Woolf and her husband, Leonard Woolf, called \"Two Stories\". It was later published in New York in 1921 as part of another collection entitled \"Monday or Tuesday\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 0,
+                    "sentences": [
+                      "\"The Mark on the Wall\" is the first published story by Virginia Woolf.",
+                      " It was published in 1917 as part of the first collection of short stories written by Virginia Woolf and her husband, Leonard Woolf, called \"Two Stories\".",
+                      " It was later published in New York in 1921 as part of another collection entitled \"Monday or Tuesday\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-1",
+                  "title": "Emma Bull",
+                  "text": "Emma Bull (born December 13, 1954) is an American science fiction and fantasy author. Her novels include the Hugo- and Nebula-nominated \"Bone Dance\" and the urban fantasy \"War for the Oaks\". She is also known for a series of anthologies set in Liavek, a shared universe that she created with her husband Will Shetterly. As a singer, songwriter, and guitarist, she has been a member of the Minneapolis-based folk/rock bands Cats Laughing and The Flash Girls.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 1,
+                    "sentences": [
+                      "Emma Bull (born December 13, 1954) is an American science fiction and fantasy author.",
+                      " Her novels include the Hugo- and Nebula-nominated \"Bone Dance\" and the urban fantasy \"War for the Oaks\".",
+                      " She is also known for a series of anthologies set in Liavek, a shared universe that she created with her husband Will Shetterly.",
+                      " As a singer, songwriter, and guitarist, she has been a member of the Minneapolis-based folk/rock bands Cats Laughing and The Flash Girls."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-2",
+                  "title": "Virginia Woolf",
+                  "text": "Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941) was an English writer who is considered one of the foremost modernists of the twentieth century, and a pioneer in the use of stream of consciousness as a narrative device. Born in an affluent household in Kensington, London, she attended the King's College London and was acquainted with the early reformers of women's higher education.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 2,
+                    "sentences": [
+                      "Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941) was an English writer who is considered one of the foremost modernists of the twentieth century, and a pioneer in the use of stream of consciousness as a narrative device.",
+                      " Born in an affluent household in Kensington, London, she attended the King's College London and was acquainted with the early reformers of women's higher education."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-3",
+                  "title": "Orlando: A Biography",
+                  "text": "Orlando: A Biography is a novel by Virginia Woolf, first published on 11 October 1928. A high-spirited romp inspired by the tumultuous family history of Woolf's lover and close friend, the aristocratic poet and novelist Vita Sackville-West, it is arguably one of Woolf's most popular novels: a history of English literature in satiric form. The book describes the adventures of a poet who changes sex from man to woman and lives for centuries, meeting the key figures of English literary history. Considered a feminist classic, the book has been written about extensively by scholars of women's writing and gender and transgender studies.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 3,
+                    "sentences": [
+                      "Orlando: A Biography is a novel by Virginia Woolf, first published on 11 October 1928.",
+                      " A high-spirited romp inspired by the tumultuous family history of Woolf's lover and close friend, the aristocratic poet and novelist Vita Sackville-West, it is arguably one of Woolf's most popular novels: a history of English literature in satiric form.",
+                      " The book describes the adventures of a poet who changes sex from man to woman and lives for centuries, meeting the key figures of English literary history.",
+                      " Considered a feminist classic, the book has been written about extensively by scholars of women's writing and gender and transgender studies."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-4",
+                  "title": "Me! I'm Afraid of Virginia Woolf",
+                  "text": "Me! I'm Afraid of Virginia Woolf is a 1978 television play by Alan Bennett, produced by London Weekend Television and directed by Stephen Frears. The title of the play is a parody of \"Who's Afraid of Virginia Woolf?\", which in turn plays on the title of the Disney song \"Who's Afraid of the Big Bad Wolf?\".",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 4,
+                    "sentences": [
+                      "Me!",
+                      " I'm Afraid of Virginia Woolf is a 1978 television play by Alan Bennett, produced by London Weekend Television and directed by Stephen Frears.",
+                      " The title of the play is a parody of \"Who's Afraid of Virginia Woolf?",
+                      "\", which in turn plays on the title of the Disney song \"Who's Afraid of the Big Bad Wolf?",
+                      "\"."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-5",
+                  "title": "Jane de Gay",
+                  "text": "Rev Dr \"Jane de Gay\" is a British academic and lecturer who has earned a reputation as an expert on the life and works of Virginia Woolf. Dr de Gay's works on Woolf include a series of articles and a 2006 book, \"Virginia Woolf's Novels and the Literary Past\", published by Edinburgh University Press. Her work has been recognised by the Virginia Woolf Society of Great Britain. She has co-edited four books on gender and theatre, including \"Languages of Theatre Shaped by Women\" (with Lizbeth Goodman).",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 5,
+                    "sentences": [
+                      "Rev Dr \"Jane de Gay\" is a British academic and lecturer who has earned a reputation as an expert on the life and works of Virginia Woolf.",
+                      " Dr de Gay's works on Woolf include a series of articles and a 2006 book, \"Virginia Woolf's Novels and the Literary Past\", published by Edinburgh University Press.",
+                      " Her work has been recognised by the Virginia Woolf Society of Great Britain.",
+                      " She has co-edited four books on gender and theatre, including \"Languages of Theatre Shaped by Women\" (with Lizbeth Goodman)."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-6",
+                  "title": "Freshwater (opera)",
+                  "text": "Freshwater is a two-act chamber opera composed by Andy Vores, based on the 1929 comic play by Virginia Woolf. Vores received assistance in creating the opera from Quentin Bell, Woolf's nephew and executor, who provided a rarely seen earlier version of the text that served as the inspiration for several passages of the libretto.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 6,
+                    "sentences": [
+                      "Freshwater is a two-act chamber opera composed by Andy Vores, based on the 1929 comic play by Virginia Woolf.",
+                      " Vores received assistance in creating the opera from Quentin Bell, Woolf's nephew and executor, who provided a rarely seen earlier version of the text that served as the inspiration for several passages of the libretto."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-7",
+                  "title": "The Duchess and the Jeweller",
+                  "text": "\"The Duchess and the Jeweller\" (1938) is a short story by Virginia Woolf. Woolf, being an advocate of addressing the \"stream of consciousness,\" shows the thoughts and actions of a greedy jeweller; Woolf makes a thematic point that corrupt people do corrupt actions for purely selfish motives (and often without regret). It was first published in British \"Harper's Bazaar\" Magazine in April 1938 and subsequently published posthumously in 1944 in the collection \"A Haunted House and Other Short Stories.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 7,
+                    "sentences": [
+                      "\"The Duchess and the Jeweller\" (1938) is a short story by Virginia Woolf.",
+                      " Woolf, being an advocate of addressing the \"stream of consciousness,\" shows the thoughts and actions of a greedy jeweller; Woolf makes a thematic point that corrupt people do corrupt actions for purely selfish motives (and often without regret).",
+                      " It was first published in British \"Harper's Bazaar\" Magazine in April 1938 and subsequently published posthumously in 1944 in the collection \"A Haunted House and Other Short Stories."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-8",
+                  "title": "Moments of Being",
+                  "text": "Moments of Being is a collection of posthumously-published autobiographical essays by Virginia Woolf. The collection was first found in the papers of her husband, used by Quentin Bell in his biography of Virginia Woolf, published in 1972. In 1976, the essays were edited for publication by Jeanne Schulkind. The second edition was published in 1985. The original texts are now housed at Sussex University and in the British Library in London.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 8,
+                    "sentences": [
+                      "Moments of Being is a collection of posthumously-published autobiographical essays by Virginia Woolf.",
+                      " The collection was first found in the papers of her husband, used by Quentin Bell in his biography of Virginia Woolf, published in 1972.",
+                      " In 1976, the essays were edited for publication by Jeanne Schulkind.",
+                      " The second edition was published in 1985.",
+                      " The original texts are now housed at Sussex University and in the British Library in London."
+                    ]
+                  }
+                },
+                {
+                  "id": "context-9",
+                  "title": "Jane Marcus",
+                  "text": "Jane Marcus (1938\u20132015) was a pioneering feminist literary scholar, specializing in women writers of the Modernist era, but especially in the social and political context of their writings. Focusing on Virginia Woolf, Rebecca West, and Nancy Cunard, among many others, she devised groundbreaking analyses of Woolf's writings, upending a generation of criticism that ignored feminist, pacifist, and socialist themes in much of Woolf's work and critique of imperialism and bourgeois society. Marcus's understanding of Woolf's place within the larger context of English literature has become prevailing wisdom today in the fields affected by her theorization and research, despite the controversial nature of her positions when they were originally formulated and how much opposition she garnered from earlier scholars and critics.",
+                  "metadata": {
+                    "source": "hotpotqa_context",
+                    "position": 9,
+                    "sentences": [
+                      "Jane Marcus (1938\u20132015) was a pioneering feminist literary scholar, specializing in women writers of the Modernist era, but especially in the social and political context of their writings.",
+                      " Focusing on Virginia Woolf, Rebecca West, and Nancy Cunard, among many others, she devised groundbreaking analyses of Woolf's writings, upending a generation of criticism that ignored feminist, pacifist, and socialist themes in much of Woolf's work and critique of imperialism and bourgeois society.",
+                      " Marcus's understanding of Woolf's place within the larger context of English literature has become prevailing wisdom today in the fields affected by her theorization and research, despite the controversial nature of her positions when they were originally formulated and how much opposition she garnered from earlier scholars and critics."
+                    ]
+                  }
+                }
+              ]
+            },
+            "evidence_citations": [
+              {
+                "document_id": "context-1",
+                "title": "Emma Bull",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Emma Bull (born December 13, 1954)"
+              },
+              {
+                "document_id": "context-2",
+                "title": "Virginia Woolf",
+                "sentence_indices": [
+                  0
+                ],
+                "fact": "Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941)"
+              }
+            ],
+            "evidence_citation_evaluations": [
+              {
+                "citation": {
+                  "document_id": "context-1",
+                  "title": "Emma Bull",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Emma Bull (born December 13, 1954)"
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Emma Bull",
+                    "sentence_index": 0
+                  }
+                ]
+              },
+              {
+                "citation": {
+                  "document_id": "context-2",
+                  "title": "Virginia Woolf",
+                  "sentence_indices": [
+                    0
+                  ],
+                  "fact": "Adeline Virginia Woolf (n\u00e9e Stephen; 25 January 1882 \u2013 28 March 1941)"
+                },
+                "matches_gold": true,
+                "matched_gold_facts": [
+                  {
+                    "title": "Virginia Woolf",
+                    "sentence_index": 0
+                  }
+                ]
+              }
+            ],
+            "repair_attempts": 0,
+            "llm_retry_count": 0,
+            "started_at": null,
+            "finished_at": null,
+            "duration_ms": 9686.499484989326,
+            "error": null
+          }
+        ],
+        "final_answer": {
+          "answer": "Virginia Woolf"
+        },
+        "status": "succeeded",
+        "total_duration_ms": 9686.555205000332,
+        "config": {
+          "llm": {
+            "provider": "cluster",
+            "model": "mistralai/Mistral-Medium-3.5-128B",
+            "model_env": null,
+            "temperature": 0.0,
+            "api_key_env": "CLUSTER_API_KEY",
+            "api_base": "http://atknoll32.air.cit.tum.de:3000/inference",
+            "api_base_env": null,
+            "api_version": null,
+            "api_version_env": null,
+            "request_timeout_seconds": 180.0,
+            "max_retries": 8,
+            "retry_initial_delay_seconds": 2.0,
+            "retry_max_delay_seconds": 120.0
+          },
+          "planner": {
+            "max_nodes": 10,
+            "max_depth": 3,
+            "repair_rounds": 1,
+            "planner_mode": "simple"
+          },
+          "execution": {
+            "max_parallel_nodes": 4,
+            "node_timeout_seconds": 120.0,
+            "node_repair_rounds": 1,
+            "fail_fast": false,
+            "ltm_conversation_turn_format": "text"
+          },
+          "validation": {
+            "structural_only": true
+          },
+          "benchmark": {
+            "dataset": "hotpotqa",
+            "split": "validation",
+            "default_limit": 100,
+            "max_parallel_examples": 4,
+            "empty_prediction_retries": 1,
+            "output_dir": "runs/benchmarks"
+          }
+        },
+        "mermaid": "flowchart TD\n  single_prompt[\"single_prompt: Single prompt\\nsynthesis\\nsucceeded\"]\n  click single_prompt dagqaSelectGraphNode"
+      },
+      "error": null,
+      "exact_match": 0.0,
+      "f1": 0.8,
+      "cosine_sim": 0.8399142026901245
+    }
+  ],
+  "metrics": {
+    "example_count": 4.0,
+    "success_count": 4.0,
+    "failure_count": 0.0,
+    "error_count": 0.0,
+    "exact_match": 0.5,
+    "f1": 0.9222222222222223,
+    "cosine_sim": 0.8789030462503433,
+    "context_cosine_sim": 0.8905519098043442,
+    "mini_l6_cosine_sim": 0.9316884577274323,
+    "mini_l6_context_cosine_sim": 0.8596698939800262,
+    "multi_qa_mpnet_cosine_sim": 0.8801994025707245,
+    "gte_base_cosine_sim": 0.9722900390625,
+    "bge_base_cosine_sim": 0.9291196167469025,
+    "e5_base_cosine_sim": 0.969723716378212,
+    "bleu": 0.8415915863410565,
+    "bigram_f1": 0.8809523809523809,
+    "chrf": 0.8890975596832306,
+    "rouge_l": 0.9222222222222223,
+    "meteor": 0.9036348822539949,
+    "avg_latency_ms": 12170.36619825376,
+    "p50_latency_ms": 12632.797820013366,
+    "total_llm_call_count": 4.0,
+    "total_llm_retry_count": 0.0,
+    "avg_llm_retry_count": 0.0,
+    "avg_llm_call_count": 1.0,
+    "avg_node_count": 1.0,
+    "avg_graph_depth": 0.0,
+    "structural_valid_rate": 1.0,
+    "structural_failure_rate": 0.0,
+    "total_evidence_citation_count": 9.0,
+    "correct_evidence_citation_count": 8.0,
+    "wrong_evidence_citation_count": 1.0,
+    "wrong_supporting_text_rate": 0.1111111111111111,
+    "avg_gold_supporting_fact_recall": 0.9375,
+    "total_runtime_ms": 14267.567857998074
+  }
+}

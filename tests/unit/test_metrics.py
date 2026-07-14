@@ -14,6 +14,7 @@ from dagqa.eval.benchmark import (
     _run_example,
     _run_examples,
     _sample_examples,
+    _structural_issues,
 )
 from dagqa.eval.hotpot_loader import HotpotExample
 from dagqa.eval.metrics import (
@@ -37,6 +38,7 @@ from dagqa.schemas import (
     Operation,
     PromptSpec,
     RunTrace,
+    SchedulerWave,
     TaskType,
 )
 
@@ -541,3 +543,95 @@ def test_cosine_mean_skips_empty_pairs() -> None:
     samples = [MetricSample(1.0, "a", "a"), MetricSample(0.5, "", "")]
 
     assert _cosine_mean(samples) == 1.0
+
+
+def _dependent_final_plan() -> DagPlan:
+    answer_schema = {
+        "type": "object",
+        "properties": {"answer": {"type": "string"}},
+        "required": ["answer"],
+    }
+    return DagPlan(
+        question="Which person was born earlier?",
+        final_node="q3",
+        nodes=[
+            DagNode(
+                id="q1",
+                label="First birth date",
+                task_type=TaskType.fact_lookup,
+                operation=Operation.answer,
+                question="When was Ada born?",
+                prompt=PromptSpec(
+                    system="Return JSON only.",
+                    user_template="Question: {resolved_question}",
+                ),
+                output_schema=answer_schema,
+            ),
+            DagNode(
+                id="q3",
+                label="Compare",
+                task_type=TaskType.synthesis,
+                operation=Operation.synthesize,
+                question="Who was born earlier?",
+                depends_on=["q1"],
+                input_map={"q1_answer": "q1.answer"},
+                prompt=PromptSpec(
+                    system="Return JSON only.",
+                    user_template="Inputs: {dependencies}\nQuestion: {resolved_question}",
+                ),
+                output_schema=answer_schema,
+            ),
+        ],
+    )
+
+
+def _succeeded_trace(node_id: str, dependency_values: dict | None = None) -> NodeTrace:
+    return NodeTrace(
+        node_id=node_id,
+        label=node_id,
+        task_type=TaskType.fact_lookup,
+        operation=Operation.answer,
+        status=NodeStatus.succeeded,
+        dependency_values=dependency_values or {},
+        returned_value={"answer": "Ada"},
+    )
+
+
+def _run_with_traces(plan: DagPlan, nodes: list[NodeTrace]) -> RunTrace:
+    return RunTrace(
+        run_id="run",
+        question=plan.question,
+        plan=plan,
+        waves=[SchedulerWave(index=0, node_ids=[trace.node_id for trace in nodes])],
+        nodes=nodes,
+        final_answer={"answer": "Ada"},
+        status=NodeStatus.succeeded,
+        total_duration_ms=1.0,
+    )
+
+
+def test_structural_issues_skips_dependency_check_for_single_prompt_ltm_runs() -> None:
+    plan = _dependent_final_plan()
+    run = _run_with_traces(plan, [_succeeded_trace("ltm")])
+
+    assert _structural_issues(run) == []
+
+
+def test_structural_issues_flags_dag_final_trace_without_dependency_values() -> None:
+    plan = _dependent_final_plan()
+    run = _run_with_traces(plan, [_succeeded_trace("q1"), _succeeded_trace("q3")])
+
+    assert _structural_issues(run) == ["q3: final trace has no dependency_values"]
+
+
+def test_structural_issues_accepts_final_trace_with_dependency_values() -> None:
+    plan = _dependent_final_plan()
+    run = _run_with_traces(
+        plan,
+        [
+            _succeeded_trace("q1"),
+            _succeeded_trace("q3", {"q1_answer": "10 December 1815"}),
+        ],
+    )
+
+    assert _structural_issues(run) == []

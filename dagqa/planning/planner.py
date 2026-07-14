@@ -12,12 +12,39 @@ from openai import AsyncOpenAI, AzureOpenAI
 from dagqa.config import LLMConfig, PlannerConfig
 from dagqa.llm.base import LanguageModel
 from dagqa.llm.retry import retry_llm_call
+from dagqa.nodes.prompts import render_evidence_section
 from dagqa.planning.normalizer import normalize_plan_dependencies
 from dagqa.planning.parser import parse_plan
 from dagqa.planning.validator import validate_plan
-from dagqa.schemas import DagNode, DagPlan, LLMRequest, Operation, PromptSpec, TaskType
+from dagqa.schemas import (
+    DagNode,
+    DagPlan,
+    EvidenceDocument,
+    EvidenceSelection,
+    LLMRequest,
+    Operation,
+    PromptSpec,
+    TaskType,
+)
 
 logger = logging.getLogger(__name__)
+
+
+def _render_source_catalog(evidence_documents: list[EvidenceDocument] | None) -> str:
+    """Render the available documents (id, title, content) for the planner.
+
+    Reuses the execution-time evidence rendering so the planner sees documents in
+    the same format the executor later injects per node. Returns an empty string
+    when no documents are provided.
+    """
+    if not evidence_documents:
+        return ""
+    selection = EvidenceSelection(
+        strategy="all_documents",
+        total_available=len(evidence_documents),
+        documents=list(evidence_documents),
+    )
+    return render_evidence_section(selection, require_citations=False)
 
 
 class PlannerError(RuntimeError):
@@ -35,9 +62,11 @@ class Planner:
         self.config = config
         self.llm_config = llm_config
 
-    async def plan(self, question: str) -> DagPlan:
+    async def plan(
+        self, question: str, evidence_documents: list[EvidenceDocument] | None = None
+    ) -> DagPlan:
         if self.llm_config and self.llm_config.provider == "azure_openai":
-            return await self._plan_structured_azure(question)
+            return await self._plan_structured_azure(question, evidence_documents)
         # Use cluster JSON schema planner when API credentials are available
         api_key = os.getenv(self.llm_config.api_key_env or "") if self.llm_config else None
         api_base = (
@@ -48,12 +77,14 @@ class Planner:
         )
         if api_key and api_base:
             if self.config.planner_mode == "simple":
-                return await self._plan_simple_cluster(question)
-            return await self._plan_structured_cluster(question)
+                return await self._plan_simple_cluster(question, evidence_documents)
+            return await self._plan_structured_cluster(question, evidence_documents)
         # Fallback: use the injected LLM with YAML planner (tests, local dev)
-        return await self._plan_yaml_fallback(question)
+        return await self._plan_yaml_fallback(question, evidence_documents)
 
-    async def _plan_yaml_fallback(self, question: str) -> DagPlan:
+    async def _plan_yaml_fallback(
+        self, question: str, evidence_documents: list[EvidenceDocument] | None = None
+    ) -> DagPlan:
         """Fallback planner that uses the injected LLM with YAML output."""
         from dagqa.planning.prompts import (  # noqa: PLC0415
             PLANNER_SYSTEM,
@@ -61,10 +92,13 @@ class Planner:
             planner_user_prompt,
         )
 
+        source_catalog = _render_source_catalog(evidence_documents)
         response = await self.llm.complete(
             LLMRequest(
                 system=PLANNER_SYSTEM,
-                prompt=planner_user_prompt(question, self.config.max_nodes, self.config.max_depth),
+                prompt=planner_user_prompt(
+                    question, self.config.max_nodes, self.config.max_depth, source_catalog
+                ),
             )
         )
         raw = response.text
@@ -89,8 +123,11 @@ class Planner:
                 raw = repair.text
         raise PlannerError("Planner produced invalid DAG: " + "; ".join(last_errors))
 
-    async def _plan_structured_azure(self, question: str) -> DagPlan:
+    async def _plan_structured_azure(
+        self, question: str, evidence_documents: list[EvidenceDocument] | None = None
+    ) -> DagPlan:
         validation_errors: list[str] = []
+        source_catalog = _render_source_catalog(evidence_documents)
 
         def _call(errors: list[str]) -> dict[str, Any]:
             endpoint = _env_or_value(self.llm_config.api_base_env, self.llm_config.api_base)
@@ -120,6 +157,7 @@ class Planner:
                             self.config.max_nodes,
                             self.config.max_depth,
                             errors,
+                            source_catalog,
                         ),
                     },
                 ],
@@ -155,7 +193,9 @@ class Planner:
 
         raise PlannerError("Planner produced invalid DAG: " + "; ".join(validation_errors))
 
-    async def _plan_simple_cluster(self, question: str) -> DagPlan:
+    async def _plan_simple_cluster(
+        self, question: str, evidence_documents: list[EvidenceDocument] | None = None
+    ) -> DagPlan:
         api_base = _env_or_value(self.llm_config.api_base_env, self.llm_config.api_base)
         api_key = os.getenv(self.llm_config.api_key_env or "")
         model = _env_or_value(self.llm_config.model_env, self.llm_config.model)
@@ -167,6 +207,7 @@ class Planner:
             timeout=self.llm_config.request_timeout_seconds,
             max_retries=0,
         )
+        source_catalog = _render_source_catalog(evidence_documents)
         validation_errors: list[str] = []
 
         for attempt in range(self.config.repair_rounds + 1):
@@ -185,6 +226,7 @@ class Planner:
                                     self.config.max_nodes,
                                     self.config.max_depth,
                                     errors,
+                                    source_catalog,
                                 ),
                             },
                         ],
@@ -214,7 +256,9 @@ class Planner:
 
         raise PlannerError("Planner produced invalid DAG: " + "; ".join(validation_errors))
 
-    async def _plan_structured_cluster(self, question: str) -> DagPlan:
+    async def _plan_structured_cluster(
+        self, question: str, evidence_documents: list[EvidenceDocument] | None = None
+    ) -> DagPlan:
         validation_errors: list[str] = []
         api_base = _env_or_value(self.llm_config.api_base_env, self.llm_config.api_base)
         api_key = os.getenv(self.llm_config.api_key_env or "")
@@ -227,6 +271,7 @@ class Planner:
             timeout=self.llm_config.request_timeout_seconds,
             max_retries=0,
         )
+        source_catalog = _render_source_catalog(evidence_documents)
 
         for attempt in range(self.config.repair_rounds + 1):
             try:
@@ -244,6 +289,7 @@ class Planner:
                                     self.config.max_nodes,
                                     self.config.max_depth,
                                     errors,
+                                    source_catalog,
                                 ),
                             },
                         ],
@@ -281,6 +327,10 @@ STRUCTURED_PLANNER_SYSTEM = """You create executable DAG plans for a QA agent.
 Return only data matching the supplied JSON schema.
 References must use exactly '<node_id>.<field>', for example 'q1.city'.
 Do not invent nested references like 'q1.answer.city'.
+Each node must include a "sources" array of Document IDs (from the Supporting
+evidence documents in the user message) whose content answers that node's
+question. Include extra IDs when unsure, use only IDs printed there, and never
+invent IDs.
 Comparison and synthesis nodes must receive both the values being compared and
 the labels/entities those values belong to. For example, do not compare only
 year1/year2; also include university1/university2 so the final answer can name
@@ -373,6 +423,7 @@ def structured_planner_prompt(
     max_nodes: int,
     max_depth: int,
     previous_errors: list[str] | None = None,
+    source_catalog: str = "",
 ) -> str:
     repair_instruction = ""
     if previous_errors:
@@ -390,6 +441,9 @@ Constraints:
 - max_nodes: {max_nodes}
 - max_depth: {max_depth}
 - final_node must be the node that returns the final answer.
+- For every node, set sources to the Document IDs from the Supporting evidence documents below
+  whose content answers that node's question. Include extra IDs when unsure; use only the IDs
+  printed below and never invent IDs. Use an empty array if no documents are shown.
 - Independent fact lookup nodes should run in parallel.
 - Every input_map reference must point to a field in a dependency node's output_fields.
 - Every node listed in depends_on must be consumed by at least one input_map reference.
@@ -468,7 +522,7 @@ Constraints:
   when the question asks for that more specific surface.
 - The final node prompt must mention the original question and explicitly compare the current
   candidate answer with the requested answer type before returning answer.
-"""
+{source_catalog}"""
 
 
 STRUCTURED_PLAN_SCHEMA: dict[str, Any] = {
@@ -491,6 +545,7 @@ STRUCTURED_PLAN_SCHEMA: dict[str, Any] = {
                     "operation",
                     "question",
                     "depends_on",
+                    "sources",
                     "prompt",
                     "input_map",
                     "child_output_policy",
@@ -509,6 +564,7 @@ STRUCTURED_PLAN_SCHEMA: dict[str, Any] = {
                     },
                     "question": {"type": "string"},
                     "depends_on": {"type": "array", "items": {"type": "string"}},
+                    "sources": {"type": "array", "items": {"type": "string"}},
                     "prompt": {
                         "type": "object",
                         "additionalProperties": False,
@@ -585,6 +641,7 @@ def _structured_data_to_plan(data: dict[str, Any]) -> DagPlan:
                 operation=raw_node["operation"],
                 question=raw_node["question"],
                 depends_on=raw_node["depends_on"],
+                sources=list(raw_node.get("sources", []) or []),
                 prompt=PromptSpec(**raw_node["prompt"]),
                 input_map={
                     item["name"]: item["reference"].replace(".answer.", ".", 1)
@@ -605,7 +662,11 @@ Use {q1.answer} syntax to reference previous answers in later questions.
 Preserve all constraints (dates, names, roles, scoped superlatives)
 from the original question. The last question must answer the original
 question using all previous answers.
-Return a JSON object with a "steps" array of {id, question, depends_on}.
+For each sub-question, add a "sources" array listing the Document IDs (from the
+Supporting evidence documents shown in the user message) whose content answers
+it. Include extra IDs when unsure, use only IDs printed there, and never invent
+IDs. Use an empty array if no documents are shown.
+Return a JSON object with a "steps" array of {id, question, depends_on, sources}.
 """
 
 
@@ -614,6 +675,7 @@ def simple_planner_prompt(
     max_nodes: int,
     max_depth: int,
     previous_errors: list[str] | None = None,
+    source_catalog: str = "",
 ) -> str:
     repair_instruction = ""
     if previous_errors:
@@ -629,7 +691,9 @@ Constraints:
 - Independent sub-questions should not depend on each other.
 - Use {{q1.answer}} to reference a previous step's answer.
 - The final step must produce the answer to the original question.
-"""
+- Set each step's sources to the Document IDs from the evidence catalog below whose content
+  answers that step. Include extra IDs when unsure; use only the IDs printed below.
+{source_catalog}"""
 
 
 SIMPLE_PLAN_SCHEMA: dict[str, Any] = {
@@ -643,11 +707,12 @@ SIMPLE_PLAN_SCHEMA: dict[str, Any] = {
             "items": {
                 "type": "object",
                 "additionalProperties": False,
-                "required": ["id", "question", "depends_on"],
+                "required": ["id", "question", "depends_on", "sources"],
                 "properties": {
                     "id": {"type": "string"},
                     "question": {"type": "string"},
                     "depends_on": {"type": "array", "items": {"type": "string"}},
+                    "sources": {"type": "array", "items": {"type": "string"}},
                 },
             },
         }
@@ -669,6 +734,7 @@ def _simple_steps_to_plan(data: dict[str, Any], question: str) -> DagPlan:
         step_id = step["id"]
         step_question = step["question"]
         depends_on = [dep for dep in step.get("depends_on", []) if dep in step_ids]
+        sources = list(step.get("sources", []) or [])
         is_final = step_id == final_id
 
         # Build input_map from placeholders + ensure all deps are consumed
@@ -739,6 +805,7 @@ def _simple_steps_to_plan(data: dict[str, Any], question: str) -> DagPlan:
                 operation=operation,
                 question=step_question,
                 depends_on=depends_on,
+                sources=sources,
                 prompt=PromptSpec(system="Return JSON only.", user_template=user_template),
                 input_map=input_map,
                 output_schema=output_schema,

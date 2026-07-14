@@ -9,6 +9,7 @@ nodes:
     operation: answer
     question: "When was Ada Lovelace born?"
     depends_on: []
+    sources: [context-0]
     prompt:
       system: "Return JSON only."
       user_template: "Question: {resolved_question}"
@@ -25,6 +26,7 @@ nodes:
     operation: answer
     question: "When was Alan Turing born?"
     depends_on: []
+    sources: [context-1]
     prompt:
       system: "Return JSON only."
       user_template: "Question: {resolved_question}"
@@ -41,6 +43,7 @@ nodes:
     operation: compare
     question: "Who was born earlier: {q1.answer} or {q2.answer}?"
     depends_on: [q1, q2]
+    sources: []
     prompt:
       system: "Return JSON only."
       user_template: |

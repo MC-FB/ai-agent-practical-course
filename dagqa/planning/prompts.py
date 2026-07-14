@@ -12,6 +12,10 @@ Every node must include:
 - operation: answer, transform, compare, or synthesize
 - question
 - depends_on
+- sources: list of Document IDs (from the evidence catalog in the user message)
+  whose content answers this node's question; include extra IDs when unsure, use
+  only IDs printed there, and never invent IDs; use an empty list when no catalog
+  is provided
 - prompt.system
 - prompt.user_template
 - input_map
@@ -61,7 +65,9 @@ with the concise final answer, even when it also returns supporting fields.
 """
 
 
-def planner_user_prompt(question: str, max_nodes: int, max_depth: int) -> str:
+def planner_user_prompt(
+    question: str, max_nodes: int, max_depth: int, source_catalog: str = ""
+) -> str:
     return f"""User question:
 {question}
 
@@ -74,13 +80,15 @@ Constraints:
 - Prefer parallel branches when parts are independent.
 - Dependent nodes must be executable from their child outputs. Prepare prompt templates with
   placeholders for the values returned by child nodes.
+- For each node, set sources to the Document IDs from the evidence catalog below whose content
+  answers that node's question. Include extra IDs when unsure; use only the IDs printed below.
 - Preserve bridge entities and temporal boundary wording from the original question; do not
   rewrite boundary questions into latest/earliest endpoint questions.
 - Preserve scoped superlatives and comparatives. For example, if a bridge resolves a setting to
   New England, ask for the largest state in New England, not the largest U.S. state globally.
 - Preserve quoted titles as answer targets; do not reinterpret "who wrote '<title>'" as
   composition or authorship of a different entity mentioned inside the title.
-"""
+{source_catalog}"""
 
 
 def plan_repair_prompt(raw_plan: str, errors: list[str]) -> str:

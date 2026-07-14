@@ -1453,12 +1453,67 @@ const COMPARISON_METRICS = [
   ["wrong_supporting_text_rate", "Non-Gold Citations", "percent", "lower"],
 ] as const;
 
+// Aggregate answer-metric keys shown as columns in the multi-model comparison table, in
+// display order. Mirrors ANSWER_METRICS in dagqa/eval/metrics.py; keys absent from every
+// run in the group are hidden, so pre-registry runs simply show fewer columns.
+const ANSWER_METRIC_COLUMNS = [
+  "exact_match",
+  "f1",
+  "cosine_sim",
+  "context_cosine_sim",
+  "mini_l6_cosine_sim",
+  "mini_l6_context_cosine_sim",
+  "multi_qa_mpnet_cosine_sim",
+  "gte_base_cosine_sim",
+  "bge_base_cosine_sim",
+  "e5_base_cosine_sim",
+  "bleu",
+  "bigram_f1",
+  "chrf",
+  "rouge_l",
+  "meteor",
+] as const;
+
+// Compact column headers; the cosine variants are named after their embedding model.
+const ANSWER_METRIC_LABELS: Record<string, string> = {
+  exact_match: "EM",
+  f1: "F1",
+  cosine_sim: "Cosine",
+  context_cosine_sim: "Cosine (ctx)",
+  mini_l6_cosine_sim: "MiniLM",
+  mini_l6_context_cosine_sim: "MiniLM (ctx)",
+  multi_qa_mpnet_cosine_sim: "Multi-QA",
+  gte_base_cosine_sim: "GTE",
+  bge_base_cosine_sim: "BGE",
+  e5_base_cosine_sim: "E5",
+  bleu: "BLEU",
+  bigram_f1: "Bigram F1",
+  chrf: "chrF",
+  rouge_l: "ROUGE-L",
+  meteor: "METEOR",
+};
+
+function answerMetricCell(key: string, value: number | undefined) {
+  if (value === undefined) return "—";
+  if (key === "exact_match") return `${(value * 100).toFixed(0)}%`;
+  if (key === "f1") return `${(value * 100).toFixed(1)}%`;
+  return value.toFixed(3);
+}
+
+const SYSTEM_LABELS: Record<string, string> = {
+  direct_llm: "Single prompt",
+  dag_multi_hop: "Multi-hop DAG",
+  dag_least_to_most: "Least-to-Most",
+  dag_ltm_conversation: "LtM Conversation",
+  dag_agent: "Combined (LtM+DAG)",
+};
+
 function systemLabel(system: string) {
-  return system === "dag_agent" ? "DAG agent" : "Single prompt";
+  return SYSTEM_LABELS[system] ?? system;
 }
 
 function runTypeLabel(system?: string | null) {
-  return system === "dag_agent" ? "Multi-node DAG" : "Single-node prompt";
+  return SYSTEM_LABELS[system ?? ""] ?? system ?? "Unknown";
 }
 
 function benchmarkOptionLabel(item: SavedBenchmarkSummary | HotpotBenchmarkResult) {
@@ -1627,18 +1682,24 @@ function MultiModelComparisonView({
   const rows = results.map((r) => ({
     result: r,
     model: r.model?.split("/").pop() ?? r.model ?? "unknown",
-    system: r.system === "dag_agent" ? "DAG agent" : "Single prompt",
-    cosine: r.metrics.cosine_sim ?? 0,
-    em: (r.metrics.exact_match ?? 0) * 100,
-    f1: (r.metrics.f1 ?? 0) * 100,
+    system: SYSTEM_LABELS[r.system] ?? r.system,
+    metrics: r.metrics as Record<string, number | undefined>,
     goldRecall: (r.metrics.avg_gold_supporting_fact_recall ?? 0) * 100,
     latency: (r.metrics.avg_latency_ms ?? 0) / 1000,
     records: r.records.length,
   }));
 
-  const bestCosine = Math.max(...rows.map((r) => r.cosine));
-  const bestEM = Math.max(...rows.map((r) => r.em));
-  const bestF1 = Math.max(...rows.map((r) => r.f1));
+  // Only answer metrics present in at least one run become columns.
+  const metricKeys = ANSWER_METRIC_COLUMNS.filter((key) =>
+    rows.some((row) => row.metrics[key] !== undefined),
+  );
+  const bestByMetric = new Map<string, number>();
+  for (const key of metricKeys) {
+    const values = rows
+      .map((row) => row.metrics[key])
+      .filter((value): value is number => value !== undefined);
+    if (values.length > 0) bestByMetric.set(key, Math.max(...values));
+  }
 
   // Group by model to show DAG advantage
   const modelGroups = new Map<string, typeof rows>();
@@ -1663,9 +1724,11 @@ function MultiModelComparisonView({
             <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
               <th className="px-4 py-2">Model</th>
               <th className="px-4 py-2">System</th>
-              <th className="px-4 py-2 text-right">Cosine</th>
-              <th className="px-4 py-2 text-right">EM</th>
-              <th className="px-4 py-2 text-right">F1</th>
+              {metricKeys.map((key) => (
+                <th className="whitespace-nowrap px-4 py-2 text-right" key={key}>
+                  {ANSWER_METRIC_LABELS[key] ?? humanizeMetric(key)}
+                </th>
+              ))}
               <th className="px-4 py-2 text-right">Gold Recall</th>
               <th className="px-4 py-2 text-right">Latency</th>
               <th className="px-4 py-2"></th>
@@ -1676,7 +1739,8 @@ function MultiModelComparisonView({
               group.map((row, index) => {
                 const dagRow = group.find((r) => r.result.system === "dag_agent");
                 const spRow = group.find((r) => r.result.system === "direct_llm");
-                const dagWins = dagRow && spRow && dagRow.cosine > spRow.cosine;
+                const dagWins =
+                  dagRow && spRow && (dagRow.metrics.cosine_sim ?? 0) > (spRow.metrics.cosine_sim ?? 0);
                 return (
                   <tr
                     key={row.result.run_id}
@@ -1695,27 +1759,20 @@ function MultiModelComparisonView({
                       {index === 0 ? model : ""}
                     </td>
                     <td className="px-4 py-2 text-slate-600">{row.system}</td>
-                    <td
-                      className={`px-4 py-2 text-right font-mono ${
-                        row.cosine === bestCosine ? "font-bold text-emerald-700" : ""
-                      }`}
-                    >
-                      {row.cosine.toFixed(3)}
-                    </td>
-                    <td
-                      className={`px-4 py-2 text-right font-mono ${
-                        row.em === bestEM ? "font-bold text-emerald-700" : ""
-                      }`}
-                    >
-                      {row.em.toFixed(0)}%
-                    </td>
-                    <td
-                      className={`px-4 py-2 text-right font-mono ${
-                        row.f1 === bestF1 ? "font-bold text-emerald-700" : ""
-                      }`}
-                    >
-                      {row.f1.toFixed(1)}%
-                    </td>
+                    {metricKeys.map((key) => {
+                      const value = row.metrics[key];
+                      const isBest = value !== undefined && value === bestByMetric.get(key);
+                      return (
+                        <td
+                          className={`px-4 py-2 text-right font-mono ${
+                            isBest ? "font-bold text-emerald-700" : ""
+                          }`}
+                          key={key}
+                        >
+                          {answerMetricCell(key, value)}
+                        </td>
+                      );
+                    })}
                     <td className="px-4 py-2 text-right font-mono">
                       {row.goldRecall.toFixed(0)}%
                     </td>
@@ -1759,11 +1816,11 @@ function BenchmarkComparisonView({
   ) => void;
 }) {
   const mixedSystems = first.system !== second.system;
-  const focus = mixedSystems && second.system === "dag_agent" ? second : first;
+  const focus = mixedSystems && first.system === "direct_llm" ? second : first;
   const reference = focus === first ? second : first;
-  const focusLabel = mixedSystems ? "Multi-node DAG" : "Run A";
-  const referenceLabel = mixedSystems ? "Single-node prompt" : "Run B";
-  const deltaLabel = mixedSystems ? "Multi-node impact" : "Run A impact";
+  const focusLabel = mixedSystems ? systemLabel(focus.system) : "Run A";
+  const referenceLabel = mixedSystems ? systemLabel(reference.system) : "Run B";
+  const deltaLabel = mixedSystems ? `${systemLabel(focus.system)} impact` : "Run A impact";
   const sameSeed = focus.seed === reference.seed;
   const referenceById = new Map(reference.records.map((record) => [record.id, record]));
   const [hideEmptyResponses, setHideEmptyResponses] = useState(false);
@@ -1813,7 +1870,7 @@ function BenchmarkComparisonView({
       <div className="comparison-heading">
         <div>
           <span className="comparison-eyebrow">Performance overview</span>
-          <strong>{mixedSystems ? "Multi-node DAG vs Single-node prompt" : `${systemLabel(first.system)} comparison`}</strong>
+          <strong>{mixedSystems ? `${systemLabel(focus.system)} vs ${systemLabel(reference.system)}` : `${systemLabel(first.system)} comparison`}</strong>
           <span>
             {sameSeed
               ? `Aligned question comparison, seed ${focus.seed}`
@@ -1997,7 +2054,7 @@ function DatasetView({
   const [benchmarkName, setBenchmarkName] = useState("");
   const [benchmarkDataset, setBenchmarkDataset] = useState("hotpotqa");
   const [benchmarkSubset, setBenchmarkSubset] = useState<BenchmarkSubset>("validation");
-  const [systems, setSystems] = useState<string[]>(["dag_agent", "direct_llm"]);
+  const [systems, setSystems] = useState<string[]>(["direct_llm", "dag_least_to_most"]);
   const [seedInput, setSeedInput] = useState("");
   const clusterModels = useMemo(
     () => (modelCatalog?.models ?? []).filter((m) => m.provider === "cluster"),
@@ -2370,7 +2427,7 @@ function DatasetView({
       setBenchmarkDataset(selected.dataset ?? "hotpotqa");
       setBenchmarkSubset((selected.subset as BenchmarkSubset | undefined) ?? "validation");
       setSystems(
-        selected.systems?.filter((system) => system === "dag_agent" || system === "direct_llm") ??
+        selected.systems?.filter((system) => system in SYSTEM_LABELS) ??
           systems,
       );
       window.localStorage.setItem(ACTIVE_BENCHMARK_STORAGE_KEY, selected.run_id);
@@ -2482,8 +2539,10 @@ function DatasetView({
                 </div>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {[
-                    ["dag_agent", "DAG agent", "Multi-step graph"],
-                    ["direct_llm", "Single prompt", "One model call"],
+                    ["direct_llm", "Single prompt", "One LLM call with all evidence"],
+                    ["dag_multi_hop", "Multi-hop DAG", "Plan then execute nodes independently"],
+                    ["dag_least_to_most", "Least-to-Most", "Plan then answer all steps in one call"],
+                    ["dag_ltm_conversation", "LtM Conversation", "Plan then answer each step in a chat turn"],
                   ].map(([value, label, description]) => (
                     <label
                       className="flex min-h-16 items-start gap-3 rounded-md border border-slate-200 bg-white p-3 shadow-sm transition-colors hover:border-emerald-200 hover:bg-emerald-50/40"

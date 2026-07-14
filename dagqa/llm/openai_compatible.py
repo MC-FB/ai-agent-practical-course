@@ -30,14 +30,16 @@ class OpenAICompatibleLanguageModel(LanguageModel):
 
     async def complete(self, request: LLMRequest) -> LLMResponse:
         started = time.perf_counter()
+        messages = [
+            {"role": "system", "content": request.system},
+            *({"role": message.role, "content": message.content} for message in request.history),
+            {"role": "user", "content": request.prompt},
+        ]
         response, retry_count = await retry_llm_call(
             lambda: self.client.chat.completions.create(
                 model=self.model,
                 temperature=request.temperature,
-                messages=[
-                    {"role": "system", "content": request.system},
-                    {"role": "user", "content": request.prompt},
-                ],
+                messages=messages,
             ),
             self.config,
         )
