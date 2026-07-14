@@ -57,3 +57,44 @@ def test_render_mermaid_adds_click_hooks_for_nodes() -> None:
     assert "click b dagqaSelectGraphNode" in mermaid
     assert "a: First\\nfact_lookup\\nsucceeded" in mermaid
     assert "b: Second\\nsynthesis\\npending" in mermaid
+    assert "classDef succeededNode fill:#dcfce7,stroke:#16a34a,color:#14532d" in mermaid
+    assert "class a succeededNode" in mermaid
+    assert "class b succeededNode" not in mermaid
+
+
+def test_render_mermaid_uses_default_status_for_unmatched_nodes() -> None:
+    plan = DagPlan(
+        question="Which answer wins?",
+        final_node="b",
+        nodes=[
+            DagNode(
+                id="a",
+                label="First",
+                task_type=TaskType.fact_lookup,
+                question="Find the first fact",
+                operation=Operation.answer,
+                depends_on=[],
+                prompt=PromptSpec(system="system", user_template="template"),
+                input_map={},
+                output_schema={"type": "object", "properties": {"value": {"type": "string"}}},
+            ),
+            DagNode(
+                id="b",
+                label="Second",
+                task_type=TaskType.synthesis,
+                question="Combine values",
+                operation=Operation.answer,
+                depends_on=["a"],
+                prompt=PromptSpec(system="system", user_template="template"),
+                input_map={"value": "a.value"},
+                output_schema={"type": "object", "properties": {"answer": {"type": "string"}}},
+            ),
+        ],
+    )
+
+    mermaid = render_mermaid(plan, [], default_status=NodeStatus.succeeded)
+
+    assert "a: First\\nfact_lookup\\nsucceeded" in mermaid
+    assert "b: Second\\nsynthesis\\nsucceeded" in mermaid
+    assert "class a succeededNode" in mermaid
+    assert "class b succeededNode" in mermaid

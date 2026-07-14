@@ -88,6 +88,30 @@ def test_normalize_saved_benchmark_record_rebuilds_missing_mermaid() -> None:
     assert "click answer dagqaSelectGraphNode" in run_trace["mermaid"]
 
 
+def test_normalize_saved_benchmark_record_rebuilds_unstyled_succeeded_mermaid() -> None:
+    legacy_trace = _single_node_run_trace()
+    legacy_trace["mermaid"] = (
+        'flowchart TD\n  answer["answer: Answer\\nsynthesis\\nsucceeded"]\n'
+        "  click answer dagqaSelectGraphNode"
+    )
+
+    normalized = api._normalize_benchmark_record(
+        {
+            "id": "example-1",
+            "question": "Who won?",
+            "gold_answer": "Ada",
+            "prediction": "Ada",
+            "exact_match": 1.0,
+            "run_trace": legacy_trace,
+        }
+    )
+
+    mermaid = normalized["run_trace"]["mermaid"]
+
+    assert "classDef succeededNode" in mermaid
+    assert "class answer succeededNode" in mermaid
+
+
 def test_repair_benchmark_payload_upgrades_legacy_records_to_metric_scores(tmp_path) -> None:
     path = tmp_path / "legacy.json"
     payload = {

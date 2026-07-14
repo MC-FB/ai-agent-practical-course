@@ -42,7 +42,18 @@ from dagqa.graph.scheduler import Scheduler
 from dagqa.nodes.runner import NodeRunner
 from dagqa.planning.parser import parse_plan
 from dagqa.planning.planner import PlannerError
-from dagqa.schemas import DagPlan, NodeStatus, NodeTrace, RunTrace, SchedulerWave
+from dagqa.schemas import (
+    DagNode,
+    DagPlan,
+    LLMRequest,
+    NodeStatus,
+    NodeTrace,
+    Operation,
+    PromptSpec,
+    RunTrace,
+    SchedulerWave,
+    TaskType,
+)
 
 router = APIRouter()
 RUNS: dict[str, RunTrace] = {}
@@ -54,8 +65,8 @@ LIVE_BENCHMARK_STOPS: dict[str, asyncio.Event] = {}
 CLUSTER_API_BASE = "http://atknoll32.air.cit.tum.de:3000/inference"
 CLUSTER_MODELS_URL = "http://atknoll32.air.cit.tum.de:3000/models"
 PREFERRED_CLUSTER_MODELS = (
-    "Qwen/Qwen3.5-122B-A10B",
     "mistralai/Mistral-Medium-3.5-128B",
+    "Qwen/Qwen3.5-122B-A10B",
     "google/gemma-4-31B-it",
 )
 DEFAULT_CLUSTER_MODEL = PREFERRED_CLUSTER_MODELS[0]
@@ -101,7 +112,7 @@ class AskRequest(BaseModel):
     question: str
     llm: LLMSelection | None = None
     planner: PlannerSelection | None = None
-    planner: PlannerSelection | None = None
+    system: BenchmarkSystem = "dag_multi_hop"
 
 
 class ExecuteRequest(BaseModel):
@@ -394,12 +405,14 @@ async def execute(request: ExecuteRequest) -> dict[str, Any]:
 @router.post("/ask")
 async def ask(request: AskRequest) -> dict[str, Any]:
     try:
-        run = await client(request.llm, request.planner).ask(request.question)
+        run = await _ask_with_system(
+            client(request.llm, request.planner), request.question, request.system
+        )
     except PlannerError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     RUNS[run.run_id] = run
     payload = run.model_dump(mode="json")
-    payload["mermaid"] = render_mermaid(run.plan, run.nodes)
+    payload["mermaid"] = _render_mermaid_for_run(run)
     return payload
 
 
@@ -422,7 +435,7 @@ async def ask_live(request: AskRequest) -> dict[str, Any]:
         "error": None,
         "total_duration_ms": 0,
     }
-    asyncio.create_task(_run_live(run_id, request.question, dag_client, cfg))
+    asyncio.create_task(_run_live(run_id, request.question, dag_client, cfg, request.system))
     return LIVE_RUNS[run_id]
 
 
@@ -433,11 +446,164 @@ def get_live_run(run_id: str) -> dict[str, Any]:
     return LIVE_RUNS[run_id]
 
 
+async def _ask_direct(client: DagQaClient, question: str) -> RunTrace:
+    started = time.perf_counter()
+    system_prompt = "Answer the user's question directly and concisely."
+    prompt = (
+        f"Question: {question}\n\n"
+        'Return JSON only with this exact shape: {"answer": "concise answer"}.'
+    )
+    response = await client.llm.complete(LLMRequest(system=system_prompt, prompt=prompt))
+    answer = response.text.strip()
+    try:
+        parsed = json.loads(answer)
+    except json.JSONDecodeError:
+        parsed = {"answer": answer}
+    final_answer = {"answer": str(parsed.get("answer", answer)).strip()}
+    plan = DagPlan(
+        question=question,
+        nodes=[
+            DagNode(
+                id="single_prompt",
+                label="Single prompt",
+                task_type=TaskType.synthesis,
+                operation=Operation.answer,
+                question=question,
+                prompt=PromptSpec(system=system_prompt, user_template=prompt),
+                output_schema={
+                    "type": "object",
+                    "required": ["answer"],
+                    "properties": {"answer": {"type": "string"}},
+                },
+            )
+        ],
+        final_node="single_prompt",
+    )
+    trace = NodeTrace(
+        node_id="single_prompt",
+        label="Single prompt",
+        task_type=TaskType.synthesis,
+        operation=Operation.answer,
+        status=NodeStatus.succeeded,
+        resolved_question=question,
+        rendered_prompt=prompt,
+        raw_response=response.text,
+        parsed_output=parsed,
+        returned_value=final_answer,
+        llm_retry_count=int(response.metadata.get("retry_count", 0)),
+        duration_ms=(time.perf_counter() - started) * 1000,
+    )
+    return RunTrace(
+        run_id=str(uuid4()),
+        question=question,
+        plan=plan,
+        waves=[SchedulerWave(index=0, node_ids=["single_prompt"])],
+        nodes=[trace],
+        final_answer=final_answer,
+        status=NodeStatus.succeeded,
+        total_duration_ms=(time.perf_counter() - started) * 1000,
+        config=client.config.model_dump(mode="json"),
+    )
+
+
+async def _ask_with_system(
+    dag_client: DagQaClient,
+    question: str,
+    system: BenchmarkSystem,
+) -> RunTrace:
+    if system == "direct_llm":
+        return await _ask_direct(dag_client, question)
+    if system == "dag_least_to_most":
+        return await dag_client.ask_least_to_most(question)
+    if system == "dag_ltm_conversation":
+        return await dag_client.ask_least_to_most_conversation(question)
+    if system == "dag_multi_hop":
+        return await dag_client.ask_multi_hop(question)
+    return await dag_client.ask(question)
+
+
+def _render_mermaid_for_run(run: RunTrace) -> str:
+    trace_ids = {trace.node_id for trace in run.nodes}
+    plan_ids = {node.id for node in run.plan.nodes}
+    default_status = NodeStatus.pending
+    if run.status == NodeStatus.succeeded and trace_ids and trace_ids.isdisjoint(plan_ids):
+        default_status = NodeStatus.succeeded
+    return render_mermaid(run.plan, run.nodes, default_status=default_status)
+
+
+async def _run_live_single_strategy(
+    run_id: str,
+    question: str,
+    dag_client: DagQaClient,
+    cfg: AppConfig,
+    system: BenchmarkSystem,
+    started: float,
+) -> None:
+    plan: DagPlan | None = None
+    waves: list[SchedulerWave] = []
+    traces: list[NodeTrace] = []
+    final_answer: dict[str, Any] | None = None
+
+    def update(
+        phase: str,
+        status: str = "running",
+        error: str | None = None,
+    ) -> None:
+        default_status = (
+            NodeStatus.succeeded if status == NodeStatus.succeeded.value else NodeStatus.pending
+        )
+        LIVE_RUNS[run_id] = {
+            "run_id": run_id,
+            "question": question,
+            "provider": cfg.llm.provider,
+            "model": cfg.llm.model,
+            "system": system,
+            "phase": phase,
+            "status": status,
+            "nodes": [trace.model_dump(mode="json") for trace in traces],
+            "waves": [wave.model_dump(mode="json") for wave in waves],
+            "plan": plan.model_dump(mode="json") if plan else None,
+            "final_answer": final_answer,
+            "mermaid": render_mermaid(plan, traces, default_status=default_status)
+            if plan
+            else None,
+            "error": error,
+            "total_duration_ms": (time.perf_counter() - started) * 1000,
+        }
+
+    try:
+        if system == "direct_llm":
+            update("executing")
+            run_trace = await _ask_direct(dag_client, question)
+        else:
+            plan = await dag_client.plan(question)
+            waves = Scheduler().build_waves(plan)
+            update("executing")
+            if system == "dag_least_to_most":
+                run_trace = await dag_client.executor.execute_least_to_most_only(plan, [])
+            elif system == "dag_ltm_conversation":
+                run_trace = await dag_client.executor.execute_least_to_most_conversation(plan, [])
+            else:
+                run_trace = await _ask_with_system(dag_client, question, system)
+        run_trace.run_id = run_id
+        plan = run_trace.plan
+        waves = run_trace.waves
+        traces = run_trace.nodes
+        final_answer = run_trace.final_answer
+        RUNS[run_id] = run_trace
+        update("complete", status=run_trace.status.value)
+    except PlannerError as exc:
+        update("error", status="failed", error=str(exc))
+    except Exception as exc:
+        update("error", status="failed", error=str(exc))
+
+
 async def _run_live(
     run_id: str,
     question: str,
     dag_client: DagQaClient,
     cfg: AppConfig,
+    system: BenchmarkSystem,
 ) -> None:
     started = time.perf_counter()
     plan: DagPlan | None = None
@@ -445,6 +611,10 @@ async def _run_live(
     traces: list[NodeTrace] = []
     outputs: dict[str, dict[str, Any]] = {}
     runner = NodeRunner(dag_client.llm, cfg.execution, cfg.llm)
+
+    if system != "dag_multi_hop":
+        await _run_live_single_strategy(run_id, question, dag_client, cfg, system, started)
+        return
 
     def update(
         phase: str,
@@ -457,6 +627,7 @@ async def _run_live(
             "question": question,
             "provider": cfg.llm.provider,
             "model": cfg.llm.model,
+            "system": system,
             "phase": phase,
             "status": status,
             "nodes": [trace.model_dump(mode="json") for trace in traces],
@@ -1956,11 +2127,29 @@ def _normalize_run_trace(run_trace: Any) -> dict[str, Any] | None:
     if not isinstance(run_trace, dict):
         return None
     normalized = dict(run_trace)
-    if not normalized.get("mermaid") and normalized.get("plan") and normalized.get("nodes"):
+    mermaid = normalized.get("mermaid")
+    if normalized.get("plan") and normalized.get("nodes"):
         try:
             plan = DagPlan.model_validate(normalized["plan"])
             traces = [NodeTrace.model_validate(node) for node in normalized.get("nodes", [])]
-            normalized["mermaid"] = render_mermaid(plan, traces)
+            trace_ids = {trace.node_id for trace in traces}
+            plan_ids = {node.id for node in plan.nodes}
+            default_status = NodeStatus.pending
+            if (
+                normalized.get("status") == NodeStatus.succeeded.value
+                and trace_ids
+                and trace_ids.isdisjoint(plan_ids)
+            ):
+                default_status = NodeStatus.succeeded
+            missing_succeeded_style = normalized.get(
+                "status"
+            ) == NodeStatus.succeeded.value and "succeededNode" not in str(mermaid or "")
+            if (
+                not mermaid
+                or missing_succeeded_style
+                or (default_status == NodeStatus.succeeded and "\\npending" in mermaid)
+            ):
+                normalized["mermaid"] = render_mermaid(plan, traces, default_status=default_status)
         except Exception:
             normalized["mermaid"] = None
     return normalized

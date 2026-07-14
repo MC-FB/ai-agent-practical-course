@@ -57,6 +57,7 @@ import {
   startLiveAsk,
   stopLiveBenchmark,
   type BenchmarkSubset,
+  type ChatStrategy,
   type DagNode,
   type BenchmarkMeta,
   type AnnotationTable,
@@ -79,6 +80,7 @@ import "./index.css";
 mermaid.initialize({ startOnLoad: false, theme: "default", securityLevel: "loose" });
 
 const SAMPLE_QUESTIONS = [
+  "Which happened first: the founding of the company that created the iPhone, or the death of the author of the novel that inspired Blade Runner?",
   "Which person was born earlier: Ada Lovelace or Alan Turing?",
   "Which city is farther north: the birthplace of Albert Einstein or the birthplace of Marie Curie?",
   "Who lived longer: the author of Pride and Prejudice or the author of Frankenstein?",
@@ -929,6 +931,7 @@ function goldSupportingFactsByTitle(facts: GoldSupportingFact[]): Map<string, nu
 
 function ChatView({ llm }: { llm: LLMSelection }) {
   const [question, setQuestion] = useState(SAMPLE_QUESTIONS[0]);
+  const [strategy, setStrategy] = useState<ChatStrategy>("dag_multi_hop");
   const [run, setRun] = useState<LiveRun | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>();
   const [phase, setPhase] = useState<RunPhase>("idle");
@@ -956,7 +959,7 @@ function ChatView({ llm }: { llm: LLMSelection }) {
     setRun(null);
     setSelectedNodeId(undefined);
     try {
-      const started = await startLiveAsk(question.trim(), llm, plannerOverride);
+      const started = await startLiveAsk(question.trim(), llm, plannerOverride, strategy);
       setRun(started);
       setPhase(started.phase);
 
@@ -1006,6 +1009,27 @@ function ChatView({ llm }: { llm: LLMSelection }) {
             {SAMPLE_QUESTIONS.map((sample) => (
               <option key={sample} value={sample}>
                 {sample}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="sample-select">
+          <label htmlFor="chat-strategy">Strategy</label>
+          <select
+            id="chat-strategy"
+            value={strategy}
+            disabled={busy}
+            onChange={(event) => {
+              setStrategy(event.target.value as ChatStrategy);
+              setRun(null);
+              setSelectedNodeId(undefined);
+              setPhase("idle");
+            }}
+          >
+            {CHAT_STRATEGIES.map((system) => (
+              <option key={system} value={system}>
+                {runTypeLabel(system)}
               </option>
             ))}
           </select>
@@ -1458,7 +1482,6 @@ const COMPARISON_METRICS = [
 // run in the group are hidden, so pre-registry runs simply show fewer columns.
 const ANSWER_METRIC_COLUMNS = [
   "exact_match",
-  "f1",
   "cosine_sim",
   "context_cosine_sim",
   "mini_l6_cosine_sim",
@@ -1472,6 +1495,7 @@ const ANSWER_METRIC_COLUMNS = [
   "chrf",
   "rouge_l",
   "meteor",
+  "f1",
 ] as const;
 
 // Compact column headers; the cosine variants are named after their embedding model.
@@ -1507,6 +1531,13 @@ const SYSTEM_LABELS: Record<string, string> = {
   dag_ltm_conversation: "LtM Conversation",
   dag_agent: "Combined (LtM+DAG)",
 };
+
+const CHAT_STRATEGIES: ChatStrategy[] = [
+  "direct_llm",
+  "dag_least_to_most",
+  "dag_ltm_conversation",
+  "dag_multi_hop",
+];
 
 function systemLabel(system: string) {
   return SYSTEM_LABELS[system] ?? system;
@@ -1679,7 +1710,23 @@ function MultiModelComparisonView({
   results: HotpotBenchmarkResult[];
   onSelectResult: (run: HotpotBenchmarkResult) => void;
 }) {
-  const rows = results.map((r) => ({
+  const uniqueResults = [...results]
+    .sort((left, right) => {
+      const leftTime = Date.parse(left.created_at ?? "") || 0;
+      const rightTime = Date.parse(right.created_at ?? "") || 0;
+      return rightTime - leftTime;
+    })
+    .filter((run, index, sorted) => {
+      const key = `${run.dataset}:${run.seed}:${run.model}:${run.system}`;
+      return (
+        sorted.findIndex((candidate) => {
+          const candidateKey = `${candidate.dataset}:${candidate.seed}:${candidate.model}:${candidate.system}`;
+          return candidateKey === key;
+        }) === index
+      );
+    });
+
+  const rows = uniqueResults.map((r) => ({
     result: r,
     model: r.model?.split("/").pop() ?? r.model ?? "unknown",
     system: SYSTEM_LABELS[r.system] ?? r.system,
@@ -1693,13 +1740,6 @@ function MultiModelComparisonView({
   const metricKeys = ANSWER_METRIC_COLUMNS.filter((key) =>
     rows.some((row) => row.metrics[key] !== undefined),
   );
-  const bestByMetric = new Map<string, number>();
-  for (const key of metricKeys) {
-    const values = rows
-      .map((row) => row.metrics[key])
-      .filter((value): value is number => value !== undefined);
-    if (values.length > 0) bestByMetric.set(key, Math.max(...values));
-  }
 
   // Group by model to show DAG advantage
   const modelGroups = new Map<string, typeof rows>();
@@ -1707,6 +1747,17 @@ function MultiModelComparisonView({
     const group = modelGroups.get(row.model) ?? [];
     group.push(row);
     modelGroups.set(row.model, group);
+  }
+  const bestByModelMetric = new Map<string, Map<string, number>>();
+  for (const [model, group] of modelGroups.entries()) {
+    const bestByMetric = new Map<string, number>();
+    for (const key of metricKeys) {
+      const values = group
+        .map((row) => row.metrics[key])
+        .filter((value): value is number => value !== undefined);
+      if (values.length > 0) bestByMetric.set(key, Math.max(...values));
+    }
+    bestByModelMetric.set(model, bestByMetric);
   }
 
   return (
@@ -1716,7 +1767,7 @@ function MultiModelComparisonView({
           Multi-model comparison · {results[0]?.records.length ?? 0} examples · seed{" "}
           {results[0]?.seed}
         </h3>
-        <span className="text-xs text-slate-500">{results.length} runs</span>
+        <span className="text-xs text-slate-500">{uniqueResults.length} runs</span>
       </div>
       <div className="overflow-x-auto rounded-lg border border-slate-200">
         <table className="w-full text-sm">
@@ -1761,7 +1812,8 @@ function MultiModelComparisonView({
                     <td className="px-4 py-2 text-slate-600">{row.system}</td>
                     {metricKeys.map((key) => {
                       const value = row.metrics[key];
-                      const isBest = value !== undefined && value === bestByMetric.get(key);
+                      const bestForModel = bestByModelMetric.get(model)?.get(key);
+                      const isBest = value !== undefined && value === bestForModel;
                       return (
                         <td
                           className={`px-4 py-2 text-right font-mono ${
