@@ -57,6 +57,9 @@ def test_render_mermaid_adds_click_hooks_for_nodes() -> None:
     assert "click b dagqaSelectGraphNode" in mermaid
     assert "a: First\\nfact_lookup\\nsucceeded" in mermaid
     assert "b: Second\\nsynthesis\\npending" in mermaid
+    assert "classDef succeededNode fill:#dcfce7,stroke:#16a34a,color:#14532d" in mermaid
+    assert "class a succeededNode" in mermaid
+    assert "class b succeededNode" not in mermaid
 
 
 def test_render_mermaid_uses_default_status_for_unmatched_nodes() -> None:
@@ -93,3 +96,5 @@ def test_render_mermaid_uses_default_status_for_unmatched_nodes() -> None:
 
     assert "a: First\\nfact_lookup\\nsucceeded" in mermaid
     assert "b: Second\\nsynthesis\\nsucceeded" in mermaid
+    assert "class a succeededNode" in mermaid
+    assert "class b succeededNode" in mermaid

@@ -96,6 +96,12 @@ export type PlannerSelection = {
   max_depth?: number;
 };
 
+export type ChatStrategy =
+  | "direct_llm"
+  | "dag_least_to_most"
+  | "dag_ltm_conversation"
+  | "dag_multi_hop";
+
 export type AppConfigResponse = {
   planner: { max_nodes: number; max_depth: number };
   [key: string]: unknown;
@@ -136,6 +142,7 @@ export type LiveRun = {
   question: string;
   provider: string;
   model: string;
+  system?: ChatStrategy | string;
   plan?: DagPlan | null;
   phase: "planning" | "executing" | "complete" | "error";
   status: string;
@@ -152,11 +159,12 @@ export async function ask(
   question: string,
   llm: LLMSelection,
   planner?: PlannerSelection,
+  system?: ChatStrategy,
 ): Promise<RunTrace> {
   const response = await fetch("/api/ask", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question, llm, planner }),
+    body: JSON.stringify({ question, llm, planner, system }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
@@ -173,11 +181,12 @@ export async function startLiveAsk(
   question: string,
   llm: LLMSelection,
   planner?: PlannerSelection,
+  system?: ChatStrategy,
 ): Promise<LiveRun> {
   const response = await fetch("/api/ask/live", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question, llm, planner }),
+    body: JSON.stringify({ question, llm, planner, system }),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.json();

@@ -57,6 +57,7 @@ import {
   startLiveAsk,
   stopLiveBenchmark,
   type BenchmarkSubset,
+  type ChatStrategy,
   type DagNode,
   type BenchmarkMeta,
   type AnnotationTable,
@@ -80,6 +81,7 @@ mermaid.initialize({ startOnLoad: false, theme: "default", securityLevel: "loose
 
 const SAMPLE_QUESTIONS = [
   "Which person was born earlier: Ada Lovelace or Alan Turing?",
+  "Which happened first: the founding of the company that created the iPhone, or the death of the author of the novel that inspired Blade Runner?",
   "Which city is farther north: the birthplace of Albert Einstein or the birthplace of Marie Curie?",
   "Who lived longer: the author of Pride and Prejudice or the author of Frankenstein?",
   "Which film was released earlier: the film that won Best Picture in 1994 or the film that won Best Picture in 2001?",
@@ -929,6 +931,7 @@ function goldSupportingFactsByTitle(facts: GoldSupportingFact[]): Map<string, nu
 
 function ChatView({ llm }: { llm: LLMSelection }) {
   const [question, setQuestion] = useState(SAMPLE_QUESTIONS[0]);
+  const [strategy, setStrategy] = useState<ChatStrategy>("dag_multi_hop");
   const [run, setRun] = useState<LiveRun | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>();
   const [phase, setPhase] = useState<RunPhase>("idle");
@@ -956,7 +959,7 @@ function ChatView({ llm }: { llm: LLMSelection }) {
     setRun(null);
     setSelectedNodeId(undefined);
     try {
-      const started = await startLiveAsk(question.trim(), llm, plannerOverride);
+      const started = await startLiveAsk(question.trim(), llm, plannerOverride, strategy);
       setRun(started);
       setPhase(started.phase);
 
@@ -1006,6 +1009,27 @@ function ChatView({ llm }: { llm: LLMSelection }) {
             {SAMPLE_QUESTIONS.map((sample) => (
               <option key={sample} value={sample}>
                 {sample}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="sample-select">
+          <label htmlFor="chat-strategy">Strategy</label>
+          <select
+            id="chat-strategy"
+            value={strategy}
+            disabled={busy}
+            onChange={(event) => {
+              setStrategy(event.target.value as ChatStrategy);
+              setRun(null);
+              setSelectedNodeId(undefined);
+              setPhase("idle");
+            }}
+          >
+            {CHAT_STRATEGIES.map((system) => (
+              <option key={system} value={system}>
+                {runTypeLabel(system)}
               </option>
             ))}
           </select>
@@ -1507,6 +1531,13 @@ const SYSTEM_LABELS: Record<string, string> = {
   dag_ltm_conversation: "LtM Conversation",
   dag_agent: "Combined (LtM+DAG)",
 };
+
+const CHAT_STRATEGIES: ChatStrategy[] = [
+  "direct_llm",
+  "dag_least_to_most",
+  "dag_ltm_conversation",
+  "dag_multi_hop",
+];
 
 function systemLabel(system: string) {
   return SYSTEM_LABELS[system] ?? system;
