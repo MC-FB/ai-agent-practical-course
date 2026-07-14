@@ -681,10 +681,80 @@
       "question": "Who was born earlier, Emma Bull or Virginia Woolf?",
       "gold_answer": "Adeline Virginia Woolf",
       "prediction": "Virginia Woolf",
+      "human_low": 0.8,
+      "human_high": 1.0,
+      "note": null,
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.8,
+        "cosine_sim": 0.8399142026901245,
+        "context_cosine_sim": 0.7011175155639648,
+        "mini_l6_cosine_sim": 0.9161258935928345,
+        "mini_l6_context_cosine_sim": 0.6348953247070312,
+        "multi_qa_mpnet_cosine_sim": 0.8139036893844604,
+        "gte_base_cosine_sim": 0.93798828125,
+        "bge_base_cosine_sim": 0.8393278121948242,
+        "e5_base_cosine_sim": 0.9401494860649109,
+        "bleu": 0.6065306597126334,
+        "bigram_f1": 0.6666666666666666,
+        "chrf": 0.6391511842755736,
+        "rouge_l": 0.8,
+        "meteor": 0.6465517241379309
+      }
+    },
+    {
+      "run_id": "7a4bc81d-66b2-4843-82e9-c9bee23aeff7",
+      "record_id": "5ac09da45542996f0d89cc1d",
+      "question": "What is the main flavor of both soft drinks, Solo from Norway, and Sunkist?",
+      "gold_answer": "orange",
+      "prediction": "The main flavor of both Solo and Sunkist is orange.",
       "human_low": null,
       "human_high": null,
       "note": null,
-      "scores": {}
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.19999999999999998,
+        "cosine_sim": 0.506371021270752,
+        "context_cosine_sim": 0.664086103439331,
+        "mini_l6_cosine_sim": 0.538621187210083,
+        "mini_l6_context_cosine_sim": 0.8026648759841919,
+        "multi_qa_mpnet_cosine_sim": 0.4469830393791199,
+        "gte_base_cosine_sim": 0.8759765625,
+        "bge_base_cosine_sim": 0.7053918838500977,
+        "e5_base_cosine_sim": 0.8322855234146118,
+        "bleu": 0.14113991930789777,
+        "bigram_f1": 0.0,
+        "chrf": 0.28839308839308836,
+        "rouge_l": 0.19999999999999998,
+        "meteor": 0.27777777777777785
+      }
+    },
+    {
+      "run_id": "7a4bc81d-66b2-4843-82e9-c9bee23aeff7",
+      "record_id": "5ae09d6155429945ae9593d4",
+      "question": "Lee Sung-jae stars in the film Barking Dogs Never Bite which is what film genre?",
+      "gold_answer": "comedy-drama",
+      "prediction": "Barking Dogs Never Bite is a dark comedy-drama film.",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {
+        "exact_match": 0.0,
+        "f1": 0.2222222222222222,
+        "cosine_sim": 0.36831480264663696,
+        "context_cosine_sim": 0.7233306169509888,
+        "mini_l6_cosine_sim": 0.4124336242675781,
+        "mini_l6_context_cosine_sim": 0.5596227645874023,
+        "multi_qa_mpnet_cosine_sim": 0.2492058426141739,
+        "gte_base_cosine_sim": 0.79638671875,
+        "bge_base_cosine_sim": 0.5611021518707275,
+        "e5_base_cosine_sim": 0.7994940876960754,
+        "bleu": 0.16036590969929357,
+        "bigram_f1": 0.0,
+        "chrf": 0.5291120071768404,
+        "rouge_l": 0.2222222222222222,
+        "meteor": 0.2941176470588236
+      }
     }
   ]
 }

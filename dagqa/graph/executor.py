@@ -7,11 +7,7 @@ from typing import Any
 from uuid import uuid4
 
 from dagqa.config import AppConfig
-from dagqa.evidence import (
-    all_documents_selection,
-    select_planner_sources,
-    select_source_union,
-)
+from dagqa.evidence import all_documents_selection
 from dagqa.graph.scheduler import Scheduler
 from dagqa.graph.substitution import MissingDependencyValue, get_path
 from dagqa.llm.base import LanguageModel
@@ -270,45 +266,26 @@ class DagExecutor:
         started = time.perf_counter()
         run_id = str(uuid4())
 
-        # Build ordered sub-questions from topological order, each with its own
-        # planner-assigned evidence (fall back to all documents when a node
-        # declared no resolvable sources).
-        sub_question_nodes = self._ordered_sub_question_nodes(plan)
-        final_node = next(node for node in plan.nodes if node.id == plan.final_node)
+        # Build ordered sub-questions from topological order. Every step reasons over
+        # the same full document set, rendered once at the end of the prompt.
+        ordered_questions = [node.question for node in self._ordered_sub_question_nodes(plan)]
 
-        step_blocks: list[str] = []
-        union_ids: list[str] = []
-        for step_index, node in enumerate(sub_question_nodes):
-            selection = select_planner_sources(node, evidence_documents) or all_documents_selection(
-                evidence_documents
-            )
-            section = ""
-            if selection is not None:
-                union_ids.extend(document.id for document in selection.documents)
-                section = render_evidence_section(selection, require_citations=False)
-            step_blocks.append(f"  Step {step_index + 1}: {node.question}{section}")
-
-        # The final step synthesizes over the union of every step's sources plus
-        # any sources the planner attached to the final node itself.
-        union_ids.extend(final_node.sources)
-        evidence = select_source_union(union_ids, evidence_documents) or all_documents_selection(
-            evidence_documents
-        )
-        final_section = (
+        evidence = all_documents_selection(evidence_documents)
+        evidence_section = (
             render_evidence_section(evidence, require_citations=True)
             if evidence is not None
             else ""
         )
 
-        sub_q_block = "\n".join(step_blocks)
+        sub_q_block = "\n".join(f"  Step {i + 1}: {q}" for i, q in enumerate(ordered_questions))
 
         prompt = (
             f"Question: {plan.question}\n\n"
-            f"Solve step by step. For each step, find the answer in that step's "
+            f"Solve step by step. For each step, find the answer in the "
             f"evidence before moving to the next step.\n\n"
             f"{sub_q_block}\n"
-            f"  Final step: Using the above answers, answer the original question."
-            f"{final_section}\n\n"
+            f"  Final step: Using the above answers, answer the original question.\n"
+            f"{evidence_section}\n"
             f"Instructions:\n"
             f"- For each step, find the specific entity, value, or fact in the evidence.\n"
             f"- Copy exact names, numbers, and dates from the evidence.\n"
@@ -386,16 +363,23 @@ class DagExecutor:
     def _build_ltm_prompts(
         self,
         plan: DagPlan,
+        evidence: EvidenceSelection | None,
         turn_format: str,
     ) -> tuple[str, str, str]:
         """Build the (system, per-turn instruction, final) prompts for an LtM conversation."""
+        evidence_section = (
+            render_evidence_section(evidence, require_citations=True)
+            if evidence is not None
+            else ""
+        )
         system_prompt = (
             f"You are answering a question step by step over multiple turns.\n"
             f"Original question: {plan.question}\n\n"
-            f"Each turn asks one sub-question and shows the evidence documents for "
-            f"that step. Answer it using only that turn's evidence, copying exact "
-            f"names, numbers, and dates from the evidence. Your earlier answers "
-            f"remain available in the conversation for later turns."
+            f"Each turn asks one sub-question. Answer it using only the evidence "
+            f"below, copying exact names, numbers, and dates from the evidence. "
+            f"Your earlier answers remain available in the conversation for "
+            f"later turns."
+            f"{evidence_section}"
         )
         if turn_format == "json":
             turn_instruction = 'Return JSON only: {"answer": "short answer"}'
@@ -514,25 +498,14 @@ class DagExecutor:
         sub_question_nodes = self._ordered_sub_question_nodes(plan)
         final_node = next(node for node in plan.nodes if node.id == plan.final_node)
 
-        turn_format = self.config.execution.ltm_conversation_turn_format
-        system_prompt, turn_instruction, final_prompt = self._build_ltm_prompts(plan, turn_format)
+        # Every turn reasons over the same full document set, carried once in the
+        # system prompt rather than repeated in each turn's user message.
+        evidence = all_documents_selection(evidence_documents)
 
-        # Resolve each sub-question node's planner-assigned evidence up front so the
-        # final turn can synthesize over the union of everything the steps gathered.
-        # Fall back to all documents when a node declared no resolvable sources.
-        sub_selections: list[EvidenceSelection | None] = []
-        union_ids: list[str] = []
-        for node in sub_question_nodes:
-            selection = select_planner_sources(node, evidence_documents) or all_documents_selection(
-                evidence_documents
-            )
-            if selection is not None:
-                union_ids.extend(document.id for document in selection.documents)
-            sub_selections.append(selection)
-        union_ids.extend(final_node.sources)
-        final_selection = select_source_union(
-            union_ids, evidence_documents
-        ) or all_documents_selection(evidence_documents)
+        turn_format = self.config.execution.ltm_conversation_turn_format
+        system_prompt, turn_instruction, final_prompt = self._build_ltm_prompts(
+            plan, evidence, turn_format
+        )
 
         history: list[ChatMessage] = []
         traces: list[NodeTrace] = []
@@ -544,17 +517,9 @@ class DagExecutor:
         for turn_index, node in enumerate([*sub_question_nodes, final_node]):
             is_final = node.id == plan.final_node
             if is_final:
-                selection = final_selection
-                base_user_prompt = final_prompt
+                user_prompt = final_prompt
             else:
-                selection = sub_selections[turn_index]
-                base_user_prompt = f"Step {turn_index + 1}: {node.question}\n{turn_instruction}"
-            section = (
-                render_evidence_section(selection, require_citations=is_final)
-                if selection is not None
-                else ""
-            )
-            user_prompt = f"{base_user_prompt}{section}"
+                user_prompt = f"Step {turn_index + 1}: {node.question}\n{turn_instruction}"
             # Record the dependency values the conversation history carries into
             # this turn (audit only; the model reads them from the history).
             dependency_values = _resolve_turn_dependency_values(node, outputs)
@@ -562,7 +527,7 @@ class DagExecutor:
                 node,
                 is_final,
                 plan,
-                selection,
+                evidence,
                 system_prompt,
                 user_prompt,
                 turn_format,

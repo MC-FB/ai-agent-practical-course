@@ -53,21 +53,15 @@ async def test_conversation_asks_one_sub_question_per_turn_with_history(app_conf
         ChatMessage(role="user", content=llm.requests[1].prompt),
         ChatMessage(role="assistant", content="23 June 1912"),
     ]
-    # Evidence is no longer in the shared system prompt; each turn shows only its
-    # node's planner-assigned documents.
-    assert "Supporting evidence documents:" not in llm.requests[0].system
+    # All documents are carried once in the shared system prompt, not repeated per turn.
+    assert "Supporting evidence documents:" in llm.requests[0].system
     assert llm.requests[0].system == llm.requests[2].system
-    assert "Supporting evidence documents:" in llm.requests[0].prompt
+    assert "Supporting evidence documents:" not in llm.requests[0].prompt
     assert "When was Ada Lovelace born?" in llm.requests[0].prompt
     assert "answer the original question" in llm.requests[2].prompt
-    # Turn 1 sees only Ada Lovelace's document; turn 2 only Alan Turing's.
-    assert "Ada was born on 10 December 1815." in llm.requests[0].prompt
-    assert "Turing was born on 23 June 1912." not in llm.requests[0].prompt
-    assert "Turing was born on 23 June 1912." in llm.requests[1].prompt
-    assert "Ada was born on 10 December 1815." not in llm.requests[1].prompt
-    # The final turn synthesizes over the union of both steps' documents.
-    assert "Ada was born on 10 December 1815." in llm.requests[2].prompt
-    assert "Turing was born on 23 June 1912." in llm.requests[2].prompt
+    # Every turn reasons over both documents.
+    assert "Ada was born on 10 December 1815." in llm.requests[0].system
+    assert "Turing was born on 23 June 1912." in llm.requests[0].system
     assert run.nodes[0].returned_value == {"answer": "10 December 1815"}
     assert run.nodes[2].evidence_citations[0].document_id == "context-0"
     # Turns record the dependency values the conversation history carried in.
@@ -76,16 +70,19 @@ async def test_conversation_asks_one_sub_question_per_turn_with_history(app_conf
         "left_date": "10 December 1815",
         "right_date": "23 June 1912",
     }
-    # Per-turn traces record the planner-assigned evidence subset they were shown.
-    assert run.nodes[0].supporting_evidence.strategy == "planner_assigned_sources"
-    assert [doc.id for doc in run.nodes[0].supporting_evidence.documents] == ["context-0"]
+    # Per-turn traces record the full document set they were shown.
+    assert run.nodes[0].supporting_evidence.strategy == "all_documents"
+    assert [doc.id for doc in run.nodes[0].supporting_evidence.documents] == [
+        "context-0",
+        "context-1",
+    ]
     assert [doc.id for doc in run.nodes[2].supporting_evidence.documents] == [
         "context-0",
         "context-1",
     ]
 
 
-async def test_single_prompt_ltm_uses_only_planner_assigned_sources(app_config) -> None:
+async def test_single_prompt_ltm_uses_all_documents(app_config) -> None:
     documents = [
         *_documents(),
         EvidenceDocument(id="context-2", title="Distractor", text="Totally unrelated content."),
@@ -97,17 +94,19 @@ async def test_single_prompt_ltm_uses_only_planner_assigned_sources(app_config) 
     )
 
     assert run.status == NodeStatus.succeeded
-    # requests[0] is the planner (sees the full catalog); requests[1] is the
-    # compiled Least-to-Most prompt (only planner-assigned sources per step).
+    # requests[0] is the planner; requests[1] is the compiled Least-to-Most prompt,
+    # which carries every available document regardless of planner-assigned sources.
     ltm_prompt = llm.requests[1].prompt
     assert "Ada was born on 10 December 1815." in ltm_prompt
     assert "Turing was born on 23 June 1912." in ltm_prompt
-    # The distractor was assigned to no node, so it never enters the LtM prompt.
-    assert "Totally unrelated content." not in ltm_prompt
-    assert run.nodes[0].supporting_evidence.strategy == "planner_assigned_sources"
+    assert "Totally unrelated content." in ltm_prompt
+    # The catalog is rendered exactly once, not once per step.
+    assert ltm_prompt.count("Supporting evidence documents:") == 1
+    assert run.nodes[0].supporting_evidence.strategy == "all_documents"
     assert [doc.id for doc in run.nodes[0].supporting_evidence.documents] == [
         "context-0",
         "context-1",
+        "context-2",
     ]
 
 
