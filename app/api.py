@@ -412,7 +412,7 @@ async def ask(request: AskRequest) -> dict[str, Any]:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     RUNS[run.run_id] = run
     payload = run.model_dump(mode="json")
-    payload["mermaid"] = render_mermaid(run.plan, run.nodes)
+    payload["mermaid"] = _render_mermaid_for_run(run)
     return payload
 
 
@@ -522,6 +522,15 @@ async def _ask_with_system(
     return await dag_client.ask(question)
 
 
+def _render_mermaid_for_run(run: RunTrace) -> str:
+    trace_ids = {trace.node_id for trace in run.nodes}
+    plan_ids = {node.id for node in run.plan.nodes}
+    default_status = NodeStatus.pending
+    if run.status == NodeStatus.succeeded and trace_ids and trace_ids.isdisjoint(plan_ids):
+        default_status = NodeStatus.succeeded
+    return render_mermaid(run.plan, run.nodes, default_status=default_status)
+
+
 async def _run_live_single_strategy(
     run_id: str,
     question: str,
@@ -530,12 +539,19 @@ async def _run_live_single_strategy(
     system: BenchmarkSystem,
     started: float,
 ) -> None:
+    plan: DagPlan | None = None
+    waves: list[SchedulerWave] = []
+    traces: list[NodeTrace] = []
+    final_answer: dict[str, Any] | None = None
+
     def update(
         phase: str,
         status: str = "running",
         error: str | None = None,
-        run_trace: RunTrace | None = None,
     ) -> None:
+        default_status = (
+            NodeStatus.succeeded if status == NodeStatus.succeeded.value else NodeStatus.pending
+        )
         LIVE_RUNS[run_id] = {
             "run_id": run_id,
             "question": question,
@@ -544,25 +560,38 @@ async def _run_live_single_strategy(
             "system": system,
             "phase": phase,
             "status": status,
-            "nodes": [trace.model_dump(mode="json") for trace in run_trace.nodes]
-            if run_trace
-            else [],
-            "waves": [wave.model_dump(mode="json") for wave in run_trace.waves]
-            if run_trace
-            else [],
-            "plan": run_trace.plan.model_dump(mode="json") if run_trace else None,
-            "final_answer": run_trace.final_answer if run_trace else None,
-            "mermaid": render_mermaid(run_trace.plan, run_trace.nodes) if run_trace else None,
+            "nodes": [trace.model_dump(mode="json") for trace in traces],
+            "waves": [wave.model_dump(mode="json") for wave in waves],
+            "plan": plan.model_dump(mode="json") if plan else None,
+            "final_answer": final_answer,
+            "mermaid": render_mermaid(plan, traces, default_status=default_status)
+            if plan
+            else None,
             "error": error,
             "total_duration_ms": (time.perf_counter() - started) * 1000,
         }
 
     try:
-        update("executing")
-        run_trace = await _ask_with_system(dag_client, question, system)
+        if system == "direct_llm":
+            update("executing")
+            run_trace = await _ask_direct(dag_client, question)
+        else:
+            plan = await dag_client.plan(question)
+            waves = Scheduler().build_waves(plan)
+            update("executing")
+            if system == "dag_least_to_most":
+                run_trace = await dag_client.executor.execute_least_to_most_only(plan, [])
+            elif system == "dag_ltm_conversation":
+                run_trace = await dag_client.executor.execute_least_to_most_conversation(plan, [])
+            else:
+                run_trace = await _ask_with_system(dag_client, question, system)
         run_trace.run_id = run_id
+        plan = run_trace.plan
+        waves = run_trace.waves
+        traces = run_trace.nodes
+        final_answer = run_trace.final_answer
         RUNS[run_id] = run_trace
-        update("complete", status=run_trace.status.value, run_trace=run_trace)
+        update("complete", status=run_trace.status.value)
     except PlannerError as exc:
         update("error", status="failed", error=str(exc))
     except Exception as exc:

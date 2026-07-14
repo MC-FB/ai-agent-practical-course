@@ -80,8 +80,8 @@ import "./index.css";
 mermaid.initialize({ startOnLoad: false, theme: "default", securityLevel: "loose" });
 
 const SAMPLE_QUESTIONS = [
-  "Which person was born earlier: Ada Lovelace or Alan Turing?",
   "Which happened first: the founding of the company that created the iPhone, or the death of the author of the novel that inspired Blade Runner?",
+  "Which person was born earlier: Ada Lovelace or Alan Turing?",
   "Which city is farther north: the birthplace of Albert Einstein or the birthplace of Marie Curie?",
   "Who lived longer: the author of Pride and Prejudice or the author of Frankenstein?",
   "Which film was released earlier: the film that won Best Picture in 1994 or the film that won Best Picture in 2001?",
