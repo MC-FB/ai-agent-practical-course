@@ -1956,11 +1956,22 @@ def _normalize_run_trace(run_trace: Any) -> dict[str, Any] | None:
     if not isinstance(run_trace, dict):
         return None
     normalized = dict(run_trace)
-    if not normalized.get("mermaid") and normalized.get("plan") and normalized.get("nodes"):
+    mermaid = normalized.get("mermaid")
+    if normalized.get("plan") and normalized.get("nodes"):
         try:
             plan = DagPlan.model_validate(normalized["plan"])
             traces = [NodeTrace.model_validate(node) for node in normalized.get("nodes", [])]
-            normalized["mermaid"] = render_mermaid(plan, traces)
+            trace_ids = {trace.node_id for trace in traces}
+            plan_ids = {node.id for node in plan.nodes}
+            default_status = NodeStatus.pending
+            if (
+                normalized.get("status") == NodeStatus.succeeded.value
+                and trace_ids
+                and trace_ids.isdisjoint(plan_ids)
+            ):
+                default_status = NodeStatus.succeeded
+            if not mermaid or (default_status == NodeStatus.succeeded and "\\npending" in mermaid):
+                normalized["mermaid"] = render_mermaid(plan, traces, default_status=default_status)
         except Exception:
             normalized["mermaid"] = None
     return normalized
