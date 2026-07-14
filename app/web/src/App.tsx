@@ -1458,7 +1458,6 @@ const COMPARISON_METRICS = [
 // run in the group are hidden, so pre-registry runs simply show fewer columns.
 const ANSWER_METRIC_COLUMNS = [
   "exact_match",
-  "f1",
   "cosine_sim",
   "context_cosine_sim",
   "mini_l6_cosine_sim",
@@ -1472,6 +1471,7 @@ const ANSWER_METRIC_COLUMNS = [
   "chrf",
   "rouge_l",
   "meteor",
+  "f1",
 ] as const;
 
 // Compact column headers; the cosine variants are named after their embedding model.
@@ -1679,7 +1679,23 @@ function MultiModelComparisonView({
   results: HotpotBenchmarkResult[];
   onSelectResult: (run: HotpotBenchmarkResult) => void;
 }) {
-  const rows = results.map((r) => ({
+  const uniqueResults = [...results]
+    .sort((left, right) => {
+      const leftTime = Date.parse(left.created_at ?? "") || 0;
+      const rightTime = Date.parse(right.created_at ?? "") || 0;
+      return rightTime - leftTime;
+    })
+    .filter((run, index, sorted) => {
+      const key = `${run.dataset}:${run.seed}:${run.model}:${run.system}`;
+      return (
+        sorted.findIndex((candidate) => {
+          const candidateKey = `${candidate.dataset}:${candidate.seed}:${candidate.model}:${candidate.system}`;
+          return candidateKey === key;
+        }) === index
+      );
+    });
+
+  const rows = uniqueResults.map((r) => ({
     result: r,
     model: r.model?.split("/").pop() ?? r.model ?? "unknown",
     system: SYSTEM_LABELS[r.system] ?? r.system,
@@ -1693,13 +1709,6 @@ function MultiModelComparisonView({
   const metricKeys = ANSWER_METRIC_COLUMNS.filter((key) =>
     rows.some((row) => row.metrics[key] !== undefined),
   );
-  const bestByMetric = new Map<string, number>();
-  for (const key of metricKeys) {
-    const values = rows
-      .map((row) => row.metrics[key])
-      .filter((value): value is number => value !== undefined);
-    if (values.length > 0) bestByMetric.set(key, Math.max(...values));
-  }
 
   // Group by model to show DAG advantage
   const modelGroups = new Map<string, typeof rows>();
@@ -1707,6 +1716,17 @@ function MultiModelComparisonView({
     const group = modelGroups.get(row.model) ?? [];
     group.push(row);
     modelGroups.set(row.model, group);
+  }
+  const bestByModelMetric = new Map<string, Map<string, number>>();
+  for (const [model, group] of modelGroups.entries()) {
+    const bestByMetric = new Map<string, number>();
+    for (const key of metricKeys) {
+      const values = group
+        .map((row) => row.metrics[key])
+        .filter((value): value is number => value !== undefined);
+      if (values.length > 0) bestByMetric.set(key, Math.max(...values));
+    }
+    bestByModelMetric.set(model, bestByMetric);
   }
 
   return (
@@ -1716,7 +1736,7 @@ function MultiModelComparisonView({
           Multi-model comparison · {results[0]?.records.length ?? 0} examples · seed{" "}
           {results[0]?.seed}
         </h3>
-        <span className="text-xs text-slate-500">{results.length} runs</span>
+        <span className="text-xs text-slate-500">{uniqueResults.length} runs</span>
       </div>
       <div className="overflow-x-auto rounded-lg border border-slate-200">
         <table className="w-full text-sm">
@@ -1761,7 +1781,8 @@ function MultiModelComparisonView({
                     <td className="px-4 py-2 text-slate-600">{row.system}</td>
                     {metricKeys.map((key) => {
                       const value = row.metrics[key];
-                      const isBest = value !== undefined && value === bestByMetric.get(key);
+                      const bestForModel = bestByModelMetric.get(model)?.get(key);
+                      const isBest = value !== undefined && value === bestForModel;
                       return (
                         <td
                           className={`px-4 py-2 text-right font-mono ${
