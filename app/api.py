@@ -2141,7 +2141,14 @@ def _normalize_run_trace(run_trace: Any) -> dict[str, Any] | None:
                 and trace_ids.isdisjoint(plan_ids)
             ):
                 default_status = NodeStatus.succeeded
-            if not mermaid or (default_status == NodeStatus.succeeded and "\\npending" in mermaid):
+            missing_succeeded_style = normalized.get(
+                "status"
+            ) == NodeStatus.succeeded.value and "succeededNode" not in str(mermaid or "")
+            if (
+                not mermaid
+                or missing_succeeded_style
+                or (default_status == NodeStatus.succeeded and "\\npending" in mermaid)
+            ):
                 normalized["mermaid"] = render_mermaid(plan, traces, default_status=default_status)
         except Exception:
             normalized["mermaid"] = None
