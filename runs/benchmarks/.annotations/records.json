@@ -674,6 +674,17 @@
         "rouge_l": 0.6666666666666666,
         "meteor": 0.4934210526315789
       }
+    },
+    {
+      "run_id": "92a29316-0c7f-43a2-8050-15b2973659cf",
+      "record_id": "5a7be2595542997c3ec972ac",
+      "question": "Who was born earlier, Emma Bull or Virginia Woolf?",
+      "gold_answer": "Adeline Virginia Woolf",
+      "prediction": "Virginia Woolf",
+      "human_low": null,
+      "human_high": null,
+      "note": null,
+      "scores": {}
     }
   ]
 }
